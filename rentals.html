@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cars for Sale - Adedayo Aremu Autos</title>
+    <title>Car Rentals - Adedayo Aremu Autos</title>
     <style>
         * {
             margin: 0;
@@ -35,6 +35,470 @@
             margin: 0 20px;
             font-size: 18px;
         }
+        .nav a:hover, .nav a.active {
+            color: #c5a059;
+        }
+        .page-title {
+            text-align: center;
+            padding: 50px 20px;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://via.placeholder.com/1600x400');
+            background-size: cover;
+            color: white;
+        }
+        .page-title h2 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .page-title h2 span {
+            color: #c5a059;
+        }
+        .rental-types {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 50px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        .type-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .type-card i {
+            font-size: 40px;
+            color: #c5a059;
+            margin-bottom: 20px;
+        }
+        .type-card h3 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .type-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .type-card .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c5a059;
+        }
+        .filters {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .filter-select {
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            min-width: 150px;
+        }
+        .cars-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .car-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .car-image {
+            height: 200px;
+            background: #ddd;
+            position: relative;
+        }
+        .car-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .car-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #c5a059;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .car-details {
+            padding: 20px;
+        }
+        .car-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .car-specs {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .rental-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #c5a059;
+            margin: 15px 0;
+        }
+        .rental-terms {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #c5a059;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #a88642;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            margin-top: 10px;
+        }
+        .btn-whatsapp:hover {
+            background: #128C7E;
+        }
+        .terms-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+        }
+        .terms-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+        .terms-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .term-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .term-item i {
+            font-size: 24px;
+            color: #c5a059;
+        }
+        .term-item h4 {
+            margin-bottom: 5px;
+        }
+        .term-item p {
+            color: #666;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #25D366;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @media (max-width: 768px) {
+            .rental-types {
+                flex-direction: column;
+            }
+            .terms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <h1>ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
+        <p>Premium Cars • Rental • Financing</p>
+    </div>
+    
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="cars.html">Buy Cars</a>
+        <a href="rentals.html" class="active">Rentals</a>
+        <a href="financing.html">Financing</a>
+        <a href="contact.html">Contact</a>
+    </div>
+    
+    <div class="page-title">
+        <h2>Car <span>Rentals</span></h2>
+        <p>Flexible rental options for any occasion</p>
+    </div>
+    
+    <div class="rental-types">
+        <div class="type-card">
+            <i class="fas fa-sun"></i>
+            <h3>Daily Rental</h3>
+            <p>Perfect for short trips and weekend getaways</p>
+            <div class="price">From ₦25,000/day</div>
+        </div>
+        <div class="type-card">
+            <i class="fas fa-calendar-week"></i>
+            <h3>Weekly Rental</h3>
+            <p>Save more with our weekly rates</p>
+            <div class="price">From ₦150,000/week</div>
+        </div>
+        <div class="type-card">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>Monthly Rental</h3>
+            <p>Best value for long-term needs</p>
+            <div class="price">From ₦500,000/month</div>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <select class="filter-select">
+            <option>All Car Types</option>
+            <option>Sedan</option>
+            <option>SUV</option>
+            <option>Luxury</option>
+            <option>Economy</option>
+        </select>
+        <select class="filter-select">
+            <option>Rental Duration</option>
+            <option>Daily</option>
+            <option>Weekly</option>
+            <option>Monthly</option>
+        </select>
+        <select class="filter-select">
+            <option>Price Range</option>
+            <option>Under ₦30k/day</option>
+            <option>₦30k - ₦50k/day</option>
+            <option>Above ₦50k/day</option>
+        </select>
+    </div>
+    
+    <div class="cars-grid" id="rental-cars">
+        <!-- Rental cars will be loaded here -->
+    </div>
+    
+    <div class="terms-section">
+        <h3>Rental Terms & Conditions</h3>
+        <div class="terms-grid">
+            <div class="term-item">
+                <i class="fas fa-id-card"></i>
+                <div>
+                    <h4>Valid Driver's License</h4>
+                    <p>International or Nigerian license accepted</p>
+                </div>
+            </div>
+            <div class="term-item">
+                <i class="fas fa-money-bill"></i>
+                <div>
+                    <h4>Security Deposit</h4>
+                    <p>₦100,000 - ₦500,000 depending on car</p>
+                </div>
+            </div>
+            <div class="term-item">
+                <i class="fas fa-gas-pump"></i>
+                <div>
+                    <h4>Fuel Policy</h4>
+                    <p>Return with same fuel level</p>
+                </div>
+            </div>
+            <div class="term-item">
+                <i class="fas fa-road"></i>
+                <div>
+                    <h4>Mileage Limit</h4>
+                    <p>200km/day included, ₦100/km extra</p>
+                </div>
+            </div>
+            <div class="term-item">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <h4>Insurance</h4>
+                    <p>Comprehensive insurance included</p>
+                </div>
+            </div>
+            <div class="term-item">
+                <i class="fas fa-truck"></i>
+                <div>
+                    <h4>Delivery</h4>
+                    <p>Nationwide delivery available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i> Book via WhatsApp
+    </a>
+    
+    <div class="footer">
+        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+    </div>
+    
+    <script>
+        const rentalCars = [
+            {
+                name: "2022 Toyota Corolla",
+                type: "Sedan",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                seats: 5,
+                daily: "₦25,000",
+                weekly: "₦150,000",
+                monthly: "₦500,000",
+                deposit: "₦100,000",
+                badge: "Economy",
+                image: "https://via.placeholder.com/400x300"
+            },
+            {
+                name: "2021 Honda Accord",
+                type: "Sedan",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                seats: 5,
+                daily: "₦35,000",
+                weekly: "₦210,000",
+                monthly: "₦700,000",
+                deposit: "₦150,000",
+                badge: "Executive",
+                image: "https://via.placeholder.com/400x300"
+            },
+            {
+                name: "2020 Toyota Prado",
+                type: "SUV",
+                transmission: "Automatic",
+                fuel: "Diesel",
+                seats: 7,
+                daily: "₦80,000",
+                weekly: "₦500,000",
+                monthly: "₦1,800,000",
+                deposit: "₦300,000",
+                badge: "Luxury SUV",
+                image: "https://via.placeholder.com/400x300"
+            },
+            {
+                name: "2022 Lexus RX350",
+                type: "Luxury SUV",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                seats: 5,
+                daily: "₦100,000",
+                weekly: "₦600,000",
+                monthly: "₦2,000,000",
+                deposit: "₦400,000",
+                badge: "Luxury",
+                image: "https://via.placeholder.com/400x300"
+            },
+            {
+                name: "2019 Mercedes C300",
+                type: "Luxury Sedan",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                seats: 5,
+                daily: "₦70,000",
+                weekly: "₦420,000",
+                monthly: "₦1,500,000",
+                deposit: "₦250,000",
+                badge: "Premium",
+                image: "https://via.placeholder.com/400x300"
+            },
+            {
+                name: "2021 Toyota Hiace Bus",
+                type: "Van/Bus",
+                transmission: "Manual",
+                fuel: "Diesel",
+                seats: 15,
+                daily: "₦60,000",
+                weekly: "₦350,000",
+                monthly: "₦1,200,000",
+                deposit: "₦200,000",
+                badge: "Passenger Van",
+                image: "https://via.placeholder.com/400x300"
+            }
+        ];
+        
+        const container = document.getElementById('rental-cars');
+        rentalCars.forEach(car => {
+            container.innerHTML += `
+                <div class="car-card">
+                    <div class="car-image">
+                        <img src="${car.image}" alt="${car.name}">
+                        <span class="car-badge">${car.badge}</span>
+                    </div>
+                    <div class="car-details">
+                        <h3 class="car-title">${car.name}</h3>
+                        <div class="car-specs">
+                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
+                            <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
+                            <span><i class="fas fa-users"></i> ${car.seats} seats</span>
+                        </div>
+                        <div class="rental-price">${car.daily}/day</div>
+                        <div class="rental-terms">
+                            <div><strong>Weekly:</strong> ${car.weekly}</div>
+                            <div><strong>Monthly:</strong> ${car.monthly}</div>
+                            <div><strong>Deposit:</strong> ${car.deposit}</div>
+                        </div>
+                        <button class="btn" onclick="bookRental('${car.name}')">Book Now</button>
+                        <button class="btn btn-whatsapp" onclick="whatsappRental('${car.name}')">
+                            <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        function bookRental(carName) {
+            alert(`Thank you for your interest in renting the ${carName}. Please call us at +234 801 234 5678 to complete your booking.`);
+        }
+        
+        function whatsappRental(carName) {
+            window.open(`https://wa.me/2348012345678?text=Hello, I'm interested in renting the ${carName}. Please provide more information.`, '_blank');
+        }
+    </script>
+</body>
+</html>        }
         .nav a:hover, .nav a.active {
             color: #c5a059;
         }
