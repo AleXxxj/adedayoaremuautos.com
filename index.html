@@ -9,282 +9,1275 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+
         body {
-            background: #f5f5f5;
+            background-color: #0a0a0a;
+            color: #ffffff;
         }
+
+        /* Premium Variables */
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section */
         .header {
-            background: #1a1a1a;
-            color: white;
-            padding: 20px;
-            text-align: center;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
         }
-        .header h1 {
-            color: #c5a059;
-            margin-bottom: 10px;
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .nav {
-            background: #333;
-            padding: 15px;
-            text-align: center;
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .nav a {
-            color: white;
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.3));
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin: 5px 0 0;
+            text-transform: uppercase;
+        }
+
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
             text-decoration: none;
-            margin: 0 20px;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
         }
-        .nav a:hover {
-            color: #c5a059;
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
         }
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://via.placeholder.com/1600x600');
-            background-size: cover;
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .phone-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .phone-btn i {
+            color: var(--primary);
+        }
+
+        .phone-btn:hover {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
             color: white;
-            text-align: center;
-            padding: 100px 20px;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
         }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            min-height: 800px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%), 
+                        url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            margin-top: 90px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 50px;
+            position: relative;
+            z-index: 2;
+        }
+
         .hero h2 {
-            font-size: 48px;
-            margin-bottom: 20px;
+            font-size: 70px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            max-width: 800px;
         }
+
         .hero h2 span {
-            color: #c5a059;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
         }
+
+        .hero h2 span::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: rgba(197, 160, 89, 0.1);
+            z-index: -1;
+        }
+
         .hero p {
             font-size: 20px;
-            margin-bottom: 30px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 15px 30px;
-            background: #c5a059;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 0 10px;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background: #a88642;
-        }
-        .services {
-            display: flex;
-            justify-content: center;
-            padding: 50px 20px;
-            background: white;
-        }
-        .service-card {
-            text-align: center;
-            padding: 30px;
-            margin: 0 15px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            width: 300px;
-        }
-        .service-card i {
-            font-size: 40px;
-            color: #c5a059;
-            margin-bottom: 20px;
-        }
-        .service-card h3 {
-            margin-bottom: 15px;
-        }
-        .featured {
-            padding: 50px 20px;
-            text-align: center;
-        }
-        .featured h2 {
+            color: var(--text-light);
             margin-bottom: 40px;
-            font-size: 36px;
+            max-width: 600px;
+            line-height: 1.6;
         }
-        .featured h2 span {
-            color: #c5a059;
-        }
-        .cars {
+
+        .hero-buttons {
             display: flex;
-            justify-content: center;
+            gap: 20px;
             flex-wrap: wrap;
         }
-        .car-card {
-            background: white;
-            width: 250px;
-            margin: 15px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
         }
-        .car-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 5px;
-            background: #ddd;
+
+        .btn-primary {
+            background: var(--primary);
+            color: #0a0a0a;
         }
-        .car-card h4 {
-            margin: 15px 0 10px;
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 30px rgba(197, 160, 89, 0.3);
         }
-        .car-price {
-            color: #c5a059;
-            font-size: 20px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .car-specs {
-            color: #666;
-            font-size: 14px;
-            margin: 10px 0;
-        }
-        .contact-info {
-            background: #1a1a1a;
+
+        .btn-outline {
+            background: transparent;
             color: white;
-            text-align: center;
-            padding: 50px 20px;
+            border: 2px solid rgba(255,255,255,0.2);
         }
-        .contact-info h3 {
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-light {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-outline-light:hover {
+            background: rgba(197, 160, 89, 0.2);
+            border-color: var(--primary);
+        }
+
+        /* Services Cards */
+        .services {
+            padding: 100px 50px;
+            background: var(--dark-bg);
+            position: relative;
+        }
+
+        .services-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .section-title h2 span {
+            color: var(--primary);
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .service-card {
+            background: var(--card-bg);
+            padding: 50px 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .service-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .service-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(197, 160, 89, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 40px;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover .service-icon {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: scale(1.1);
+        }
+
+        .service-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
             margin-bottom: 20px;
         }
-        .contact-info p {
-            margin: 10px 0;
+
+        .service-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
         }
-        .whatsapp-btn {
-            display: inline-block;
+
+        .service-link:hover {
+            gap: 10px;
+        }
+
+        /* Featured Vehicles */
+        .featured {
+            padding: 100px 50px;
+            background: linear-gradient(180deg, var(--dark-bg) 0%, #0f0f0f 100%);
+        }
+
+        .featured-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .view-all:hover {
+            gap: 10px;
+        }
+
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+
+        .car-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .car-image {
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .car-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .car-card:hover .car-image img {
+            transform: scale(1.1);
+        }
+
+        .car-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .car-details {
+            padding: 25px;
+        }
+
+        .car-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .car-specs {
+            display: flex;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .car-specs i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .car-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .car-price small {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .car-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .car-actions .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            justify-content: center;
+        }
+
+        /* Why Choose Us */
+        .why-choose {
+            padding: 100px 50px;
+            background: var(--dark-bg);
+        }
+
+        .why-choose-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .feature i {
+            font-size: 50px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 100px 50px;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(197, 160, 89, 0.1) 0%, transparent 70%);
+        }
+
+        .contact-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .contact-info h3 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .contact-info p {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .contact-details {
+            margin: 40px 0;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 18px;
+        }
+
+        .contact-item i {
+            width: 50px;
+            height: 50px;
+            background: rgba(197, 160, 89, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .contact-form {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: #050505;
+            padding: 50px 50px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
             background: #25D366;
             color: white;
             padding: 15px 30px;
+            border-radius: 50px;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
         }
-        .footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 20px;
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
         }
-        /* Mobile view for header section */
-        
+
+        /* Mobile Responsive */
+        @media (max-width: 1200px) {
+            .cars-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .header {
+                padding: 15px 30px;
+            }
+            
+            .nav-menu {
+                gap: 20px;
+            }
+            
+            .hero h2 {
+                font-size: 50px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .header div {
+            .header-container {
                 flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .hero {
+                margin-top: 150px;
+                min-height: 600px;
+            }
+            
+            .hero h2 {
+                font-size: 36px;
+            }
+            
+            .services-grid,
+            .cars-grid,
+            .features-grid,
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-container {
                 text-align: center;
             }
-            .header img {
-                height: 50px;
+            
+            .contact-item {
+                justify-content: center;
             }
-            .header h1 {
-                font-size: 24px;
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .footer-bottom-links {
+                justify-content: center;
             }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-            <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo" style="height: 60px; width: auto;">
-            <div>
-                <h1 style="margin: 0;">ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
-                <p style="margin: 5px 0 0 0;">Premium Cars • Rental • Financing</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>Premium Cars • Rental • Financing</p>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html" class="active">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="tel:+2348012345678" class="phone-btn">
+                    <i class="fas fa-phone-alt"></i>
+                    +234 801 234 5678
+                </a>
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    Chat Now
+                </a>
             </div>
         </div>
     </div>
-    
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="cars.html">Buy Cars</a>
-        <a href="rentals.html">Rentals</a>
-        <a href="financing.html">Financing</a>
-        <a href="contact.html">Contact</a>
-    </div>
-    
+
+    <!-- Hero Section -->
     <div class="hero">
-        <h2>Buy, Rent & <span>Finance Cars</span> with Confidence</h2>
-        <p>Premium vehicles, verified quality, and flexible payment plans</p>
-        <div>
-            <a href="cars.html" class="btn">View Cars</a>
-            <a href="rentals.html" class="btn">Rent a Car</a>
-            <a href="financing.html" class="btn">Apply for Financing</a>
+        <div class="hero-content">
+            <h2>Buy, Rent & <span>Finance Cars</span><br>with Confidence</h2>
+            <p>Premium vehicles, verified quality, and flexible payment plans tailored for you. Experience luxury and reliability with every ride.</p>
+            <div class="hero-buttons">
+                <a href="cars.html" class="btn btn-primary">
+                    <i class="fas fa-car"></i>
+                    View Cars
+                </a>
+                <a href="rentals.html" class="btn btn-outline">
+                    <i class="fas fa-key"></i>
+                    Rent a Car
+                </a>
+                <a href="financing.html" class="btn btn-outline-light">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Apply for Financing
+                </a>
+            </div>
         </div>
     </div>
-    
+
+    <!-- Services Section -->
     <div class="services">
-        <div class="service-card">
-            <i class="fas fa-car"></i>
-            <h3>Buy a Car</h3>
-            <p>Explore our curated collection of premium vehicles</p>
-        </div>
-        <div class="service-card">
-            <i class="fas fa-key"></i>
-            <h3>Rent a Car</h3>
-            <p>Daily, weekly, or monthly rentals available</p>
-        </div>
-        <div class="service-card">
-            <i class="fas fa-hand-holding-usd"></i>
-            <h3>Finance a Car</h3>
-            <p>Flexible payment plans from 6-24 months</p>
+        <div class="services-container">
+            <div class="section-title">
+                <h2>Our <span>Services</span></h2>
+                <p>Comprehensive automotive solutions tailored to your needs</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3>Buy a Car</h3>
+                    <p>Explore our curated collection of premium, verified vehicles from top brands. Each car comes with a comprehensive inspection report.</p>
+                    <a href="cars.html" class="service-link">
+                        Browse Collection <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3>Rent a Car</h3>
+                    <p>Flexible daily, weekly, or monthly rentals. Choose from our fleet of luxury and economy vehicles for any occasion.</p>
+                    <a href="rentals.html" class="service-link">
+                        View Rentals <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h3>Finance a Car</h3>
+                    <p>Flexible payment plans from 6 to 24 months with competitive rates. Drive your dream car today with our easy financing options.</p>
+                    <a href="financing.html" class="service-link">
+                        Learn More <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-    
+
+    <!-- Featured Vehicles -->
     <div class="featured">
-        <h2>Featured <span>Vehicles</span></h2>
-        <div class="cars" id="featured-cars">
-            <!-- Cars will be added here -->
+        <div class="featured-container">
+            <div class="section-header">
+                <div>
+                    <h2>Featured <span>Vehicles</span></h2>
+                    <p>Hand-picked premium cars for you</p>
+                </div>
+                <a href="cars.html" class="view-all">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="cars-grid" id="featured-cars">
+                <!-- Cars will be loaded here via JavaScript -->
+            </div>
         </div>
     </div>
-    
-    <div class="contact-info">
-        <h3>Contact Us Today</h3>
-        <p><i class="fas fa-phone"></i> +234 801 234 5678</p>
-        <p><i class="fas fa-envelope"></i> info@adedayoaremuautos.com</p>
-        <p><i class="fas fa-map-marker-alt"></i> 123 Auto Avenue, Lagos, Nigeria</p>
-        <a href="https://wa.me/2348012345678" class="whatsapp-btn"><i class="fab fa-whatsapp"></i> Chat on WhatsApp</a>
+
+    <!-- Why Choose Us -->
+    <div class="why-choose">
+        <div class="why-choose-container">
+            <div class="section-title">
+                <h2>Why Choose <span>Us</span></h2>
+                <p>Experience the difference of dealing with a trusted, professional dealer</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Trusted Dealer</h3>
+                    <p>Years of experience serving satisfied customers across Nigeria with integrity and transparency.</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Verified Vehicles</h3>
+                    <p>Every car undergoes rigorous 360-degree inspection before listing to ensure quality and reliability.</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <h3>Flexible Payment</h3>
+                    <p>Cash or financing options to suit your budget with competitive rates and quick approval.</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-truck"></i>
+                    <h3>Nationwide Delivery</h3>
+                    <p>We deliver your car anywhere in Nigeria with full insurance during transit.</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-file-contract"></i>
+                    <h3>Paperwork Done</h3>
+                    <p>Full documentation, customs clearance, and transfer processed for you hassle-free.</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-headset"></i>
+                    <h3>After-Sales Support</h3>
+                    <p>Comprehensive after-sales service including maintenance support and warranty options.</p>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Get in <span>Touch</span></h3>
+                <p>Ready to find your perfect vehicle? Contact us today for personalized assistance.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>+234 801 234 5678</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>info@adedayoaremuautos.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>123 Auto Avenue, Victoria Island, Lagos, Nigeria</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Mon - Sat: 9:00 AM - 6:00 PM</span>
+                    </div>
+                </div>
+                
+                <a href="https://wa.me/2348012345678" class="btn btn-primary" style="width: fit-content;">
+                    <i class="fab fa-whatsapp"></i>
+                    Chat on WhatsApp
+                </a>
+            </div>
+            
+            <div class="contact-form">
+                <h3 style="margin-bottom: 30px;">Send us a Message</h3>
+                <form>
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" placeholder="Phone Number" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="How can we help you?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        Send Message <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <div class="footer">
-        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 50px;">
+                        <h3 style="color: white;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Newsletter</h4>
+                    <p>Subscribe to get updates on new arrivals and special offers.</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="email" placeholder="Your Email" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 5px; color: white;">
+                        <button style="background: var(--primary); border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-arrow-right" style="color: #0a0a0a;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat with us
+    </a>
+
     <script>
-        // Sample cars data
+        // Premium car data with realistic images
         const cars = [
             {
                 name: "2020 Toyota Camry",
                 price: "₦12,500,000",
-                specs: "2020 • 25,000km • Automatic",
-                image: "https://via.placeholder.com/250x150"
+                pricePerMonth: "₦350,000/mo",
+                year: "2020",
+                mileage: "25,000km",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                badge: "Foreign Used",
+                image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2019 Lexus RX350",
                 price: "₦18,500,000",
-                specs: "2019 • 35,000km • Automatic",
-                image: "https://via.placeholder.com/250x150"
+                pricePerMonth: "₦520,000/mo",
+                year: "2019",
+                mileage: "35,000km",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                badge: "Foreign Used",
+                image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2021 Honda Accord",
                 price: "₦14,500,000",
-                specs: "2021 • 15,000km • Automatic",
-                image: "https://via.placeholder.com/250x150"
+                pricePerMonth: "₦410,000/mo",
+                year: "2021",
+                mileage: "15,000km",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                badge: "Foreign Used",
+                image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2018 Mercedes C300",
                 price: "₦16,500,000",
-                specs: "2018 • 45,000km • Automatic",
-                image: "https://via.placeholder.com/250x150"
+                pricePerMonth: "₦460,000/mo",
+                year: "2018",
+                mileage: "45,000km",
+                transmission: "Automatic",
+                fuel: "Petrol",
+                badge: "Nigerian Used",
+                image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             }
         ];
         
-        // Display cars
+        // Display cars with premium styling
         const container = document.getElementById('featured-cars');
         cars.forEach(car => {
             container.innerHTML += `
                 <div class="car-card">
-                    <img src="${car.image}" alt="${car.name}">
-                    <h4>${car.name}</h4>
-                    <div class="car-specs">${car.specs}</div>
-                    <div class="car-price">${car.price}</div>
-                    <a href="car-detail.html" style="color: #c5a059; text-decoration: none;">View Details →</a>
+                    <div class="car-image">
+                        <img src="${car.image}" alt="${car.name}">
+                        <span class="car-badge">${car.badge}</span>
+                    </div>
+                    <div class="car-details">
+                        <h3 class="car-title">${car.name}</h3>
+                        <div class="car-specs">
+                            <span><i class="fas fa-calendar"></i> ${car.year}</span>
+                            <span><i class="fas fa-tachometer-alt"></i> ${car.mileage}</span>
+                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
+                        </div>
+                        <div class="car-price">
+                            ${car.price}
+                            <small>${car.pricePerMonth}</small>
+                        </div>
+                        <div class="car-actions">
+                            <a href="car-detail.html" class="btn btn-primary">View</a>
+                            <a href="https://wa.me/2348012345678?text=I'm interested in ${car.name}" class="btn btn-outline" target="_blank">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             `;
         });
