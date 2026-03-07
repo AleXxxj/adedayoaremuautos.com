@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Adedayo Aremu Autos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+
+        /* Header Styles (same as homepage) */
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.3));
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1.2;
+            color: white;
+        }
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin: 5px 0 0;
+            text-transform: uppercase;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .phone-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .phone-btn i {
+            color: var(--primary);
+        }
+
+        .phone-btn:hover {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-top: 90px;
+            padding: 80px 50px;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+            z-index: 1;
+        }
+
+        .page-header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header h1 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .page-header h1 span {
+            color: var(--primary);
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 80px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-light {
+            background: var(--card-bg);
+            border-radius: 30px;
+            margin: 40px auto;
+            padding: 60px;
+        }
+
+        .section-title {
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .section-title h2 span {
+            color: var(--primary);
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 18px;
+            max-width: 600px;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        /* Founder Bio - Short Version (Executive Summary) */
+        .executive-bio {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .executive-bio::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            right: 20px;
+            font-size: 200px;
+            color: rgba(197, 160, 89, 0.05);
+            font-family: serif;
+            line-height: 1;
+        }
+
+        .executive-bio h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .executive-bio p {
+            color: var(--text-light);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .executive-bio .position {
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 20px;
+            display: block;
+        }
+
+        /* Founder Bio - Long Version (Full Story) */
+        .full-bio {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .full-bio h3 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .full-bio h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        .full-bio p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .full-bio p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Mission & Vision Cards */
+        .mv-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .mv-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mv-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .mv-card .icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(197, 160, 89, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            font-size: 30px;
+            color: var(--primary);
+        }
+
+        .mv-card h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .mv-card p {
+            color: var(--text-light);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        /* Strategic Objectives */
+        .objectives-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .objective-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .objective-card:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .objective-card h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .objective-card ul {
+            list-style: none;
+        }
+
+        .objective-card li {
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .objective-card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Values Section */
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .value-item {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .value-item:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .value-item:hover i,
+        .value-item:hover h5,
+        .value-item:hover p {
+            color: #0a0a0a;
+        }
+
+        .value-item i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .value-item h5 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .value-item p {
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Timeline */
+        .timeline {
+            margin: 60px 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, var(--primary), transparent);
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            grid-column: 2;
+        }
+
+        .timeline-item:nth-child(even) .timeline-year {
+            grid-column: 1;
+            text-align: right;
+        }
+
+        .timeline-year {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        /* Footer (same as homepage) */
+        .footer {
+            background: #050505;
+            padding: 50px 50px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .two-column,
+            .mv-grid,
+            .objectives-grid,
+            .values-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline::before {
+                left: 30px;
+            }
+            
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .timeline-item:nth-child(even) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-year {
+                grid-column: 1;
+                text-align: left;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .page-header h1 {
+                font-size: 36px;
+            }
+            
+            .section {
+                padding: 40px 20px;
+            }
+            
+            .section-light {
+                padding: 30px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>Premium Cars • Rental • Financing</p>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="about.html" class="active">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="tel:+2348012345678" class="phone-btn">
+                    <i class="fas fa-phone-alt"></i>
+                    +234 801 234 5678
+                </a>
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    Chat Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>About <span>Adedayo Aremu Autos</span></h1>
+            <p>Building a legacy of trust, excellence, and premium automotive service in Nigeria</p>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Vehicles Sold</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Happy Clients</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Customer Support</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5+</div>
+                <div class="stat-label">Years Experience</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Founder Bios - Two Versions Side by Side -->
+    <div class="section">
+        <div class="section-title">
+            <h2>Meet the <span>Founder</span></h2>
+            <p>The vision and leadership behind Adedayo Aremu Autos</p>
+        </div>
+        
+        <div class="two-column">
+            <!-- Executive Bio (Short Version - Homepage Ready) -->
+            <div class="executive-bio">
+                <h3>Adedayo Aremu</h3>
+                <p>Adedayo Aremu is an entrepreneurial professional and founder of Adedayo Aremu Autos, a growing automotive enterprise committed to excellence, transparency, and customer-centered service. With a strategic mindset and strong business acumen, he has positioned his brand to deliver reliable vehicle sourcing, quality assurance, and value-driven automotive solutions.</p>
+                
+                <p>Adedayo's approach to business is grounded in integrity, operational efficiency, and long-term relationship building. He understands that success in the automotive industry requires more than transactions—it demands trust, market insight, and consistent performance. By leveraging digital platforms, data-informed decision-making, and disciplined execution, he continues to expand his brand presence and customer base.</p>
+                
+                <p>Focused on sustainable growth, Adedayo is building a dealership model that prioritizes professionalism, financial intelligence, and scalable systems. His long-term vision is to establish Adedayo Aremu Autos as a recognized and respected name in the automotive marketplace, known for quality inventory, competitive pricing, and exceptional client experience.</p>
+                
+                <span class="position">Founder & CEO, Adedayo Aremu Autos</span>
+            </div>
+            
+            <!-- Full Autobiography (Deep Story - About Page Only) -->
+            <div class="full-bio">
+                <h3>The Founder's Story</h3>
+                <p>Adedayo Aremu is an entrepreneur driven by vision, discipline, and an unwavering commitment to excellence. With a strong foundation in business development and a passion for the automotive industry, he has built his professional identity around integrity, strategic growth, and customer-centered service.</p>
+                
+                <p>From an early stage, Adedayo demonstrated a natural inclination toward commerce and enterprise. His understanding of value creation, branding, and market positioning shaped his entrepreneurial journey and laid the groundwork for his ventures. Over time, he refined his focus toward the automotive sector, recognizing both its economic potential and its role in empowering mobility, independence, and opportunity.</p>
+                
+                <p>As the founder of Adedayo Aremu Autos, he has positioned his brand to reflect professionalism, reliability, and premium service standards. His business philosophy emphasizes transparency, quality assurance, and long-term client relationships. Rather than simply facilitating vehicle transactions, he prioritizes delivering tailored automotive solutions that align with customer needs and financial goals.</p>
+                
+                <p>Adedayo's leadership style is strategic and growth-oriented. He believes in continuous improvement, leveraging digital platforms, market analytics, and customer insights to enhance operational efficiency and brand visibility. His approach integrates traditional business principles with modern innovation, ensuring adaptability in an evolving marketplace.</p>
+                
+                <p>Beyond business, Adedayo values personal development, financial literacy, and community impact. He views entrepreneurship not merely as a means of income generation, but as a platform for influence, mentorship, and sustainable wealth creation. His long-term vision includes expanding his automotive enterprise into a recognized dealership brand known for excellence, trust, and global competitiveness.</p>
+                
+                <p>Grounded in discipline and guided by ambition, Adedayo Aremu continues to build a legacy defined by professionalism, resilience, and purposeful leadership.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="section">
+        <div class="mv-grid">
+            <!-- Mission -->
+            <div class="mv-card">
+                <div class="icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h3>Mission</h3>
+                <p>To deliver reliable and premium automotive solutions through transparent business practices, quality vehicle sourcing, competitive pricing, and exceptional customer service. Guided by integrity, operational excellence, and faith-driven values, Adedayo Aremu Autos is committed to creating lasting value for customers while building a high-performance automotive enterprise.</p>
+            </div>
+            
+            <!-- Vision -->
+            <div class="mv-card">
+                <div class="icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3>Vision</h3>
+                <p>To establish Adedayo Aremu Autos as a trusted and distinguished automotive brand recognized for integrity, professionalism, and customer satisfaction, while expanding into a scalable multi-location dealership known for quality inventory, strong market presence, and positive community impact.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Objectives -->
+    <div class="section section-light">
+        <div class="section-title">
+            <h2>Strategic <span>Objectives</span></h2>
+            <p>Our roadmap for sustainable growth and market leadership</p>
+        </div>
+        
+        <div class="objectives-grid">
+            <!-- Customer Excellence -->
+            <div class="objective-card">
+                <h4><i class="fas fa-star" style="color: var(--primary);"></i> Customer Excellence</h4>
+                <ul>
+                    <li>Provide dependable, high-quality vehicles that meet diverse customer needs</li>
+                    <li>Deliver a premium, service-driven automotive experience</li>
+                    <li>Build long-term relationships based on transparency and trust</li>
+                </ul>
+            </div>
+            
+            <!-- Operational Growth -->
+            <div class="objective-card">
+                <h4><i class="fas fa-chart-line" style="color: var(--primary);"></i> Operational Growth</h4>
+                <ul>
+                    <li>Achieve sustainable annual revenue growth through disciplined execution</li>
+                    <li>Optimize inventory sourcing and turnover using data-driven insights</li>
+                    <li>Develop strategic financing partnerships to expand vehicle accessibility</li>
+                </ul>
+            </div>
+            
+            <!-- Brand & Digital Expansion -->
+            <div class="objective-card">
+                <h4><i class="fas fa-globe" style="color: var(--primary);"></i> Brand & Digital Expansion</h4>
+                <ul>
+                    <li>Build a recognizable, high-conversion digital automotive platform</li>
+                    <li>Strengthen brand visibility through modern marketing and technology</li>
+                    <li>Establish structured systems that support scalable dealership operations</li>
+                </ul>
+            </div>
+            
+            <!-- Community & Ethical Impact -->
+            <div class="objective-card">
+                <h4><i class="fas fa-hand-heart" style="color: var(--primary);"></i> Community & Ethical Impact</h4>
+                <ul>
+                    <li>Conduct business with honesty, integrity, and responsible stewardship</li>
+                    <li>Create employment and mentorship opportunities</li>
+                    <li>Contribute positively to the community while honoring faith-centered values</li>
+                </ul>
+            </div>
+            
+            <!-- Long-Term Expansion -->
+            <div class="objective-card" style="grid-column: span 2;">
+                <h4><i class="fas fa-building" style="color: var(--primary);"></i> Long-Term Expansion</h4>
+                <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <li>Launch a physical dealership hub within defined milestones</li>
+                    <li>Expand into multiple locations with strong regional market presence</li>
+                    <li>Position the brand as a respected name in both everyday and luxury automotive markets</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Values -->
+    <div class="section">
+        <div class="section-title">
+            <h2>Our Core <span>Values</span></h2>
+            <p>The principles that guide everything we do</p>
+        </div>
+        
+        <div class="values-grid">
+            <div class="value-item">
+                <i class="fas fa-gem"></i>
+                <h5>Integrity</h5>
+                <p>Honest dealings, transparent communication</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-medal"></i>
+                <h5>Excellence</h5>
+                <p>Premium quality in every vehicle</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-handshake"></i>
+                <h5>Trust</h5>
+                <p>Long-term client relationships</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-lightbulb"></i>
+                <h5>Innovation</h5>
+                <p>Modern digital solutions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journey Timeline -->
+    <div class="section section-light">
+        <div class="section-title">
+            <h2>Our <span>Journey</span></h2>
+            <p>Milestones in building a trusted automotive brand</p>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-year">2020</div>
+                <div class="timeline-content">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">Foundation</h4>
+                    <p>Adedayo Aremu Autos was established with a vision to transform the automotive buying experience in Nigeria.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-year">2021</div>
+                <div class="timeline-content">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">First Major Milestone</h4>
+                    <p>Successfully sold 20+ vehicles and built a reputation for quality and transparency.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-year">2022</div>
+                <div class="timeline-content">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">Digital Expansion</h4>
+                    <p>Launched our online platform, making vehicle browsing and financing accessible nationwide.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-year">2023</div>
+                <div class="timeline-content">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">Rental & Financing</h4>
+                    <p>Expanded services to include flexible rental options and tailored financing plans.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-year">2024</div>
+                <div class="timeline-content">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">Today</h4>
+                    <p>Building towards a physical dealership hub while serving customers across Nigeria.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 50px;">
+                        <h3 style="color: white;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
