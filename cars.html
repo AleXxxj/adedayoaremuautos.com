@@ -3,1060 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cars for Sale - Adedayo Aremu Autos</title>
+    <title>Buy Cars - Adedayo Aremu Autos</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        /* Copy ALL styles from the new homepage here */
+        /* Same exact CSS as the premium homepage */
+        
+        /* Additional styles specific to cars page */
+        .page-header {
+            margin-top: 90px;
+            padding: 60px 50px;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
         }
-
-        body {
-            background-color: #0a0a0a;
-            color: #ffffff;
+        
+        .page-header h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
         }
-
-        /* Premium Variables */
-        :root {
-            --primary: #c5a059;
-            --primary-dark: #a88642;
-            --primary-light: #d4b57a;
-            --dark-bg: #0a0a0a;
-            --card-bg: #111111;
-            --card-hover: #1a1a1a;
-            --text-light: #e0e0e0;
-            --text-muted: #888888;
-            --border: #222222;
-            --shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        /* Header Section - FIXED */
-        .header {
-            background: rgba(10, 10, 10, 0.98);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
-        }
-
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-container img {
-            height: 50px;
-            width: auto;
-            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
-        }
-
-        .logo-text h1 {
-            font-size: 22px;
-            font-weight: 900; /* Bolder */
-            letter-spacing: 0.5px;
-            margin: 0;
-            line-height: 1.2;
-            white-space: nowrap; /* Prevents line break */
-            color: white;
-        }
-
-        .logo-text h1 span {
-            color: var(--primary);
-            font-weight: 900; /* Bolder */
-        }
-
-        .logo-text p {
-            font-size: 11px;
+        
+        .page-header p {
             color: var(--text-muted);
-            letter-spacing: 1.5px;
-            margin: 3px 0 0;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        /* Navigation - IMPROVED */
-        .nav-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .nav-menu a {
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
-            padding: 5px 0;
-            transition: all 0.3s ease;
-        }
-
-        .nav-menu a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s ease;
-        }
-
-        .nav-menu a:hover::after,
-        .nav-menu a.active::after {
-            width: 100%;
-        }
-
-        .nav-menu a:hover,
-        .nav-menu a.active {
-            color: var(--primary);
-        }
-
-        /* Header Actions - REMOVED PHONE BUTTON (only WhatsApp remains) */
-        .header-actions {
-            display: flex;
-            align-items: center;
-        }
-
-        .whatsapp-btn {
-            background: #25D366;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .whatsapp-btn i {
             font-size: 18px;
         }
-
-        .whatsapp-btn:hover {
-            background: #128C7E;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        
+        .filters-section {
+            padding: 30px 50px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
         }
-
-        /* Mobile Menu Button - NEW */
-        .mobile-menu-btn {
-            display: none;
-            background: transparent;
-            border: 1px solid rgba(197, 160, 89, 0.3);
-            border-radius: 5px;
-            padding: 8px 12px;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-menu-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Hero Section - ADJUSTED for mobile */
-        .hero {
-            min-height: 100vh;
-            height: auto;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 100%), 
-                        url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            margin-top: 74px;
-            position: relative;
-            overflow: hidden;
-            padding: 60px 0;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.15) 0%, transparent 60%);
-        }
-
-        .hero-content {
+        
+        .filters-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
-            position: relative;
-            z-index: 2;
-            width: 100%;
         }
-
-        .hero h2 {
-            font-size: clamp(32px, 8vw, 70px);
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            max-width: 900px;
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
         }
-
-        .hero h2 span {
-            color: var(--primary);
-            position: relative;
-            display: inline-block;
-        }
-
-        .hero p {
-            font-size: clamp(16px, 4vw, 20px);
-            color: var(--text-light);
-            margin-bottom: 30px;
-            max-width: 600px;
-            line-height: 1.6;
-        }
-
-        .hero-buttons {
+        
+        .filter-group {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
         }
-
-        .btn {
-            padding: 14px 30px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
+        
+        .filter-group label {
+            color: var(--text-muted);
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
         }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #0a0a0a;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 30px rgba(197, 160, 89, 0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-light {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .btn-outline-light:hover {
-            background: rgba(197, 160, 89, 0.2);
-            border-color: var(--primary);
-        }
-
-        /* Services Section - MOBILE OPTIMIZED */
-        .services {
-            padding: 60px 20px;
-            background: var(--dark-bg);
-        }
-
-        .services-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .section-title h2 {
-            font-size: clamp(28px, 6vw, 42px);
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .section-title h2 span {
-            color: var(--primary);
-        }
-
-        .section-title p {
-            color: var(--text-muted);
-            font-size: clamp(14px, 3vw, 18px);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .service-card {
-            background: var(--card-bg);
-            padding: 40px 25px;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .service-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(197, 160, 89, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 35px;
-            color: var(--primary);
-            transition: all 0.3s ease;
-        }
-
-        .service-card:hover .service-icon {
-            background: var(--primary);
-            color: #0a0a0a;
-            transform: scale(1.1);
-        }
-
-        .service-card h3 {
-            font-size: 22px;
-            margin-bottom: 12px;
-        }
-
-        .service-card p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 15px;
-        }
-
-        .service-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .service-link:hover {
-            gap: 10px;
-        }
-
-        /* Featured Vehicles - MOBILE OPTIMIZED */
-        .featured {
-            padding: 60px 20px;
-            background: linear-gradient(180deg, var(--dark-bg) 0%, #0f0f0f 100%);
-        }
-
-        .featured-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .section-header h2 {
-            font-size: clamp(24px, 5vw, 36px);
-        }
-
-        .view-all {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .cars-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .car-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .car-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .car-image {
-            height: 180px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .car-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: all 0.5s ease;
-        }
-
-        .car-card:hover .car-image img {
-            transform: scale(1.1);
-        }
-
-        .car-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: var(--primary);
-            color: #0a0a0a;
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .car-details {
-            padding: 20px;
-        }
-
-        .car-title {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .car-specs {
-            display: flex;
-            gap: 12px;
-            color: var(--text-muted);
-            font-size: 13px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .car-specs i {
-            color: var(--primary);
-            margin-right: 3px;
-        }
-
-        .car-price {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .car-price small {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 400;
-            display: block;
-        }
-
-        .car-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .car-actions .btn {
-            flex: 1;
-            padding: 10px;
-            font-size: 13px;
-            justify-content: center;
-        }
-
-        /* Why Choose Us - MOBILE OPTIMIZED */
-        .why-choose {
-            padding: 60px 20px;
-            background: var(--dark-bg);
-        }
-
-        .why-choose-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 30px 20px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .feature:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .feature i {
-            font-size: 45px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .feature p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        /* Contact Section - MOBILE OPTIMIZED */
-        .contact-section {
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .contact-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            align-items: center;
-        }
-
-        .contact-info h3 {
-            font-size: clamp(28px, 5vw, 42px);
-            margin-bottom: 15px;
-        }
-
-        .contact-info p {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .contact-details {
-            margin: 30px 0;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            color: var(--text-light);
-            font-size: 16px;
-            flex-wrap: wrap;
-        }
-
-        .contact-item i {
-            width: 45px;
-            height: 45px;
-            background: rgba(197, 160, 89, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .contact-form {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 14px;
+        
+        .filter-group select {
+            padding: 12px 15px;
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--border);
             border-radius: 10px;
             color: white;
-            font-size: 15px;
+            font-size: 14px;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
+        
+        .filter-group select:hover,
+        .filter-group select:focus {
             border-color: var(--primary);
-            background: rgba(197, 160, 89, 0.1);
+            outline: none;
         }
-
-        .form-group textarea {
-            height: 100px;
-            resize: none;
+        
+        .filter-group select option {
+            background: var(--dark-bg);
+            color: white;
         }
-
-        /* Footer - MOBILE OPTIMIZED */
-        .footer {
-            background: #050505;
-            padding: 40px 20px 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .footer-about p {
-            color: var(--text-muted);
-            margin: 15px 0;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .social-links {
+        
+        .filter-actions {
             display: flex;
-            gap: 12px;
+            gap: 15px;
+            align-items: flex-end;
         }
-
-        .social-links a {
-            width: 36px;
-            height: 36px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
+        
+        .btn-filter {
+            padding: 12px 25px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-reset {
+            padding: 12px 25px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .cars-listing {
+            padding: 50px;
+            background: var(--dark-bg);
+        }
+        
+        .listing-header {
+            max-width: 1400px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .results-count {
+            color: var(--text-muted);
+        }
+        
+        .results-count span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sort-dropdown label {
+            color: var(--text-muted);
+        }
+        
+        .sort-dropdown select {
+            padding: 8px 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .pagination {
+            max-width: 1400px;
+            margin: 50px auto 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .page-link {
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             color: white;
             text-decoration: none;
             transition: all 0.3s ease;
-            font-size: 16px;
         }
-
-        .social-links a:hover {
+        
+        .page-link:hover,
+        .page-link.active {
             background: var(--primary);
+            border-color: var(--primary);
             color: #0a0a0a;
-            transform: translateY(-3px);
         }
-
-        .footer-links h4,
-        .footer-contact h4 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: white;
-        }
-
-        .footer-links ul {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 8px;
-        }
-
-        .footer-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
-            padding-left: 5px;
-        }
-
-        .footer-contact p {
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            color: var(--text-muted);
-            font-size: 13px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .footer-bottom-links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .footer-bottom-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .footer-bottom-links a:hover {
-            color: var(--primary);
-        }
-
-        /* WhatsApp Float - IMPROVED for mobile */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #25D366;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
-            z-index: 999;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .whatsapp-float i {
-            font-size: 20px;
-        }
-
-        .whatsapp-float:hover {
-            background: #128C7E;
-            transform: scale(1.05);
-        }
-
-        /* Mobile Menu Styles - COMPLETELY NEW */
-        @media (max-width: 900px) {
-            .mobile-menu-btn {
-                display: block;
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 36px;
             }
-
-            .nav-menu {
-                display: none;
-                width: 100%;
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-actions {
                 flex-direction: column;
-                align-items: center;
+            }
+            
+            .listing-header {
+                flex-direction: column;
                 gap: 15px;
-                padding: 20px 0 10px;
-                border-top: 1px solid rgba(197, 160, 89, 0.2);
-                margin-top: 15px;
-            }
-
-            .nav-menu.active {
-                display: flex;
-            }
-
-            .header-actions {
-                margin-left: auto;
-                margin-right: 10px;
-            }
-
-            .whatsapp-btn {
-                padding: 8px 15px;
-                font-size: 13px;
-            }
-
-            .whatsapp-btn span {
-                display: inline;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo-container img {
-                height: 40px;
-            }
-
-            .logo-text h1 {
-                font-size: 18px;
-            }
-
-            .logo-text p {
-                font-size: 9px;
-            }
-
-            .whatsapp-btn span {
-                display: none; /* Hide text, show only icon on very small screens */
-            }
-
-            .whatsapp-btn i {
-                margin: 0;
-            }
-
-            .whatsapp-btn {
-                padding: 8px 12px;
-            }
-
-            .hero-buttons .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .contact-item {
-                flex-direction: column;
                 text-align: center;
-                align-items: flex-start;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-                align-items: center;
-            }
-
-            .footer-bottom-links {
-                justify-content: center;
             }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- Same Header as homepage -->
     <div class="header">
-        <div class="header-container">
-            <div class="logo-container">
-                <img src="images/aaa_logo.PNG" alt="Adedayo Aremu Autos Logo">
-                <div class="logo-text">
-                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
-                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+        <!-- Copy exact header from homepage -->
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Browse <span>Our Cars</span></h1>
+        <p>Discover premium vehicles for sale • All verified • Best prices guaranteed</p>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label>Brand</label>
+                    <select>
+                        <option>All Brands</option>
+                        <option>Toyota</option>
+                        <option>Lexus</option>
+                        <option>Honda</option>
+                        <option>Mercedes-Benz</option>
+                        <option>BMW</option>
+                    </select>
                 </div>
-            </div>
-            
-            <!-- Mobile Menu Button -->
-            <div class="mobile-menu-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
-            </div>
-            
-            <div class="nav-menu" id="navMenu">
-                <a href="index.html" class="active">Home</a>
-                <a href="cars.html">Buy Cars</a>
-                <a href="rentals.html">Rentals</a>
-                <a href="financing.html">Financing</a>
-                <a href="contact.html">Contact</a>
-            </div>
-            
-            <div class="header-actions">
-                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>Chat Now</span>
-                </a>
+                
+                <div class="filter-group">
+                    <label>Price Range</label>
+                    <select>
+                        <option>Any Price</option>
+                        <option>₦5M - ₦10M</option>
+                        <option>₦10M - ₦15M</option>
+                        <option>₦15M - ₦20M</option>
+                        <option>₦20M+</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Year</label>
+                    <select>
+                        <option>Any Year</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>2021</option>
+                        <option>2020</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Transmission</label>
+                    <select>
+                        <option>Any</option>
+                        <option>Automatic</option>
+                        <option>Manual</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Fuel Type</label>
+                    <select>
+                        <option>Any</option>
+                        <option>Petrol</option>
+                        <option>Diesel</option>
+                        <option>Hybrid</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn-filter">Apply Filters</button>
+                    <button class="btn-reset">Reset</button>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="page-title">
-        <h2>Cars for <span>Sale</span></h2>
-        <p>Browse our collection of premium, verified vehicles</p>
+
+    <!-- Cars Listing -->
+    <div class="cars-listing">
+        <div class="listing-header">
+            <div class="results-count">
+                Showing <span>1-12</span> of <span>24</span> vehicles
+            </div>
+            <div class="sort-dropdown">
+                <label>Sort by:</label>
+                <select>
+                    <option>Newest First</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Year: Newest</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="cars-grid" style="max-width: 1400px; margin: 0 auto;">
+            <!-- 12 cars will load here -->
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <a href="#" class="page-link active">1</a>
+            <a href="#" class="page-link">2</a>
+            <a href="#" class="page-link">3</a>
+            <a href="#" class="page-link">4</a>
+            <a href="#" class="page-link">5</a>
+            <a href="#" class="page-link"><i class="fas fa-chevron-right"></i></a>
+        </div>
     </div>
-    
-    <div class="filters">
-        <select class="filter-select">
-            <option>All Brands</option>
-            <option>Toyota</option>
-            <option>Lexus</option>
-            <option>Honda</option>
-            <option>Mercedes</option>
-        </select>
-        <select class="filter-select">
-            <option>All Years</option>
-            <option>2024</option>
-            <option>2023</option>
-            <option>2022</option>
-        </select>
-        <select class="filter-select">
-            <option>Price: Any</option>
-            <option>Under ₦10M</option>
-            <option>₦10M - ₦15M</option>
-            <option>Above ₦15M</option>
-        </select>
-    </div>
-    
-    <div class="cars-grid" id="cars-container">
-        <!-- Cars will be loaded here -->
-    </div>
-    
-    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
-        <i class="fab fa-whatsapp"></i> Chat with us
-    </a>
-    
+
+    <!-- Same Footer as homepage -->
     <div class="footer">
-        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+        <!-- Copy exact footer from homepage -->
     </div>
-    
+
     <script>
-        const carsForSale = [
-            {
-                name: "2020 Toyota Camry",
-                year: 2020,
-                mileage: "25,000 km",
-                fuel: "Petrol",
-                transmission: "Automatic",
-                price: "₦12,500,000",
-                badge: "Foreign Used"
-            },
-            {
-                name: "2019 Lexus RX350",
-                year: 2019,
-                mileage: "35,000 km",
-                fuel: "Petrol",
-                transmission: "Automatic",
-                price: "₦18,500,000",
-                badge: "Foreign Used"
-            },
-            {
-                name: "2021 Honda Accord",
-                year: 2021,
-                mileage: "15,000 km",
-                fuel: "Petrol",
-                transmission: "Automatic",
-                price: "₦14,500,000",
-                badge: "Nigerian Used"
-            },
-            {
-                name: "2018 Mercedes C300",
-                year: 2018,
-                mileage: "45,000 km",
-                fuel: "Petrol",
-                transmission: "Automatic",
-                price: "₦16,500,000",
-                badge: "Foreign Used"
-            },
-            {
-                name: "2022 Toyota Prado",
-                year: 2022,
-                mileage: "10,000 km",
-                fuel: "Diesel",
-                transmission: "Automatic",
-                price: "₦35,000,000",
-                badge: "New"
-            },
-            {
-                name: "2020 Range Rover Sport",
-                year: 2020,
-                mileage: "30,000 km",
-                fuel: "Petrol",
-                transmission: "Automatic",
-                price: "₦42,000,000",
-                badge: "Foreign Used"
-            }
+        // Expanded car data for all 24 cars
+        const allCars = [
+            // Add 24 cars here with same structure as homepage
         ];
         
-        const container = document.getElementById('cars-container');
-        carsForSale.forEach(car => {
-            container.innerHTML += `
-                <div class="car-card">
-                    <div class="car-image">
-                        <img src="https://via.placeholder.com/400x300" alt="${car.name}">
-                        <span class="car-badge">${car.badge}</span>
-                    </div>
-                    <div class="car-details">
-                        <h3 class="car-title">${car.name}</h3>
-                        <div class="car-specs">
-                            <span><i class="fas fa-calendar"></i> ${car.year}</span>
-                            <span><i class="fas fa-tachometer-alt"></i> ${car.mileage}</span>
-                        </div>
-                        <div class="car-specs">
-                            <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
-                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
-                        </div>
-                        <div class="car-price">${car.price}</div>
-                        <button class="btn" onclick="inquire('${car.name}')">Inquire Now</button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        function inquire(carName) {
-            window.open(`https://wa.me/2348012345678?text=I'm interested in ${carName}`, '_blank');
-        }
+        // Display first 12 cars
+        const container = document.querySelector('.cars-grid');
+        // Load cars logic here
     </script>
 </body>
 </html>
