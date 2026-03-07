@@ -31,11 +31,11 @@
             --shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* Header Section - FIXED */
+        /* Header Section - FIXED for mobile */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
-            padding: 12px 20px;
+            padding: 12px 15px;
             position: fixed;
             width: 100%;
             top: 0;
@@ -56,6 +56,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
 
         .logo-container img {
@@ -65,22 +66,22 @@
         }
 
         .logo-text h1 {
-            font-size: 22px;
-            font-weight: 900; /* Bolder */
+            font-size: 20px;
+            font-weight: 900;
             letter-spacing: 0.5px;
             margin: 0;
             line-height: 1.2;
-            white-space: nowrap; /* Prevents line break */
+            white-space: nowrap;
             color: white;
         }
 
         .logo-text h1 span {
             color: var(--primary);
-            font-weight: 900; /* Bolder */
+            font-weight: 900;
         }
 
         .logo-text p {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             letter-spacing: 1.5px;
             margin: 3px 0 0;
@@ -88,7 +89,7 @@
             font-weight: 500;
         }
 
-        /* Navigation - IMPROVED */
+        /* Navigation */
         .nav-menu {
             display: flex;
             gap: 25px;
@@ -127,16 +128,17 @@
             color: var(--primary);
         }
 
-        /* Header Actions - REMOVED PHONE BUTTON (only WhatsApp remains) */
+        /* Header Actions - FIXED for mobile */
         .header-actions {
             display: flex;
             align-items: center;
+            margin-left: 10px;
         }
 
         .whatsapp-btn {
             background: #25D366;
             color: white;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
@@ -145,7 +147,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            white-space: nowrap; /* Prevents line break */
         }
 
         .whatsapp-btn i {
@@ -158,7 +160,7 @@
             box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
 
-        /* Mobile Menu Button - NEW */
+        /* Mobile Menu Button */
         .mobile-menu-btn {
             display: none;
             background: transparent;
@@ -176,20 +178,21 @@
             color: var(--primary);
         }
 
-        /* Hero Section - ADJUSTED for mobile */
+        /* Hero Section - FIXED background */
         .hero {
             min-height: 100vh;
             height: auto;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 100%), 
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%), 
                         url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover;
-            background-position: center;
+            background-size: cover; /* Changed from 'cover' to 'cover' but with proper positioning */
+            background-position: center 30%; /* Adjusted position */
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             margin-top: 74px;
             position: relative;
             overflow: hidden;
-            padding: 60px 0;
+            padding: 40px 0;
         }
 
         .hero::before {
@@ -199,7 +202,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.15) 0%, transparent 60%);
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.15) 0%, transparent 70%);
         }
 
         .hero-content {
@@ -253,7 +256,6 @@
             gap: 8px;
             border: none;
             cursor: pointer;
-            white-space: nowrap;
         }
 
         .btn-primary {
@@ -291,7 +293,7 @@
             border-color: var(--primary);
         }
 
-        /* Services Section - MOBILE OPTIMIZED */
+        /* Services Section */
         .services {
             padding: 60px 20px;
             background: var(--dark-bg);
@@ -391,7 +393,7 @@
             gap: 10px;
         }
 
-        /* Featured Vehicles - MOBILE OPTIMIZED */
+        /* Featured Vehicles */
         .featured {
             padding: 60px 20px;
             background: linear-gradient(180deg, var(--dark-bg) 0%, #0f0f0f 100%);
@@ -528,7 +530,339 @@
             justify-content: center;
         }
 
-        /* Why Choose Us - MOBILE OPTIMIZED */
+        /* About Section - NEW */
+        .about-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+        }
+
+        .about-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: clamp(28px, 5vw, 42px);
+            margin-bottom: 20px;
+        }
+
+        .about-content h2 span {
+            color: var(--primary);
+        }
+
+        .about-content h3 {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .about-content p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .about-stat {
+            text-align: center;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .about-stat .number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .about-stat .label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .about-image .badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Referral Program - NEW */
+        .referral-section {
+            padding: 80px 20px;
+            background: var(--dark-bg);
+        }
+
+        .referral-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .referral-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .referral-content h2 {
+            font-size: clamp(28px, 5vw, 42px);
+            margin-bottom: 15px;
+        }
+
+        .referral-content h2 span {
+            color: var(--primary);
+        }
+
+        .referral-content .highlight {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0;
+            line-height: 1.2;
+        }
+
+        .referral-content .highlight small {
+            font-size: 18px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .referral-content p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .referral-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .referral-features li {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .referral-features li i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .referral-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid var(--primary);
+            text-align: center;
+        }
+
+        .referral-card i {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .referral-card h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .referral-card .percent {
+            font-size: 72px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin: 20px 0;
+        }
+
+        .referral-card .percent small {
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .referral-cta {
+            display: inline-block;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .referral-cta:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Blog Section - NEW */
+        .blog-section {
+            padding: 80px 20px;
+            background: linear-gradient(180deg, #0f0f0f 0%, var(--dark-bg) 100%);
+        }
+
+        .blog-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .blog-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .blog-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .blog-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .blog-card:hover .blog-image img {
+            transform: scale(1.1);
+        }
+
+        .blog-content {
+            padding: 25px;
+        }
+
+        .blog-category {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .blog-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .blog-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .blog-meta i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .read-more {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            gap: 10px;
+        }
+
+        /* Why Choose Us */
         .why-choose {
             padding: 60px 20px;
             background: var(--dark-bg);
@@ -577,7 +911,7 @@
             font-size: 14px;
         }
 
-        /* Contact Section - MOBILE OPTIMIZED */
+        /* Contact Section */
         .contact-section {
             padding: 60px 20px;
             background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
@@ -670,7 +1004,7 @@
             resize: none;
         }
 
-        /* Footer - MOBILE OPTIMIZED */
+        /* Footer */
         .footer {
             background: #050505;
             padding: 40px 20px 20px;
@@ -785,7 +1119,7 @@
             color: var(--primary);
         }
 
-        /* WhatsApp Float - IMPROVED for mobile */
+        /* WhatsApp Float */
         .whatsapp-float {
             position: fixed;
             bottom: 20px;
@@ -814,7 +1148,7 @@
             transform: scale(1.05);
         }
 
-        /* Mobile Menu Styles - COMPLETELY NEW */
+        /* Mobile Styles - FIXED */
         @media (max-width: 900px) {
             .mobile-menu-btn {
                 display: block;
@@ -837,22 +1171,25 @@
 
             .header-actions {
                 margin-left: auto;
-                margin-right: 10px;
             }
 
-            .whatsapp-btn {
-                padding: 8px 15px;
-                font-size: 13px;
+            .about-grid,
+            .referral-grid {
+                grid-template-columns: 1fr;
             }
 
-            .whatsapp-btn span {
-                display: inline;
+            .about-image {
+                order: -1;
+            }
+
+            .referral-card {
+                order: -1;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .logo-container img {
-                height: 40px;
+                height: 45px; /* Larger on mobile */
             }
 
             .logo-text h1 {
@@ -863,21 +1200,32 @@
                 font-size: 9px;
             }
 
-            .whatsapp-btn span {
-                display: none; /* Hide text, show only icon on very small screens */
-            }
-
-            .whatsapp-btn i {
-                margin: 0;
-            }
-
             .whatsapp-btn {
                 padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .hero {
+                margin-top: 74px;
+                background-position: center 20%; /* Adjusted for mobile */
             }
 
             .hero-buttons .btn {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .about-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .referral-grid {
+                padding: 30px 20px;
+            }
+
+            .referral-content .highlight {
+                font-size: 36px;
             }
 
             .contact-item {
@@ -896,16 +1244,48 @@
                 justify-content: center;
             }
         }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                gap: 8px;
+            }
+
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+                letter-spacing: 1px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn span {
+                display: none; /* Hide text on very small screens */
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header - FIXED with phone button removed -->
+    <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo-container">
-                <img src="images/aaa_logo.PNG" alt="Adedayo Aremu Autos Logo">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
                 <div class="logo-text">
                     <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
                     <p>PREMIUM CARS • RENTAL • FINANCING</p>
@@ -922,6 +1302,7 @@
                 <a href="cars.html">Buy Cars</a>
                 <a href="rentals.html">Rentals</a>
                 <a href="financing.html">Financing</a>
+                <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
             </div>
             
@@ -934,7 +1315,7 @@
         </div>
     </div>
 
-    <!-- Hero Section - UPDATED with 3 buttons -->
+    <!-- Hero Section - FIXED background -->
     <div class="hero">
         <div class="hero-content">
             <h2>Buy, Rent & <span>Finance Cars</span> with Confidence</h2>
@@ -1016,6 +1397,163 @@
             
             <div class="cars-grid" id="featured-cars">
                 <!-- Cars will be loaded here via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section - NEW -->
+    <div class="about-section">
+        <div class="about-container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <h2>Meet <span>Adedayo Aremu</span></h2>
+                    <h3>Founder & CEO</h3>
+                    <p>Adedayo Aremu is an entrepreneurial professional and founder of Adedayo Aremu Autos, a growing automotive enterprise committed to excellence, transparency, and customer-centered service. With a strategic mindset and strong business acumen, he has positioned his brand to deliver reliable vehicle sourcing, quality assurance, and value-driven automotive solutions.</p>
+                    
+                    <p>Focused on sustainable growth, Adedayo is building a dealership model that prioritizes professionalism, financial intelligence, and scalable systems. His long-term vision is to establish Adedayo Aremu Autos as a recognized and respected name in the automotive marketplace.</p>
+                    
+                    <div class="about-stats">
+                        <div class="about-stat">
+                            <div class="number">50+</div>
+                            <div class="label">Vehicles Sold</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="number">100%</div>
+                            <div class="label">Client Satisfaction</div>
+                        </div>
+                        <div class="about-stat">
+                            <div class="number">5+</div>
+                            <div class="label">Years Experience</div>
+                        </div>
+                    </div>
+                    
+                    <a href="about.html" class="btn btn-primary">Read Full Story</a>
+                </div>
+                
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Adedayo Aremu">
+                    <div class="badge">Trusted Dealer</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Program - NEW -->
+    <div class="referral-section">
+        <div class="referral-container">
+            <div class="referral-grid">
+                <div class="referral-content">
+                    <h2>Earn with <span>Our Referral Program</span></h2>
+                    <p>Know someone looking for a quality vehicle? Refer them to us and earn a commission on every successful purchase.</p>
+                    
+                    <div class="highlight">
+                        1.5% <small>commission</small>
+                    </div>
+                    
+                    <ul class="referral-features">
+                        <li><i class="fas fa-check-circle"></i> Earn on every successful vehicle purchase</li>
+                        <li><i class="fas fa-check-circle"></i> No limits - refer as many buyers as you want</li>
+                        <li><i class="fas fa-check-circle"></i> Fast payout after transaction completion</li>
+                        <li><i class="fas fa-check-circle"></i> Track your referrals easily</li>
+                    </ul>
+                    
+                    <a href="referral.html" class="btn btn-primary">Become a Partner</a>
+                </div>
+                
+                <div class="referral-card">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Refer & Earn</h3>
+                    <div class="percent">
+                        1.5% <small>per sale</small>
+                    </div>
+                    <p>On every successful vehicle purchase through your referral</p>
+                    <p style="color: var(--primary); font-weight: 600; margin-top: 20px;">Example: Refer a ₦10M car = ₦150,000</p>
+                    <a href="https://wa.me/2348012345678?text=I'm%20interested%20in%20your%20referral%20program" class="referral-cta">Start Referring</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Section - NEW -->
+    <div class="blog-section">
+        <div class="blog-container">
+            <div class="section-title">
+                <h2>Automotive <span>Insights</span></h2>
+                <p>Expert advice and tips for car buyers and enthusiasts</p>
+            </div>
+            
+            <div class="blog-grid">
+                <!-- Blog Post 1 -->
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="SUV on rough road">
+                    </div>
+                    <div class="blog-content">
+                        <span class="blog-category">Buying Guide</span>
+                        <h3 class="blog-title">Top 5 SUVs for Nigerian Roads</h3>
+                        <div class="blog-meta">
+                            <span><i class="fas fa-calendar"></i> Mar 5, 2024</span>
+                            <span><i class="fas fa-clock"></i> 5 min read</span>
+                        </div>
+                        <p class="blog-excerpt">Discover the best SUVs built to handle Nigerian terrain - from rugged roads to city driving. We review durability, fuel efficiency, and value.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 2 -->
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car financing">
+                    </div>
+                    <div class="blog-content">
+                        <span class="blog-category">Financing</span>
+                        <h3 class="blog-title">How to Finance Your First Car</h3>
+                        <div class="blog-meta">
+                            <span><i class="fas fa-calendar"></i> Feb 20, 2024</span>
+                            <span><i class="fas fa-clock"></i> 7 min read</span>
+                        </div>
+                        <p class="blog-excerpt">A complete guide to car financing in Nigeria. Learn about down payments, interest rates, documentation, and how to qualify for the best terms.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 3 -->
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Foreign used cars">
+                    </div>
+                    <div class="blog-content">
+                        <span class="blog-category">Used Cars</span>
+                        <h3 class="blog-title">A Guide to Foreign Used Cars</h3>
+                        <div class="blog-meta">
+                            <span><i class="fas fa-calendar"></i> Feb 10, 2024</span>
+                            <span><i class="fas fa-clock"></i> 6 min read</span>
+                        </div>
+                        <p class="blog-excerpt">Everything you need to know about foreign used (Tokunbo) cars - from inspection checklists to customs clearance and documentation.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Blog Post 4 -->
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car maintenance">
+                    </div>
+                    <div class="blog-content">
+                        <span class="blog-category">Maintenance</span>
+                        <h3 class="blog-title">5 Essential Car Maintenance Tips</h3>
+                        <div class="blog-meta">
+                            <span><i class="fas fa-calendar"></i> Jan 25, 2024</span>
+                            <span><i class="fas fa-clock"></i> 4 min read</span>
+                        </div>
+                        <p class="blog-excerpt">Keep your vehicle running smoothly with these essential maintenance tips from our expert mechanics. Save money and extend your car's life.</p>
+                        <a href="#" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center" style="text-align: center; margin-top: 40px;">
+                <a href="blog.html" class="btn btn-outline">View All Articles <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </div>
@@ -1129,7 +1667,7 @@
             <div class="footer-grid">
                 <div class="footer-about">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 45px;">
                         <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
                     </div>
                     <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
@@ -1148,6 +1686,7 @@
                         <li><a href="cars.html">Buy Cars</a></li>
                         <li><a href="rentals.html">Rentals</a></li>
                         <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
@@ -1272,13 +1811,12 @@
             `;
         });
 
-        // Mobile Menu Toggle - NEW
+        // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
 
         mobileMenuBtn.addEventListener('click', function() {
             navMenu.classList.toggle('active');
-            // Change icon
             const icon = this.querySelector('i');
             if (navMenu.classList.contains('active')) {
                 icon.classList.remove('fa-bars');
@@ -1289,7 +1827,7 @@
             }
         });
 
-        // Close menu when clicking on a link (for mobile)
+        // Close menu when clicking on a link
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
