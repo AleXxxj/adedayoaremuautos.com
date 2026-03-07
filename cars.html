@@ -3,334 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buy Cars - Adedayo Aremu Autos</title>
+    <title>Cars for Sale - Adedayo Aremu Autos</title>
     <style>
-        /* Copy ALL styles from the new homepage here */
-        /* Same exact CSS as the premium homepage */
-        
-        /* Additional styles specific to cars page */
-        .page-header {
-            margin-top: 90px;
-            padding: 60px 50px;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+        }
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
             text-align: center;
-            border-bottom: 1px solid var(--border);
         }
-        
-        .page-header h1 {
-            font-size: 48px;
-            margin-bottom: 15px;
+        .header h1 {
+            color: #c5a059;
+            margin-bottom: 10px;
         }
-        
-        .page-header p {
-            color: var(--text-muted);
-            font-size: 18px;
+        .nav {
+            background: #333;
+            padding: 15px;
+            text-align: center;
         }
-        
-        .filters-section {
-            padding: 30px 50px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .filters-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .filter-group label {
-            color: var(--text-muted);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .filter-group select {
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-group select:hover,
-        .filter-group select:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-        
-        .filter-group select option {
-            background: var(--dark-bg);
-            color: white;
-        }
-        
-        .filter-actions {
-            display: flex;
-            gap: 15px;
-            align-items: flex-end;
-        }
-        
-        .btn-filter {
-            padding: 12px 25px;
-            background: var(--primary);
-            border: none;
-            border-radius: 10px;
-            color: #0a0a0a;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-filter:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        .btn-reset {
-            padding: 12px 25px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-reset:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        
-        .cars-listing {
-            padding: 50px;
-            background: var(--dark-bg);
-        }
-        
-        .listing-header {
-            max-width: 1400px;
-            margin: 0 auto 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .results-count {
-            color: var(--text-muted);
-        }
-        
-        .results-count span {
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        .sort-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .sort-dropdown label {
-            color: var(--text-muted);
-        }
-        
-        .sort-dropdown select {
-            padding: 8px 15px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            color: white;
-        }
-        
-        .pagination {
-            max-width: 1400px;
-            margin: 50px auto 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .page-link {
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
+        .nav a {
             color: white;
             text-decoration: none;
-            transition: all 0.3s ease;
+            margin: 0 20px;
+            font-size: 18px;
         }
-        
-        .page-link:hover,
-        .page-link.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #0a0a0a;
+        .nav a:hover, .nav a.active {
+            color: #c5a059;
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .page-header h1 {
-                font-size: 36px;
-            }
-            
-            .filter-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .filter-actions {
-                flex-direction: column;
-            }
-            
-            .listing-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
+        .page-title {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .page-title h2 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .page-title h2 span {
+            color: #c5a059;
+        }
+        .filters {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .filter-select {
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            min-width: 150px;
+        }
+        .cars-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .car-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .car-image {
+            height: 200px;
+            background: #ddd;
+            position: relative;
+        }
+        .car-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .car-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #c5a059;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .car-details {
+            padding: 20px;
+        }
+        .car-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .car-specs {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .car-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #c5a059;
+            margin: 15px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #c5a059;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            width: 100%;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #a88642;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #25D366;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Same Header as homepage -->
     <div class="header">
-        <!-- Copy exact header from homepage -->
+        <h1>ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
+        <p>Premium Cars • Rental • Financing</p>
     </div>
-
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>Browse <span>Our Cars</span></h1>
-        <p>Discover premium vehicles for sale • All verified • Best prices guaranteed</p>
+    
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="cars.html" class="active">Buy Cars</a>
+        <a href="rentals.html">Rentals</a>
+        <a href="financing.html">Financing</a>
+        <a href="contact.html">Contact</a>
     </div>
-
-    <!-- Filters Section -->
-    <div class="filters-section">
-        <div class="filters-container">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label>Brand</label>
-                    <select>
-                        <option>All Brands</option>
-                        <option>Toyota</option>
-                        <option>Lexus</option>
-                        <option>Honda</option>
-                        <option>Mercedes-Benz</option>
-                        <option>BMW</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Price Range</label>
-                    <select>
-                        <option>Any Price</option>
-                        <option>₦5M - ₦10M</option>
-                        <option>₦10M - ₦15M</option>
-                        <option>₦15M - ₦20M</option>
-                        <option>₦20M+</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Year</label>
-                    <select>
-                        <option>Any Year</option>
-                        <option>2023</option>
-                        <option>2022</option>
-                        <option>2021</option>
-                        <option>2020</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Transmission</label>
-                    <select>
-                        <option>Any</option>
-                        <option>Automatic</option>
-                        <option>Manual</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Fuel Type</label>
-                    <select>
-                        <option>Any</option>
-                        <option>Petrol</option>
-                        <option>Diesel</option>
-                        <option>Hybrid</option>
-                    </select>
-                </div>
-                
-                <div class="filter-actions">
-                    <button class="btn-filter">Apply Filters</button>
-                    <button class="btn-reset">Reset</button>
-                </div>
-            </div>
-        </div>
+    
+    <div class="page-title">
+        <h2>Cars for <span>Sale</span></h2>
+        <p>Browse our collection of premium, verified vehicles</p>
     </div>
-
-    <!-- Cars Listing -->
-    <div class="cars-listing">
-        <div class="listing-header">
-            <div class="results-count">
-                Showing <span>1-12</span> of <span>24</span> vehicles
-            </div>
-            <div class="sort-dropdown">
-                <label>Sort by:</label>
-                <select>
-                    <option>Newest First</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Year: Newest</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="cars-grid" style="max-width: 1400px; margin: 0 auto;">
-            <!-- 12 cars will load here -->
-        </div>
-        
-        <!-- Pagination -->
-        <div class="pagination">
-            <a href="#" class="page-link active">1</a>
-            <a href="#" class="page-link">2</a>
-            <a href="#" class="page-link">3</a>
-            <a href="#" class="page-link">4</a>
-            <a href="#" class="page-link">5</a>
-            <a href="#" class="page-link"><i class="fas fa-chevron-right"></i></a>
-        </div>
+    
+    <div class="filters">
+        <select class="filter-select">
+            <option>All Brands</option>
+            <option>Toyota</option>
+            <option>Lexus</option>
+            <option>Honda</option>
+            <option>Mercedes</option>
+        </select>
+        <select class="filter-select">
+            <option>All Years</option>
+            <option>2024</option>
+            <option>2023</option>
+            <option>2022</option>
+        </select>
+        <select class="filter-select">
+            <option>Price: Any</option>
+            <option>Under ₦10M</option>
+            <option>₦10M - ₦15M</option>
+            <option>Above ₦15M</option>
+        </select>
     </div>
-
-    <!-- Same Footer as homepage -->
+    
+    <div class="cars-grid" id="cars-container">
+        <!-- Cars will be loaded here -->
+    </div>
+    
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i> Chat with us
+    </a>
+    
     <div class="footer">
-        <!-- Copy exact footer from homepage -->
+        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
     </div>
-
+    
     <script>
-        // Expanded car data for all 24 cars
-        const allCars = [
-            // Add 24 cars here with same structure as homepage
+        const carsForSale = [
+            {
+                name: "2020 Toyota Camry",
+                year: 2020,
+                mileage: "25,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦12,500,000",
+                badge: "Foreign Used"
+            },
+            {
+                name: "2019 Lexus RX350",
+                year: 2019,
+                mileage: "35,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦18,500,000",
+                badge: "Foreign Used"
+            },
+            {
+                name: "2021 Honda Accord",
+                year: 2021,
+                mileage: "15,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦14,500,000",
+                badge: "Nigerian Used"
+            },
+            {
+                name: "2018 Mercedes C300",
+                year: 2018,
+                mileage: "45,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦16,500,000",
+                badge: "Foreign Used"
+            },
+            {
+                name: "2022 Toyota Prado",
+                year: 2022,
+                mileage: "10,000 km",
+                fuel: "Diesel",
+                transmission: "Automatic",
+                price: "₦35,000,000",
+                badge: "New"
+            },
+            {
+                name: "2020 Range Rover Sport",
+                year: 2020,
+                mileage: "30,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦42,000,000",
+                badge: "Foreign Used"
+            }
         ];
         
-        // Display first 12 cars
-        const container = document.querySelector('.cars-grid');
-        // Load cars logic here
+        const container = document.getElementById('cars-container');
+        carsForSale.forEach(car => {
+            container.innerHTML += `
+                <div class="car-card">
+                    <div class="car-image">
+                        <img src="https://via.placeholder.com/400x300" alt="${car.name}">
+                        <span class="car-badge">${car.badge}</span>
+                    </div>
+                    <div class="car-details">
+                        <h3 class="car-title">${car.name}</h3>
+                        <div class="car-specs">
+                            <span><i class="fas fa-calendar"></i> ${car.year}</span>
+                            <span><i class="fas fa-tachometer-alt"></i> ${car.mileage}</span>
+                        </div>
+                        <div class="car-specs">
+                            <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
+                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
+                        </div>
+                        <div class="car-price">${car.price}</div>
+                        <button class="btn" onclick="inquire('${car.name}')">Inquire Now</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        function inquire(carName) {
+            window.open(`https://wa.me/2348012345678?text=I'm interested in ${carName}`, '_blank');
+        }
     </script>
 </body>
 </html>
