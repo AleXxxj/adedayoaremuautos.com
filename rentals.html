@@ -2,382 +2,1191 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Car Rentals - Adedayo Aremu Autos</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+
         body {
-            background: #f5f5f5;
+            background-color: #0a0a0a;
+            color: #ffffff;
         }
+
+        /* Premium Variables - Same as homepage */
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section - EXACT copy from homepage */
         .header {
-            background: #1a1a1a;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
             color: white;
-            padding: 20px;
-            text-align: center;
         }
-        .header h1 {
-            color: #c5a059;
-            margin-bottom: 10px;
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 900;
         }
-        .nav {
-            background: #333;
-            padding: 15px;
-            text-align: center;
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 3px 0 0;
+            text-transform: uppercase;
+            font-weight: 500;
         }
-        .nav a {
-            color: white;
+
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
             text-decoration: none;
-            margin: 0 20px;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .whatsapp-btn i {
             font-size: 18px;
         }
-        .nav a:hover, .nav a.active {
-            color: #c5a059;
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
-        .page-title {
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Page Header - Rentals page specific */
+        .page-header {
+            margin-top: 90px;
+            padding: 80px 20px 60px;
             text-align: center;
-            padding: 50px 20px;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://via.placeholder.com/1600x400');
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+                        url('https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
             background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header h1 {
+            font-size: clamp(42px, 8vw, 70px);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .page-header h1 span {
+            color: var(--primary);
+        }
+
+        .page-header p {
+            color: var(--text-light);
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Rental Types Cards */
+        .rental-types {
+            max-width: 1400px;
+            margin: -40px auto 40px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .type-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .type-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: var(--card-hover);
+        }
+
+        .type-card i {
+            font-size: 50px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .type-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
             color: white;
         }
-        .page-title h2 {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .page-title h2 span {
-            color: #c5a059;
-        }
-        .rental-types {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 50px auto;
-            max-width: 1200px;
-            padding: 0 20px;
-        }
-        .type-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            flex: 1;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        .type-card i {
-            font-size: 40px;
-            color: #c5a059;
-            margin-bottom: 20px;
-        }
-        .type-card h3 {
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
+
         .type-card p {
-            color: #666;
+            color: var(--text-muted);
             margin-bottom: 20px;
+            line-height: 1.6;
         }
+
         .type-card .price {
-            font-size: 28px;
-            font-weight: bold;
-            color: #c5a059;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0 10px;
         }
-        .filters {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
+
+        .type-card .price small {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+            display: block;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filters-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
             display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            color: var(--text-muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .filter-group select {
+            padding: 14px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-group select:hover,
+        .filter-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .filter-group select option {
+            background: var(--dark-bg);
+            color: white;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-filter {
+            padding: 14px 25px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        .btn-reset {
+            padding: 14px 25px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Results Bar */
+        .results-bar {
+            max-width: 1400px;
+            margin: 30px auto 20px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
             gap: 15px;
-            justify-content: center;
         }
-        .filter-select {
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            min-width: 150px;
+
+        .results-count {
+            color: var(--text-muted);
         }
-        .cars-grid {
-            max-width: 1200px;
+
+        .results-count span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-dropdown label {
+            color: var(--text-muted);
+        }
+
+        .sort-dropdown select {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Cars Grid */
+        .cars-listing {
+            padding: 0 20px 60px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+        }
+
+        .cars-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
         }
+
         .car-card {
-            background: white;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
         .car-image {
             height: 200px;
-            background: #ddd;
             position: relative;
+            overflow: hidden;
         }
+
         .car-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: all 0.5s ease;
         }
+
+        .car-card:hover .car-image img {
+            transform: scale(1.1);
+        }
+
         .car-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #c5a059;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
+            top: 15px;
+            left: 15px;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 5px 15px;
+            border-radius: 50px;
             font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         .car-details {
             padding: 20px;
         }
+
         .car-title {
-            font-size: 18px;
+            font-size: 20px;
+            font-weight: 700;
             margin-bottom: 10px;
+            color: white;
         }
+
         .car-specs {
             display: flex;
             gap: 15px;
-            color: #666;
+            color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
-        .rental-price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #c5a059;
+
+        .car-specs i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .rental-prices {
+            background: rgba(197, 160, 89, 0.05);
+            border-radius: 10px;
+            padding: 15px;
             margin: 15px 0;
+            border: 1px solid rgba(197, 160, 89, 0.2);
         }
-        .rental-terms {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .price-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .price-row .duration {
+            color: var(--text-muted);
+        }
+
+        .price-row .amount {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .deposit-info {
+            font-size: 13px;
+            color: var(--text-muted);
             margin: 10px 0;
-            font-size: 14px;
-            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
+
+        .deposit-info i {
+            color: var(--primary);
+        }
+
+        .car-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 12px 20px;
-            background: #c5a059;
-            color: white;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 5px;
-            width: 100%;
-            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
+            justify-content: center;
+            flex: 1;
         }
-        .btn:hover {
-            background: #a88642;
+
+        .btn-primary {
+            background: var(--primary);
+            color: #0a0a0a;
         }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
         .btn-whatsapp {
             background: #25D366;
-            margin-top: 10px;
+            color: white;
         }
+
         .btn-whatsapp:hover {
             background: #128C7E;
+            transform: translateY(-2px);
         }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Terms Section */
         .terms-section {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 50px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--border);
         }
+
         .terms-section h3 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 24px;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-align: center;
         }
+
+        .terms-section h3 span {
+            color: var(--primary);
+        }
+
         .terms-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 30px;
         }
+
         .term-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 15px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
+
+        .term-item:hover {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.05);
+        }
+
         .term-item i {
             font-size: 24px;
-            color: #c5a059;
+            color: var(--primary);
+            margin-top: 3px;
         }
+
         .term-item h4 {
             margin-bottom: 5px;
+            color: white;
         }
+
         .term-item p {
-            color: #666;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
         }
+
+        /* Footer - EXACT same as homepage */
         .footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
+            background: #050505;
+            padding: 40px 20px 20px;
+            border-top: 1px solid var(--border);
         }
-        .whatsapp-float {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #25D366;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
             display: flex;
             align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
             gap: 10px;
         }
-        @media (max-width: 768px) {
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .whatsapp-float i {
+            font-size: 20px;
+        }
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
             .rental-types {
+                grid-template-columns: 1fr;
+                margin-top: 20px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
                 flex-direction: column;
             }
+
             .terms-grid {
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 600px) {
+            .logo-container {
+                gap: 8px;
+            }
+
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+                letter-spacing: 1px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .results-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .terms-section {
+                padding: 30px 20px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container img {
+                height: 35px;
+            }
+
+            .logo-text h1 {
+                font-size: 14px;
+            }
+
+            .logo-text p {
+                display: none;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px;
+                border-radius: 50%;
+            }
+
+            .whatsapp-btn i {
+                font-size: 18px;
+                margin: 0;
+            }
+
+            .mobile-menu-btn {
+                padding: 6px 10px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header - EXACT copy from homepage -->
     <div class="header">
-        <h1>ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
-        <p>Premium Cars • Rental • Financing</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html" class="active">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat Now</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Car <span>Rentals</span></h1>
+            <p>Flexible rental options for any occasion - daily, weekly, or monthly</p>
+        </div>
     </div>
     
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="cars.html">Buy Cars</a>
-        <a href="rentals.html" class="active">Rentals</a>
-        <a href="financing.html">Financing</a>
-        <a href="contact.html">Contact</a>
-    </div>
-    
-    <div class="page-title">
-        <h2>Car <span>Rentals</span></h2>
-        <p>Flexible rental options for any occasion</p>
-    </div>
-    
+    <!-- Rental Types Cards -->
     <div class="rental-types">
         <div class="type-card">
             <i class="fas fa-sun"></i>
             <h3>Daily Rental</h3>
-            <p>Perfect for short trips and weekend getaways</p>
-            <div class="price">From ₦25,000/day</div>
+            <p>Perfect for short trips, business meetings, and weekend getaways</p>
+            <div class="price">₦25,000<small>/day</small></div>
         </div>
         <div class="type-card">
             <i class="fas fa-calendar-week"></i>
             <h3>Weekly Rental</h3>
-            <p>Save more with our weekly rates</p>
-            <div class="price">From ₦150,000/week</div>
+            <p>Save more with our weekly rates - ideal for vacations and projects</p>
+            <div class="price">₦150,000<small>/week</small></div>
         </div>
         <div class="type-card">
             <i class="fas fa-calendar-alt"></i>
             <h3>Monthly Rental</h3>
-            <p>Best value for long-term needs</p>
-            <div class="price">From ₦500,000/month</div>
+            <p>Best value for long-term needs - corporate and personal use</p>
+            <div class="price">₦500,000<small>/month</small></div>
         </div>
     </div>
     
-    <div class="filters">
-        <select class="filter-select">
-            <option>All Car Types</option>
-            <option>Sedan</option>
-            <option>SUV</option>
-            <option>Luxury</option>
-            <option>Economy</option>
-        </select>
-        <select class="filter-select">
-            <option>Rental Duration</option>
-            <option>Daily</option>
-            <option>Weekly</option>
-            <option>Monthly</option>
-        </select>
-        <select class="filter-select">
-            <option>Price Range</option>
-            <option>Under ₦30k/day</option>
-            <option>₦30k - ₦50k/day</option>
-            <option>Above ₦50k/day</option>
-        </select>
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Car Type</label>
+                    <select id="typeFilter">
+                        <option value="all">All Types</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Luxury Sedan">Luxury Sedan</option>
+                        <option value="Luxury SUV">Luxury SUV</option>
+                        <option value="Van/Bus">Van/Bus</option>
+                        <option value="Economy">Economy</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Rental Duration</label>
+                    <select id="durationFilter">
+                        <option value="all">Any Duration</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Price Range (per day)</label>
+                    <select id="priceFilter">
+                        <option value="all">Any Price</option>
+                        <option value="0-30000">Under ₦30k</option>
+                        <option value="30000-50000">₦30k - ₦50k</option>
+                        <option value="50000-80000">₦50k - ₦80k</option>
+                        <option value="80000-999999">Above ₦80k</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Transmission</label>
+                    <select id="transmissionFilter">
+                        <option value="all">All</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn-filter" onclick="applyFilters()">Apply Filters</button>
+                    <button class="btn-reset" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <div class="cars-grid" id="rental-cars">
-        <!-- Rental cars will be loaded here -->
+    <!-- Results Bar -->
+    <div class="results-bar">
+        <div class="results-count">
+            Showing <span id="showingCount">1-6</span> of <span id="totalCount">6</span> vehicles
+        </div>
+        <div class="sort-dropdown">
+            <label>Sort by:</label>
+            <select id="sortFilter" onchange="applyFilters()">
+                <option value="default">Default</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+            </select>
+        </div>
     </div>
     
+    <!-- Cars Grid -->
+    <div class="cars-listing">
+        <div class="cars-grid" id="rental-cars">
+            <!-- Rental cars will be loaded here -->
+        </div>
+        
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none; text-align: center; padding: 60px 20px;">
+            <i class="fas fa-car" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+            <h3>No vehicles found</h3>
+            <p style="color: var(--text-muted);">Try adjusting your filters or browse all rentals</p>
+            <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 20px; display: inline-block; width: auto;">View All Rentals</button>
+        </div>
+    </div>
+    
+    <!-- Terms Section -->
     <div class="terms-section">
-        <h3>Rental Terms & Conditions</h3>
+        <h3>Rental <span>Terms & Conditions</span></h3>
         <div class="terms-grid">
             <div class="term-item">
                 <i class="fas fa-id-card"></i>
                 <div>
                     <h4>Valid Driver's License</h4>
-                    <p>International or Nigerian license accepted</p>
+                    <p>International or Nigerian license accepted. Must be valid for the entire rental period.</p>
                 </div>
             </div>
             <div class="term-item">
                 <i class="fas fa-money-bill"></i>
                 <div>
                     <h4>Security Deposit</h4>
-                    <p>₦100,000 - ₦500,000 depending on car</p>
+                    <p>₦100,000 - ₦500,000 depending on vehicle category. Refunded upon return.</p>
                 </div>
             </div>
             <div class="term-item">
                 <i class="fas fa-gas-pump"></i>
                 <div>
                     <h4>Fuel Policy</h4>
-                    <p>Return with same fuel level</p>
+                    <p>Vehicle provided with full tank. Return with same fuel level.</p>
                 </div>
             </div>
             <div class="term-item">
                 <i class="fas fa-road"></i>
                 <div>
                     <h4>Mileage Limit</h4>
-                    <p>200km/day included, ₦100/km extra</p>
+                    <p>200km/day included. ₦100/km charged for excess mileage.</p>
                 </div>
             </div>
             <div class="term-item">
                 <i class="fas fa-shield-alt"></i>
                 <div>
                     <h4>Insurance</h4>
-                    <p>Comprehensive insurance included</p>
+                    <p>Comprehensive insurance coverage included for all rentals.</p>
                 </div>
             </div>
             <div class="term-item">
                 <i class="fas fa-truck"></i>
                 <div>
-                    <h4>Delivery</h4>
-                    <p>Nationwide delivery available</p>
+                    <h4>Delivery & Pickup</h4>
+                    <p>Nationwide delivery available. Free delivery within Lagos.</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
-        <i class="fab fa-whatsapp"></i> Book via WhatsApp
-    </a>
-    
+    <!-- Footer -->
     <div class="footer">
-        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 45px;">
+                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat with us
+    </a>
+
     <script>
+        // Enhanced rental car data with real images
         const rentalCars = [
             {
                 name: "2022 Toyota Corolla",
@@ -385,12 +1194,12 @@
                 transmission: "Automatic",
                 fuel: "Petrol",
                 seats: 5,
-                daily: "₦25,000",
-                weekly: "₦150,000",
-                monthly: "₦500,000",
-                deposit: "₦100,000",
+                daily: 25000,
+                weekly: 150000,
+                monthly: 500000,
+                deposit: 100000,
                 badge: "Economy",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2021 Honda Accord",
@@ -398,12 +1207,12 @@
                 transmission: "Automatic",
                 fuel: "Petrol",
                 seats: 5,
-                daily: "₦35,000",
-                weekly: "₦210,000",
-                monthly: "₦700,000",
-                deposit: "₦150,000",
+                daily: 35000,
+                weekly: 210000,
+                monthly: 700000,
+                deposit: 150000,
                 badge: "Executive",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2020 Toyota Prado",
@@ -411,12 +1220,12 @@
                 transmission: "Automatic",
                 fuel: "Diesel",
                 seats: 7,
-                daily: "₦80,000",
-                weekly: "₦500,000",
-                monthly: "₦1,800,000",
-                deposit: "₦300,000",
+                daily: 80000,
+                weekly: 500000,
+                monthly: 1800000,
+                deposit: 300000,
                 badge: "Luxury SUV",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2022 Lexus RX350",
@@ -424,12 +1233,12 @@
                 transmission: "Automatic",
                 fuel: "Petrol",
                 seats: 5,
-                daily: "₦100,000",
-                weekly: "₦600,000",
-                monthly: "₦2,000,000",
-                deposit: "₦400,000",
+                daily: 100000,
+                weekly: 600000,
+                monthly: 2000000,
+                deposit: 400000,
                 badge: "Luxury",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2019 Mercedes C300",
@@ -437,12 +1246,12 @@
                 transmission: "Automatic",
                 fuel: "Petrol",
                 seats: 5,
-                daily: "₦70,000",
-                weekly: "₦420,000",
-                monthly: "₦1,500,000",
-                deposit: "₦250,000",
+                daily: 70000,
+                weekly: 420000,
+                monthly: 1500000,
+                deposit: 250000,
                 badge: "Premium",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2021 Toyota Hiace Bus",
@@ -450,52 +1259,177 @@
                 transmission: "Manual",
                 fuel: "Diesel",
                 seats: 15,
-                daily: "₦60,000",
-                weekly: "₦350,000",
-                monthly: "₦1,200,000",
-                deposit: "₦200,000",
+                daily: 60000,
+                weekly: 350000,
+                monthly: 1200000,
+                deposit: 200000,
                 badge: "Passenger Van",
-                image: "https://via.placeholder.com/400x300"
+                image: "https://images.unsplash.com/photo-1581548698665-f9ea59d8bdc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             }
         ];
-        
-        const container = document.getElementById('rental-cars');
-        rentalCars.forEach(car => {
-            container.innerHTML += `
-                <div class="car-card">
-                    <div class="car-image">
-                        <img src="${car.image}" alt="${car.name}">
-                        <span class="car-badge">${car.badge}</span>
-                    </div>
-                    <div class="car-details">
-                        <h3 class="car-title">${car.name}</h3>
-                        <div class="car-specs">
-                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
-                            <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
-                            <span><i class="fas fa-users"></i> ${car.seats} seats</span>
+
+        // Format currency
+        function formatCurrency(amount) {
+            return '₦' + amount.toLocaleString();
+        }
+
+        // Display cars function
+        function displayCars(cars) {
+            const container = document.getElementById('rental-cars');
+            const noResults = document.getElementById('noResults');
+            
+            if (cars.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+                
+                let html = '';
+                cars.forEach(car => {
+                    html += `
+                        <div class="car-card">
+                            <div class="car-image">
+                                <img src="${car.image}" alt="${car.name}">
+                                <span class="car-badge">${car.badge}</span>
+                            </div>
+                            <div class="car-details">
+                                <h3 class="car-title">${car.name}</h3>
+                                <div class="car-specs">
+                                    <span><i class="fas fa-cog"></i> ${car.transmission}</span>
+                                    <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
+                                    <span><i class="fas fa-users"></i> ${car.seats} seats</span>
+                                </div>
+                                
+                                <div class="rental-prices">
+                                    <div class="price-row">
+                                        <span class="duration"><i class="fas fa-sun"></i> Daily</span>
+                                        <span class="amount">${formatCurrency(car.daily)}</span>
+                                    </div>
+                                    <div class="price-row">
+                                        <span class="duration"><i class="fas fa-calendar-week"></i> Weekly</span>
+                                        <span class="amount">${formatCurrency(car.weekly)}</span>
+                                    </div>
+                                    <div class="price-row">
+                                        <span class="duration"><i class="fas fa-calendar-alt"></i> Monthly</span>
+                                        <span class="amount">${formatCurrency(car.monthly)}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="deposit-info">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Security deposit: ${formatCurrency(car.deposit)} (refundable)</span>
+                                </div>
+                                
+                                <div class="car-actions">
+                                    <button class="btn btn-primary" onclick="bookRental('${car.name}')">
+                                        <i class="fas fa-calendar-check"></i> Book
+                                    </button>
+                                    <button class="btn btn-whatsapp" onclick="whatsappRental('${car.name}')">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="rental-price">${car.daily}/day</div>
-                        <div class="rental-terms">
-                            <div><strong>Weekly:</strong> ${car.weekly}</div>
-                            <div><strong>Monthly:</strong> ${car.monthly}</div>
-                            <div><strong>Deposit:</strong> ${car.deposit}</div>
-                        </div>
-                        <button class="btn" onclick="bookRental('${car.name}')">Book Now</button>
-                        <button class="btn btn-whatsapp" onclick="whatsappRental('${car.name}')">
-                            <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-        
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            
+            // Update counts
+            document.getElementById('showingCount').textContent = `1-${cars.length}`;
+            document.getElementById('totalCount').textContent = cars.length;
+        }
+
+        // Filter function
+        function applyFilters() {
+            const type = document.getElementById('typeFilter').value;
+            const duration = document.getElementById('durationFilter').value;
+            const price = document.getElementById('priceFilter').value;
+            const transmission = document.getElementById('transmissionFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            
+            let filteredCars = [...rentalCars];
+            
+            // Apply type filter
+            if (type !== 'all') {
+                filteredCars = filteredCars.filter(car => car.type === type);
+            }
+            
+            // Apply transmission filter
+            if (transmission !== 'all') {
+                filteredCars = filteredCars.filter(car => car.transmission === transmission);
+            }
+            
+            // Apply price filter (based on daily rate)
+            if (price !== 'all') {
+                const [min, max] = price.split('-').map(Number);
+                filteredCars = filteredCars.filter(car => car.daily >= min && car.daily <= max);
+            }
+            
+            // Apply sorting
+            if (sort === 'price-low') {
+                filteredCars.sort((a, b) => a.daily - b.daily);
+            } else if (sort === 'price-high') {
+                filteredCars.sort((a, b) => b.daily - a.daily);
+            } else if (sort === 'name') {
+                filteredCars.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            
+            displayCars(filteredCars);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('typeFilter').value = 'all';
+            document.getElementById('durationFilter').value = 'all';
+            document.getElementById('priceFilter').value = 'all';
+            document.getElementById('transmissionFilter').value = 'all';
+            document.getElementById('sortFilter').value = 'default';
+            
+            displayCars(rentalCars);
+        }
+
+        // Book rental function
         function bookRental(carName) {
-            alert(`Thank you for your interest in renting the ${carName}. Please call us at +234 801 234 5678 to complete your booking.`);
+            window.open(`https://wa.me/2348012345678?text=Hello, I want to book the ${carName} for rental. Please provide availability and booking details.`, '_blank');
         }
         
+        // WhatsApp inquiry function
         function whatsappRental(carName) {
-            window.open(`https://wa.me/2348012345678?text=Hello, I'm interested in renting the ${carName}. Please provide more information.`, '_blank');
+            window.open(`https://wa.me/2348012345678?text=Hello, I'm interested in renting the ${carName}. Please provide more information about rates and availability.`, '_blank');
         }
+
+        // Initialize with all cars
+        displayCars(rentalCars);
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
     </script>
 </body>
 </html>
