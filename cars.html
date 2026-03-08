@@ -2,213 +2,1035 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Cars for Sale - Adedayo Aremu Autos</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+
         body {
-            background: #f5f5f5;
+            background-color: #0a0a0a;
+            color: #ffffff;
         }
+
+        /* Premium Variables - Same as homepage */
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section - EXACT same as homepage */
         .header {
-            background: #1a1a1a;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
             color: white;
-            padding: 20px;
-            text-align: center;
         }
-        .header h1 {
-            color: #c5a059;
-            margin-bottom: 10px;
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 900;
         }
-        .nav {
-            background: #333;
-            padding: 15px;
-            text-align: center;
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 3px 0 0;
+            text-transform: uppercase;
+            font-weight: 500;
         }
-        .nav a {
-            color: white;
+
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
             text-decoration: none;
-            margin: 0 20px;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .whatsapp-btn i {
             font-size: 18px;
         }
-        .nav a:hover, .nav a.active {
-            color: #c5a059;
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
-        .page-title {
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Page Header - Cars page specific */
+        .page-header {
+            margin-top: 90px;
+            padding: 60px 20px 30px;
             text-align: center;
-            padding: 50px 20px;
+            background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            border-bottom: 1px solid var(--border);
         }
-        .page-title h2 {
-            font-size: 36px;
-            margin-bottom: 10px;
+
+        .page-header h1 {
+            font-size: clamp(32px, 6vw, 48px);
+            margin-bottom: 15px;
         }
-        .page-title h2 span {
-            color: #c5a059;
+
+        .page-header h1 span {
+            color: var(--primary);
         }
-        .filters {
-            max-width: 1200px;
-            margin: 0 auto 30px;
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filters-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            color: var(--text-muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 14px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-group select:hover,
+        .filter-group input:hover,
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .filter-group select option {
+            background: var(--dark-bg);
+            color: white;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-filter {
+            padding: 14px 25px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        .btn-reset {
+            padding: 14px 25px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Active Filters */
+        .active-filters {
+            max-width: 1400px;
+            margin: 20px auto 0;
             padding: 0 20px;
             display: flex;
             flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-tag {
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .filter-tag i {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag i:hover {
+            color: white;
+        }
+
+        /* Results Bar */
+        .results-bar {
+            max-width: 1400px;
+            margin: 30px auto 20px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 15px;
-            justify-content: center;
         }
-        .filter-select {
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            min-width: 150px;
+
+        .results-count {
+            color: var(--text-muted);
         }
-        .cars-grid {
-            max-width: 1200px;
+
+        .results-count span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-dropdown label {
+            color: var(--text-muted);
+        }
+
+        .sort-dropdown select {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Cars Grid */
+        .cars-listing {
+            padding: 0 20px 60px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+        }
+
+        .cars-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
+            gap: 25px;
         }
+
         .car-card {
-            background: white;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
         .car-image {
             height: 200px;
-            background: #ddd;
             position: relative;
+            overflow: hidden;
         }
+
         .car-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: all 0.5s ease;
         }
+
+        .car-card:hover .car-image img {
+            transform: scale(1.1);
+        }
+
         .car-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #c5a059;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 5px 15px;
+            border-radius: 50px;
             font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
+        .car-badge.sold {
+            background: #dc3545;
+            color: white;
+        }
+
+        .car-badge.new {
+            background: #28a745;
+            color: white;
+        }
+
         .car-details {
             padding: 20px;
         }
+
         .car-title {
             font-size: 18px;
+            font-weight: 700;
             margin-bottom: 10px;
+            color: white;
         }
+
         .car-specs {
             display: flex;
             gap: 15px;
-            color: #666;
+            color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
         }
+
+        .car-specs i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
         .car-price {
-            font-size: 22px;
-            font-weight: bold;
-            color: #c5a059;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
             margin: 15px 0;
         }
+
+        .car-price small {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+            display: block;
+        }
+
+        .car-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .car-actions .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            justify-content: center;
+        }
+
         .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #c5a059;
-            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 25px;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 5px;
-            width: 100%;
-            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
             border: none;
             cursor: pointer;
+            justify-content: center;
         }
-        .btn:hover {
-            background: #a88642;
+
+        .btn-primary {
+            background: var(--primary);
+            color: #0a0a0a;
         }
-        .footer {
-            background: #333;
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
             color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
         }
-        .whatsapp-float {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-whatsapp {
             background: #25D366;
             color: white;
-            padding: 15px 25px;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 50px;
+        }
+
+        .page-link {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover,
+        .page-link.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #0a0a0a;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-results i {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* Footer - EXACT same as homepage */
+        .footer {
+            background: #050505;
+            padding: 40px 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
             border-radius: 50px;
             text-decoration: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .whatsapp-float i {
+            font-size: 20px;
+        }
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+            }
+
+            .results-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header - EXACT same as homepage -->
     <div class="header">
-        <h1>ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
-        <p>Premium Cars • Rental • Financing</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html">Home</a>
+                <a href="cars.html" class="active">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat Now</span>
+                </a>
+            </div>
+        </div>
     </div>
-    
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="cars.html" class="active">Buy Cars</a>
-        <a href="rentals.html">Rentals</a>
-        <a href="financing.html">Financing</a>
-        <a href="contact.html">Contact</a>
-    </div>
-    
-    <div class="page-title">
-        <h2>Cars for <span>Sale</span></h2>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Cars for <span>Sale</span></h1>
         <p>Browse our collection of premium, verified vehicles</p>
     </div>
-    
-    <div class="filters">
-        <select class="filter-select">
-            <option>All Brands</option>
-            <option>Toyota</option>
-            <option>Lexus</option>
-            <option>Honda</option>
-            <option>Mercedes</option>
-        </select>
-        <select class="filter-select">
-            <option>All Years</option>
-            <option>2024</option>
-            <option>2023</option>
-            <option>2022</option>
-        </select>
-        <select class="filter-select">
-            <option>Price: Any</option>
-            <option>Under ₦10M</option>
-            <option>₦10M - ₦15M</option>
-            <option>Above ₦15M</option>
-        </select>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Brand</label>
+                    <select id="brandFilter">
+                        <option value="all">All Brands</option>
+                        <option value="toyota">Toyota</option>
+                        <option value="lexus">Lexus</option>
+                        <option value="honda">Honda</option>
+                        <option value="mercedes">Mercedes-Benz</option>
+                        <option value="bmw">BMW</option>
+                        <option value="range rover">Range Rover</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Year</label>
+                    <select id="yearFilter">
+                        <option value="all">All Years</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Price Range</label>
+                    <select id="priceFilter">
+                        <option value="all">Any Price</option>
+                        <option value="0-10000000">Under ₦10M</option>
+                        <option value="10000000-15000000">₦10M - ₦15M</option>
+                        <option value="15000000-20000000">₦15M - ₦20M</option>
+                        <option value="20000000-30000000">₦20M - ₦30M</option>
+                        <option value="30000000-999999999">Above ₦30M</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Transmission</label>
+                    <select id="transmissionFilter">
+                        <option value="all">All</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Fuel Type</label>
+                    <select id="fuelFilter">
+                        <option value="all">All</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Hybrid">Hybrid</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn-filter" onclick="applyFilters()">Apply Filters</button>
+                    <button class="btn-reset" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Filters Tags -->
+        <div class="active-filters" id="activeFilters"></div>
     </div>
-    
-    <div class="cars-grid" id="cars-container">
-        <!-- Cars will be loaded here -->
+
+    <!-- Results Bar -->
+    <div class="results-bar">
+        <div class="results-count">
+            Showing <span id="showingCount">1-6</span> of <span id="totalCount">12</span> vehicles
+        </div>
+        <div class="sort-dropdown">
+            <label>Sort by:</label>
+            <select id="sortFilter" onchange="applyFilters()">
+                <option value="default">Default</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="year-new">Year: Newest First</option>
+                <option value="year-old">Year: Oldest First</option>
+            </select>
+        </div>
     </div>
-    
-    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
-        <i class="fab fa-whatsapp"></i> Chat with us
-    </a>
-    
+
+    <!-- Cars Grid -->
+    <div class="cars-listing">
+        <div class="cars-grid" id="cars-container">
+            <!-- Cars will be loaded here -->
+        </div>
+        
+        <!-- No Results Message (hidden by default) -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-car"></i>
+            <h3>No vehicles found</h3>
+            <p>Try adjusting your filters or browse all cars</p>
+            <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 20px;">View All Cars</button>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <a href="#" class="page-link active">1</a>
+            <a href="#" class="page-link">2</a>
+            <a href="#" class="page-link">3</a>
+            <a href="#" class="page-link">4</a>
+            <a href="#" class="page-link"><i class="fas fa-chevron-right"></i></a>
+        </div>
+    </div>
+
+    <!-- Footer - EXACT same as homepage -->
     <div class="footer">
-        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 45px;">
+                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat with us
+    </a>
+
     <script>
+        // Enhanced car data with images
         const carsForSale = [
             {
                 name: "2020 Toyota Camry",
@@ -217,7 +1039,10 @@
                 fuel: "Petrol",
                 transmission: "Automatic",
                 price: "₦12,500,000",
-                badge: "Foreign Used"
+                priceValue: 12500000,
+                badge: "Foreign Used",
+                brand: "toyota",
+                image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2019 Lexus RX350",
@@ -226,7 +1051,10 @@
                 fuel: "Petrol",
                 transmission: "Automatic",
                 price: "₦18,500,000",
-                badge: "Foreign Used"
+                priceValue: 18500000,
+                badge: "Foreign Used",
+                brand: "lexus",
+                image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2021 Honda Accord",
@@ -235,7 +1063,10 @@
                 fuel: "Petrol",
                 transmission: "Automatic",
                 price: "₦14,500,000",
-                badge: "Nigerian Used"
+                priceValue: 14500000,
+                badge: "Nigerian Used",
+                brand: "honda",
+                image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2018 Mercedes C300",
@@ -244,7 +1075,10 @@
                 fuel: "Petrol",
                 transmission: "Automatic",
                 price: "₦16,500,000",
-                badge: "Foreign Used"
+                priceValue: 16500000,
+                badge: "Foreign Used",
+                brand: "mercedes",
+                image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2022 Toyota Prado",
@@ -253,7 +1087,10 @@
                 fuel: "Diesel",
                 transmission: "Automatic",
                 price: "₦35,000,000",
-                badge: "New"
+                priceValue: 35000000,
+                badge: "New",
+                brand: "toyota",
+                image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             },
             {
                 name: "2020 Range Rover Sport",
@@ -262,38 +1099,212 @@
                 fuel: "Petrol",
                 transmission: "Automatic",
                 price: "₦42,000,000",
-                badge: "Foreign Used"
+                priceValue: 42000000,
+                badge: "Foreign Used",
+                brand: "range rover",
+                image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "2023 BMW X5",
+                year: 2023,
+                mileage: "5,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦48,000,000",
+                priceValue: 48000000,
+                badge: "New",
+                brand: "bmw",
+                image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "2019 Toyota Highlander",
+                year: 2019,
+                mileage: "40,000 km",
+                fuel: "Petrol",
+                transmission: "Automatic",
+                price: "₦22,000,000",
+                priceValue: 22000000,
+                badge: "Foreign Used",
+                brand: "toyota",
+                image: "https://images.unsplash.com/photo-1581548698665-f9ea59d8bdc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
             }
         ];
-        
-        const container = document.getElementById('cars-container');
-        carsForSale.forEach(car => {
-            container.innerHTML += `
-                <div class="car-card">
-                    <div class="car-image">
-                        <img src="https://via.placeholder.com/400x300" alt="${car.name}">
-                        <span class="car-badge">${car.badge}</span>
-                    </div>
-                    <div class="car-details">
-                        <h3 class="car-title">${car.name}</h3>
-                        <div class="car-specs">
-                            <span><i class="fas fa-calendar"></i> ${car.year}</span>
-                            <span><i class="fas fa-tachometer-alt"></i> ${car.mileage}</span>
+
+        // Display cars function
+        function displayCars(cars) {
+            const container = document.getElementById('cars-container');
+            const noResults = document.getElementById('noResults');
+            
+            if (cars.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                document.querySelector('.pagination').style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                document.querySelector('.pagination').style.display = 'flex';
+                
+                let html = '';
+                cars.forEach(car => {
+                    html += `
+                        <div class="car-card">
+                            <div class="car-image">
+                                <img src="${car.image}" alt="${car.name}">
+                                <span class="car-badge ${car.badge.toLowerCase().replace(' ', '-')}">${car.badge}</span>
+                            </div>
+                            <div class="car-details">
+                                <h3 class="car-title">${car.name}</h3>
+                                <div class="car-specs">
+                                    <span><i class="fas fa-calendar"></i> ${car.year}</span>
+                                    <span><i class="fas fa-tachometer-alt"></i> ${car.mileage}</span>
+                                </div>
+                                <div class="car-specs">
+                                    <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
+                                    <span><i class="fas fa-cog"></i> ${car.transmission}</span>
+                                </div>
+                                <div class="car-price">
+                                    ${car.price}
+                                    <small>From ₦${Math.round(car.priceValue * 0.03).toLocaleString()}/mo*</small>
+                                </div>
+                                <div class="car-actions">
+                                    <a href="car-detail.html" class="btn btn-primary">View</a>
+                                    <a href="https://wa.me/2348012345678?text=I'm interested in ${car.name}" class="btn btn-outline" target="_blank">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="car-specs">
-                            <span><i class="fas fa-gas-pump"></i> ${car.fuel}</span>
-                            <span><i class="fas fa-cog"></i> ${car.transmission}</span>
-                        </div>
-                        <div class="car-price">${car.price}</div>
-                        <button class="btn" onclick="inquire('${car.name}')">Inquire Now</button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        function inquire(carName) {
-            window.open(`https://wa.me/2348012345678?text=I'm interested in ${carName}`, '_blank');
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            
+            // Update counts
+            document.getElementById('showingCount').textContent = `1-${cars.length}`;
+            document.getElementById('totalCount').textContent = cars.length;
         }
+
+        // Filter function
+        function applyFilters() {
+            const brand = document.getElementById('brandFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const price = document.getElementById('priceFilter').value;
+            const transmission = document.getElementById('transmissionFilter').value;
+            const fuel = document.getElementById('fuelFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            
+            let filteredCars = [...carsForSale];
+            
+            // Apply filters
+            if (brand !== 'all') {
+                filteredCars = filteredCars.filter(car => car.brand === brand);
+            }
+            
+            if (year !== 'all') {
+                filteredCars = filteredCars.filter(car => car.year === parseInt(year));
+            }
+            
+            if (price !== 'all') {
+                const [min, max] = price.split('-').map(Number);
+                filteredCars = filteredCars.filter(car => car.priceValue >= min && car.priceValue <= max);
+            }
+            
+            if (transmission !== 'all') {
+                filteredCars = filteredCars.filter(car => car.transmission === transmission);
+            }
+            
+            if (fuel !== 'all') {
+                filteredCars = filteredCars.filter(car => car.fuel === fuel);
+            }
+            
+            // Apply sorting
+            if (sort === 'price-low') {
+                filteredCars.sort((a, b) => a.priceValue - b.priceValue);
+            } else if (sort === 'price-high') {
+                filteredCars.sort((a, b) => b.priceValue - a.priceValue);
+            } else if (sort === 'year-new') {
+                filteredCars.sort((a, b) => b.year - a.year);
+            } else if (sort === 'year-old') {
+                filteredCars.sort((a, b) => a.year - b.year);
+            }
+            
+            displayCars(filteredCars);
+            updateActiveFilters();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('brandFilter').value = 'all';
+            document.getElementById('yearFilter').value = 'all';
+            document.getElementById('priceFilter').value = 'all';
+            document.getElementById('transmissionFilter').value = 'all';
+            document.getElementById('fuelFilter').value = 'all';
+            document.getElementById('sortFilter').value = 'default';
+            
+            displayCars(carsForSale);
+            document.getElementById('activeFilters').innerHTML = '';
+        }
+
+        // Update active filters tags
+        function updateActiveFilters() {
+            const filters = [];
+            const brand = document.getElementById('brandFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const price = document.getElementById('priceFilter').value;
+            const transmission = document.getElementById('transmissionFilter').value;
+            const fuel = document.getElementById('fuelFilter').value;
+            
+            if (brand !== 'all') filters.push(`Brand: ${brand}`);
+            if (year !== 'all') filters.push(`Year: ${year}`);
+            if (price !== 'all') {
+                const [min, max] = price.split('-');
+                filters.push(`Price: ₦${(parseInt(min)/1000000).toFixed(0)}M - ₦${(parseInt(max)/1000000).toFixed(0)}M`);
+            }
+            if (transmission !== 'all') filters.push(`Transmission: ${transmission}`);
+            if (fuel !== 'all') filters.push(`Fuel: ${fuel}`);
+            
+            const container = document.getElementById('activeFilters');
+            if (filters.length > 0) {
+                let html = '';
+                filters.forEach(filter => {
+                    html += `<span class="filter-tag">${filter} <i class="fas fa-times" onclick="resetFilters()"></i></span>`;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        // Initialize with all cars
+        displayCars(carsForSale);
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
     </script>
 </body>
 </html>
