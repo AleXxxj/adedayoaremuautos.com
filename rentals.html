@@ -798,122 +798,127 @@
             transform: scale(1.05);
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 900px) {
-            .mobile-menu-btn {
-                display: block;
-            }
+       /* Mobile Responsive - EXACT same as homepage */
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: block;
+    }
 
-            .nav-menu {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-                padding: 20px 0 10px;
-                border-top: 1px solid rgba(197, 160, 89, 0.2);
-                margin-top: 15px;
-            }
+    .nav-menu {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 20px 0 10px;
+        border-top: 1px solid rgba(197, 160, 89, 0.2);
+        margin-top: 15px;
+    }
 
-            .nav-menu.active {
-                display: flex;
-            }
+    .nav-menu.active {
+        display: flex;
+    }
 
-            .header-actions {
-                margin-left: auto;
-            }
+    .header-actions {
+        margin-left: auto;
+    }
 
-            .rental-types {
-                grid-template-columns: 1fr;
-                margin-top: 20px;
-            }
+    .rental-types {
+        grid-template-columns: 1fr;
+        margin-top: 20px;
+    }
 
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
 
-            .filter-actions {
-                flex-direction: column;
-            }
+    .filter-actions {
+        flex-direction: column;
+    }
 
-            .terms-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    .terms-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
-        @media (max-width: 600px) {
-            .logo-container {
-                gap: 8px;
-            }
+@media (max-width: 600px) {
+    .logo-container {
+        gap: 8px;
+    }
 
-            .logo-container img {
-                height: 40px;
-            }
+    .logo-container img {
+        height: 45px; /* Larger on mobile - matches homepage */
+    }
 
-            .logo-text h1 {
-                font-size: 16px;
-            }
+    .logo-text h1 {
+        font-size: 18px; /* Matches homepage */
+    }
 
-            .logo-text p {
-                font-size: 8px;
-                letter-spacing: 1px;
-            }
+    .logo-text p {
+        font-size: 9px; /* Matches homepage */
+        display: block; /* ENSURE IT'S VISIBLE */
+    }
 
-            .whatsapp-btn {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
+    .whatsapp-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
 
-            .results-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+    .results-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-            .terms-section {
-                padding: 30px 20px;
-            }
+    .terms-section {
+        padding: 30px 20px;
+    }
 
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
 
-            .footer-bottom-links {
-                justify-content: center;
-            }
-        }
+    .footer-bottom-links {
+        justify-content: center;
+    }
+}
 
-        @media (max-width: 480px) {
-            .logo-container img {
-                height: 35px;
-            }
+@media (max-width: 480px) {
+    .logo-container {
+        gap: 6px; /* Matches homepage */
+    }
 
-            .logo-text h1 {
-                font-size: 14px;
-            }
+    .logo-container img {
+        height: 40px; /* Matches homepage */
+    }
 
-            .logo-text p {
-                display: none;
-            }
+    .logo-text h1 {
+        font-size: 16px; /* Matches homepage */
+    }
 
-            .whatsapp-btn span {
-                display: none;
-            }
+    .logo-text p {
+        font-size: 8px; /* Matches homepage */
+        letter-spacing: 1px; /* Matches homepage */
+        display: block; /* KEEP IT VISIBLE */
+    }
 
-            .whatsapp-btn {
-                padding: 8px;
-                border-radius: 50%;
-            }
+    .whatsapp-btn {
+        padding: 8px 10px;
+    }
 
-            .whatsapp-btn i {
-                font-size: 18px;
-                margin: 0;
-            }
+    .whatsapp-btn span {
+        display: none; /* Hide text on very small screens */
+    }
 
-            .mobile-menu-btn {
-                padding: 6px 10px;
-            }
-        }
+    .whatsapp-btn i {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .mobile-menu-btn {
+        padding: 6px 10px;
+    }
+}
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
