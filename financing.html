@@ -2,478 +2,1127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Car Financing - Adedayo Aremu Autos</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+
         body {
-            background: #f5f5f5;
+            background-color: #0a0a0a;
+            color: #ffffff;
         }
+
+        /* Premium Variables - Same as homepage */
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section - EXACT copy from homepage */
         .header {
-            background: #1a1a1a;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
             color: white;
-            padding: 20px;
-            text-align: center;
         }
-        .header h1 {
-            color: #c5a059;
-            margin-bottom: 10px;
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 900;
         }
-        .nav {
-            background: #333;
-            padding: 15px;
-            text-align: center;
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 3px 0 0;
+            text-transform: uppercase;
+            font-weight: 500;
         }
-        .nav a {
-            color: white;
+
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
             text-decoration: none;
-            margin: 0 20px;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .whatsapp-btn i {
             font-size: 18px;
         }
-        .nav a:hover, .nav a.active {
-            color: #c5a059;
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
-        .page-title {
-            text-align: center;
-            padding: 50px 20px;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://via.placeholder.com/1600x400');
-            background-size: cover;
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
             color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .page-title h2 {
-            font-size: 48px;
-            margin-bottom: 10px;
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
         }
-        .page-title h2 span {
-            color: #c5a059;
+
+        /* Page Header - Financing page specific */
+        .page-header {
+            margin-top: 90px;
+            padding: 80px 20px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+                        url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
         }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .page-header h1 {
+            font-size: clamp(42px, 8vw, 70px);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .page-header h1 span {
+            color: var(--primary);
+        }
+
+        .page-header p {
+            color: var(--text-light);
+            font-size: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Intro Section */
+        .intro-section {
+            max-width: 1400px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
         .intro-text {
+            font-size: 18px;
+            color: var(--text-light);
+            line-height: 1.8;
             max-width: 800px;
-            margin: 0 auto 50px;
-            text-align: center;
+            margin: 0 auto;
+        }
+
+        .intro-text .highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Steps Section */
+        .steps-section {
+            max-width: 1400px;
+            margin: 60px auto;
             padding: 0 20px;
         }
-        .steps-container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 20px;
-        }
-        .steps-container h3 {
+
+        .section-title {
             text-align: center;
-            font-size: 32px;
-            margin-bottom: 40px;
-        }
-        .steps {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
             margin-bottom: 50px;
         }
-        .step {
-            flex: 1;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            position: relative;
+
+        .section-title h2 {
+            font-size: clamp(32px, 5vw, 42px);
+            margin-bottom: 15px;
         }
+
+        .section-title h2 span {
+            color: var(--primary);
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
         .step-number {
-            width: 50px;
-            height: 50px;
-            background: #c5a059;
-            color: white;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: #0a0a0a;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0 auto 20px;
-        }
-        .step h4 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .step p {
-            color: #666;
-        }
-        .eligibility {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        .eligibility h3 {
             font-size: 28px;
-            margin-bottom: 30px;
-            color: #333;
+            font-weight: 800;
+            margin: 0 auto 25px;
+            transition: all 0.3s ease;
         }
-        .requirements-grid {
+
+        .step-card:hover .step-number {
+            background: white;
+            color: var(--primary);
+        }
+
+        .step-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Eligibility Section */
+        .eligibility-section {
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 60px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .eligibility-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 40px;
         }
-        .requirement {
+
+        .requirement-card {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 5px;
+            padding: 25px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
-        .requirement i {
-            font-size: 24px;
-            color: #c5a059;
+
+        .requirement-card:hover {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.05);
         }
+
+        .requirement-card i {
+            font-size: 30px;
+            color: var(--primary);
+        }
+
+        .requirement-card h4 {
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .requirement-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Plans Section */
         .plans-section {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 60px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--border);
         }
-        .plans-section h3 {
-            font-size: 28px;
-            margin-bottom: 30px;
+
+        .plans-table-container {
+            overflow-x: auto;
+            margin-top: 40px;
         }
+
         .plans-table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .plans-table th {
-            background: #c5a059;
-            color: white;
-            padding: 15px;
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 18px;
             text-align: left;
+            font-weight: 700;
         }
+
         .plans-table td {
             padding: 15px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-light);
         }
-        .plans-table tr:hover {
-            background: #f9f9f9;
+
+        .plans-table tr:hover td {
+            background: rgba(197, 160, 89, 0.05);
         }
-        .calculator {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+
+        .plans-table tr:last-child td {
+            border-bottom: none;
         }
-        .calculator h3 {
-            font-size: 28px;
-            margin-bottom: 30px;
+
+        .plans-table .amount {
+            color: var(--primary);
+            font-weight: 700;
         }
-        .calc-grid {
+
+        /* Calculator Section */
+        .calculator-section {
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 60px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .calculator-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
+            margin-top: 40px;
         }
-        .calc-inputs {
-            background: #f9f9f9;
-            padding: 30px;
-            border-radius: 10px;
-        }
-        .calc-inputs label {
-            display: block;
-            margin: 15px 0 5px;
-            color: #333;
-        }
-        .calc-inputs input, .calc-inputs select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .calc-result {
-            background: #c5a059;
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .calc-result .amount {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-        .application-form {
-            max-width: 800px;
-            margin: 50px auto;
+
+        .calculator-inputs {
+            background: rgba(255,255,255,0.02);
             padding: 40px;
-            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .calc-group {
+            margin-bottom: 25px;
+        }
+
+        .calc-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .calc-group input,
+        .calc-group select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
             border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
-        .application-form h3 {
-            font-size: 28px;
-            margin-bottom: 30px;
+
+        .calc-group input:focus,
+        .calc-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.1);
         }
-        .form-group {
+
+        .calc-group select option {
+            background: var(--dark-bg);
+            color: white;
+        }
+
+        .calculator-result {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .calculator-result h4 {
+            font-size: 20px;
+            color: #0a0a0a;
             margin-bottom: 20px;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
+
+        .result-amount {
+            font-size: 56px;
+            font-weight: 800;
+            color: #0a0a0a;
+            margin: 20px 0;
+            line-height: 1.2;
         }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+
+        .result-details {
+            color: rgba(0,0,0,0.7);
             font-size: 16px;
+            margin: 10px 0;
         }
+
+        .result-details span {
+            font-weight: 700;
+            color: #0a0a0a;
+        }
+
+        /* Application Form */
+        .application-section {
+            max-width: 1400px;
+            margin: 80px auto;
+            padding: 60px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .application-form {
+            max-width: 800px;
+            margin: 40px auto 0;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .btn {
-            background: #c5a059;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
             width: 100%;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background: #a88642;
-        }
-        .footer {
-            background: #333;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
-        .whatsapp-float {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #25D366;
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.1);
+        }
+
+        .form-group select option {
+            background: var(--dark-bg);
             color: white;
-            padding: 15px 25px;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 30px;
+            background: var(--primary);
+            color: #0a0a0a;
+            border: none;
             border-radius: 50px;
-            text-decoration: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        }
+
+        /* Footer - EXACT same as homepage */
+        .footer {
+            background: #050505;
+            padding: 40px 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
             display: flex;
             align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
             gap: 10px;
         }
-        @media (max-width: 768px) {
-            .steps {
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .whatsapp-float i {
+            font-size: 20px;
+        }
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
                 flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                margin-top: 15px;
             }
-            .requirements-grid {
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .steps-grid {
                 grid-template-columns: 1fr;
             }
-            .calc-grid {
+
+            .eligibility-grid {
                 grid-template-columns: 1fr;
             }
+
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+
             .form-row {
                 grid-template-columns: 1fr;
+            }
+
+            .plans-section,
+            .eligibility-section,
+            .calculator-section,
+            .application-section {
+                padding: 40px 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .logo-container {
+                gap: 8px;
+            }
+
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+                display: block;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .result-amount {
+                font-size: 40px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                gap: 6px;
+            }
+
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+                letter-spacing: 1px;
+                display: block;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .mobile-menu-btn {
+                padding: 6px 10px;
+            }
+
+            .result-amount {
+                font-size: 32px;
             }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header - EXACT copy from homepage -->
     <div class="header">
-        <h1>ADEDAYO AREMU <span style="color: #c5a059;">AUTOS</span></h1>
-        <p>Premium Cars • Rental • Financing</p>
-    </div>
-    
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="cars.html">Buy Cars</a>
-        <a href="rentals.html">Rentals</a>
-        <a href="financing.html" class="active">Financing</a>
-        <a href="contact.html">Contact</a>
-    </div>
-    
-    <div class="page-title">
-        <h2>Car <span>Financing</span></h2>
-        <p>Own your dream car with flexible payment plans</p>
-    </div>
-    
-    <div class="intro-text">
-        <p>We make car ownership easy with transparent financing options. Drive your dream car today with as low as 30% down payment.</p>
-    </div>
-    
-    <div class="steps-container">
-        <h3>How It Works in <span style="color: #c5a059;">3 Simple Steps</span></h3>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h4>Apply</h4>
-                <p>Fill out our simple application form below</p>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+                </div>
             </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h4>Get Approved</h4>
-                <p>We'll review and contact you within 24 hours</p>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
             </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h4>Drive</h4>
-                <p>Choose your car and finalize paperwork</p>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html" class="active">Financing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat Now</span>
+                </a>
             </div>
         </div>
     </div>
-    
-    <div class="eligibility">
-        <h3>Eligibility Requirements</h3>
-        <div class="requirements-grid">
-            <div class="requirement">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Car <span>Financing</span></h1>
+            <p>Own your dream car with flexible, transparent payment plans</p>
+        </div>
+    </div>
+
+    <!-- Intro Section -->
+    <div class="intro-section">
+        <p class="intro-text">
+            We make car ownership easy with transparent financing options. Drive your dream car today with as low as <span class="highlight">30% down payment</span> and flexible terms that fit your budget.
+        </p>
+    </div>
+
+    <!-- Steps Section -->
+    <div class="steps-section">
+        <div class="section-title">
+            <h2>How It Works in <span>3 Simple Steps</span></h2>
+            <p>Quick, transparent, and hassle-free financing process</p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Apply</h3>
+                <p>Fill out our simple online application form with your details and preferred car.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Get Approved</h3>
+                <p>We'll review your application and contact you within 24 hours with a decision.</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Drive</h3>
+                <p>Choose your car, finalize the paperwork, and drive away with confidence.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eligibility Section -->
+    <div class="eligibility-section">
+        <div class="section-title">
+            <h2>Eligibility <span>Requirements</span></h2>
+            <p>Simple criteria to qualify for financing</p>
+        </div>
+        
+        <div class="eligibility-grid">
+            <div class="requirement-card">
                 <i class="fas fa-id-card"></i>
                 <div>
-                    <strong>Valid ID</strong>
-                    <p>Driver's License, Passport, or National ID</p>
+                    <h4>Valid ID</h4>
+                    <p>Driver's License, International Passport, or National ID</p>
                 </div>
             </div>
-            <div class="requirement">
+            
+            <div class="requirement-card">
                 <i class="fas fa-file-invoice"></i>
                 <div>
-                    <strong>Proof of Income</strong>
-                    <p>Payslips (last 3 months) or Bank Statements</p>
+                    <h4>Proof of Income</h4>
+                    <p>Last 3 months payslips or bank statements</p>
                 </div>
             </div>
-            <div class="requirement">
+            
+            <div class="requirement-card">
                 <i class="fas fa-university"></i>
                 <div>
-                    <strong>Bank Verification</strong>
-                    <p>Valid BVN</p>
+                    <h4>Bank Verification</h4>
+                    <p>Valid BVN (Bank Verification Number)</p>
                 </div>
             </div>
-            <div class="requirement">
+            
+            <div class="requirement-card">
                 <i class="fas fa-money-bill"></i>
                 <div>
-                    <strong>Down Payment</strong>
-                    <p>Minimum 30% of car value</p>
+                    <h4>Down Payment</h4>
+                    <p>Minimum 30% of vehicle value</p>
                 </div>
             </div>
-            <div class="requirement">
+            
+            <div class="requirement-card">
                 <i class="fas fa-phone"></i>
                 <div>
-                    <strong>Valid Contact</strong>
-                    <p>Active phone number and email</p>
+                    <h4>Valid Contact</h4>
+                    <p>Active phone number and email address</p>
                 </div>
             </div>
-            <div class="requirement">
+            
+            <div class="requirement-card">
                 <i class="fas fa-home"></i>
                 <div>
-                    <strong>Residence Proof</strong>
+                    <h4>Residence Proof</h4>
                     <p>Utility bill or tenancy agreement</p>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Financing Plans Section -->
     <div class="plans-section">
-        <h3>Available <span style="color: #c5a059;">Financing Plans</span></h3>
-        <table class="plans-table">
-            <thead>
-                <tr>
-                    <th>Duration</th>
-                    <th>Down Payment</th>
-                    <th>Interest Rate</th>
-                    <th>Monthly Payment (₦5M Car)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>6 Months</strong></td>
-                    <td>30% (₦1.5M)</td>
-                    <td>5%</td>
-                    <td>₦645,833</td>
-                </tr>
-                <tr>
-                    <td><strong>12 Months</strong></td>
-                    <td>30% (₦1.5M)</td>
-                    <td>8%</td>
-                    <td>₦350,000</td>
-                </tr>
-                <tr>
-                    <td><strong>24 Months</strong></td>
-                    <td>30% (₦1.5M)</td>
-                    <td>12%</td>
-                    <td>₦196,667</td>
-                </tr>
-                <tr>
-                    <td><strong>36 Months</strong></td>
-                    <td>30% (₦1.5M)</td>
-                    <td>15%</td>
-                    <td>₦147,222</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="section-title">
+            <h2>Available <span>Financing Plans</span></h2>
+            <p>Flexible terms to suit your budget (based on ₦5,000,000 car)</p>
+        </div>
+        
+        <div class="plans-table-container">
+            <table class="plans-table">
+                <thead>
+                    <tr>
+                        <th>Duration</th>
+                        <th>Down Payment</th>
+                        <th>Interest Rate</th>
+                        <th>Monthly Payment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>6 Months</strong></td>
+                        <td>30% (₦1.5M)</td>
+                        <td>5%</td>
+                        <td class="amount">₦645,833</td>
+                    </tr>
+                    <tr>
+                        <td><strong>12 Months</strong></td>
+                        <td>30% (₦1.5M)</td>
+                        <td>8%</td>
+                        <td class="amount">₦350,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>24 Months</strong></td>
+                        <td>30% (₦1.5M)</td>
+                        <td>12%</td>
+                        <td class="amount">₦196,667</td>
+                    </tr>
+                    <tr>
+                        <td><strong>36 Months</strong></td>
+                        <td>30% (₦1.5M)</td>
+                        <td>15%</td>
+                        <td class="amount">₦147,222</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    
-    <div class="calculator">
-        <h3>Finance <span style="color: #c5a059;">Calculator</span></h3>
-        <div class="calc-grid">
-            <div class="calc-inputs">
-                <label>Car Price (₦)</label>
-                <input type="number" id="carPrice" value="5000000" oninput="calculatePayment()">
+
+    <!-- Calculator Section -->
+    <div class="calculator-section">
+        <div class="section-title">
+            <h2>Finance <span>Calculator</span></h2>
+            <p>Estimate your monthly payments instantly</p>
+        </div>
+        
+        <div class="calculator-grid">
+            <div class="calculator-inputs">
+                <div class="calc-group">
+                    <label>Car Price (₦)</label>
+                    <input type="number" id="carPrice" value="5000000" oninput="calculatePayment()">
+                </div>
                 
-                <label>Down Payment (₦)</label>
-                <input type="number" id="downPayment" value="1500000" oninput="calculatePayment()">
+                <div class="calc-group">
+                    <label>Down Payment (₦)</label>
+                    <input type="number" id="downPayment" value="1500000" oninput="calculatePayment()">
+                </div>
                 
-                <label>Loan Term (months)</label>
-                <select id="loanTerm" onchange="calculatePayment()">
-                    <option value="6">6 months</option>
-                    <option value="12" selected>12 months</option>
-                    <option value="24">24 months</option>
-                    <option value="36">36 months</option>
-                </select>
+                <div class="calc-group">
+                    <label>Loan Term (months)</label>
+                    <select id="loanTerm" onchange="calculatePayment()">
+                        <option value="6">6 months</option>
+                        <option value="12" selected>12 months</option>
+                        <option value="24">24 months</option>
+                        <option value="36">36 months</option>
+                    </select>
+                </div>
                 
-                <label>Interest Rate (%)</label>
-                <input type="number" id="interestRate" value="8" oninput="calculatePayment()">
+                <div class="calc-group">
+                    <label>Interest Rate (%)</label>
+                    <input type="number" id="interestRate" value="8" oninput="calculatePayment()" step="0.1">
+                </div>
             </div>
-            <div class="calc-result">
+            
+            <div class="calculator-result">
                 <h4>Estimated Monthly Payment</h4>
-                <div class="amount" id="monthlyPayment">₦350,000</div>
-                <p>Total Interest: <span id="totalInterest">₦400,000</span></p>
-                <p>Total Payment: <span id="totalPayment">₦5,400,000</span></p>
+                <div class="result-amount" id="monthlyPayment">₦350,000</div>
+                <div class="result-details">
+                    Total Interest: <span id="totalInterest">₦400,000</span>
+                </div>
+                <div class="result-details">
+                    Total Payment: <span id="totalPayment">₦5,400,000</span>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="application-form">
-        <h3>Apply for <span style="color: #c5a059;">Financing</span></h3>
-        <form action="https://formspree.io/f/your-finance-form" method="POST">
+
+    <!-- Application Form -->
+    <div class="application-section">
+        <div class="section-title">
+            <h2>Apply for <span>Financing</span></h2>
+            <p>Fill out the form below and we'll get back to you within 24 hours</p>
+        </div>
+        
+        <form class="application-form" action="https://formspree.io/f/your-finance-form" method="POST">
             <div class="form-row">
                 <div class="form-group">
                     <label>Full Name *</label>
-                    <input type="text" name="fullname" required>
+                    <input type="text" name="fullname" placeholder="John Doe" required>
                 </div>
                 <div class="form-group">
                     <label>Phone Number *</label>
-                    <input type="tel" name="phone" required>
+                    <input type="tel" name="phone" placeholder="080 1234 5678" required>
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email">
+                    <input type="email" name="email" placeholder="john@example.com">
                 </div>
                 <div class="form-group">
                     <label>Employment Status *</label>
@@ -527,23 +1176,84 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>BVN</label>
+                    <label>BVN (Optional)</label>
                     <input type="text" name="bvn" placeholder="Bank Verification Number">
                 </div>
             </div>
             
-            <button type="submit" class="btn">Submit Application</button>
+            <button type="submit" class="btn">
+                Submit Application <i class="fas fa-arrow-right"></i>
+            </button>
         </form>
     </div>
-    
-    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
-        <i class="fab fa-whatsapp"></i> Chat about Financing
-    </a>
-    
+
+    <!-- Footer -->
     <div class="footer">
-        <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 45px;">
+                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat about Financing
+    </a>
+
     <script>
         function calculatePayment() {
             const price = parseFloat(document.getElementById('carPrice').value) || 0;
@@ -553,7 +1263,15 @@
             
             const loanAmount = price - down;
             const monthlyRate = rate / 100 / 12;
-            const monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+            
+            // Calculate monthly payment using loan amortization formula
+            let monthlyPayment = 0;
+            if (monthlyRate > 0) {
+                monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+            } else {
+                monthlyPayment = loanAmount / months;
+            }
+            
             const totalPayment = monthlyPayment * months;
             const totalInterest = totalPayment - loanAmount;
             
@@ -563,6 +1281,35 @@
                 document.getElementById('totalPayment').textContent = '₦' + Math.round(totalPayment).toLocaleString();
             }
         }
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
     </script>
 </body>
 </html>
