@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>5 Essential Car Maintenance Tips - Adedayo Aremu Autos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section - Same as homepage */
+        .header {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 12px 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .logo-container img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+            color: white;
+        }
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 900;
+        }
+
+        .logo-text p {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 3px 0 0;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .whatsapp-btn i {
+            font-size: 18px;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+                        url('https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+        }
+
+        .post-header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .post-category {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .post-header h1 {
+            font-size: clamp(36px, 6vw, 56px);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .post-header h1 span {
+            color: var(--primary);
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: var(--text-muted);
+            font-size: 16px;
+            flex-wrap: wrap;
+        }
+
+        .post-meta i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        /* Blog Post Content */
+        .blog-container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .blog-content {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .blog-content h2 {
+            font-size: 28px;
+            margin: 40px 0 20px;
+            color: var(--primary);
+        }
+
+        .blog-content h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .blog-content h3 {
+            font-size: 22px;
+            margin: 30px 0 15px;
+            color: var(--text-light);
+        }
+
+        .blog-content p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .blog-content ul, .blog-content ol {
+            margin: 20px 0;
+            padding-left: 20px;
+            color: var(--text-light);
+        }
+
+        .blog-content li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .blog-content li::marker {
+            color: var(--primary);
+        }
+
+        .blog-content blockquote {
+            background: rgba(197, 160, 89, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 30px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .blog-content blockquote p {
+            margin-bottom: 10px;
+        }
+
+        .blog-content blockquote cite {
+            display: block;
+            margin-top: 10px;
+            color: var(--primary);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .blog-image {
+            margin: 40px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .blog-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .blog-image figcaption {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Maintenance-specific styles */
+        .maintenance-card {
+            background: rgba(255,255,255,0.02);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .maintenance-card:hover {
+            transform: translateX(10px);
+            background: rgba(197, 160, 89, 0.05);
+        }
+
+        .maintenance-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .maintenance-card h3 i {
+            width: 50px;
+            height: 50px;
+            background: rgba(197, 160, 89, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .tip-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .tip-item {
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tip-item h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tip-item p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .schedule-table th {
+            background: var(--primary);
+            color: #0a0a0a;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-light);
+        }
+
+        .schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .warning-signs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .warning-sign {
+            background: rgba(192, 57, 43, 0.1);
+            border: 1px solid #c0392b;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .warning-sign i {
+            font-size: 30px;
+            color: #c0392b;
+            margin-bottom: 10px;
+        }
+
+        .warning-sign h4 {
+            color: #c0392b;
+            margin-bottom: 10px;
+        }
+
+        .warning-sign p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .cost-savings {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid #27ae60;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .cost-savings h4 {
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cost-savings ul li {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .seasonal-tips {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .season-card {
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .season-card i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .season-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .season-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Author Box */
+        .author-box {
+            display: flex;
+            gap: 30px;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin: 60px 0 30px;
+        }
+
+        .author-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+        }
+
+        .author-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .author-info h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .author-info h3 span {
+            color: var(--primary);
+        }
+
+        .author-info p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .author-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .author-social a {
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .author-social a:hover {
+            color: var(--primary);
+        }
+
+        /* Related Posts */
+        .related-posts {
+            margin: 60px 0;
+        }
+
+        .related-posts h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .related-posts h2 span {
+            color: var(--primary);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .related-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .related-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .related-image {
+            height: 150px;
+            overflow: hidden;
+        }
+
+        .related-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .related-card:hover .related-image img {
+            transform: scale(1.1);
+        }
+
+        .related-content {
+            padding: 20px;
+        }
+
+        .related-content h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .related-content h4 a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .related-content h4 a:hover {
+            color: var(--primary);
+        }
+
+        .related-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Share Section */
+        .share-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+        .share-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .share-tag {
+            padding: 8px 15px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .share-tag:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+        }
+
+        .share-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .share-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .share-icon:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin: 60px 0;
+        }
+
+        .comments-section h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .comments-section h2 span {
+            color: var(--primary);
+        }
+
+        .comment-form {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        .comment-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .comment-form input,
+        .comment-form textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .comment-form input:focus,
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .comment-form textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .comment-form button {
+            padding: 15px 30px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50px;
+            color: #0a0a0a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .comment-form button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .comment {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .comment-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .comment-header h4 {
+            color: var(--primary);
+        }
+
+        .comment-date {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .comment-content p {
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .comment-reply {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .comment-reply:hover {
+            gap: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #050505;
+            padding: 40px 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .whatsapp-float i {
+            font-size: 20px;
+        }
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .tip-grid,
+            .warning-signs,
+            .seasonal-tips {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .maintenance-card h3 {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .schedule-table {
+                font-size: 14px;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/aaa_logo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+                </div>
+            </div>
+            
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="blog.html">Blog</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat Now</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Post Header -->
+    <div class="post-header">
+        <div class="post-header-content">
+            <span class="post-category">🔧 Maintenance</span>
+            <h1>5 Essential Car <span>Maintenance Tips</span> Every Owner Should Know</h1>
+            <div class="post-meta">
+                <span><i class="fas fa-calendar"></i> January 25, 2024</span>
+                <span><i class="fas fa-clock"></i> 6 min read</span>
+                <span><i class="fas fa-user"></i> By Adedayo Aremu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Content -->
+    <div class="blog-container">
+        <div class="blog-content">
+            <p>Your car is likely one of the biggest investments you'll make. Yet many Nigerian car owners neglect regular maintenance, leading to costly repairs and premature vehicle failure. The good news? Proper maintenance doesn't require a mechanic's license – just knowledge of a few key principles and consistent attention.</p>
+            
+            <p>In this guide, we'll cover five essential maintenance tips that will keep your vehicle running smoothly, save you money, and extend its lifespan significantly.</p>
+
+            <div class="maintenance-card">
+                <h3><i class="fas fa-oil-can"></i> 1. Regular Oil Changes</h3>
+                <p>Engine oil is the lifeblood of your vehicle. It lubricates moving parts, reduces friction, and helps cool the engine. Neglecting oil changes is the fastest way to destroy your engine.</p>
+                
+                <div class="tip-grid">
+                    <div class="tip-item">
+                        <h4><i class="fas fa-clock"></i> How Often?</h4>
+                        <p>Every 5,000 - 7,500 km for conventional oil, or every 10,000 - 15,000 km for synthetic. Check your owner's manual for specific recommendations.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning Signs</h4>
+                        <p>Dark, gritty oil on dipstick, engine knocking sounds, or the oil change light on your dashboard.</p>
+                    </div>
+                </div>
+
+                <p><strong>Pro Tip:</strong> In Nigeria's hot climate, consider using high-quality synthetic oil that can withstand higher temperatures. Always check your oil level at least once a month.</p>
+            </div>
+
+            <div class="maintenance-card">
+                <h3><i class="fas fa-tachometer-alt"></i> 2. Tire Maintenance and Rotation</h3>
+                <p>Your tires are the only part of your car that touches the road. Proper tire maintenance ensures safety, improves fuel economy, and extends tire life.</p>
+                
+                <div class="tip-grid">
+                    <div class="tip-item">
+                        <h4><i class="fas fa-clock"></i> How Often?</h4>
+                        <p>Check tire pressure monthly. Rotate tires every 8,000 - 10,000 km. Replace when tread depth reaches 1.6mm.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning Signs</h4>
+                        <p>Uneven wear, vibrations while driving, bulges or cracks in sidewalls, frequent pressure loss.</p>
+                    </div>
+                </div>
+
+                <p><strong>Pro Tip:</strong> Nigerian roads can be harsh on tires. Consider tires with reinforced sidewalls for better protection against potholes. Keep your spare tire properly inflated – you never know when you'll need it.</p>
+            </div>
+
+            <div class="blog-image">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Car tires">
+                <figcaption>Proper tire maintenance is crucial for safety on Nigerian roads</figcaption>
+            </div>
+
+            <div class="maintenance-card">
+                <h3><i class="fas fa-tint"></i> 3. Fluid Level Checks</h3>
+                <p>Beyond engine oil, your vehicle relies on several other fluids to function properly. Regular checks prevent breakdowns and costly damage.</p>
+                
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Fluid</th>
+                            <th>Check Frequency</th>
+                            <th>Function</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Coolant/Antifreeze</strong></td>
+                            <td>Monthly</td>
+                            <td>Prevents engine overheating</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Brake Fluid</strong></td>
+                            <td>Every oil change</td>
+                            <td>Ensures proper braking performance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transmission Fluid</strong></td>
+                            <td>Every 10,000 km</td>
+                            <td>Lubricates transmission components</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Power Steering Fluid</strong></td>
+                            <td>Monthly</td>
+                            <td>Makes steering smooth and easy</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Windshield Washer</strong></td>
+                            <td>Monthly</td>
+                            <td>Maintains clear visibility</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>Pro Tip:</strong> Learn to identify different fluids by color and consistency. Clean, bright fluids indicate good condition. Dark, burnt-smelling, or gritty fluids need immediate attention.</p>
+            </div>
+
+            <div class="maintenance-card">
+                <h3><i class="fas fa-charging-station"></i> 4. Battery Care</h3>
+                <p>Nigeria's heat can be particularly harsh on car batteries. A little attention can extend battery life and prevent unexpected breakdowns.</p>
+                
+                <div class="tip-grid">
+                    <div class="tip-item">
+                        <h4><i class="fas fa-clock"></i> How Often?</h4>
+                        <p>Check battery terminals monthly for corrosion. Test battery voltage every 3 months. Replace every 3-5 years.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning Signs</h4>
+                        <p>Slow engine crank, dim headlights, clicking sound when turning key, swollen battery case.</p>
+                    </div>
+                </div>
+
+                <p><strong>Pro Tip:</strong> Clean battery terminals with a wire brush and apply petroleum jelly to prevent corrosion. If your car sits unused for long periods, consider a battery maintainer.</p>
+            </div>
+
+            <div class="maintenance-card">
+                <h3><i class="fas fa-filter"></i> 5. Air Filter Replacement</h3>
+                <p>A clean air filter improves fuel economy, reduces emissions, and protects your engine from dust and debris – especially important on dusty Nigerian roads.</p>
+                
+                <div class="tip-grid">
+                    <div class="tip-item">
+                        <h4><i class="fas fa-clock"></i> How Often?</h4>
+                        <p>Check every 5,000 km. Replace every 15,000 - 30,000 km depending on driving conditions. More often if you drive on unpaved roads.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning Signs</h4>
+                        <p>Reduced fuel economy, strange engine sounds, black smoke from exhaust, check engine light.</p>
+                    </div>
+                </div>
+
+                <p><strong>Pro Tip:</strong> In dusty Harmattan season, check your air filter more frequently. A clean filter can improve fuel economy by up to 10%.</p>
+            </div>
+
+            <h2>⚠️ Warning Signs You Should Never Ignore</h2>
+            <p>Some problems can't wait for scheduled maintenance. Watch for these warning signs:</p>
+
+            <div class="warning-signs">
+                <div class="warning-sign">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h4>Dashboard Lights</h4>
+                    <p>Check engine, oil pressure, or battery lights indicate immediate attention needed</p>
+                </div>
+                <div class="warning-sign">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h4>Unusual Noises</h4>
+                    <p>Squealing brakes, knocking engine, or grinding gears need professional inspection</p>
+                </div>
+                <div class="warning-sign">
+                    <i class="fas fa-tint"></i>
+                    <h4>Fluid Leaks</h4>
+                    <p>Any puddle under your car – color indicates which fluid (green=coolant, red=transmission, brown=oil)</p>
+                </div>
+                <div class="warning-sign">
+                    <i class="fas fa-fire"></i>
+                    <h4>Burning Smells</h4>
+                    <p>Electrical burning, oil burning, or sweet smells indicate serious problems</p>
+                </div>
+            </div>
+
+            <h2>💰 How Regular Maintenance Saves You Money</h2>
+            
+            <div class="cost-savings">
+                <h4><i class="fas fa-money-bill-wave"></i> The Real Cost of Neglect</h4>
+                <ul>
+                    <li><strong>Oil change:</strong> ₦15,000 - ₦25,000 vs <strong>Engine replacement:</strong> ₦800,000 - ₦2,000,000</li>
+                    <li><strong>Air filter:</strong> ₦5,000 - ₦15,000 vs <strong>Fuel system repair:</strong> ₦150,000 - ₦400,000</li>
+                    <li><strong>Tire rotation:</strong> ₦3,000 - ₦5,000 vs <strong>New tires:</strong> ₦80,000 - ₦400,000 per set</li>
+                    <li><strong>Brake pad replacement:</strong> ₦25,000 - ₦50,000 vs <strong>Brake system overhaul:</strong> ₦200,000 - ₦500,000</li>
+                </ul>
+                <p style="margin-top: 20px; color: var(--primary); font-weight: 600;">Regular maintenance costs pennies compared to major repairs!</p>
+            </div>
+
+            <h2>📅 Seasonal Maintenance Tips for Nigeria</h2>
+            
+            <div class="seasonal-tips">
+                <div class="season-card">
+                    <i class="fas fa-sun"></i>
+                    <h4>Dry Season (Nov-Mar)</h4>
+                    <p>Check air conditioning, replace air filters more frequently due to Harmattan dust, check tire pressure (heat increases pressure).</p>
+                </div>
+                <div class="season-card">
+                    <i class="fas fa-cloud-rain"></i>
+                    <h4>Rainy Season (Apr-Oct)</h4>
+                    <p>Check wiper blades, ensure proper tire tread for hydroplaning prevention, test headlights, check for water leaks.</p>
+                </div>
+            </div>
+
+            <h2>🔧 DIY vs Professional Maintenance</h2>
+            <p>Some maintenance tasks are safe for DIY, while others require professional expertise:</p>
+
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>DIY Friendly</th>
+                        <th>Leave to Professionals</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Checking fluid levels</td>
+                        <td>Transmission service</td>
+                    </tr>
+                    <tr>
+                        <td>Replacing air filters</td>
+                        <td>Brake system repairs</td>
+                    </tr>
+                    <tr>
+                        <td>Checking tire pressure</td>
+                        <td>Engine diagnostics</td>
+                    </tr>
+                    <tr>
+                        <td>Replacing wiper blades</td>
+                        <td>Air conditioning service</td>
+                    </tr>
+                    <tr>
+                        <td>Cleaning battery terminals</td>
+                        <td>Timing belt replacement</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>📝 Maintenance Schedule Summary</h2>
+            <p>Follow this simple schedule to keep your car in top condition:</p>
+
+            <ul>
+                <li><strong>Every Week:</strong> Check tire pressure, fluid levels, and lights</li>
+                <li><strong>Every Month:</strong> Check battery terminals, air filter, and belts for wear</li>
+                <li><strong>Every 5,000 km:</strong> Oil and filter change, tire rotation</li>
+                <li><strong>Every 10,000 km:</strong> Inspect brakes, transmission fluid, and coolant</li>
+                <li><strong>Every 20,000 km:</strong> Replace air filter, fuel filter, and spark plugs</li>
+                <li><strong>Every 40,000 km:</strong> Change transmission fluid, coolant, and inspect suspension</li>
+                <li><strong>Every 2 Years:</strong> Replace brake fluid and power steering fluid</li>
+            </ul>
+
+            <div class="blog-image">
+                <img src="https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Car maintenance">
+                <figcaption>Regular maintenance keeps your vehicle reliable and safe</figcaption>
+            </div>
+
+            <h2>❓ Frequently Asked Questions</h2>
+
+            <h3>Can I use any oil for my car?</h3>
+            <p>No. Always use the oil grade recommended in your owner's manual. Using the wrong oil can reduce engine life and fuel economy.</p>
+
+            <h3>How do I know if my brakes need service?</h3>
+            <p>Squealing or grinding noises, vibration when braking, or a soft brake pedal all indicate needed brake service.</p>
+
+            <h3>Is premium fuel worth the extra cost?</h3>
+            <p>Only if your car requires it. Check your owner's manual. Using premium fuel in an engine designed for regular provides no benefit.</p>
+
+            <h3>How long should a car battery last in Nigeria?</h3>
+            <p>Typically 2-3 years due to our hot climate. Regular maintenance can extend this slightly.</p>
+
+            <h3>What's the most important maintenance task?</h3>
+            <p>Regular oil changes by far. Nothing extends engine life more than clean, fresh oil.</p>
+
+            <blockquote>
+                <p>"Maintenance isn't an expense – it's an investment in your vehicle's longevity and your family's safety. A well-maintained car will serve you faithfully for years."</p>
+                <cite>- Adedayo Aremu, Founder</cite>
+            </blockquote>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <div class="share-tags">
+                    <a href="#" class="share-tag">#CarMaintenance</a>
+                    <a href="#" class="share-tag">#CarCare</a>
+                    <a href="#" class="share-tag">#VehicleTips</a>
+                    <a href="#" class="share-tag">#NigerianDrivers</a>
+                </div>
+                <div class="share-icons">
+                    <a href="#" class="share-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <!-- Author Box -->
+            <div class="author-box">
+                <div class="author-image">
+                    <img src="images/CEO.PNG" alt="Adedayo Aremu">
+                </div>
+                <div class="author-info">
+                    <h3><span>Adedayo Aremu</span></h3>
+                    <p>Founder & CEO of Adedayo Aremu Autos. With over 5 years of experience in the Nigerian automotive industry, Adedayo is passionate about helping customers find the perfect vehicles for their needs through transparent, customer-centered service.</p>
+                    <div class="author-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            <div class="related-posts">
+                <h2>Related <span>Articles</span></h2>
+                <div class="related-grid">
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="SUV guide">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-suv-guide.html">Top 5 SUVs for Nigerian Roads</a></h4>
+                            <div class="related-meta">March 5, 2024</div>
+                        </div>
+                    </div>
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="images/foreign_used.JPG" alt="Foreign used cars">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-foreign-used.html">A Complete Guide to Foreign Used Cars</a></h4>
+                            <div class="related-meta">Feb 10, 2024</div>
+                        </div>
+                    </div>
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car inspection">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-inspection-guide.html">Pre-Purchase Inspection Checklist</a></h4>
+                            <div class="related-meta">Dec 18, 2023</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h2>Comments <span>(4)</span></h2>
+                
+                <form class="comment-form">
+                    <div class="comment-form-row">
+                        <input type="text" placeholder="Your Name *" required>
+                        <input type="email" placeholder="Your Email *" required>
+                    </div>
+                    <textarea placeholder="Your Comment *" required></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Emeka Nwosu</h4>
+                            <span class="comment-date">3 days ago</span>
+                        </div>
+                        <p>This is gold! I've been driving for 10 years and never knew about checking transmission fluid. Just checked mine and it was low. Thanks for saving my transmission!</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Zainab Abdullahi</h4>
+                            <span class="comment-date">5 days ago</span>
+                        </div>
+                        <p>The cost comparison section really opened my eyes. I've been skipping oil changes to save money but now I realize that's actually more expensive in the long run. Thank you!</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/62.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Oluwaseun Adebayo</h4>
+                            <span class="comment-date">1 week ago</span>
+                        </div>
+                        <p>Question: How do I know if my mechanic is doing a good job? Sometimes I feel like they're recommending unnecessary repairs.</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Chioma Okafor</h4>
+                            <span class="comment-date">2 weeks ago</span>
+                        </div>
+                        <p>The seasonal tips are so helpful! I never thought about how Harmattan affects my car. Will definitely check my air filter more often during dry season.</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
+                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat with us
+    </a>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
