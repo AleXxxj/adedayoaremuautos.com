@@ -540,7 +540,7 @@
             font-size: 14px;
         }
 
-        /* Footer - FIXED for mobile */
+        /* Footer - UPDATED to match homepage exactly */
         .footer {
             background: #050505;
             padding: 40px 20px 20px;
@@ -681,7 +681,7 @@
             transform: scale(1.05);
         }
 
-        /* Mobile Responsive - COMPLETELY REWRITTEN for mobile friendliness */
+        /* Mobile Responsive - UPDATED to match homepage */
         @media (max-width: 1024px) {
             .footer-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -736,15 +736,15 @@
 
             .footer-grid {
                 grid-template-columns: 1fr;
-                text-align: center;
+                text-align: left; /* CHANGED: from center to left to match homepage */
             }
 
             .footer-about .social-links {
-                justify-content: center;
+                justify-content: flex-start; /* CHANGED: from center to flex-start */
             }
 
             .footer-contact p {
-                justify-content: center;
+                justify-content: flex-start; /* CHANGED: from center to flex-start */
             }
         }
 
@@ -845,7 +845,7 @@
 
         @media (max-width: 480px) {
             .logo-text p {
-                display: none; /* Hide tagline on very small screens */
+                display: block; /* CHANGED: from none to block - keep tagline visible */
             }
 
             .whatsapp-btn span {
@@ -887,11 +887,12 @@
 
             .footer-bottom {
                 flex-direction: column;
-                text-align: center;
+                text-align: left; /* CHANGED: from center to left to match homepage */
+                align-items: flex-start; /* CHANGED: from center to flex-start */
             }
 
             .footer-bottom-links {
-                justify-content: center;
+                justify-content: flex-start; /* CHANGED: from center to flex-start */
             }
         }
     </style>
