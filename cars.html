@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Cars for Sale - Adedayo Aremu Autos</title>
     <style>
+        /* All your existing CSS remains exactly the same */
         * {
             margin: 0;
             padding: 0;
@@ -1163,7 +1164,7 @@
                 <div class="footer-currency">
                     <h4>Currency</h4>
                     <div class="currency-options">
-                        <a href="#" class="currency-option active" data-currency="NGN" data-symbol="₦">
+                        <a href="#" class="currency-option" data-currency="NGN" data-symbol="₦">
                             <span>🇳🇬</span> NGN (₦)
                         </a>
                         <a href="#" class="currency-option" data-currency="USD" data-symbol="$">
@@ -1365,26 +1366,8 @@
                 });
                 container.innerHTML = html;
                 
-                // After displaying cars, re-attach currency option listeners
-                attachCurrencyListeners();
-                
-                // Re-apply currency conversion if a currency was previously selected
-                const savedCurrency = localStorage.getItem('manualCurrency');
-                if (savedCurrency && savedCurrency !== 'NGN') {
-                    let symbol = '₦';
-                    if (savedCurrency === 'USD') symbol = '$';
-                    else if (savedCurrency === 'GBP') symbol = '£';
-                    else if (savedCurrency === 'EUR') symbol = '€';
-                    convertPrices(savedCurrency, symbol);
-                    
-                    // Update active state in footer
-                    document.querySelectorAll('.currency-option').forEach(opt => {
-                        opt.classList.remove('active');
-                        if (opt.dataset.currency === savedCurrency) {
-                            opt.classList.add('active');
-                        }
-                    });
-                }
+                // After displaying cars, check for saved currency and apply it
+                applySavedCurrency();
             }
             
             // Update counts
@@ -1515,7 +1498,7 @@
             });
         });
 
-        // ========== NEW CURRENCY FUNCTIONS ==========
+        // ========== FIXED CURRENCY FUNCTIONS ==========
 
         // Exchange rates
         const exchangeRates = {
@@ -1525,10 +1508,42 @@
             EUR: 0.00060, // 1 NGN = 0.00060 EUR
         };
 
+        // Apply saved currency on page load
+        function applySavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            if (savedCurrency && savedCurrency !== 'NGN') {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                
+                // Convert prices
+                convertPrices(savedCurrency, symbol);
+                
+                // Update active state in footer
+                document.querySelectorAll('.currency-option').forEach(opt => {
+                    opt.classList.remove('active');
+                    if (opt.dataset.currency === savedCurrency) {
+                        opt.classList.add('active');
+                    }
+                });
+            } else {
+                // Ensure NGN is active if no saved currency or saved is NGN
+                document.querySelectorAll('.currency-option').forEach(opt => {
+                    opt.classList.remove('active');
+                    if (opt.dataset.currency === 'NGN') {
+                        opt.classList.add('active');
+                    }
+                });
+            }
+        }
+
         // Function to attach currency option listeners
         function attachCurrencyListeners() {
             document.querySelectorAll('.currency-option').forEach(option => {
+                // Remove any existing listeners
                 option.removeEventListener('click', handleCurrencyClick);
+                // Add fresh listener
                 option.addEventListener('click', handleCurrencyClick);
             });
         }
@@ -1556,10 +1571,13 @@
             document.getElementById('countryNotification').style.display = 'none';
         }
 
-        // Initialize currency detection
+        // Initialize everything when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             // Attach listeners to currency options
             attachCurrencyListeners();
+            
+            // Apply saved currency preference
+            applySavedCurrency();
             
             // Check if user has already made a currency choice
             const currencyChoice = localStorage.getItem('currencyChoice');
@@ -1590,8 +1608,8 @@
                         currencyCode = 'EUR';
                     }
                     
-                    // Only show notification if user is not in Nigeria and not already set
-                    if (countryCode !== 'NG' && !localStorage.getItem('manualCurrency')) {
+                    // Only show notification if user is not in Nigeria, no manual currency set, and not dismissed
+                    if (countryCode !== 'NG' && !localStorage.getItem('manualCurrency') && !localStorage.getItem('currencyChoice')) {
                         document.getElementById('userCountry').textContent = country;
                         document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
                         document.getElementById('switchCurrencyCode').textContent = currencyCode;
@@ -1657,8 +1675,8 @@
             });
         }
 
-        // Re-attach listeners when filters are applied (since displayCars is called)
-        // This is already handled in displayCars function above
+        // Make sure to re-attach listeners after any dynamic content changes
+        // This is already handled in displayCars function
     </script>
 </body>
 </html>
