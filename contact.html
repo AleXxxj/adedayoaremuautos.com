@@ -31,11 +31,11 @@
             --shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* Header Section - EXACT copy from homepage */
+        /* Header Section - EXACT copy from homepage with FIXED mobile order */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
-            padding: 12px 20px;
+            padding: 12px 15px;
             position: fixed;
             width: 100%;
             top: 0;
@@ -56,6 +56,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
 
         .logo-container img {
@@ -65,7 +66,7 @@
         }
 
         .logo-text h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
             letter-spacing: 0.5px;
             margin: 0;
@@ -80,7 +81,7 @@
         }
 
         .logo-text p {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             letter-spacing: 1.5px;
             margin: 3px 0 0;
@@ -91,7 +92,7 @@
         /* Navigation */
         .nav-menu {
             display: flex;
-            gap: 30px;
+            gap: 25px;
         }
 
         .nav-menu a {
@@ -127,16 +128,17 @@
             color: var(--primary);
         }
 
-        /* Header Actions */
+        /* Header Actions - FIXED for mobile */
         .header-actions {
             display: flex;
             align-items: center;
+            margin-left: 10px;
         }
 
         .whatsapp-btn {
             background: #25D366;
             color: white;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
@@ -145,7 +147,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            white-space: nowrap; /* Prevents line break */
         }
 
         .whatsapp-btn i {
@@ -632,7 +634,7 @@
             transform: scale(1.05);
         }
 
-        /* Mobile Responsive */
+        /* Mobile Responsive - UPDATED to match homepage exactly */
         @media (max-width: 900px) {
             .mobile-menu-btn {
                 display: block;
@@ -682,7 +684,6 @@
 
             .logo-text p {
                 font-size: 9px;
-                display: block;
             }
 
             .whatsapp-btn {
@@ -717,7 +718,7 @@
 
         @media (max-width: 480px) {
             .logo-container {
-                gap: 6px;
+                gap: 8px;
             }
 
             .logo-container img {
@@ -731,7 +732,7 @@
             .logo-text p {
                 font-size: 8px;
                 letter-spacing: 1px;
-                display: block;
+                display: block; /* Keep tagline visible */
             }
 
             .whatsapp-btn {
@@ -739,7 +740,7 @@
             }
 
             .whatsapp-btn span {
-                display: none;
+                display: none; /* Hide text on very small screens */
             }
 
             .whatsapp-btn i {
@@ -772,18 +773,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header - EXACT copy from homepage -->
+    <!-- Header - UPDATED to match homepage exactly -->
     <div class="header">
         <div class="header-container">
             <div class="logo-container">
-                <img src="images/adedayologo.PNG" alt="Adedayo Aremu Autos Logo">
+                <img src="images/aaa_logo.PNG" alt="Adedayo Aremu Autos Logo">
                 <div class="logo-text">
                     <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
                     <p>PREMIUM CARS • RENTAL • FINANCING</p>
                 </div>
             </div>
             
-            <!-- Mobile Menu Button -->
+            <!-- Mobile Menu Button (appears before WhatsApp on mobile) -->
             <div class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
             </div>
@@ -965,7 +966,7 @@
             <div class="footer-grid">
                 <div class="footer-about">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                        <img src="images/adedayologo.PNG" alt="Logo" style="height: 45px;">
+                        <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
                         <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
                     </div>
                     <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
