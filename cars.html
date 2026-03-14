@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Cars for Sale - Adedayo Aremu Autos</title>
     <style>
-        /* All your existing CSS remains exactly the same */
+        /* ALL YOUR EXISTING CSS REMAINS EXACTLY THE SAME */
         * {
             margin: 0;
             padding: 0;
@@ -18,7 +18,6 @@
             color: #ffffff;
         }
 
-        /* Premium Variables - Same as homepage */
         :root {
             --primary: #c5a059;
             --primary-dark: #a88642;
@@ -32,7 +31,6 @@
             --shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* Header Section - EXACT same as homepage */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
@@ -90,7 +88,6 @@
             font-weight: 500;
         }
 
-        /* Navigation */
         .nav-menu {
             display: flex;
             gap: 25px;
@@ -129,7 +126,6 @@
             color: var(--primary);
         }
 
-        /* Header Actions */
         .header-actions {
             display: flex;
             align-items: center;
@@ -161,7 +157,6 @@
             box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
 
-        /* Mobile Menu Button */
         .mobile-menu-btn {
             display: none;
             background: transparent;
@@ -179,7 +174,6 @@
             color: var(--primary);
         }
 
-        /* Page Header - Cars page specific */
         .page-header {
             margin-top: 90px;
             padding: 60px 20px 30px;
@@ -204,7 +198,6 @@
             margin: 0 auto;
         }
 
-        /* Filters Section */
         .filters-section {
             padding: 40px 20px;
             background: var(--card-bg);
@@ -303,7 +296,6 @@
             color: var(--primary);
         }
 
-        /* Active Filters */
         .active-filters {
             max-width: 1400px;
             margin: 20px auto 0;
@@ -334,7 +326,6 @@
             color: white;
         }
 
-        /* Results Bar */
         .results-bar {
             max-width: 1400px;
             margin: 30px auto 20px;
@@ -374,7 +365,6 @@
             cursor: pointer;
         }
 
-        /* Cars Grid */
         .cars-listing {
             padding: 0 20px 60px;
             max-width: 1400px;
@@ -537,7 +527,6 @@
             background: #128C7E;
         }
 
-        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
@@ -566,7 +555,6 @@
             color: #0a0a0a;
         }
 
-        /* No Results */
         .no-results {
             text-align: center;
             padding: 60px 20px;
@@ -579,7 +567,7 @@
             margin-bottom: 20px;
         }
 
-        /* Currency Selector in Footer - NEW */
+        /* Currency Selector in Footer */
         .footer-currency {
             margin-bottom: 20px;
         }
@@ -617,7 +605,7 @@
             font-size: 18px;
         }
 
-        /* Country Notification - NEW */
+        /* Country Notification */
         .country-notification {
             position: fixed;
             bottom: 30px;
@@ -733,7 +721,6 @@
             }
         }
 
-        /* Footer - EXACT same as homepage with currency selector added */
         .footer {
             background: #050505;
             padding: 40px 20px 20px;
@@ -847,7 +834,6 @@
             color: var(--primary);
         }
 
-        /* WhatsApp Float */
         .whatsapp-float {
             position: fixed;
             bottom: 20px;
@@ -876,7 +862,6 @@
             transform: scale(1.05);
         }
 
-        /* Mobile Responsive */
         @media (max-width: 900px) {
             .mobile-menu-btn {
                 display: block;
@@ -965,7 +950,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header - EXACT same as homepage (UNTOUCHED) -->
+    <!-- Header - EXACT same as homepage -->
     <div class="header">
         <div class="header-container">
             <div class="logo-container">
@@ -976,7 +961,6 @@
                 </div>
             </div>
             
-            <!-- Mobile Menu Button -->
             <div class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
             </div>
@@ -999,13 +983,11 @@
         </div>
     </div>
 
-    <!-- Page Header (UNTOUCHED) -->
     <div class="page-header">
         <h1>Cars for <span>Sale</span></h1>
         <p>Browse our collection of premium, verified vehicles</p>
     </div>
 
-    <!-- Filters Section (UNTOUCHED) -->
     <div class="filters-section">
         <div class="filters-container">
             <div class="filters-grid">
@@ -1074,11 +1056,9 @@
             </div>
         </div>
         
-        <!-- Active Filters Tags -->
         <div class="active-filters" id="activeFilters"></div>
     </div>
 
-    <!-- Results Bar (UNTOUCHED) -->
     <div class="results-bar">
         <div class="results-count">
             Showing <span id="showingCount">1-6</span> of <span id="totalCount">12</span> vehicles
@@ -1095,13 +1075,9 @@
         </div>
     </div>
 
-    <!-- Cars Grid (prices updated with data attributes) -->
     <div class="cars-listing">
-        <div class="cars-grid" id="cars-container">
-            <!-- Cars will be loaded here -->
-        </div>
+        <div class="cars-grid" id="cars-container"></div>
         
-        <!-- No Results Message -->
         <div class="no-results" id="noResults" style="display: none;">
             <i class="fas fa-car"></i>
             <h3>No vehicles found</h3>
@@ -1109,7 +1085,6 @@
             <button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 20px;">View All Cars</button>
         </div>
         
-        <!-- Pagination (UNTOUCHED) -->
         <div class="pagination">
             <a href="#" class="page-link active">1</a>
             <a href="#" class="page-link">2</a>
@@ -1119,7 +1094,6 @@
         </div>
     </div>
 
-    <!-- Footer - UPDATED with Currency Selector (everything else untouched) -->
     <div class="footer">
         <div class="footer-container">
             <div class="footer-grid">
@@ -1160,10 +1134,10 @@
                     </ul>
                 </div>
                 
-                <!-- Currency Selector - NEW (added as a new column) -->
+                <!-- Currency Selector -->
                 <div class="footer-currency">
                     <h4>Currency</h4>
-                    <div class="currency-options">
+                    <div class="currency-options" id="currencyOptions">
                         <a href="#" class="currency-option" data-currency="NGN" data-symbol="₦">
                             <span>🇳🇬</span> NGN (₦)
                         </a>
@@ -1191,7 +1165,6 @@
         </div>
     </div>
 
-    <!-- Country Notification - NEW -->
     <div class="country-notification" id="countryNotification" style="display: none;">
         <div class="notification-content">
             <i class="fas fa-globe"></i>
@@ -1207,16 +1180,13 @@
         </div>
     </div>
 
-    <!-- WhatsApp Float (UNTOUCHED) -->
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
         Chat with us
     </a>
 
     <script>
-        // ========== EXISTING CODE - COMPLETELY UNTOUCHED ==========
-        
-        // Enhanced car data with images
+        // ========== CAR DATA ==========
         const carsForSale = [
             {
                 name: "2020 Toyota Camry",
@@ -1316,7 +1286,15 @@
             }
         ];
 
-        // Display cars function - MODIFIED to include data attributes for currency conversion
+        // ========== EXCHANGE RATES ==========
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        // ========== DISPLAY CARS FUNCTION ==========
         function displayCars(cars) {
             const container = document.getElementById('cars-container');
             const noResults = document.getElementById('noResults');
@@ -1331,7 +1309,6 @@
                 
                 let html = '';
                 cars.forEach(car => {
-                    // Store original price for currency conversion
                     const monthlyValue = Math.round(car.priceValue * 0.03);
                     
                     html += `
@@ -1365,17 +1342,13 @@
                     `;
                 });
                 container.innerHTML = html;
-                
-                // After displaying cars, check for saved currency and apply it
-                applySavedCurrency();
             }
             
-            // Update counts
             document.getElementById('showingCount').textContent = `1-${cars.length}`;
             document.getElementById('totalCount').textContent = cars.length;
         }
 
-        // Filter function (UNTOUCHED)
+        // ========== FILTER FUNCTIONS ==========
         function applyFilters() {
             const brand = document.getElementById('brandFilter').value;
             const year = document.getElementById('yearFilter').value;
@@ -1386,7 +1359,6 @@
             
             let filteredCars = [...carsForSale];
             
-            // Apply filters
             if (brand !== 'all') {
                 filteredCars = filteredCars.filter(car => car.brand === brand);
             }
@@ -1408,7 +1380,6 @@
                 filteredCars = filteredCars.filter(car => car.fuel === fuel);
             }
             
-            // Apply sorting
             if (sort === 'price-low') {
                 filteredCars.sort((a, b) => a.priceValue - b.priceValue);
             } else if (sort === 'price-high') {
@@ -1423,7 +1394,6 @@
             updateActiveFilters();
         }
 
-        // Reset filters (UNTOUCHED)
         function resetFilters() {
             document.getElementById('brandFilter').value = 'all';
             document.getElementById('yearFilter').value = 'all';
@@ -1436,7 +1406,6 @@
             document.getElementById('activeFilters').innerHTML = '';
         }
 
-        // Update active filters tags (UNTOUCHED)
         function updateActiveFilters() {
             const filters = [];
             const brand = document.getElementById('brandFilter').value;
@@ -1466,10 +1435,98 @@
             }
         }
 
-        // Initialize with all cars
+        // ========== CURRENCY FUNCTIONS ==========
+        function convertPrices(targetCurrency, symbol) {
+            const rate = exchangeRates[targetCurrency] || 1;
+            
+            document.querySelectorAll('.car-price[data-price-ngn]').forEach(el => {
+                const ngnPrice = parseFloat(el.dataset.priceNgn);
+                const ngnMonthly = parseFloat(el.dataset.monthlyNgn);
+                
+                if (!isNaN(ngnPrice) && !isNaN(ngnMonthly)) {
+                    const convertedPrice = Math.round(ngnPrice * rate);
+                    const convertedMonthly = Math.round(ngnMonthly * rate);
+                    
+                    const formattedPrice = convertedPrice.toLocaleString();
+                    const formattedMonthly = convertedMonthly.toLocaleString();
+                    
+                    el.innerHTML = `${symbol}${formattedPrice}<small>${symbol}${formattedMonthly}/mo*</small>`;
+                }
+            });
+        }
+
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            // Save to localStorage
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            
+            // Convert prices
+            convertPrices(currency, symbol);
+            
+            // Update active state
+            setActiveCurrency(currency);
+            
+            // Hide notification
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            
+            if (savedCurrency) {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                // Default to NGN
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
+        }
+
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
+        }
+
+        // ========== INITIALIZATION ==========
         displayCars(carsForSale);
 
-        // Mobile Menu Toggle (UNTOUCHED)
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
 
@@ -1485,7 +1542,6 @@
             }
         });
 
-        // Close menu when clicking on a link (UNTOUCHED)
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -1498,92 +1554,18 @@
             });
         });
 
-        // ========== FIXED CURRENCY FUNCTIONS ==========
-
-        // Exchange rates
-        const exchangeRates = {
-            NGN: 1,
-            USD: 0.00065, // 1 NGN = 0.00065 USD
-            GBP: 0.00052, // 1 NGN = 0.00052 GBP
-            EUR: 0.00060, // 1 NGN = 0.00060 EUR
-        };
-
-        // Apply saved currency on page load
-        function applySavedCurrency() {
-            const savedCurrency = localStorage.getItem('manualCurrency');
-            if (savedCurrency && savedCurrency !== 'NGN') {
-                let symbol = '₦';
-                if (savedCurrency === 'USD') symbol = '$';
-                else if (savedCurrency === 'GBP') symbol = '£';
-                else if (savedCurrency === 'EUR') symbol = '€';
-                
-                // Convert prices
-                convertPrices(savedCurrency, symbol);
-                
-                // Update active state in footer
-                document.querySelectorAll('.currency-option').forEach(opt => {
-                    opt.classList.remove('active');
-                    if (opt.dataset.currency === savedCurrency) {
-                        opt.classList.add('active');
-                    }
-                });
-            } else {
-                // Ensure NGN is active if no saved currency or saved is NGN
-                document.querySelectorAll('.currency-option').forEach(opt => {
-                    opt.classList.remove('active');
-                    if (opt.dataset.currency === 'NGN') {
-                        opt.classList.add('active');
-                    }
-                });
-            }
-        }
-
-        // Function to attach currency option listeners
-        function attachCurrencyListeners() {
-            document.querySelectorAll('.currency-option').forEach(option => {
-                // Remove any existing listeners
-                option.removeEventListener('click', handleCurrencyClick);
-                // Add fresh listener
-                option.addEventListener('click', handleCurrencyClick);
-            });
-        }
-
-        // Handle currency click
-        function handleCurrencyClick(e) {
-            e.preventDefault();
-            const currency = this.dataset.currency;
-            const symbol = this.dataset.symbol;
-            
-            // Convert prices
-            convertPrices(currency, symbol);
-            
-            // Update active state
-            document.querySelectorAll('.currency-option').forEach(opt => {
-                opt.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            // Save choice
-            localStorage.setItem('currencyChoice', 'manual');
-            localStorage.setItem('manualCurrency', currency);
-            
-            // Hide notification if visible
-            document.getElementById('countryNotification').style.display = 'none';
-        }
-
-        // Initialize everything when DOM is ready
+        // Page Load Initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Attach listeners to currency options
+            // Attach currency listeners
             attachCurrencyListeners();
             
-            // Apply saved currency preference
-            applySavedCurrency();
+            // Load saved currency preference
+            loadSavedCurrency();
             
-            // Check if user has already made a currency choice
+            // Check for country detection
             const currencyChoice = localStorage.getItem('currencyChoice');
-            if (currencyChoice === 'dismissed') return;
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
             
-            // Detect user's country
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
@@ -1608,75 +1590,18 @@
                         currencyCode = 'EUR';
                     }
                     
-                    // Only show notification if user is not in Nigeria, no manual currency set, and not dismissed
-                    if (countryCode !== 'NG' && !localStorage.getItem('manualCurrency') && !localStorage.getItem('currencyChoice')) {
+                    if (countryCode !== 'NG') {
                         document.getElementById('userCountry').textContent = country;
                         document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
                         document.getElementById('switchCurrencyCode').textContent = currencyCode;
                         document.getElementById('countryNotification').style.display = 'block';
                         
-                        // Store detected info
                         localStorage.setItem('detectedCurrency', currency);
                         localStorage.setItem('detectedSymbol', currencySymbol);
                     }
                 })
-                .catch(() => {
-                    // Silently fail if IP detection doesn't work
-                });
+                .catch(() => {});
         });
-
-        // Switch currency function (called from notification)
-        function switchCurrency() {
-            const currency = localStorage.getItem('detectedCurrency') || 'USD';
-            const symbol = localStorage.getItem('detectedSymbol') || '$';
-            
-            convertPrices(currency, symbol);
-            
-            // Update active state in footer
-            document.querySelectorAll('.currency-option').forEach(opt => {
-                opt.classList.remove('active');
-                if (opt.dataset.currency === currency) {
-                    opt.classList.add('active');
-                }
-            });
-            
-            // Save choice
-            localStorage.setItem('currencyChoice', 'accepted');
-            localStorage.setItem('manualCurrency', currency);
-            
-            // Dismiss notification
-            dismissNotification();
-        }
-
-        // Dismiss notification
-        function dismissNotification() {
-            document.getElementById('countryNotification').style.display = 'none';
-            localStorage.setItem('currencyChoice', 'dismissed');
-        }
-
-        // Convert prices function
-        function convertPrices(targetCurrency, symbol) {
-            const rate = exchangeRates[targetCurrency] || 1;
-            
-            document.querySelectorAll('.car-price[data-price-ngn]').forEach(el => {
-                const ngnPrice = parseFloat(el.dataset.priceNgn);
-                const ngnMonthly = parseFloat(el.dataset.monthlyNgn);
-                
-                if (!isNaN(ngnPrice) && !isNaN(ngnMonthly)) {
-                    const convertedPrice = Math.round(ngnPrice * rate);
-                    const convertedMonthly = Math.round(ngnMonthly * rate);
-                    
-                    // Format with commas
-                    const formattedPrice = convertedPrice.toLocaleString();
-                    const formattedMonthly = convertedMonthly.toLocaleString();
-                    
-                    el.innerHTML = `${symbol}${formattedPrice}<small>${symbol}${formattedMonthly}/mo*</small>`;
-                }
-            });
-        }
-
-        // Make sure to re-attach listeners after any dynamic content changes
-        // This is already handled in displayCars function
     </script>
 </body>
 </html>
