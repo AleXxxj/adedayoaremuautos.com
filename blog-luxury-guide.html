@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Luxury Cars vs Regular Cars: Is the Premium Worth It? - Adedayo Aremu Autos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+
+        :root {
+            --primary: #c5a059;
+            --primary-dark: #a88642;
+            --primary-light: #d4b57a;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111111;
+            --card-hover: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #888888;
+            --border: #222222;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Header Section - Same as homepage */
+        .header {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 12px 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .logo-container img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            margin: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+            color: white;
+        }
+
+        .logo-text h1 span {
+            color: var(--primary);
+            font-weight: 900;
+        }
+
+        .logo-text p {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 3px 0 0;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .whatsapp-btn i {
+            font-size: 18px;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+                        url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+        }
+
+        .post-header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .post-category {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .post-header h1 {
+            font-size: clamp(36px, 6vw, 56px);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .post-header h1 span {
+            color: var(--primary);
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: var(--text-muted);
+            font-size: 16px;
+            flex-wrap: wrap;
+        }
+
+        .post-meta i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        /* Blog Post Content */
+        .blog-container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .blog-content {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .blog-content h2 {
+            font-size: 28px;
+            margin: 40px 0 20px;
+            color: var(--primary);
+        }
+
+        .blog-content h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .blog-content h3 {
+            font-size: 22px;
+            margin: 30px 0 15px;
+            color: var(--text-light);
+        }
+
+        .blog-content p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .blog-content ul, .blog-content ol {
+            margin: 20px 0;
+            padding-left: 20px;
+            color: var(--text-light);
+        }
+
+        .blog-content li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .blog-content li::marker {
+            color: var(--primary);
+        }
+
+        .blog-content blockquote {
+            background: rgba(197, 160, 89, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 30px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .blog-content blockquote p {
+            margin-bottom: 10px;
+        }
+
+        .blog-content blockquote cite {
+            display: block;
+            margin-top: 10px;
+            color: var(--primary);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .blog-image {
+            margin: 40px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .blog-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .blog-image figcaption {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Luxury vs Regular specific styles */
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .comparison-header-item {
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+        }
+
+        .comparison-header-item.feature {
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .comparison-header-item.luxury {
+            border-color: var(--primary);
+        }
+
+        .comparison-header-item i {
+            font-size: 30px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .comparison-header-item h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .comparison-row:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-feature {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .comparison-regular {
+            color: var(--text-muted);
+        }
+
+        .comparison-luxury {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .brand-showcase {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .brand-card {
+            text-align: center;
+            padding: 25px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .brand-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .brand-card i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .brand-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .brand-card p {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .cost-comparison {
+            background: linear-gradient(135deg, rgba(197, 160, 89, 0.1) 0%, rgba(0,0,0,0.2) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+
+        .cost-label {
+            color: var(--text-light);
+        }
+
+        .cost-regular {
+            color: var(--text-muted);
+            width: 100px;
+            text-align: right;
+        }
+
+        .cost-luxury {
+            color: var(--primary);
+            font-weight: 600;
+            width: 100px;
+            text-align: right;
+        }
+
+        .pros-cons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .pros-box, .cons-box {
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .pros-box {
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid #27ae60;
+        }
+
+        .cons-box {
+            background: rgba(192, 57, 43, 0.1);
+            border: 1px solid #c0392b;
+        }
+
+        .pros-box h4, .cons-box h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pros-box h4 {
+            color: #27ae60;
+        }
+
+        .cons-box h4 {
+            color: #c0392b;
+        }
+
+        .pros-box ul, .cons-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pros-box li, .cons-box li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .pros-box li::before {
+            content: '✓';
+            color: #27ae60;
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+        .cons-box li::before {
+            content: '✗';
+            color: #c0392b;
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+        .decision-tree {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            border: 1px solid var(--border);
+        }
+
+        .decision-question {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .decision-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .decision-option {
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .decision-option:hover {
+            border-color: var(--primary);
+            background: rgba(197, 160, 89, 0.05);
+        }
+
+        .decision-option h5 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .decision-option p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .popular-models {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .model-category {
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .model-category h4 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .model-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .model-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .model-list li:last-child {
+            border-bottom: none;
+        }
+
+        .model-name {
+            color: var(--text-light);
+        }
+
+        .model-price {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .testimonial {
+            background: rgba(197, 160, 89, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            border: 1px solid var(--primary);
+            position: relative;
+        }
+
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 80px;
+            color: rgba(197, 160, 89, 0.2);
+            font-family: serif;
+        }
+
+        .testimonial p {
+            font-style: italic;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .testimonial-author img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .testimonial-author h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .testimonial-author p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 0;
+            font-style: normal;
+        }
+
+        /* Author Box */
+        .author-box {
+            display: flex;
+            gap: 30px;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin: 60px 0 30px;
+        }
+
+        .author-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+        }
+
+        .author-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .author-info h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .author-info h3 span {
+            color: var(--primary);
+        }
+
+        .author-info p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .author-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .author-social a {
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .author-social a:hover {
+            color: var(--primary);
+        }
+
+        /* Related Posts */
+        .related-posts {
+            margin: 60px 0;
+        }
+
+        .related-posts h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .related-posts h2 span {
+            color: var(--primary);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .related-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .related-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .related-image {
+            height: 150px;
+            overflow: hidden;
+        }
+
+        .related-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .related-card:hover .related-image img {
+            transform: scale(1.1);
+        }
+
+        .related-content {
+            padding: 20px;
+        }
+
+        .related-content h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .related-content h4 a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .related-content h4 a:hover {
+            color: var(--primary);
+        }
+
+        .related-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Share Section */
+        .share-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+        .share-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .share-tag {
+            padding: 8px 15px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .share-tag:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+        }
+
+        .share-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .share-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .share-icon:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin: 60px 0;
+        }
+
+        .comments-section h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .comments-section h2 span {
+            color: var(--primary);
+        }
+
+        .comment-form {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        .comment-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .comment-form input,
+        .comment-form textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .comment-form input:focus,
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .comment-form textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .comment-form button {
+            padding: 15px 30px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50px;
+            color: #0a0a0a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .comment-form button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .comment {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .comment-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .comment-header h4 {
+            color: var(--primary);
+        }
+
+        .comment-date {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .comment-content p {
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .comment-reply {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .comment-reply:hover {
+            gap: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #050505;
+            padding: 40px 20px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-about p {
+            color: var(--text-muted);
+            margin: 15px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: #0a0a0a;
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4,
+        .footer-contact h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-contact p {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--primary);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .whatsapp-float i {
+            font-size: 20px;
+        }
+
+        .whatsapp-float:hover {
+            background: #128C7E;
+            transform: scale(1.05);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .brand-showcase {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pros-cons-grid,
+            .popular-models {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .comparison-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .comparison-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .brand-showcase {
+                grid-template-columns: 1fr;
+            }
+
+            .decision-options {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/aaa_logo.PNG" alt="Adedayo Aremu Autos Logo">
+                <div class="logo-text">
+                    <h1>ADEDAYO AREMU <span>AUTOS</span></h1>
+                    <p>PREMIUM CARS • RENTAL • FINANCING</p>
+                </div>
+            </div>
+            
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html">Home</a>
+                <a href="cars.html">Buy Cars</a>
+                <a href="rentals.html">Rentals</a>
+                <a href="financing.html">Financing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="blog.html">Blog</a>
+            </div>
+            
+            <div class="header-actions">
+                <a href="https://wa.me/2348012345678" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Chat Now</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Post Header -->
+    <div class="post-header">
+        <div class="post-header-content">
+            <span class="post-category">🏎️ Luxury Cars</span>
+            <h1>Luxury Cars vs Regular Cars: <span>Is the Premium Worth It?</span></h1>
+            <div class="post-meta">
+                <span><i class="fas fa-calendar"></i> January 15, 2024</span>
+                <span><i class="fas fa-clock"></i> 7 min read</span>
+                <span><i class="fas fa-user"></i> By Adedayo Aremu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Content -->
+    <div class="blog-container">
+        <div class="blog-content">
+            <p>The debate is as old as the automotive industry itself: is it worth paying a premium for a luxury vehicle, or does a regular car offer everything you need at a fraction of the cost? In Nigeria, where brands like Lexus, Mercedes-Benz, and BMW command significant respect (and prices), this question is particularly relevant.</p>
+            
+            <p>In this comprehensive comparison, we'll examine the real differences between luxury and regular vehicles, helping you decide which category truly fits your needs, budget, and lifestyle.</p>
+
+            <h2>The Price Gap: What Are You Really Paying For?</h2>
+            <p>Let's start with the obvious: luxury cars cost significantly more. But where does that money actually go? Understanding this helps determine if the premium is justified for your situation.</p>
+
+            <div class="comparison-header">
+                <div class="comparison-header-item feature">Feature</div>
+                <div class="comparison-header-item">Regular Car</div>
+                <div class="comparison-header-item luxury">Luxury Car</div>
+            </div>
+
+            <div class="comparison-row">
+                <div class="comparison-feature">Base Price (New)</div>
+                <div class="comparison-regular">₦8M - ₦15M</div>
+                <div class="comparison-luxury">₦25M - ₦80M+</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-feature">Base Price (Tokunbo)</div>
+                <div class="comparison-regular">₦4M - ₦10M</div>
+                <div class="comparison-luxury">₦12M - ₦35M</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-feature">Annual Maintenance</div>
+                <div class="comparison-regular">₦150k - ₦300k</div>
+                <div class="comparison-luxury">₦500k - ₦1.5M</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-feature">Insurance (Annual)</div>
+                <div class="comparison-regular">₦100k - ₦200k</div>
+                <div class="comparison-luxury">₦300k - ₦800k</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-feature">Fuel Consumption</div>
+                <div class="comparison-regular">12-18 km/l</div>
+                <div class="comparison-luxury">6-12 km/l</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-feature">Depreciation (5 years)</div>
+                <div class="comparison-regular">40-50%</div>
+                <div class="comparison-luxury">50-60%</div>
+            </div>
+
+            <h2>What You Get with a Luxury Car</h2>
+            <p>Luxury vehicles justify their higher price tags through several key areas:</p>
+
+            <h3>1. Superior Materials and Build Quality</h3>
+            <p>Step inside a Lexus RX350 and you're immediately struck by the difference. Where a regular car uses hard plastics, luxury cars employ soft-touch leather, genuine wood trim, and metal accents. The difference isn't just aesthetic – these materials last longer and maintain their appearance better over time.</p>
+
+            <div class="blog-image">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Luxury car interior">
+                <figcaption>Luxury car interiors feature premium materials and exceptional craftsmanship</figcaption>
+            </div>
+
+            <h3>2. Advanced Technology and Features</h3>
+            <p>Luxury brands typically pioneer automotive technology. Features that eventually trickle down to regular cars often appear first in luxury vehicles:</p>
+            <ul>
+                <li><strong>Advanced Driver Assistance Systems:</strong> Adaptive cruise control, lane keeping, automatic emergency braking</li>
+                <li><strong>Premium Audio:</strong> Mark Levinson, Bowers & Wilkins, or Bang & Olufsen sound systems</li>
+                <li><strong>Comfort Features:</strong> Heated and ventilated seats, massaging functions, quad-zone climate control</li>
+                <li><strong>Lighting:</strong> Adaptive LED matrix headlights that illuminate curves without blinding oncoming traffic</li>
+                <li><strong>Infotainment:</strong> Larger screens, better resolution, more intuitive interfaces</li>
+            </ul>
+
+            <h3>3. Performance and Engineering</h3>
+            <p>Luxury vehicles often offer:</p>
+            <ul>
+                <li><strong>More Powerful Engines:</strong> V6 and V8 options with significantly more horsepower</li>
+                <li><strong>Advanced Suspension:</strong> Air suspension systems that adapt to road conditions</li>
+                <li><strong>Better Sound Insulation:</strong> Double-pane glass, extra sound deadening for whisper-quiet cabins</li>
+                <li><strong>Smoother Ride:</strong> Engineered to absorb road imperfections that regular cars transmit to passengers</li>
+            </ul>
+
+            <h3>4. Prestige and Status</h3>
+            <p>In Nigeria, the psychological aspect cannot be ignored. Luxury vehicles carry social cachet that regular cars don't. For business professionals, arriving in a Mercedes-Benz or Lexus can influence perceptions and open doors.</p>
+
+            <h2>Leading Luxury Brands in Nigeria</h2>
+
+            <div class="brand-showcase">
+                <div class="brand-card">
+                    <i class="fas fa-car"></i>
+                    <h4>Lexus</h4>
+                    <p>The pinnacle of Japanese luxury. Unmatched reliability with premium comfort. Toyota parts availability makes maintenance easier than European rivals.</p>
+                </div>
+                <div class="brand-card">
+                    <i class="fas fa-car"></i>
+                    <h4>Mercedes-Benz</h4>
+                    <p>The benchmark for luxury. Unparalleled prestige, innovative technology, and exceptional ride comfort. Higher maintenance costs but rewarding ownership.</p>
+                </div>
+                <div class="brand-card">
+                    <i class="fas fa-car"></i>
+                    <h4>BMW</h4>
+                    <p>The ultimate driving machine. Sporty handling, powerful engines, and driver-focused design. Appeals to those who enjoy driving.</p>
+                </div>
+                <div class="brand-card">
+                    <i class="fas fa-car"></i>
+                    <h4>Range Rover</h4>
+                    <p>The king of luxury SUVs. Unmatched off-road capability combined with opulent interiors. The ultimate status symbol in Nigeria.</p>
+                </div>
+            </div>
+
+            <h2>Popular Models Comparison</h2>
+
+            <div class="popular-models">
+                <div class="model-category">
+                    <h4>Entry-Level Luxury</h4>
+                    <ul class="model-list">
+                        <li>
+                            <span class="model-name">Lexus ES350</span>
+                            <span class="model-price">₦18-25M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">Mercedes C-Class</span>
+                            <span class="model-price">₦16-22M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">BMW 3 Series</span>
+                            <span class="model-price">₦15-21M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">Audi A4</span>
+                            <span class="model-price">₦14-20M</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="model-category">
+                    <h4>Mid-Size Luxury</h4>
+                    <ul class="model-list">
+                        <li>
+                            <span class="model-name">Lexus RX350</span>
+                            <span class="model-price">₦22-30M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">Mercedes E-Class</span>
+                            <span class="model-price">₦25-35M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">BMW 5 Series</span>
+                            <span class="model-price">₦23-32M</span>
+                        </li>
+                        <li>
+                            <span class="model-name">Range Rover Velar</span>
+                            <span class="model-price">₦30-40M</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>The Case for Regular Cars</h2>
+            <p>Before you rush to finance that Lexus, consider what regular cars offer:</p>
+
+            <h3>1. Lower Total Cost of Ownership</h3>
+            <p>A Toyota Camry costs significantly less to buy, maintain, insure, and fuel than a Lexus ES350 – despite sharing many mechanical components. Over 5 years, the savings can easily exceed ₦3-5 million.</p>
+
+            <h3>2. Parts Availability</h3>
+            <p>In Nigeria, parts for Toyota, Honda, and other regular brands are everywhere. You can find brake pads, filters, and even major components in almost any town. Luxury parts often require special orders and can take weeks to arrive.</p>
+
+            <h3>3. Mechanic Familiarity</h3>
+            <p>Every roadside mechanic in Nigeria knows how to work on a Toyota Corolla. Luxury vehicles require specialized knowledge, diagnostic equipment, and trained technicians – which means higher labor costs and fewer options for service.</p>
+
+            <h3>4. Better Fuel Economy</h3>
+            <p>With fuel prices continually rising, the superior fuel efficiency of regular cars becomes increasingly important. A Honda Accord might achieve 12-14 km/l on the highway, while a Lexus ES350 manages 8-10 km/l at best.</p>
+
+            <h3>5. Lower Insurance Premiums</h3>
+            <p>Insuring a luxury vehicle costs significantly more – both for comprehensive coverage and third-party. The higher repair costs and theft risk drive up premiums.</p>
+
+            <h2>The Pros and Cons</h2>
+
+            <div class="pros-cons-grid">
+                <div class="pros-box">
+                    <h4><i class="fas fa-thumbs-up"></i> Luxury Car Advantages</h4>
+                    <ul>
+                        <li>Superior comfort and ride quality</li>
+                        <li>Advanced technology and safety features</li>
+                        <li>Prestige and status recognition</li>
+                        <li>Better resale value in premium segment</li>
+                        <li>Quieter, more refined driving experience</li>
+                        <li>More powerful engine options</li>
+                        <li>Exclusive ownership experience</li>
+                    </ul>
+                </div>
+                <div class="cons-box">
+                    <h4><i class="fas fa-thumbs-down"></i> Luxury Car Disadvantages</h4>
+                    <ul>
+                        <li>Much higher purchase price</li>
+                        <li>Expensive maintenance and repairs</li>
+                        <li>Higher fuel consumption</li>
+                        <li>Costly insurance premiums</li>
+                        <li>Parts can be difficult to source</li>
+                        <li>Requires specialized mechanics</li>
+                        <li>Higher depreciation in absolute terms</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pros-cons-grid">
+                <div class="pros-box">
+                    <h4><i class="fas fa-thumbs-up"></i> Regular Car Advantages</h4>
+                    <ul>
+                        <li>Affordable purchase price</li>
+                        <li>Inexpensive maintenance</li>
+                        <li>Parts available everywhere</li>
+                        <li>Better fuel economy</li>
+                        <li>Lower insurance costs</li>
+                        <li>Any mechanic can service them</li>
+                        <li>More practical for daily use</li>
+                    </ul>
+                </div>
+                <div class="cons-box">
+                    <h4><i class="fas fa-thumbs-down"></i> Regular Car Disadvantages</h4>
+                    <ul>
+                        <li>Basic interior materials</li>
+                        <li>Fewer luxury features</li>
+                        <li>Less powerful engines</li>
+                        <li>More road noise at highway speeds</li>
+                        <li>Less prestigious image</li>
+                        <li>Fewer advanced safety features</li>
+                        <li>Lower resale value in premium segment</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>Real Cost Comparison: 5-Year Ownership</h2>
+            
+            <div class="cost-comparison">
+                <div class="cost-item">
+                    <span class="cost-label">Toyota Camry (Regular)</span>
+                    <span class="cost-regular">Purchase: ₦12M</span>
+                    <span class="cost-luxury"></span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Maintenance (5 yrs)</span>
+                    <span class="cost-regular">₦1.2M</span>
+                    <span class="cost-luxury"></span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Insurance (5 yrs)</span>
+                    <span class="cost-regular">₦750k</span>
+                    <span class="cost-luxury"></span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Fuel (5 yrs)</span>
+                    <span class="cost-regular">₦2.5M</span>
+                    <span class="cost-luxury"></span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label"><strong>Total Cost</strong></span>
+                    <span class="cost-regular"><strong>₦16.45M</strong></span>
+                    <span class="cost-luxury"></span>
+                </div>
+                <div class="cost-item" style="border-top: 2px solid var(--primary); margin-top: 10px; padding-top: 20px;">
+                    <span class="cost-label">Lexus ES350 (Luxury)</span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury">Purchase: ₦22M</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Maintenance (5 yrs)</span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury">₦3.5M</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Insurance (5 yrs)</span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury">₦2M</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Fuel (5 yrs)</span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury">₦3.8M</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label"><strong>Total Cost</strong></span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury"><strong>₦31.3M</strong></span>
+                </div>
+                <div class="cost-item" style="background: rgba(197, 160, 89, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <span class="cost-label"><strong>Difference</strong></span>
+                    <span class="cost-regular"></span>
+                    <span class="cost-luxury"><strong>₦14.85M more for luxury</strong></span>
+                </div>
+            </div>
+
+            <h2>Decision Guide: Which One Is Right for You?</h2>
+            
+            <div class="decision-tree">
+                <div class="decision-question">Ask yourself these questions:</div>
+                <div class="decision-options">
+                    <div class="decision-option">
+                        <h5>What's your budget?</h5>
+                        <p>If you have ₦15M+ to spend and can afford higher running costs, luxury becomes feasible. Otherwise, a regular car offers better value.</p>
+                    </div>
+                    <div class="decision-option">
+                        <h5>How important is prestige?</h5>
+                        <p>For business professionals where image matters, a luxury car can be a worthwhile investment in your brand.</p>
+                    </div>
+                    <div class="decision-option">
+                        <h5>Do you value comfort?</h5>
+                        <p>If you spend hours in traffic or take long road trips, the superior comfort of luxury cars might justify the cost.</p>
+                    </div>
+                    <div class="decision-option">
+                        <h5>Can you handle maintenance?</h5>
+                        <p>Luxury cars require deeper pockets for repairs. If unexpected ₦500k+ bills would strain your finances, stick with regular.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Smart Compromises: Near-Luxury Options</h2>
+            <p>If you want some premium features without the full luxury tax, consider these "near-luxury" vehicles:</p>
+            <ul>
+                <li><strong>Toyota Avalon:</strong> Camry-based but significantly more luxurious, often called the "poor man's Lexus"</li>
+                <li><strong>Honda Accord Touring:</strong> Top-trim Accord with leather, premium audio, and most luxury features</li>
+                <li><strong>Mazda CX-9:</strong> Interior quality approaching luxury levels at a fraction of the price</li>
+                <li><strong>Volkswagen Passat:</strong> German engineering with premium feel at mainstream prices</li>
+                <li><strong>Kia K5/K8:</strong> Surprisingly upscale interiors with long warranty coverage</li>
+            </ul>
+
+            <h2>The Adedayo Aremu Autos Perspective</h2>
+            <p>After helping hundreds of Nigerians find their perfect vehicles, here's our honest advice:</p>
+            
+            <div class="testimonial">
+                <p>"I've seen customers stretch their budgets for a luxury car only to struggle with maintenance costs. I've also seen professionals whose luxury vehicles opened doors that regular cars couldn't. The right choice depends entirely on your personal circumstances, priorities, and financial reality.</p>
+                <p>My recommendation? Buy the best car you can comfortably afford to own – not just purchase. A well-maintained Toyota will serve you better than a neglected Mercedes."</p>
+                <div class="testimonial-author">
+                    <img src="images/CEO.PNG" alt="Adedayo Aremu">
+                    <div>
+                        <h4>Adedayo Aremu</h4>
+                        <p>Founder, Adedayo Aremu Autos</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Frequently Asked Questions</h2>
+
+            <h3>Is Lexus really worth more than Toyota?</h3>
+            <p>Mechanically, Lexus vehicles share much with Toyotas, which means reliability is excellent. You're paying for the luxury interior, better sound insulation, more features, and the prestige of the brand. Whether that's worth the premium is personal.</p>
+
+            <h3>Which luxury brand holds value best in Nigeria?</h3>
+            <p>Lexus generally holds value best due to its reputation for reliability and easier parts access. Mercedes-Benz also maintains strong resale value due to brand prestige, especially the G-Wagon and S-Class.</p>
+
+            <h3>Are luxury cars more expensive to insure?</h3>
+            <p>Significantly. Insurance premiums are based on the vehicle's value and repair costs. Luxury cars cost 2-3 times more to insure comprehensively than regular cars of similar age.</p>
+
+            <h3>Can I maintain a luxury car myself?</h3>
+            <p>Basic maintenance like oil changes and filter replacements are possible, but many repairs require specialized tools and diagnostic equipment. Budget for professional service.</p>
+
+            <h3>What's the sweet spot for used luxury cars?</h3>
+            <p>3-5 year old luxury cars offer the best value. They've taken the initial depreciation hit but still have plenty of life left. Lexus vehicles, in particular, are known for longevity.</p>
+
+            <h3>Should I buy a luxury car for business?</h3>
+            <p>If your clients expect a certain image and it helps close deals, a luxury car can be a business investment. Many business owners find that the perception of success helps attract high-value clients.</p>
+
+            <blockquote>
+                <p>"The difference between a luxury car and a regular car isn't just about getting from point A to point B – it's about how you feel during the journey and what message your vehicle sends when you arrive."</p>
+                <cite>- Adedayo Aremu, Founder</cite>
+            </blockquote>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <div class="share-tags">
+                    <a href="#" class="share-tag">#LuxuryCars</a>
+                    <a href="#" class="share-tag">#CarBuying</a>
+                    <a href="#" class="share-tag">#Lexus</a>
+                    <a href="#" class="share-tag">#MercedesBenz</a>
+                </div>
+                <div class="share-icons">
+                    <a href="#" class="share-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="share-icon"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <!-- Author Box -->
+            <div class="author-box">
+                <div class="author-image">
+                    <img src="images/CEO.PNG" alt="Adedayo Aremu">
+                </div>
+                <div class="author-info">
+                    <h3><span>Adedayo Aremu</span></h3>
+                    <p>Founder & CEO of Adedayo Aremu Autos. With over 5 years of experience in the Nigerian automotive industry, Adedayo is passionate about helping customers find the perfect vehicles for their needs through transparent, customer-centered service.</p>
+                    <div class="author-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            <div class="related-posts">
+                <h2>Related <span>Articles</span></h2>
+                <div class="related-grid">
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="SUV guide">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-suv-guide.html">Top 5 SUVs for Nigerian Roads</a></h4>
+                            <div class="related-meta">March 5, 2024</div>
+                        </div>
+                    </div>
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car financing">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-finance-guide.html">How to Finance Your First Car</a></h4>
+                            <div class="related-meta">Feb 20, 2024</div>
+                        </div>
+                    </div>
+                    <div class="related-card">
+                        <div class="related-image">
+                            <img src="images/foreign_used.JPG" alt="Foreign used cars">
+                        </div>
+                        <div class="related-content">
+                            <h4><a href="blog-foreign-used.html">A Complete Guide to Foreign Used Cars</a></h4>
+                            <div class="related-meta">Feb 10, 2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h2>Comments <span>(5)</span></h2>
+                
+                <form class="comment-form">
+                    <div class="comment-form-row">
+                        <input type="text" placeholder="Your Name *" required>
+                        <input type="email" placeholder="Your Email *" required>
+                    </div>
+                    <textarea placeholder="Your Comment *" required></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Kayode Martins</h4>
+                            <span class="comment-date">3 days ago</span>
+                        </div>
+                        <p>This is exactly the analysis I needed! I've been torn between a Lexus RX350 and a Toyota Highlander for months. The 5-year cost comparison really opened my eyes. Going with the Highlander and using the savings for my kids' school fees. Thanks!</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Folake Adeyemi</h4>
+                            <span class="comment-date">5 days ago</span>
+                        </div>
+                        <p>I've owned both a Mercedes C-Class and a Honda Accord. The Mercedes was wonderful but every visit to the mechanic was painful. My Accord has been almost as comfortable for daily driving and costs half as much to maintain. Great article!</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Emeka Okafor</h4>
+                            <span class="comment-date">1 week ago</span>
+                        </div>
+                        <p>Question: What about maintenance costs for Lexus vs Mercedes? I hear Lexus is more reliable but is the maintenance significantly cheaper?</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Chioma Nnamdi</h4>
+                            <span class="comment-date">2 weeks ago</span>
+                        </div>
+                        <p>I'm a real estate agent and clients definitely react differently when I pull up in my Lexus vs when I used to drive a Corolla. For my business, the luxury car has paid for itself. But I agree it's not for everyone!</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/62.jpg" alt="User">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <h4>Tunde Balogun</h4>
+                            <span class="comment-date">3 weeks ago</span>
+                        </div>
+                        <p>The near-luxury options section is gold! I test drove an Avalon and was shocked at how close it feels to a Lexus ES. Saved myself about ₦8M and still feel like I'm driving something special.</p>
+                        <a href="#" class="comment-reply">Reply <i class="fas fa-reply"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
+                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                    </div>
+                    <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cars.html">Buy Cars</a></li>
+                        <li><a href="rentals.html">Rentals</a></li>
+                        <li><a href="financing.html">Financing</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Vehicles</h4>
+                    <ul>
+                        <li><a href="#">Toyota</a></li>
+                        <li><a href="#">Lexus</a></li>
+                        <li><a href="#">Honda</a></li>
+                        <li><a href="#">Mercedes-Benz</a></li>
+                        <li><a href="#">BMW</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-contact">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
+                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
+                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
+                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adedayo Aremu Autos. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Rental Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        Chat with us
+    </a>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
