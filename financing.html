@@ -514,7 +514,7 @@
             color: #0a0a0a;
         }
 
-        /* Application Form */
+        /* Application Form - UPDATED with country selector */
         .application-section {
             max-width: 1400px;
             margin: 80px auto;
@@ -572,6 +572,29 @@
 
         .form-group input::placeholder {
             color: var(--text-muted);
+        }
+
+        /* Country Selector Styles */
+        .country-select {
+            position: relative;
+        }
+
+        .country-select select {
+            appearance: none;
+            padding-left: 45px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c5a059' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .country-flag {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .btn {
@@ -1256,14 +1279,14 @@
         </div>
     </div>
 
-    <!-- Application Form -->
+    <!-- Application Form - UPDATED with Country Selector and Dynamic Placeholders -->
     <div class="application-section">
         <div class="section-title">
             <h2>Apply for <span>Financing</span></h2>
             <p>Fill out the form below and we'll get back to you within 24 hours</p>
         </div>
         
-        <form class="application-form" action="https://formspree.io/f/your-finance-form" method="POST">
+        <form class="application-form" id="financeForm" action="https://formspree.io/f/your-finance-form" method="POST">
             <div class="form-row">
                 <div class="form-group">
                     <label>Full Name *</label>
@@ -1271,7 +1294,7 @@
                 </div>
                 <div class="form-group">
                     <label>Phone Number *</label>
-                    <input type="tel" name="phone" placeholder="080 1234 5678" required>
+                    <input type="tel" name="phone" id="phoneInput" placeholder="080 1234 5678" required>
                 </div>
             </div>
             
@@ -1280,6 +1303,25 @@
                     <label>Email</label>
                     <input type="email" name="email" placeholder="john@example.com">
                 </div>
+                <div class="form-group country-select">
+                    <label>Country *</label>
+                    <span class="country-flag" id="selectedCountryFlag">🇳🇬</span>
+                    <select name="country" id="countrySelect" required onchange="updateFormPlaceholders()">
+                        <option value="NG" data-flag="🇳🇬" data-phone="080 1234 5678" data-currency="NGN" data-income="₦" data-down="₦">Nigeria</option>
+                        <option value="US" data-flag="🇺🇸" data-phone="(555) 123-4567" data-currency="USD" data-income="$" data-down="$">United States</option>
+                        <option value="GB" data-flag="🇬🇧" data-phone="07000 123456" data-currency="GBP" data-income="£" data-down="£">United Kingdom</option>
+                        <option value="CA" data-flag="🇨🇦" data-phone="(416) 555-0123" data-currency="CAD" data-income="$" data-down="$">Canada</option>
+                        <option value="AU" data-flag="🇦🇺" data-phone="0400 123 456" data-currency="AUD" data-income="$" data-down="$">Australia</option>
+                        <option value="DE" data-flag="🇩🇪" data-phone="0151 1234567" data-currency="EUR" data-income="€" data-down="€">Germany</option>
+                        <option value="FR" data-flag="🇫🇷" data-phone="06 12 34 56 78" data-currency="EUR" data-income="€" data-down="€">France</option>
+                        <option value="ZA" data-flag="🇿🇦" data-phone="071 123 4567" data-currency="ZAR" data-income="R" data-down="R">South Africa</option>
+                        <option value="KE" data-flag="🇰🇪" data-phone="0712 345678" data-currency="KES" data-income="KSh" data-down="KSh">Kenya</option>
+                        <option value="GH" data-flag="🇬🇭" data-phone="020 1234 567" data-currency="GHS" data-income="₵" data-down="₵">Ghana</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
                 <div class="form-group">
                     <label>Employment Status *</label>
                     <select name="employment" required>
@@ -1290,27 +1332,31 @@
                         <option>Contractor</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Monthly Income *</label>
+                    <select name="monthly_income" id="monthlyIncomeSelect" required>
+                        <option value="">Select range</option>
+                        <!-- Dynamically updated by JavaScript -->
+                    </select>
+                </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>Monthly Income *</label>
-                    <select name="monthly_income" required>
-                        <option value="">Select range</option>
-                        <option>Below ₦200,000</option>
-                        <option>₦200,000 - ₦500,000</option>
-                        <option>₦500,000 - ₦1,000,000</option>
-                        <option>Above ₦1,000,000</option>
+                    <label>Down Payment *</label>
+                    <select name="down_payment" id="downPaymentSelect" required>
+                        <option value="">Select amount</option>
+                        <!-- Dynamically updated by JavaScript -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Down Payment *</label>
-                    <select name="down_payment" required>
-                        <option value="">Select amount</option>
-                        <option>₦1,000,000 - ₦2,000,000</option>
-                        <option>₦2,000,000 - ₦3,000,000</option>
-                        <option>₦3,000,000 - ₦5,000,000</option>
-                        <option>Above ₦5,000,000</option>
+                    <label>Preferred Duration *</label>
+                    <select name="duration" required>
+                        <option value="">Select</option>
+                        <option>6 months</option>
+                        <option>12 months</option>
+                        <option>24 months</option>
+                        <option>36 months</option>
                     </select>
                 </div>
             </div>
@@ -1322,20 +1368,17 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>Preferred Duration *</label>
-                    <select name="duration" required>
-                        <option value="">Select</option>
-                        <option>6 months</option>
-                        <option>12 months</option>
-                        <option>24 months</option>
-                        <option>36 months</option>
-                    </select>
+                    <label>ID Number (Optional)</label>
+                    <input type="text" name="id_number" id="idInput" placeholder="National ID / Passport / Driver's License">
                 </div>
                 <div class="form-group">
-                    <label>BVN (Optional)</label>
-                    <input type="text" name="bvn" placeholder="Bank Verification Number">
+                    <label>BVN / SSN (Optional)</label>
+                    <input type="text" name="bvn_ssn" id="bvnInput" placeholder="Bank Verification Number">
                 </div>
             </div>
+            
+            <input type="hidden" name="currency" id="formCurrency" value="NGN">
+            <input type="hidden" name="country_code" id="formCountryCode" value="NG">
             
             <button type="submit" class="btn">
                 Submit Application <i class="fas fa-arrow-right"></i>
@@ -1438,305 +1481,555 @@
     </a>
 
     <script>
-    // ========== EXCHANGE RATES ==========
-    const exchangeRates = {
-        NGN: 1,
-        USD: 0.00065,
-        GBP: 0.00052,
-        EUR: 0.00060,
-    };
+        // ========== COUNTRY DATA ==========
+        const countryData = {
+            NG: {
+                flag: '🇳🇬',
+                phonePlaceholder: '080 1234 5678',
+                currency: 'NGN',
+                currencySymbol: '₦',
+                incomeRanges: [
+                    'Below ₦200,000',
+                    '₦200,000 - ₦500,000',
+                    '₦500,000 - ₦1,000,000',
+                    'Above ₦1,000,000'
+                ],
+                downPaymentRanges: [
+                    '₦1,000,000 - ₦2,000,000',
+                    '₦2,000,000 - ₦3,000,000',
+                    '₦3,000,000 - ₦5,000,000',
+                    'Above ₦5,000,000'
+                ],
+                idPlaceholder: 'National ID / Passport / Driver\'s License',
+                bvnPlaceholder: 'Bank Verification Number (BVN)'
+            },
+            US: {
+                flag: '🇺🇸',
+                phonePlaceholder: '(555) 123-4567',
+                currency: 'USD',
+                currencySymbol: '$',
+                incomeRanges: [
+                    'Below $2,000',
+                    '$2,000 - $5,000',
+                    '$5,000 - $10,000',
+                    'Above $10,000'
+                ],
+                downPaymentRanges: [
+                    '$5,000 - $10,000',
+                    '$10,000 - $20,000',
+                    '$20,000 - $30,000',
+                    'Above $30,000'
+                ],
+                idPlaceholder: 'Social Security Number (SSN)',
+                bvnPlaceholder: 'Driver\'s License Number'
+            },
+            GB: {
+                flag: '🇬🇧',
+                phonePlaceholder: '07000 123456',
+                currency: 'GBP',
+                currencySymbol: '£',
+                incomeRanges: [
+                    'Below £1,500',
+                    '£1,500 - £3,000',
+                    '£3,000 - £6,000',
+                    'Above £6,000'
+                ],
+                downPaymentRanges: [
+                    '£5,000 - £10,000',
+                    '£10,000 - £20,000',
+                    '£20,000 - £30,000',
+                    'Above £30,000'
+                ],
+                idPlaceholder: 'National Insurance Number',
+                bvnPlaceholder: 'Driver\'s License Number'
+            },
+            CA: {
+                flag: '🇨🇦',
+                phonePlaceholder: '(416) 555-0123',
+                currency: 'CAD',
+                currencySymbol: '$',
+                incomeRanges: [
+                    'Below $2,500',
+                    '$2,500 - $5,000',
+                    '$5,000 - $8,000',
+                    'Above $8,000'
+                ],
+                downPaymentRanges: [
+                    '$5,000 - $10,000',
+                    '$10,000 - $20,000',
+                    '$20,000 - $30,000',
+                    'Above $30,000'
+                ],
+                idPlaceholder: 'Social Insurance Number (SIN)',
+                bvnPlaceholder: 'Driver\'s License Number'
+            },
+            AU: {
+                flag: '🇦🇺',
+                phonePlaceholder: '0400 123 456',
+                currency: 'AUD',
+                currencySymbol: '$',
+                incomeRanges: [
+                    'Below $2,500',
+                    '$2,500 - $5,000',
+                    '$5,000 - $8,000',
+                    'Above $8,000'
+                ],
+                downPaymentRanges: [
+                    '$5,000 - $10,000',
+                    '$10,000 - $20,000',
+                    '$20,000 - $30,000',
+                    'Above $30,000'
+                ],
+                idPlaceholder: 'Tax File Number (TFN)',
+                bvnPlaceholder: 'Driver\'s License Number'
+            },
+            DE: {
+                flag: '🇩🇪',
+                phonePlaceholder: '0151 1234567',
+                currency: 'EUR',
+                currencySymbol: '€',
+                incomeRanges: [
+                    'Below €2,000',
+                    '€2,000 - €4,000',
+                    '€4,000 - €6,000',
+                    'Above €6,000'
+                ],
+                downPaymentRanges: [
+                    '€5,000 - €10,000',
+                    '€10,000 - €20,000',
+                    '€20,000 - €30,000',
+                    'Above €30,000'
+                ],
+                idPlaceholder: 'Personalausweis / Passport',
+                bvnPlaceholder: 'Steuer-ID (Tax ID)'
+            },
+            FR: {
+                flag: '🇫🇷',
+                phonePlaceholder: '06 12 34 56 78',
+                currency: 'EUR',
+                currencySymbol: '€',
+                incomeRanges: [
+                    'Below €2,000',
+                    '€2,000 - €4,000',
+                    '€4,000 - €6,000',
+                    'Above €6,000'
+                ],
+                downPaymentRanges: [
+                    '€5,000 - €10,000',
+                    '€10,000 - €20,000',
+                    '€20,000 - €30,000',
+                    'Above €30,000'
+                ],
+                idPlaceholder: 'Carte Nationale d\'Identité',
+                bvnPlaceholder: 'Numéro de Sécurité Sociale'
+            },
+            ZA: {
+                flag: '🇿🇦',
+                phonePlaceholder: '071 123 4567',
+                currency: 'ZAR',
+                currencySymbol: 'R',
+                incomeRanges: [
+                    'Below R10,000',
+                    'R10,000 - R25,000',
+                    'R25,000 - R50,000',
+                    'Above R50,000'
+                ],
+                downPaymentRanges: [
+                    'R20,000 - R50,000',
+                    'R50,000 - R100,000',
+                    'R100,000 - R200,000',
+                    'Above R200,000'
+                ],
+                idPlaceholder: 'South African ID Number',
+                bvnPlaceholder: 'Driver\'s License Number'
+            },
+            KE: {
+                flag: '🇰🇪',
+                phonePlaceholder: '0712 345678',
+                currency: 'KES',
+                currencySymbol: 'KSh',
+                incomeRanges: [
+                    'Below KSh 30,000',
+                    'KSh 30,000 - KSh 70,000',
+                    'KSh 70,000 - KSh 150,000',
+                    'Above KSh 150,000'
+                ],
+                downPaymentRanges: [
+                    'KSh 100,000 - KSh 250,000',
+                    'KSh 250,000 - KSh 500,000',
+                    'KSh 500,000 - KSh 1,000,000',
+                    'Above KSh 1,000,000'
+                ],
+                idPlaceholder: 'National ID Number',
+                bvnPlaceholder: 'KRA PIN'
+            },
+            GH: {
+                flag: '🇬🇭',
+                phonePlaceholder: '020 1234 567',
+                currency: 'GHS',
+                currencySymbol: '₵',
+                incomeRanges: [
+                    'Below ₵2,000',
+                    '₵2,000 - ₵5,000',
+                    '₵5,000 - ₵10,000',
+                    'Above ₵10,000'
+                ],
+                downPaymentRanges: [
+                    '₵10,000 - ₵25,000',
+                    '₵25,000 - ₵50,000',
+                    '₵50,000 - ₵100,000',
+                    'Above ₵100,000'
+                ],
+                idPlaceholder: 'Ghana Card Number',
+                bvnPlaceholder: 'SSNIT Number'
+            }
+        };
 
-    // ========== CURRENCY FUNCTIONS ==========
-    let currentCurrency = 'NGN';
-    let currentSymbol = '₦';
-
-    function convertPrices(targetCurrency, symbol) {
-        const rate = exchangeRates[targetCurrency] || 1;
-        currentCurrency = targetCurrency;
-        currentSymbol = symbol;
-        
-        // Convert down payment cells
-        document.querySelectorAll('.down-payment[data-down-ngn]').forEach(el => {
-            const downNgn = parseInt(el.dataset.downNgn);
-            const downConverted = Math.round(downNgn * rate);
-            const downFormatted = downConverted.toLocaleString();
+        // ========== FORM UPDATE FUNCTION ==========
+        function updateFormPlaceholders() {
+            const countrySelect = document.getElementById('countrySelect');
+            const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+            const countryCode = countrySelect.value;
             
-            const percentMatch = el.textContent.match(/(\d+%)/);
-            if (percentMatch) {
-                const percent = percentMatch[0];
-                if (downConverted >= 1000000) {
-                    const millions = (downConverted / 1000000).toFixed(1);
-                    el.textContent = `${percent} (${symbol}${millions}M)`;
-                } else {
-                    el.textContent = `${percent} (${symbol}${downFormatted})`;
+            if (!countryCode) return;
+            
+            const data = countryData[countryCode];
+            if (!data) return;
+            
+            // Update flag
+            document.getElementById('selectedCountryFlag').textContent = data.flag;
+            
+            // Update phone placeholder
+            document.getElementById('phoneInput').placeholder = data.phonePlaceholder;
+            
+            // Update ID placeholder
+            document.getElementById('idInput').placeholder = data.idPlaceholder;
+            
+            // Update BVN/SSN placeholder
+            document.getElementById('bvnInput').placeholder = data.bvnPlaceholder;
+            
+            // Update hidden fields
+            document.getElementById('formCurrency').value = data.currency;
+            document.getElementById('formCountryCode').value = countryCode;
+            
+            // Update income ranges
+            const incomeSelect = document.getElementById('monthlyIncomeSelect');
+            incomeSelect.innerHTML = '<option value="">Select range</option>';
+            data.incomeRanges.forEach(range => {
+                const option = document.createElement('option');
+                option.value = range;
+                option.textContent = range;
+                incomeSelect.appendChild(option);
+            });
+            
+            // Update down payment ranges
+            const downSelect = document.getElementById('downPaymentSelect');
+            downSelect.innerHTML = '<option value="">Select amount</option>';
+            data.downPaymentRanges.forEach(range => {
+                const option = document.createElement('option');
+                option.value = range;
+                option.textContent = range;
+                downSelect.appendChild(option);
+            });
+        }
+
+        // ========== EXCHANGE RATES ==========
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        // ========== CURRENCY FUNCTIONS ==========
+        let currentCurrency = 'NGN';
+        let currentSymbol = '₦';
+
+        function convertPrices(targetCurrency, symbol) {
+            const rate = exchangeRates[targetCurrency] || 1;
+            currentCurrency = targetCurrency;
+            currentSymbol = symbol;
+            
+            // Convert down payment cells
+            document.querySelectorAll('.down-payment[data-down-ngn]').forEach(el => {
+                const downNgn = parseInt(el.dataset.downNgn);
+                const downConverted = Math.round(downNgn * rate);
+                const downFormatted = downConverted.toLocaleString();
+                
+                const percentMatch = el.textContent.match(/(\d+%)/);
+                if (percentMatch) {
+                    const percent = percentMatch[0];
+                    if (downConverted >= 1000000) {
+                        const millions = (downConverted / 1000000).toFixed(1);
+                        el.textContent = `${percent} (${symbol}${millions}M)`;
+                    } else {
+                        el.textContent = `${percent} (${symbol}${downFormatted})`;
+                    }
                 }
-            }
-        });
-        
-        // Convert monthly payment cells
-        document.querySelectorAll('.monthly-payment[data-monthly-ngn]').forEach(el => {
-            const monthlyNgn = parseInt(el.dataset.monthlyNgn);
-            const monthlyConverted = Math.round(monthlyNgn * rate);
-            const monthlyFormatted = monthlyConverted.toLocaleString();
-            el.textContent = `${symbol}${monthlyFormatted}`;
-        });
-        
-        // Update calculator labels
-        document.querySelectorAll('.currency-label').forEach(el => {
-            el.textContent = `(${symbol})`;
-        });
-        
-        // Update calculator input placeholders/values to reflect current currency
-        updateCalculatorDisplay();
-        
-        // Recalculate with current values
-        calculatePayment();
-    }
-
-    function updateCalculatorDisplay() {
-        // Get current input values (they're in the current currency)
-        const priceInput = document.getElementById('carPrice');
-        const downInput = document.getElementById('downPayment');
-        
-        if (priceInput && downInput) {
-            // Store current values in data attributes for conversion reference
-            const priceValue = parseFloat(priceInput.value) || 0;
-            const downValue = parseFloat(downInput.value) || 0;
+            });
             
-            // Update placeholders to show currency symbol
-            priceInput.placeholder = `${currentSymbol}0`;
-            downInput.placeholder = `${currentSymbol}0`;
+            // Convert monthly payment cells
+            document.querySelectorAll('.monthly-payment[data-monthly-ngn]').forEach(el => {
+                const monthlyNgn = parseInt(el.dataset.monthlyNgn);
+                const monthlyConverted = Math.round(monthlyNgn * rate);
+                const monthlyFormatted = monthlyConverted.toLocaleString();
+                el.textContent = `${symbol}${monthlyFormatted}`;
+            });
+            
+            // Update calculator labels
+            document.querySelectorAll('.currency-label').forEach(el => {
+                el.textContent = `(${symbol})`;
+            });
+            
+            updateCalculatorDisplay();
+            calculatePayment();
         }
-    }
 
-    function setActiveCurrency(currency) {
-        document.querySelectorAll('.currency-option').forEach(opt => {
-            opt.classList.remove('active');
-            if (opt.dataset.currency === currency) {
-                opt.classList.add('active');
+        function updateCalculatorDisplay() {
+            const priceInput = document.getElementById('carPrice');
+            const downInput = document.getElementById('downPayment');
+            
+            if (priceInput && downInput) {
+                priceInput.placeholder = `${currentSymbol}0`;
+                downInput.placeholder = `${currentSymbol}0`;
             }
-        });
-    }
-
-    function handleCurrencyClick(e) {
-        e.preventDefault();
-        const currency = this.dataset.currency;
-        const symbol = this.dataset.symbol;
-        
-        // Store original NGN values before converting
-        const priceInput = document.getElementById('carPrice');
-        const downInput = document.getElementById('downPayment');
-        
-        // Convert the displayed values to the new currency
-        const rate = exchangeRates[currency] / exchangeRates[currentCurrency];
-        
-        if (priceInput && downInput) {
-            const currentPrice = parseFloat(priceInput.value) || 0;
-            const currentDown = parseFloat(downInput.value) || 0;
-            
-            // Convert to new currency
-            const newPrice = Math.round(currentPrice * rate);
-            const newDown = Math.round(currentDown * rate);
-            
-            priceInput.value = newPrice;
-            downInput.value = newDown;
         }
-        
-        localStorage.setItem('manualCurrency', currency);
-        localStorage.setItem('currencyChoice', 'manual');
-        
-        convertPrices(currency, symbol);
-        setActiveCurrency(currency);
-        
-        document.getElementById('countryNotification').style.display = 'none';
-    }
 
-    function attachCurrencyListeners() {
-        document.querySelectorAll('.currency-option').forEach(option => {
-            option.removeEventListener('click', handleCurrencyClick);
-            option.addEventListener('click', handleCurrencyClick);
-        });
-    }
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
 
-    function loadSavedCurrency() {
-        const savedCurrency = localStorage.getItem('manualCurrency');
-        
-        if (savedCurrency && savedCurrency !== 'NGN') {
-            let symbol = '₦';
-            if (savedCurrency === 'USD') symbol = '$';
-            else if (savedCurrency === 'GBP') symbol = '£';
-            else if (savedCurrency === 'EUR') symbol = '€';
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
             
-            // Convert the default values to saved currency
-            const rate = exchangeRates[savedCurrency];
+            const priceInput = document.getElementById('carPrice');
+            const downInput = document.getElementById('downPayment');
+            
+            const rate = exchangeRates[currency] / exchangeRates[currentCurrency];
+            
+            if (priceInput && downInput) {
+                const currentPrice = parseFloat(priceInput.value) || 0;
+                const currentDown = parseFloat(downInput.value) || 0;
+                
+                const newPrice = Math.round(currentPrice * rate);
+                const newDown = Math.round(currentDown * rate);
+                
+                priceInput.value = newPrice;
+                downInput.value = newDown;
+            }
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            
+            if (savedCurrency && savedCurrency !== 'NGN') {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                
+                const rate = exchangeRates[savedCurrency];
+                
+                const priceInput = document.getElementById('carPrice');
+                const downInput = document.getElementById('downPayment');
+                
+                if (priceInput && downInput) {
+                    priceInput.value = Math.round(5000000 * rate);
+                    downInput.value = Math.round(1500000 * rate);
+                }
+                
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                document.getElementById('carPrice').value = 5000000;
+                document.getElementById('downPayment').value = 1500000;
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            const rate = exchangeRates[currency];
             
             const priceInput = document.getElementById('carPrice');
             const downInput = document.getElementById('downPayment');
             
             if (priceInput && downInput) {
-                // Default NGN values
                 priceInput.value = Math.round(5000000 * rate);
                 downInput.value = Math.round(1500000 * rate);
             }
             
-            convertPrices(savedCurrency, symbol);
-            setActiveCurrency(savedCurrency);
-        } else {
-            // Ensure NGN values are set
-            document.getElementById('carPrice').value = 5000000;
-            document.getElementById('downPayment').value = 1500000;
-            setActiveCurrency('NGN');
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
         }
-    }
 
-    function switchCurrency() {
-        const currency = localStorage.getItem('detectedCurrency') || 'USD';
-        const symbol = localStorage.getItem('detectedSymbol') || '$';
-        
-        const rate = exchangeRates[currency];
-        
-        const priceInput = document.getElementById('carPrice');
-        const downInput = document.getElementById('downPayment');
-        
-        if (priceInput && downInput) {
-            priceInput.value = Math.round(5000000 * rate);
-            downInput.value = Math.round(1500000 * rate);
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
         }
-        
-        localStorage.setItem('manualCurrency', currency);
-        localStorage.setItem('currencyChoice', 'accepted');
-        
-        convertPrices(currency, symbol);
-        setActiveCurrency(currency);
-        dismissNotification();
-    }
 
-    function dismissNotification() {
-        document.getElementById('countryNotification').style.display = 'none';
-        localStorage.setItem('currencyChoice', 'dismissed');
-    }
+        // ========== CALCULATOR FUNCTION ==========
+        function calculatePayment() {
+            const price = parseFloat(document.getElementById('carPrice').value) || 0;
+            const down = parseFloat(document.getElementById('downPayment').value) || 0;
+            const months = parseInt(document.getElementById('loanTerm').value) || 12;
+            const rate = parseFloat(document.getElementById('interestRate').value) || 8;
+            
+            let priceNgn = price;
+            let downNgn = down;
+            
+            if (currentCurrency !== 'NGN') {
+                const rateToNgn = 1 / exchangeRates[currentCurrency];
+                priceNgn = price * rateToNgn;
+                downNgn = down * rateToNgn;
+            }
+            
+            const loanAmount = priceNgn - downNgn;
+            const monthlyRate = rate / 100 / 12;
+            
+            let monthlyPaymentNgn = 0;
+            if (monthlyRate > 0) {
+                monthlyPaymentNgn = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+            } else {
+                monthlyPaymentNgn = loanAmount / months;
+            }
+            
+            const totalPaymentNgn = monthlyPaymentNgn * months;
+            const totalInterestNgn = totalPaymentNgn - loanAmount;
+            
+            let monthlyPayment = monthlyPaymentNgn;
+            let totalInterest = totalInterestNgn;
+            let totalPayment = totalPaymentNgn;
+            
+            if (currentCurrency !== 'NGN') {
+                const rate = exchangeRates[currentCurrency];
+                monthlyPayment = monthlyPaymentNgn * rate;
+                totalInterest = totalInterestNgn * rate;
+                totalPayment = totalPaymentNgn * rate;
+            }
+            
+            if (!isNaN(monthlyPayment) && isFinite(monthlyPayment)) {
+                document.getElementById('monthlyPayment').textContent = currentSymbol + Math.round(monthlyPayment).toLocaleString();
+                document.getElementById('totalInterest').textContent = currentSymbol + Math.round(totalInterest).toLocaleString();
+                document.getElementById('totalPayment').textContent = currentSymbol + Math.round(totalPayment).toLocaleString();
+            }
+        }
 
-    // ========== CALCULATOR FUNCTION (FIXED) ==========
-    function calculatePayment() {
-        const price = parseFloat(document.getElementById('carPrice').value) || 0;
-        const down = parseFloat(document.getElementById('downPayment').value) || 0;
-        const months = parseInt(document.getElementById('loanTerm').value) || 12;
-        const rate = parseFloat(document.getElementById('interestRate').value) || 8;
-        
-        // Convert inputs to NGN for calculation if they're in another currency
-        let priceNgn = price;
-        let downNgn = down;
-        
-        if (currentCurrency !== 'NGN') {
-            const rateToNgn = 1 / exchangeRates[currentCurrency];
-            priceNgn = price * rateToNgn;
-            downNgn = down * rateToNgn;
-        }
-        
-        const loanAmount = priceNgn - downNgn;
-        const monthlyRate = rate / 100 / 12;
-        
-        let monthlyPaymentNgn = 0;
-        if (monthlyRate > 0) {
-            monthlyPaymentNgn = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
-        } else {
-            monthlyPaymentNgn = loanAmount / months;
-        }
-        
-        const totalPaymentNgn = monthlyPaymentNgn * months;
-        const totalInterestNgn = totalPaymentNgn - loanAmount;
-        
-        // Convert results back to current currency for display
-        let monthlyPayment = monthlyPaymentNgn;
-        let totalInterest = totalInterestNgn;
-        let totalPayment = totalPaymentNgn;
-        
-        if (currentCurrency !== 'NGN') {
-            const rate = exchangeRates[currentCurrency];
-            monthlyPayment = monthlyPaymentNgn * rate;
-            totalInterest = totalInterestNgn * rate;
-            totalPayment = totalPaymentNgn * rate;
-        }
-        
-        if (!isNaN(monthlyPayment) && isFinite(monthlyPayment)) {
-            document.getElementById('monthlyPayment').textContent = currentSymbol + Math.round(monthlyPayment).toLocaleString();
-            document.getElementById('totalInterest').textContent = currentSymbol + Math.round(totalInterest).toLocaleString();
-            document.getElementById('totalPayment').textContent = currentSymbol + Math.round(totalPayment).toLocaleString();
-        }
-    }
+        // ========== MOBILE MENU ==========
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
 
-    // ========== MOBILE MENU (UNCHANGED) ==========
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const navMenu = document.getElementById('navMenu');
-
-    mobileMenuBtn.addEventListener('click', function() {
-        navMenu.classList.toggle('active');
-        const icon = this.querySelector('i');
-        if (navMenu.classList.contains('active')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-times');
-        } else {
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
-        }
-    });
-
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 900) {
-                navMenu.classList.remove('active');
-                const icon = mobileMenuBtn.querySelector('i');
+        mobileMenuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
                 icon.classList.remove('fa-times');
                 icon.classList.add('fa-bars');
             }
         });
-    });
 
-    // ========== PAGE LOAD INITIALIZATION ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        attachCurrencyListeners();
-        loadSavedCurrency();
-        
-        const currencyChoice = localStorage.getItem('currencyChoice');
-        if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
-        
-        fetch('https://ipapi.co/json/')
-            .then(response => response.json())
-            .then(data => {
-                const country = data.country_name;
-                const countryCode = data.country_code;
-                
-                let currency = 'NGN';
-                let currencySymbol = '₦';
-                let currencyCode = 'NGN';
-                
-                if (countryCode === 'US') {
-                    currency = 'USD';
-                    currencySymbol = '$';
-                    currencyCode = 'USD';
-                } else if (countryCode === 'GB') {
-                    currency = 'GBP';
-                    currencySymbol = '£';
-                    currencyCode = 'GBP';
-                } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
-                    currency = 'EUR';
-                    currencySymbol = '€';
-                    currencyCode = 'EUR';
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 900) {
+                    navMenu.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
                 }
-                
-                if (countryCode !== 'NG') {
-                    document.getElementById('userCountry').textContent = country;
-                    document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
-                    document.getElementById('switchCurrencyCode').textContent = currencyCode;
-                    document.getElementById('countryNotification').style.display = 'block';
+            });
+        });
+
+        // ========== PAGE LOAD INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize form with Nigeria
+            updateFormPlaceholders();
+            
+            // Attach currency listeners
+            attachCurrencyListeners();
+            loadSavedCurrency();
+            
+            // Set up country select change listener
+            document.getElementById('countrySelect').addEventListener('change', updateFormPlaceholders);
+            
+            const currencyChoice = localStorage.getItem('currencyChoice');
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country_name;
+                    const countryCode = data.country_code;
                     
-                    localStorage.setItem('detectedCurrency', currency);
-                    localStorage.setItem('detectedSymbol', currencySymbol);
-                }
-            })
-            .catch(() => {});
-    });
-  </script>
+                    // Auto-select country in dropdown if available
+                    const countrySelect = document.getElementById('countrySelect');
+                    const option = Array.from(countrySelect.options).find(opt => opt.value === countryCode);
+                    if (option) {
+                        countrySelect.value = countryCode;
+                        updateFormPlaceholders();
+                    }
+                    
+                    let currency = 'NGN';
+                    let currencySymbol = '₦';
+                    let currencyCode = 'NGN';
+                    
+                    if (countryCode === 'US') {
+                        currency = 'USD';
+                        currencySymbol = '$';
+                        currencyCode = 'USD';
+                    } else if (countryCode === 'GB') {
+                        currency = 'GBP';
+                        currencySymbol = '£';
+                        currencyCode = 'GBP';
+                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                        currency = 'EUR';
+                        currencySymbol = '€';
+                        currencyCode = 'EUR';
+                    }
+                    
+                    if (countryCode !== 'NG') {
+                        document.getElementById('userCountry').textContent = country;
+                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                        document.getElementById('countryNotification').style.display = 'block';
+                        
+                        localStorage.setItem('detectedCurrency', currency);
+                        localStorage.setItem('detectedSymbol', currencySymbol);
+                    }
+                })
+                .catch(() => {});
+        });
+    </script>
 </body>
 </html>
