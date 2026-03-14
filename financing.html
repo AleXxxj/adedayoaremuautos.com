@@ -1438,237 +1438,305 @@
     </a>
 
     <script>
-        // ========== EXCHANGE RATES ==========
-        const exchangeRates = {
-            NGN: 1,
-            USD: 0.00065,
-            GBP: 0.00052,
-            EUR: 0.00060,
-        };
+    // ========== EXCHANGE RATES ==========
+    const exchangeRates = {
+        NGN: 1,
+        USD: 0.00065,
+        GBP: 0.00052,
+        EUR: 0.00060,
+    };
 
-        // ========== CURRENCY FUNCTIONS ==========
-        function convertPrices(targetCurrency, symbol) {
-            const rate = exchangeRates[targetCurrency] || 1;
+    // ========== CURRENCY FUNCTIONS ==========
+    let currentCurrency = 'NGN';
+    let currentSymbol = '₦';
+
+    function convertPrices(targetCurrency, symbol) {
+        const rate = exchangeRates[targetCurrency] || 1;
+        currentCurrency = targetCurrency;
+        currentSymbol = symbol;
+        
+        // Convert down payment cells
+        document.querySelectorAll('.down-payment[data-down-ngn]').forEach(el => {
+            const downNgn = parseInt(el.dataset.downNgn);
+            const downConverted = Math.round(downNgn * rate);
+            const downFormatted = downConverted.toLocaleString();
             
-            // Convert down payment cells
-            document.querySelectorAll('.down-payment[data-down-ngn]').forEach(el => {
-                const downNgn = parseInt(el.dataset.downNgn);
-                const downConverted = Math.round(downNgn * rate);
-                const downFormatted = downConverted.toLocaleString();
-                
-                // Format as "30% (symbolX.XM)" - preserving the percentage part
-                const percentMatch = el.textContent.match(/(\d+%)/);
-                if (percentMatch) {
-                    const percent = percentMatch[0];
-                    // Convert to millions if large number
-                    if (downConverted >= 1000000) {
-                        const millions = (downConverted / 1000000).toFixed(1);
-                        el.textContent = `${percent} (${symbol}${millions}M)`;
-                    } else {
-                        el.textContent = `${percent} (${symbol}${downFormatted})`;
-                    }
+            const percentMatch = el.textContent.match(/(\d+%)/);
+            if (percentMatch) {
+                const percent = percentMatch[0];
+                if (downConverted >= 1000000) {
+                    const millions = (downConverted / 1000000).toFixed(1);
+                    el.textContent = `${percent} (${symbol}${millions}M)`;
+                } else {
+                    el.textContent = `${percent} (${symbol}${downFormatted})`;
                 }
-            });
-            
-            // Convert monthly payment cells
-            document.querySelectorAll('.monthly-payment[data-monthly-ngn]').forEach(el => {
-                const monthlyNgn = parseInt(el.dataset.monthlyNgn);
-                const monthlyConverted = Math.round(monthlyNgn * rate);
-                const monthlyFormatted = monthlyConverted.toLocaleString();
-                el.textContent = `${symbol}${monthlyFormatted}`;
-            });
-            
-            // Update calculator labels and inputs
-            document.querySelectorAll('.currency-label').forEach(el => {
-                el.textContent = `(${symbol})`;
-            });
-            
-            // Store current currency for calculator
-            window.currentCurrency = targetCurrency;
-            window.currentSymbol = symbol;
-            
-            // Recalculate calculator with new currency
-            if (document.getElementById('carPrice')) {
-                calculatePayment();
             }
-        }
+        });
+        
+        // Convert monthly payment cells
+        document.querySelectorAll('.monthly-payment[data-monthly-ngn]').forEach(el => {
+            const monthlyNgn = parseInt(el.dataset.monthlyNgn);
+            const monthlyConverted = Math.round(monthlyNgn * rate);
+            const monthlyFormatted = monthlyConverted.toLocaleString();
+            el.textContent = `${symbol}${monthlyFormatted}`;
+        });
+        
+        // Update calculator labels
+        document.querySelectorAll('.currency-label').forEach(el => {
+            el.textContent = `(${symbol})`;
+        });
+        
+        // Update calculator input placeholders/values to reflect current currency
+        updateCalculatorDisplay();
+        
+        // Recalculate with current values
+        calculatePayment();
+    }
 
-        function setActiveCurrency(currency) {
-            document.querySelectorAll('.currency-option').forEach(opt => {
-                opt.classList.remove('active');
-                if (opt.dataset.currency === currency) {
-                    opt.classList.add('active');
-                }
-            });
+    function updateCalculatorDisplay() {
+        // Get current input values (they're in the current currency)
+        const priceInput = document.getElementById('carPrice');
+        const downInput = document.getElementById('downPayment');
+        
+        if (priceInput && downInput) {
+            // Store current values in data attributes for conversion reference
+            const priceValue = parseFloat(priceInput.value) || 0;
+            const downValue = parseFloat(downInput.value) || 0;
+            
+            // Update placeholders to show currency symbol
+            priceInput.placeholder = `${currentSymbol}0`;
+            downInput.placeholder = `${currentSymbol}0`;
         }
+    }
 
-        function handleCurrencyClick(e) {
-            e.preventDefault();
-            const currency = this.dataset.currency;
-            const symbol = this.dataset.symbol;
-            
-            localStorage.setItem('manualCurrency', currency);
-            localStorage.setItem('currencyChoice', 'manual');
-            
-            convertPrices(currency, symbol);
-            setActiveCurrency(currency);
-            
-            document.getElementById('countryNotification').style.display = 'none';
-        }
-
-        function attachCurrencyListeners() {
-            document.querySelectorAll('.currency-option').forEach(option => {
-                option.removeEventListener('click', handleCurrencyClick);
-                option.addEventListener('click', handleCurrencyClick);
-            });
-        }
-
-        function loadSavedCurrency() {
-            const savedCurrency = localStorage.getItem('manualCurrency');
-            
-            if (savedCurrency) {
-                let symbol = '₦';
-                if (savedCurrency === 'USD') symbol = '$';
-                else if (savedCurrency === 'GBP') symbol = '£';
-                else if (savedCurrency === 'EUR') symbol = '€';
-                
-                convertPrices(savedCurrency, symbol);
-                setActiveCurrency(savedCurrency);
-            } else {
-                setActiveCurrency('NGN');
+    function setActiveCurrency(currency) {
+        document.querySelectorAll('.currency-option').forEach(opt => {
+            opt.classList.remove('active');
+            if (opt.dataset.currency === currency) {
+                opt.classList.add('active');
             }
-        }
+        });
+    }
 
-        function switchCurrency() {
-            const currency = localStorage.getItem('detectedCurrency') || 'USD';
-            const symbol = localStorage.getItem('detectedSymbol') || '$';
+    function handleCurrencyClick(e) {
+        e.preventDefault();
+        const currency = this.dataset.currency;
+        const symbol = this.dataset.symbol;
+        
+        // Store original NGN values before converting
+        const priceInput = document.getElementById('carPrice');
+        const downInput = document.getElementById('downPayment');
+        
+        // Convert the displayed values to the new currency
+        const rate = exchangeRates[currency] / exchangeRates[currentCurrency];
+        
+        if (priceInput && downInput) {
+            const currentPrice = parseFloat(priceInput.value) || 0;
+            const currentDown = parseFloat(downInput.value) || 0;
             
-            localStorage.setItem('manualCurrency', currency);
-            localStorage.setItem('currencyChoice', 'accepted');
+            // Convert to new currency
+            const newPrice = Math.round(currentPrice * rate);
+            const newDown = Math.round(currentDown * rate);
             
-            convertPrices(currency, symbol);
-            setActiveCurrency(currency);
-            dismissNotification();
+            priceInput.value = newPrice;
+            downInput.value = newDown;
         }
+        
+        localStorage.setItem('manualCurrency', currency);
+        localStorage.setItem('currencyChoice', 'manual');
+        
+        convertPrices(currency, symbol);
+        setActiveCurrency(currency);
+        
+        document.getElementById('countryNotification').style.display = 'none';
+    }
 
-        function dismissNotification() {
-            document.getElementById('countryNotification').style.display = 'none';
-            localStorage.setItem('currencyChoice', 'dismissed');
-        }
+    function attachCurrencyListeners() {
+        document.querySelectorAll('.currency-option').forEach(option => {
+            option.removeEventListener('click', handleCurrencyClick);
+            option.addEventListener('click', handleCurrencyClick);
+        });
+    }
 
-        // ========== CALCULATOR FUNCTION (UPDATED) ==========
-        function calculatePayment() {
-            const price = parseFloat(document.getElementById('carPrice').value) || 0;
-            const down = parseFloat(document.getElementById('downPayment').value) || 0;
-            const months = parseInt(document.getElementById('loanTerm').value) || 12;
-            const rate = parseFloat(document.getElementById('interestRate').value) || 8;
+    function loadSavedCurrency() {
+        const savedCurrency = localStorage.getItem('manualCurrency');
+        
+        if (savedCurrency && savedCurrency !== 'NGN') {
+            let symbol = '₦';
+            if (savedCurrency === 'USD') symbol = '$';
+            else if (savedCurrency === 'GBP') symbol = '£';
+            else if (savedCurrency === 'EUR') symbol = '€';
             
-            const loanAmount = price - down;
-            const monthlyRate = rate / 100 / 12;
+            // Convert the default values to saved currency
+            const rate = exchangeRates[savedCurrency];
             
-            let monthlyPayment = 0;
-            if (monthlyRate > 0) {
-                monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
-            } else {
-                monthlyPayment = loanAmount / months;
+            const priceInput = document.getElementById('carPrice');
+            const downInput = document.getElementById('downPayment');
+            
+            if (priceInput && downInput) {
+                // Default NGN values
+                priceInput.value = Math.round(5000000 * rate);
+                downInput.value = Math.round(1500000 * rate);
             }
             
-            const totalPayment = monthlyPayment * months;
-            const totalInterest = totalPayment - loanAmount;
-            
-            if (!isNaN(monthlyPayment) && isFinite(monthlyPayment)) {
-                const symbol = window.currentSymbol || '₦';
-                const rate = exchangeRates[window.currentCurrency] || 1;
-                
-                // Convert if currency is not NGN
-                let displayMonthly = monthlyPayment;
-                let displayInterest = totalInterest;
-                let displayTotal = totalPayment;
-                
-                if (window.currentCurrency && window.currentCurrency !== 'NGN') {
-                    displayMonthly = monthlyPayment * rate;
-                    displayInterest = totalInterest * rate;
-                    displayTotal = totalPayment * rate;
-                }
-                
-                document.getElementById('monthlyPayment').textContent = symbol + Math.round(displayMonthly).toLocaleString();
-                document.getElementById('totalInterest').textContent = symbol + Math.round(displayInterest).toLocaleString();
-                document.getElementById('totalPayment').textContent = symbol + Math.round(displayTotal).toLocaleString();
-            }
+            convertPrices(savedCurrency, symbol);
+            setActiveCurrency(savedCurrency);
+        } else {
+            // Ensure NGN values are set
+            document.getElementById('carPrice').value = 5000000;
+            document.getElementById('downPayment').value = 1500000;
+            setActiveCurrency('NGN');
         }
+    }
 
-        // ========== MOBILE MENU (UNCHANGED) ==========
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const navMenu = document.getElementById('navMenu');
+    function switchCurrency() {
+        const currency = localStorage.getItem('detectedCurrency') || 'USD';
+        const symbol = localStorage.getItem('detectedSymbol') || '$';
+        
+        const rate = exchangeRates[currency];
+        
+        const priceInput = document.getElementById('carPrice');
+        const downInput = document.getElementById('downPayment');
+        
+        if (priceInput && downInput) {
+            priceInput.value = Math.round(5000000 * rate);
+            downInput.value = Math.round(1500000 * rate);
+        }
+        
+        localStorage.setItem('manualCurrency', currency);
+        localStorage.setItem('currencyChoice', 'accepted');
+        
+        convertPrices(currency, symbol);
+        setActiveCurrency(currency);
+        dismissNotification();
+    }
 
-        mobileMenuBtn.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-            const icon = this.querySelector('i');
-            if (navMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
+    function dismissNotification() {
+        document.getElementById('countryNotification').style.display = 'none';
+        localStorage.setItem('currencyChoice', 'dismissed');
+    }
+
+    // ========== CALCULATOR FUNCTION (FIXED) ==========
+    function calculatePayment() {
+        const price = parseFloat(document.getElementById('carPrice').value) || 0;
+        const down = parseFloat(document.getElementById('downPayment').value) || 0;
+        const months = parseInt(document.getElementById('loanTerm').value) || 12;
+        const rate = parseFloat(document.getElementById('interestRate').value) || 8;
+        
+        // Convert inputs to NGN for calculation if they're in another currency
+        let priceNgn = price;
+        let downNgn = down;
+        
+        if (currentCurrency !== 'NGN') {
+            const rateToNgn = 1 / exchangeRates[currentCurrency];
+            priceNgn = price * rateToNgn;
+            downNgn = down * rateToNgn;
+        }
+        
+        const loanAmount = priceNgn - downNgn;
+        const monthlyRate = rate / 100 / 12;
+        
+        let monthlyPaymentNgn = 0;
+        if (monthlyRate > 0) {
+            monthlyPaymentNgn = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+        } else {
+            monthlyPaymentNgn = loanAmount / months;
+        }
+        
+        const totalPaymentNgn = monthlyPaymentNgn * months;
+        const totalInterestNgn = totalPaymentNgn - loanAmount;
+        
+        // Convert results back to current currency for display
+        let monthlyPayment = monthlyPaymentNgn;
+        let totalInterest = totalInterestNgn;
+        let totalPayment = totalPaymentNgn;
+        
+        if (currentCurrency !== 'NGN') {
+            const rate = exchangeRates[currentCurrency];
+            monthlyPayment = monthlyPaymentNgn * rate;
+            totalInterest = totalInterestNgn * rate;
+            totalPayment = totalPaymentNgn * rate;
+        }
+        
+        if (!isNaN(monthlyPayment) && isFinite(monthlyPayment)) {
+            document.getElementById('monthlyPayment').textContent = currentSymbol + Math.round(monthlyPayment).toLocaleString();
+            document.getElementById('totalInterest').textContent = currentSymbol + Math.round(totalInterest).toLocaleString();
+            document.getElementById('totalPayment').textContent = currentSymbol + Math.round(totalPayment).toLocaleString();
+        }
+    }
+
+    // ========== MOBILE MENU (UNCHANGED) ==========
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+
+    mobileMenuBtn.addEventListener('click', function() {
+        navMenu.classList.toggle('active');
+        const icon = this.querySelector('i');
+        if (navMenu.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 900) {
+                navMenu.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
                 icon.classList.remove('fa-times');
                 icon.classList.add('fa-bars');
             }
         });
+    });
 
-        const navLinks = document.querySelectorAll('.nav-menu a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 900) {
-                    navMenu.classList.remove('active');
-                    const icon = mobileMenuBtn.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
+    // ========== PAGE LOAD INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        attachCurrencyListeners();
+        loadSavedCurrency();
+        
+        const currencyChoice = localStorage.getItem('currencyChoice');
+        if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+        
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                const country = data.country_name;
+                const countryCode = data.country_code;
+                
+                let currency = 'NGN';
+                let currencySymbol = '₦';
+                let currencyCode = 'NGN';
+                
+                if (countryCode === 'US') {
+                    currency = 'USD';
+                    currencySymbol = '$';
+                    currencyCode = 'USD';
+                } else if (countryCode === 'GB') {
+                    currency = 'GBP';
+                    currencySymbol = '£';
+                    currencyCode = 'GBP';
+                } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                    currency = 'EUR';
+                    currencySymbol = '€';
+                    currencyCode = 'EUR';
                 }
-            });
-        });
-
-        // ========== PAGE LOAD INITIALIZATION ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            attachCurrencyListeners();
-            loadSavedCurrency();
-            
-            const currencyChoice = localStorage.getItem('currencyChoice');
-            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
-            
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    const country = data.country_name;
-                    const countryCode = data.country_code;
+                
+                if (countryCode !== 'NG') {
+                    document.getElementById('userCountry').textContent = country;
+                    document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                    document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                    document.getElementById('countryNotification').style.display = 'block';
                     
-                    let currency = 'NGN';
-                    let currencySymbol = '₦';
-                    let currencyCode = 'NGN';
-                    
-                    if (countryCode === 'US') {
-                        currency = 'USD';
-                        currencySymbol = '$';
-                        currencyCode = 'USD';
-                    } else if (countryCode === 'GB') {
-                        currency = 'GBP';
-                        currencySymbol = '£';
-                        currencyCode = 'GBP';
-                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
-                        currency = 'EUR';
-                        currencySymbol = '€';
-                        currencyCode = 'EUR';
-                    }
-                    
-                    if (countryCode !== 'NG') {
-                        document.getElementById('userCountry').textContent = country;
-                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
-                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
-                        document.getElementById('countryNotification').style.display = 'block';
-                        
-                        localStorage.setItem('detectedCurrency', currency);
-                        localStorage.setItem('detectedSymbol', currencySymbol);
-                    }
-                })
-                .catch(() => {});
-        });
-    </script>
+                    localStorage.setItem('detectedCurrency', currency);
+                    localStorage.setItem('detectedSymbol', currencySymbol);
+                }
+            })
+            .catch(() => {});
+    });
+  </script>
 </body>
 </html>
