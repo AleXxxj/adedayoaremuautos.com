@@ -1315,9 +1315,6 @@
             }
         ];
 
-        // Store original prices for currency conversion
-        const originalPrices = new Map();
-
         // Display cars function - MODIFIED to include data attributes for currency conversion
         function displayCars(cars) {
             const container = document.getElementById('cars-container');
@@ -1367,6 +1364,9 @@
                     `;
                 });
                 container.innerHTML = html;
+                
+                // After displaying cars, re-attach currency option listeners
+                attachCurrencyListeners();
                 
                 // Re-apply currency conversion if a currency was previously selected
                 const savedCurrency = localStorage.getItem('manualCurrency');
@@ -1525,8 +1525,42 @@
             EUR: 0.00060, // 1 NGN = 0.00060 EUR
         };
 
+        // Function to attach currency option listeners
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        // Handle currency click
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            // Convert prices
+            convertPrices(currency, symbol);
+            
+            // Update active state
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Save choice
+            localStorage.setItem('currencyChoice', 'manual');
+            localStorage.setItem('manualCurrency', currency);
+            
+            // Hide notification if visible
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
         // Initialize currency detection
         document.addEventListener('DOMContentLoaded', function() {
+            // Attach listeners to currency options
+            attachCurrencyListeners();
+            
             // Check if user has already made a currency choice
             const currencyChoice = localStorage.getItem('currencyChoice');
             if (currencyChoice === 'dismissed') return;
@@ -1571,31 +1605,6 @@
                 .catch(() => {
                     // Silently fail if IP detection doesn't work
                 });
-        });
-
-        // Currency option click
-        document.querySelectorAll('.currency-option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.preventDefault();
-                const currency = this.dataset.currency;
-                const symbol = this.dataset.symbol;
-                
-                // Convert prices
-                convertPrices(currency, symbol);
-                
-                // Update active state
-                document.querySelectorAll('.currency-option').forEach(opt => {
-                    opt.classList.remove('active');
-                });
-                this.classList.add('active');
-                
-                // Save choice
-                localStorage.setItem('currencyChoice', 'manual');
-                localStorage.setItem('manualCurrency', currency);
-                
-                // Hide notification if visible
-                document.getElementById('countryNotification').style.display = 'none';
-            });
         });
 
         // Switch currency function (called from notification)
@@ -1647,6 +1656,9 @@
                 }
             });
         }
+
+        // Re-attach listeners when filters are applied (since displayCars is called)
+        // This is already handled in displayCars function above
     </script>
 </body>
 </html>
