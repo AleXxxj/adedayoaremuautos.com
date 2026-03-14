@@ -691,7 +691,7 @@
         @media (max-width: 900px) {
             .mobile-menu-btn {
                 display: block;
-                order: 3;
+                order: 2; /* CHANGED: from 3 to 2 */
             }
 
             .nav-menu {
@@ -701,7 +701,7 @@
                 align-items: center;
                 gap: 15px;
                 padding: 20px 0;
-                order: 4;
+                order: 4; /* This stays the same - menu appears after header */
             }
 
             .nav-menu.active {
@@ -710,13 +710,15 @@
 
             .header-actions {
                 margin-left: auto;
-                order: 2;
+                order: 3; /* CHANGED: from 2 to 3 - Whatsapp button comes after mobile menu button */
             }
 
             .logo-container {
-                order: 1;
+                order: 1; /* Logo stays first */
             }
 
+            /* Rest of the style remains the same */
+            
             .two-column,
             .mv-grid,
             .objectives-grid,
