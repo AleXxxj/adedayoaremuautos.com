@@ -598,7 +598,161 @@
             box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
         }
 
-        /* Footer - EXACT same as homepage */
+        /* Currency Selector in Footer - NEW */
+        .footer-currency {
+            margin-bottom: 20px;
+        }
+
+        .footer-currency h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .currency-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .currency-option:hover,
+        .currency-option.active {
+            color: var(--primary);
+        }
+
+        .currency-option span {
+            font-size: 18px;
+        }
+
+        /* Country Notification - NEW */
+        .country-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-content i {
+            font-size: 30px;
+            color: var(--primary);
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .notification-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-notification {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-notification.yes {
+            background: var(--primary);
+            color: #0a0a0a;
+        }
+
+        .btn-notification.yes:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-notification.no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .btn-notification.no:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .country-notification {
+                left: 20px;
+                right: 20px;
+                bottom: 20px;
+                padding: 15px;
+            }
+            
+            .notification-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Footer - EXACT same as homepage with currency selector added */
         .footer {
             background: #050505;
             padding: 40px 20px 20px;
@@ -1007,7 +1161,7 @@
         </div>
     </div>
 
-    <!-- Financing Plans Section -->
+    <!-- Financing Plans Section (updated with data attributes) -->
     <div class="plans-section">
         <div class="section-title">
             <h2>Available <span>Financing Plans</span></h2>
@@ -1015,7 +1169,7 @@
         </div>
         
         <div class="plans-table-container">
-            <table class="plans-table">
+            <table class="plans-table" id="plansTable">
                 <thead>
                     <tr>
                         <th>Duration</th>
@@ -1027,34 +1181,34 @@
                 <tbody>
                     <tr>
                         <td><strong>6 Months</strong></td>
-                        <td>30% (₦1.5M)</td>
+                        <td class="down-payment" data-down-ngn="1500000">30% (₦1.5M)</td>
                         <td>5%</td>
-                        <td class="amount">₦645,833</td>
+                        <td class="amount monthly-payment" data-monthly-ngn="645833">₦645,833</td>
                     </tr>
                     <tr>
                         <td><strong>12 Months</strong></td>
-                        <td>30% (₦1.5M)</td>
+                        <td class="down-payment" data-down-ngn="1500000">30% (₦1.5M)</td>
                         <td>8%</td>
-                        <td class="amount">₦350,000</td>
+                        <td class="amount monthly-payment" data-monthly-ngn="350000">₦350,000</td>
                     </tr>
                     <tr>
                         <td><strong>24 Months</strong></td>
-                        <td>30% (₦1.5M)</td>
+                        <td class="down-payment" data-down-ngn="1500000">30% (₦1.5M)</td>
                         <td>12%</td>
-                        <td class="amount">₦196,667</td>
+                        <td class="amount monthly-payment" data-monthly-ngn="196667">₦196,667</td>
                     </tr>
                     <tr>
                         <td><strong>36 Months</strong></td>
-                        <td>30% (₦1.5M)</td>
+                        <td class="down-payment" data-down-ngn="1500000">30% (₦1.5M)</td>
                         <td>15%</td>
-                        <td class="amount">₦147,222</td>
+                        <td class="amount monthly-payment" data-monthly-ngn="147222">₦147,222</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Calculator Section -->
+    <!-- Calculator Section (updated with data attributes) -->
     <div class="calculator-section">
         <div class="section-title">
             <h2>Finance <span>Calculator</span></h2>
@@ -1064,12 +1218,12 @@
         <div class="calculator-grid">
             <div class="calculator-inputs">
                 <div class="calc-group">
-                    <label>Car Price (₦)</label>
+                    <label>Car Price <span class="currency-label">(₦)</span></label>
                     <input type="number" id="carPrice" value="5000000" oninput="calculatePayment()">
                 </div>
                 
                 <div class="calc-group">
-                    <label>Down Payment (₦)</label>
+                    <label>Down Payment <span class="currency-label">(₦)</span></label>
                     <input type="number" id="downPayment" value="1500000" oninput="calculatePayment()">
                 </div>
                 
@@ -1140,7 +1294,7 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>Monthly Income (₦) *</label>
+                    <label>Monthly Income *</label>
                     <select name="monthly_income" required>
                         <option value="">Select range</option>
                         <option>Below ₦200,000</option>
@@ -1150,7 +1304,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Down Payment (₦) *</label>
+                    <label>Down Payment *</label>
                     <select name="down_payment" required>
                         <option value="">Select amount</option>
                         <option>₦1,000,000 - ₦2,000,000</option>
@@ -1189,7 +1343,7 @@
         </form>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer - UPDATED with Currency Selector -->
     <div class="footer">
         <div class="footer-container">
             <div class="footer-grid">
@@ -1230,12 +1384,23 @@
                     </ul>
                 </div>
                 
-                <div class="footer-contact">
-                    <h4>Contact Info</h4>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
-                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
-                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
-                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                <!-- Currency Selector - NEW -->
+                <div class="footer-currency">
+                    <h4>Currency</h4>
+                    <div class="currency-options" id="currencyOptions">
+                        <a href="#" class="currency-option" data-currency="NGN" data-symbol="₦">
+                            <span>🇳🇬</span> NGN (₦)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="USD" data-symbol="$">
+                            <span>🇺🇸</span> USD ($)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="GBP" data-symbol="£">
+                            <span>🇬🇧</span> GBP (£)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="EUR" data-symbol="€">
+                            <span>🇪🇺</span> EUR (€)
+                        </a>
+                    </div>
                 </div>
             </div>
             
@@ -1250,6 +1415,22 @@
         </div>
     </div>
 
+    <!-- Country Notification - NEW -->
+    <div class="country-notification" id="countryNotification" style="display: none;">
+        <div class="notification-content">
+            <i class="fas fa-globe"></i>
+            <div class="notification-text">
+                <strong>We noticed you're visiting from <span id="userCountry"></span>!</strong>
+                <p>Would you like to see prices in <span id="userCurrency"></span>?</p>
+            </div>
+            <div class="notification-buttons">
+                <button class="btn-notification yes" onclick="switchCurrency()">Yes, switch to <span id="switchCurrencyCode"></span></button>
+                <button class="btn-notification no" onclick="dismissNotification()">No, keep ₦ NGN</button>
+            </div>
+            <button class="notification-close" onclick="dismissNotification()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <!-- WhatsApp Float -->
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
@@ -1257,6 +1438,125 @@
     </a>
 
     <script>
+        // ========== EXCHANGE RATES ==========
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        // ========== CURRENCY FUNCTIONS ==========
+        function convertPrices(targetCurrency, symbol) {
+            const rate = exchangeRates[targetCurrency] || 1;
+            
+            // Convert down payment cells
+            document.querySelectorAll('.down-payment[data-down-ngn]').forEach(el => {
+                const downNgn = parseInt(el.dataset.downNgn);
+                const downConverted = Math.round(downNgn * rate);
+                const downFormatted = downConverted.toLocaleString();
+                
+                // Format as "30% (symbolX.XM)" - preserving the percentage part
+                const percentMatch = el.textContent.match(/(\d+%)/);
+                if (percentMatch) {
+                    const percent = percentMatch[0];
+                    // Convert to millions if large number
+                    if (downConverted >= 1000000) {
+                        const millions = (downConverted / 1000000).toFixed(1);
+                        el.textContent = `${percent} (${symbol}${millions}M)`;
+                    } else {
+                        el.textContent = `${percent} (${symbol}${downFormatted})`;
+                    }
+                }
+            });
+            
+            // Convert monthly payment cells
+            document.querySelectorAll('.monthly-payment[data-monthly-ngn]').forEach(el => {
+                const monthlyNgn = parseInt(el.dataset.monthlyNgn);
+                const monthlyConverted = Math.round(monthlyNgn * rate);
+                const monthlyFormatted = monthlyConverted.toLocaleString();
+                el.textContent = `${symbol}${monthlyFormatted}`;
+            });
+            
+            // Update calculator labels and inputs
+            document.querySelectorAll('.currency-label').forEach(el => {
+                el.textContent = `(${symbol})`;
+            });
+            
+            // Store current currency for calculator
+            window.currentCurrency = targetCurrency;
+            window.currentSymbol = symbol;
+            
+            // Recalculate calculator with new currency
+            if (document.getElementById('carPrice')) {
+                calculatePayment();
+            }
+        }
+
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            
+            if (savedCurrency) {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
+        }
+
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
+        }
+
+        // ========== CALCULATOR FUNCTION (UPDATED) ==========
         function calculatePayment() {
             const price = parseFloat(document.getElementById('carPrice').value) || 0;
             const down = parseFloat(document.getElementById('downPayment').value) || 0;
@@ -1266,7 +1566,6 @@
             const loanAmount = price - down;
             const monthlyRate = rate / 100 / 12;
             
-            // Calculate monthly payment using loan amortization formula
             let monthlyPayment = 0;
             if (monthlyRate > 0) {
                 monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
@@ -1278,13 +1577,27 @@
             const totalInterest = totalPayment - loanAmount;
             
             if (!isNaN(monthlyPayment) && isFinite(monthlyPayment)) {
-                document.getElementById('monthlyPayment').textContent = '₦' + Math.round(monthlyPayment).toLocaleString();
-                document.getElementById('totalInterest').textContent = '₦' + Math.round(totalInterest).toLocaleString();
-                document.getElementById('totalPayment').textContent = '₦' + Math.round(totalPayment).toLocaleString();
+                const symbol = window.currentSymbol || '₦';
+                const rate = exchangeRates[window.currentCurrency] || 1;
+                
+                // Convert if currency is not NGN
+                let displayMonthly = monthlyPayment;
+                let displayInterest = totalInterest;
+                let displayTotal = totalPayment;
+                
+                if (window.currentCurrency && window.currentCurrency !== 'NGN') {
+                    displayMonthly = monthlyPayment * rate;
+                    displayInterest = totalInterest * rate;
+                    displayTotal = totalPayment * rate;
+                }
+                
+                document.getElementById('monthlyPayment').textContent = symbol + Math.round(displayMonthly).toLocaleString();
+                document.getElementById('totalInterest').textContent = symbol + Math.round(displayInterest).toLocaleString();
+                document.getElementById('totalPayment').textContent = symbol + Math.round(displayTotal).toLocaleString();
             }
         }
 
-        // Mobile Menu Toggle
+        // ========== MOBILE MENU (UNCHANGED) ==========
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
 
@@ -1300,7 +1613,6 @@
             }
         });
 
-        // Close menu when clicking on a link
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -1311,6 +1623,51 @@
                     icon.classList.add('fa-bars');
                 }
             });
+        });
+
+        // ========== PAGE LOAD INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCurrencyListeners();
+            loadSavedCurrency();
+            
+            const currencyChoice = localStorage.getItem('currencyChoice');
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country_name;
+                    const countryCode = data.country_code;
+                    
+                    let currency = 'NGN';
+                    let currencySymbol = '₦';
+                    let currencyCode = 'NGN';
+                    
+                    if (countryCode === 'US') {
+                        currency = 'USD';
+                        currencySymbol = '$';
+                        currencyCode = 'USD';
+                    } else if (countryCode === 'GB') {
+                        currency = 'GBP';
+                        currencySymbol = '£';
+                        currencyCode = 'GBP';
+                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                        currency = 'EUR';
+                        currencySymbol = '€';
+                        currencyCode = 'EUR';
+                    }
+                    
+                    if (countryCode !== 'NG') {
+                        document.getElementById('userCountry').textContent = country;
+                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                        document.getElementById('countryNotification').style.display = 'block';
+                        
+                        localStorage.setItem('detectedCurrency', currency);
+                        localStorage.setItem('detectedSymbol', currencySymbol);
+                    }
+                })
+                .catch(() => {});
         });
     </script>
 </body>
