@@ -657,7 +657,161 @@
             line-height: 1.6;
         }
 
-        /* Footer - EXACT same as homepage */
+        /* Currency Selector in Footer - NEW */
+        .footer-currency {
+            margin-bottom: 20px;
+        }
+
+        .footer-currency h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .currency-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .currency-option:hover,
+        .currency-option.active {
+            color: var(--primary);
+        }
+
+        .currency-option span {
+            font-size: 18px;
+        }
+
+        /* Country Notification - NEW */
+        .country-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-content i {
+            font-size: 30px;
+            color: var(--primary);
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .notification-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-notification {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-notification.yes {
+            background: var(--primary);
+            color: #0a0a0a;
+        }
+
+        .btn-notification.yes:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-notification.no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: white;
+        }
+
+        .btn-notification.no:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .country-notification {
+                left: 20px;
+                right: 20px;
+                bottom: 20px;
+                padding: 15px;
+            }
+            
+            .notification-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Footer - EXACT same as homepage with currency selector added */
         .footer {
             background: #050505;
             padding: 40px 20px 20px;
@@ -968,25 +1122,25 @@
         </div>
     </div>
     
-    <!-- Rental Types Cards -->
+    <!-- Rental Types Cards (updated with data attributes for currency conversion) -->
     <div class="rental-types">
         <div class="type-card">
             <i class="fas fa-sun"></i>
             <h3>Daily Rental</h3>
             <p>Perfect for short trips, business meetings, and weekend getaways</p>
-            <div class="price">₦25,000<small>/day</small></div>
+            <div class="price" data-daily-ngn="25000">₦25,000<small>/day</small></div>
         </div>
         <div class="type-card">
             <i class="fas fa-calendar-week"></i>
             <h3>Weekly Rental</h3>
             <p>Save more with our weekly rates - ideal for vacations and projects</p>
-            <div class="price">₦150,000<small>/week</small></div>
+            <div class="price" data-weekly-ngn="150000">₦150,000<small>/week</small></div>
         </div>
         <div class="type-card">
             <i class="fas fa-calendar-alt"></i>
             <h3>Monthly Rental</h3>
             <p>Best value for long-term needs - corporate and personal use</p>
-            <div class="price">₦500,000<small>/month</small></div>
+            <div class="price" data-monthly-ngn="500000">₦500,000<small>/month</small></div>
         </div>
     </div>
     
@@ -1125,7 +1279,7 @@
         </div>
     </div>
     
-    <!-- Footer -->
+    <!-- Footer - UPDATED with Currency Selector -->
     <div class="footer">
         <div class="footer-container">
             <div class="footer-grid">
@@ -1166,12 +1320,23 @@
                     </ul>
                 </div>
                 
-                <div class="footer-contact">
-                    <h4>Contact Info</h4>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
-                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
-                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
-                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                <!-- Currency Selector - NEW -->
+                <div class="footer-currency">
+                    <h4>Currency</h4>
+                    <div class="currency-options" id="currencyOptions">
+                        <a href="#" class="currency-option" data-currency="NGN" data-symbol="₦">
+                            <span>🇳🇬</span> NGN (₦)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="USD" data-symbol="$">
+                            <span>🇺🇸</span> USD ($)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="GBP" data-symbol="£">
+                            <span>🇬🇧</span> GBP (£)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="EUR" data-symbol="€">
+                            <span>🇪🇺</span> EUR (€)
+                        </a>
+                    </div>
                 </div>
             </div>
             
@@ -1186,6 +1351,22 @@
         </div>
     </div>
 
+    <!-- Country Notification - NEW -->
+    <div class="country-notification" id="countryNotification" style="display: none;">
+        <div class="notification-content">
+            <i class="fas fa-globe"></i>
+            <div class="notification-text">
+                <strong>We noticed you're visiting from <span id="userCountry"></span>!</strong>
+                <p>Would you like to see prices in <span id="userCurrency"></span>?</p>
+            </div>
+            <div class="notification-buttons">
+                <button class="btn-notification yes" onclick="switchCurrency()">Yes, switch to <span id="switchCurrencyCode"></span></button>
+                <button class="btn-notification no" onclick="dismissNotification()">No, keep ₦ NGN</button>
+            </div>
+            <button class="notification-close" onclick="dismissNotification()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <!-- WhatsApp Float -->
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
@@ -1193,7 +1374,15 @@
     </a>
 
     <script>
-        // Enhanced rental car data with real images
+        // ========== EXCHANGE RATES ==========
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        // ========== RENTAL CAR DATA ==========
         const rentalCars = [
             {
                 name: "2022 Toyota Corolla",
@@ -1275,12 +1464,124 @@
             }
         ];
 
-        // Format currency
-        function formatCurrency(amount) {
-            return '₦' + amount.toLocaleString();
+        // ========== CURRENCY FUNCTIONS ==========
+        function convertPrices(targetCurrency, symbol) {
+            const rate = exchangeRates[targetCurrency] || 1;
+            
+            // Convert rental car prices
+            document.querySelectorAll('.rental-prices').forEach((container, index) => {
+                if (index < rentalCars.length) {
+                    const car = rentalCars[index];
+                    const dailyConverted = Math.round(car.daily * rate);
+                    const weeklyConverted = Math.round(car.weekly * rate);
+                    const monthlyConverted = Math.round(car.monthly * rate);
+                    
+                    const priceRows = container.querySelectorAll('.price-row .amount');
+                    if (priceRows.length >= 3) {
+                        priceRows[0].textContent = `${symbol}${dailyConverted.toLocaleString()}`;
+                        priceRows[1].textContent = `${symbol}${weeklyConverted.toLocaleString()}`;
+                        priceRows[2].textContent = `${symbol}${monthlyConverted.toLocaleString()}`;
+                    }
+                }
+            });
+            
+            // Convert deposit amounts
+            document.querySelectorAll('.deposit-info').forEach((container, index) => {
+                if (index < rentalCars.length) {
+                    const car = rentalCars[index];
+                    const depositConverted = Math.round(car.deposit * rate);
+                    container.innerHTML = `<i class="fas fa-shield-alt"></i><span>Security deposit: ${symbol}${depositConverted.toLocaleString()} (refundable)</span>`;
+                }
+            });
+            
+            // Convert rental type cards (daily, weekly, monthly summary)
+            const dailyCard = document.querySelector('.type-card .price[data-daily-ngn]');
+            const weeklyCard = document.querySelector('.type-card .price[data-weekly-ngn]');
+            const monthlyCard = document.querySelector('.type-card .price[data-monthly-ngn]');
+            
+            if (dailyCard) {
+                const dailyNgn = parseInt(dailyCard.dataset.dailyNgn);
+                const dailyConverted = Math.round(dailyNgn * rate);
+                dailyCard.innerHTML = `${symbol}${dailyConverted.toLocaleString()}<small>/day</small>`;
+            }
+            
+            if (weeklyCard) {
+                const weeklyNgn = parseInt(weeklyCard.dataset.weeklyNgn);
+                const weeklyConverted = Math.round(weeklyNgn * rate);
+                weeklyCard.innerHTML = `${symbol}${weeklyConverted.toLocaleString()}<small>/week</small>`;
+            }
+            
+            if (monthlyCard) {
+                const monthlyNgn = parseInt(monthlyCard.dataset.monthlyNgn);
+                const monthlyConverted = Math.round(monthlyNgn * rate);
+                monthlyCard.innerHTML = `${symbol}${monthlyConverted.toLocaleString()}<small>/month</small>`;
+            }
         }
 
-        // Display cars function
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            
+            if (savedCurrency) {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
+        }
+
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
+        }
+
+        // ========== DISPLAY CARS FUNCTION (UPDATED with data attributes) ==========
         function displayCars(cars) {
             const container = document.getElementById('rental-cars');
             const noResults = document.getElementById('noResults');
@@ -1292,9 +1593,9 @@
                 noResults.style.display = 'none';
                 
                 let html = '';
-                cars.forEach(car => {
+                cars.forEach((car, index) => {
                     html += `
-                        <div class="car-card">
+                        <div class="car-card" data-car-index="${index}">
                             <div class="car-image">
                                 <img src="${car.image}" alt="${car.name}">
                                 <span class="car-badge">${car.badge}</span>
@@ -1307,24 +1608,24 @@
                                     <span><i class="fas fa-users"></i> ${car.seats} seats</span>
                                 </div>
                                 
-                                <div class="rental-prices">
+                                <div class="rental-prices" data-daily-ngn="${car.daily}" data-weekly-ngn="${car.weekly}" data-monthly-ngn="${car.monthly}">
                                     <div class="price-row">
                                         <span class="duration"><i class="fas fa-sun"></i> Daily</span>
-                                        <span class="amount">${formatCurrency(car.daily)}</span>
+                                        <span class="amount">₦${car.daily.toLocaleString()}</span>
                                     </div>
                                     <div class="price-row">
                                         <span class="duration"><i class="fas fa-calendar-week"></i> Weekly</span>
-                                        <span class="amount">${formatCurrency(car.weekly)}</span>
+                                        <span class="amount">₦${car.weekly.toLocaleString()}</span>
                                     </div>
                                     <div class="price-row">
                                         <span class="duration"><i class="fas fa-calendar-alt"></i> Monthly</span>
-                                        <span class="amount">${formatCurrency(car.monthly)}</span>
+                                        <span class="amount">₦${car.monthly.toLocaleString()}</span>
                                     </div>
                                 </div>
                                 
-                                <div class="deposit-info">
+                                <div class="deposit-info" data-deposit-ngn="${car.deposit}">
                                     <i class="fas fa-shield-alt"></i>
-                                    <span>Security deposit: ${formatCurrency(car.deposit)} (refundable)</span>
+                                    <span>Security deposit: ₦${car.deposit.toLocaleString()} (refundable)</span>
                                 </div>
                                 
                                 <div class="car-actions">
@@ -1340,14 +1641,16 @@
                     `;
                 });
                 container.innerHTML = html;
+                
+                // After displaying cars, apply saved currency
+                loadSavedCurrency();
             }
             
-            // Update counts
             document.getElementById('showingCount').textContent = `1-${cars.length}`;
             document.getElementById('totalCount').textContent = cars.length;
         }
 
-        // Filter function
+        // ========== FILTER FUNCTIONS (UNCHANGED) ==========
         function applyFilters() {
             const type = document.getElementById('typeFilter').value;
             const duration = document.getElementById('durationFilter').value;
@@ -1357,23 +1660,19 @@
             
             let filteredCars = [...rentalCars];
             
-            // Apply type filter
             if (type !== 'all') {
                 filteredCars = filteredCars.filter(car => car.type === type);
             }
             
-            // Apply transmission filter
             if (transmission !== 'all') {
                 filteredCars = filteredCars.filter(car => car.transmission === transmission);
             }
             
-            // Apply price filter (based on daily rate)
             if (price !== 'all') {
                 const [min, max] = price.split('-').map(Number);
                 filteredCars = filteredCars.filter(car => car.daily >= min && car.daily <= max);
             }
             
-            // Apply sorting
             if (sort === 'price-low') {
                 filteredCars.sort((a, b) => a.daily - b.daily);
             } else if (sort === 'price-high') {
@@ -1385,7 +1684,6 @@
             displayCars(filteredCars);
         }
 
-        // Reset filters
         function resetFilters() {
             document.getElementById('typeFilter').value = 'all';
             document.getElementById('durationFilter').value = 'all';
@@ -1396,17 +1694,15 @@
             displayCars(rentalCars);
         }
 
-        // Book rental function
         function bookRental(carName) {
             window.open(`https://wa.me/2348012345678?text=Hello, I want to book the ${carName} for rental. Please provide availability and booking details.`, '_blank');
         }
         
-        // WhatsApp inquiry function
         function whatsappRental(carName) {
             window.open(`https://wa.me/2348012345678?text=Hello, I'm interested in renting the ${carName}. Please provide more information about rates and availability.`, '_blank');
         }
 
-        // Initialize with all cars
+        // ========== INITIALIZATION ==========
         displayCars(rentalCars);
 
         // Mobile Menu Toggle
@@ -1425,7 +1721,6 @@
             }
         });
 
-        // Close menu when clicking on a link
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -1436,6 +1731,51 @@
                     icon.classList.add('fa-bars');
                 }
             });
+        });
+
+        // Page Load Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCurrencyListeners();
+            loadSavedCurrency();
+            
+            const currencyChoice = localStorage.getItem('currencyChoice');
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country_name;
+                    const countryCode = data.country_code;
+                    
+                    let currency = 'NGN';
+                    let currencySymbol = '₦';
+                    let currencyCode = 'NGN';
+                    
+                    if (countryCode === 'US') {
+                        currency = 'USD';
+                        currencySymbol = '$';
+                        currencyCode = 'USD';
+                    } else if (countryCode === 'GB') {
+                        currency = 'GBP';
+                        currencySymbol = '£';
+                        currencyCode = 'GBP';
+                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                        currency = 'EUR';
+                        currencySymbol = '€';
+                        currencyCode = 'EUR';
+                    }
+                    
+                    if (countryCode !== 'NG') {
+                        document.getElementById('userCountry').textContent = country;
+                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                        document.getElementById('countryNotification').style.display = 'block';
+                        
+                        localStorage.setItem('detectedCurrency', currency);
+                        localStorage.setItem('detectedSymbol', currencySymbol);
+                    }
+                })
+                .catch(() => {});
         });
     </script>
 </body>
