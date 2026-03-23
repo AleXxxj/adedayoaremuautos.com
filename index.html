@@ -13,25 +13,64 @@
         }
 
         body {
-            background-color: #0a0a0a;
-            color: #ffffff;
+            background-color: #0A0A0A;
+            color: #F0F0F0;
         }
 
-        /* Premium Variables */
+        /* Ultra-Premium Color Palette */
         :root {
-            --primary: #c5a059;
-            --primary-dark: #a88642;
-            --primary-light: #d4b57a;
-            --dark-bg: #0a0a0a;
-            --card-bg: #111111;
-            --card-hover: #1a1a1a;
-            --text-light: #e0e0e0;
-            --text-muted: #888888;
-            --border: #222222;
-            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* Ultra-Deep Green - like green mixed with black and a hint of lemon */
+            --green-deep: #0F3B2A;        /* Deep forest with emerald undertones */
+            --green-dark: #1A4D35;         /* Richer, deeper green */
+            --green-medium: #2C5E42;       /* Muted, sophisticated green */
+            --green-accent: #3F7352;        /* Subtle green for accents */
+            
+            /* Classic Metallics - the star of the show */
+            --silver-platinum: #E5E5E5;     /* Bright platinum */
+            --silver-classic: #CCCCCC;      /* Classic silver */
+            --silver-warm: #B8B8B8;         /* Warm silver/gray */
+            --silver-cool: #A0A0A0;         /* Cool silver/gunmetal */
+            --silver-dark: #707070;          /* Dark silver for depth */
+            
+            /* Premium Neutrals */
+            --charcoal-deep: #1A1A1A;        /* Deep charcoal */
+            --charcoal: #2A2A2A;              /* Rich charcoal */
+            --graphite: #3A3A3A;               /* Graphite gray */
+            --pearl: #F0F0F0;                   /* Pearl white */
+            
+            /* Dynamic Illustrative Colors - for icons and accents */
+            --illustration-gold: #C4A962;      /* Warm gold for highlights */
+            --illustration-bronze: #B17E4A;     /* Bronze for depth */
+            --illustration-copper: #B87333;      /* Copper for warmth */
+            --illustration-amber: #DAA520;       /* Amber for accents */
+            --illustration-steel: #4682B4;       /* Steel blue for cool accents */
+            
+            /* Usage variables */
+            --primary: var(--green-deep);
+            --primary-dark: #0A2F1F;
+            --primary-medium: var(--green-dark);
+            --primary-light: var(--green-medium);
+            
+            --dark-bg: #0A0A0A;
+            --card-bg: #151515;
+            --card-hover: #202020;
+            
+            --text-primary: var(--pearl);
+            --text-secondary: var(--silver-classic);
+            --text-muted: var(--silver-cool);
+            
+            --border: var(--graphite);
+            --border-light: #4A4A4A;
+            
+            --shadow: 0 20px 40px rgba(0,0,0,0.9);
+            --shadow-green: 0 10px 30px rgba(15, 59, 42, 0.4);
+            
+            /* Gradients */
+            --gradient-green: linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 100%);
+            --gradient-silver: linear-gradient(135deg, var(--silver-warm) 0%, var(--silver-cool) 100%);
         }
 
-        /* Header Section - FIXED for mobile */
+        /* Header Section */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
@@ -40,7 +79,7 @@
             width: 100%;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+            border-bottom: 1px solid rgba(42, 92, 66, 0.2);
         }
 
         .header-container {
@@ -62,7 +101,7 @@
         .logo-container img {
             height: 50px;
             width: auto;
-            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+            filter: drop-shadow(0 0 15px rgba(15, 59, 42, 0.5));
         }
 
         .logo-text h1 {
@@ -72,17 +111,23 @@
             margin: 0;
             line-height: 1.2;
             white-space: nowrap;
-            color: white;
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .logo-text h1 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 900;
         }
 
         .logo-text p {
             font-size: 10px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             letter-spacing: 1.5px;
             margin: 3px 0 0;
             text-transform: uppercase;
@@ -96,7 +141,7 @@
         }
 
         .nav-menu a {
-            color: #ffffff;
+            color: var(--silver-classic);
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
@@ -114,7 +159,7 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--primary);
+            background: var(--gradient-green);
             transition: width 0.3s ease;
         }
 
@@ -125,10 +170,10 @@
 
         .nav-menu a:hover,
         .nav-menu a.active {
-            color: var(--primary);
+            color: var(--pearl);
         }
 
-        /* Header Actions - FIXED for mobile */
+        /* Header Actions */
         .header-actions {
             display: flex;
             align-items: center;
@@ -147,7 +192,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
-            white-space: nowrap; /* Prevents line break */
+            white-space: nowrap;
         }
 
         .whatsapp-btn i {
@@ -164,28 +209,28 @@
         .mobile-menu-btn {
             display: none;
             background: transparent;
-            border: 1px solid rgba(197, 160, 89, 0.3);
+            border: 1px solid rgba(42, 92, 66, 0.3);
             border-radius: 5px;
             padding: 8px 12px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .mobile-menu-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: var(--green-accent);
+            color: var(--pearl);
         }
 
-        /* Hero Section - FIXED background */
+        /* Hero Section - FIXED with visible car */
         .hero {
             min-height: 100vh;
             height: auto;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%), 
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%), 
                         url('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-            background-size: cover; /* Changed from 'cover' to 'cover' but with proper positioning */
-            background-position: center 30%; /* Adjusted position */
+            background-size: cover;
+            background-position: center 40%;
             background-repeat: no-repeat;
             display: flex;
             align-items: center;
@@ -202,7 +247,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at 70% 50%, rgba(21, 77, 53, 0.2) 0%, transparent 60%);
+            z-index: 1;
         }
 
         .hero-content {
@@ -220,20 +266,27 @@
             line-height: 1.1;
             margin-bottom: 20px;
             max-width: 900px;
+            color: var(--pearl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .hero h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             position: relative;
             display: inline-block;
+            text-shadow: none;
         }
 
         .hero p {
             font-size: clamp(16px, 4vw, 20px);
-            color: var(--text-light);
+            color: var(--silver-classic);
             margin-bottom: 30px;
             max-width: 600px;
             line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .hero-buttons {
@@ -256,41 +309,46 @@
             gap: 8px;
             border: none;
             cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 20px 30px rgba(197, 160, 89, 0.3);
+            box-shadow: var(--shadow-green);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .btn-outline {
-            background: transparent;
-            color: white;
-            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.5);
+            color: var(--silver-classic);
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
         }
 
         .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: var(--green-accent);
+            color: var(--pearl);
+            background: rgba(0,0,0,0.6);
             transform: translateY(-2px);
         }
 
         .btn-outline-light {
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            color: var(--silver-classic);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .btn-outline-light:hover {
-            background: rgba(197, 160, 89, 0.2);
-            border-color: var(--primary);
+            background: rgba(21, 77, 53, 0.3);
+            border-color: var(--green-accent);
+            color: var(--pearl);
         }
 
         /* Services Section */
@@ -313,14 +371,18 @@
             font-size: clamp(28px, 6vw, 42px);
             font-weight: 700;
             margin-bottom: 10px;
+            color: var(--pearl);
         }
 
         .section-title h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .section-title p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: clamp(14px, 3vw, 18px);
         }
 
@@ -341,46 +403,66 @@
             overflow: hidden;
         }
 
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-green);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .service-card:hover::before {
+            transform: translateX(100%);
+        }
+
         .service-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
         .service-icon {
             width: 80px;
             height: 80px;
-            background: rgba(197, 160, 89, 0.1);
+            background: rgba(21, 77, 53, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 25px;
             font-size: 35px;
-            color: var(--primary);
+            color: var(--illustration-gold);
             transition: all 0.3s ease;
         }
 
         .service-card:hover .service-icon {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             transform: scale(1.1);
         }
 
         .service-card h3 {
             font-size: 22px;
             margin-bottom: 12px;
+            color: var(--silver-classic);
         }
 
         .service-card p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             line-height: 1.6;
             margin-bottom: 20px;
             font-size: 15px;
         }
 
         .service-link {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
             font-weight: 600;
             display: inline-flex;
@@ -391,12 +473,16 @@
 
         .service-link:hover {
             gap: 10px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* Featured Vehicles */
         .featured {
             padding: 60px 20px;
-            background: linear-gradient(180deg, var(--dark-bg) 0%, #0f0f0f 100%);
+            background: linear-gradient(180deg, var(--dark-bg) 0%, #050505 100%);
         }
 
         .featured-container {
@@ -416,10 +502,14 @@
 
         .section-header h2 {
             font-size: clamp(24px, 5vw, 36px);
+            color: var(--pearl);
         }
 
         .view-all {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
             font-weight: 600;
             display: flex;
@@ -427,6 +517,14 @@
             gap: 5px;
             transition: all 0.3s ease;
             white-space: nowrap;
+        }
+
+        .view-all:hover {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            gap: 10px;
         }
 
         .cars-grid {
@@ -445,7 +543,7 @@
 
         .car-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
@@ -470,14 +568,15 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             padding: 4px 12px;
             border-radius: 50px;
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .car-details {
@@ -488,32 +587,43 @@
             font-size: 17px;
             font-weight: 700;
             margin-bottom: 8px;
+            color: var(--silver-classic);
         }
 
         .car-specs {
             display: flex;
             gap: 12px;
-            color: var(--text-muted);
-            font-size: 13px;
             margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
-        .car-specs i {
-            color: var(--primary);
-            margin-right: 3px;
+        .car-specs span {
+            color: var(--silver-cool);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
+
+        /* Dynamic illustrative colors for icons */
+        .car-specs span:nth-child(1) i { color: var(--illustration-gold); }      /* Calendar - gold */
+        .car-specs span:nth-child(2) i { color: var(--illustration-copper); }    /* Tachometer - copper */
+        .car-specs span:nth-child(3) i { color: var(--illustration-steel); }      /* Cog - steel blue */
+        .car-specs span:nth-child(4) i { color: var(--illustration-amber); }      /* Gas pump - amber */
 
         .car-price {
             font-size: 22px;
             font-weight: 700;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 15px;
         }
 
         .car-price small {
             font-size: 13px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-weight: 400;
             display: block;
         }
@@ -530,10 +640,10 @@
             justify-content: center;
         }
 
-        /* About Section - NEW */
+        /* About Section */
         .about-section {
             padding: 80px 20px;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #050505 0%, var(--dark-bg) 100%);
             position: relative;
             overflow: hidden;
         }
@@ -545,7 +655,7 @@
             right: -20%;
             width: 80%;
             height: 200%;
-            background: radial-gradient(circle, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(21, 77, 53, 0.03) 0%, transparent 70%);
         }
 
         .about-container {
@@ -565,20 +675,27 @@
         .about-content h2 {
             font-size: clamp(28px, 5vw, 42px);
             margin-bottom: 20px;
+            color: var(--pearl);
         }
 
         .about-content h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .about-content h3 {
             font-size: 24px;
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 15px;
         }
 
         .about-content p {
-            color: var(--text-light);
+            color: var(--silver-classic);
             line-height: 1.8;
             margin-bottom: 20px;
             font-size: 16px;
@@ -602,12 +719,15 @@
         .about-stat .number {
             font-size: 32px;
             font-weight: 800;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 5px;
         }
 
         .about-stat .label {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 14px;
         }
 
@@ -615,7 +735,9 @@
             position: relative;
             border-radius: 20px;
             overflow: hidden;
-            border: 3px solid var(--primary);
+            border: 3px solid transparent;
+            background: var(--gradient-green);
+            padding: 3px;
             box-shadow: var(--shadow);
         }
 
@@ -623,21 +745,23 @@
             width: 100%;
             height: auto;
             display: block;
+            border-radius: 17px;
         }
 
         .about-image .badge {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             padding: 10px 20px;
             border-radius: 50px;
             font-weight: 700;
             font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Referral Program - NEW */
+        /* Referral Program */
         .referral-section {
             padding: 80px 20px;
             background: var(--dark-bg);
@@ -653,7 +777,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             align-items: center;
-            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
+            background: linear-gradient(135deg, var(--card-bg) 0%, #0a0a0a 100%);
             border-radius: 30px;
             padding: 50px;
             border: 1px solid var(--border);
@@ -662,28 +786,35 @@
         .referral-content h2 {
             font-size: clamp(28px, 5vw, 42px);
             margin-bottom: 15px;
+            color: var(--pearl);
         }
 
         .referral-content h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .referral-content .highlight {
             font-size: 48px;
             font-weight: 800;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 20px 0;
             line-height: 1.2;
         }
 
         .referral-content .highlight small {
             font-size: 18px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-weight: 400;
         }
 
         .referral-content p {
-            color: var(--text-light);
+            color: var(--silver-classic);
             line-height: 1.8;
             margin-bottom: 30px;
             font-size: 16px;
@@ -695,7 +826,7 @@
         }
 
         .referral-features li {
-            color: var(--text-light);
+            color: var(--silver-classic);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -703,7 +834,7 @@
         }
 
         .referral-features li i {
-            color: var(--primary);
+            color: var(--illustration-gold);
             font-size: 20px;
         }
 
@@ -711,56 +842,65 @@
             background: var(--card-bg);
             padding: 40px;
             border-radius: 20px;
-            border: 2px solid var(--primary);
+            border: 2px solid transparent;
+            background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                        var(--gradient-green) border-box;
             text-align: center;
         }
 
         .referral-card i {
             font-size: 60px;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 20px;
         }
 
         .referral-card h3 {
             font-size: 28px;
             margin-bottom: 15px;
+            color: var(--silver-classic);
         }
 
         .referral-card .percent {
             font-size: 72px;
             font-weight: 800;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             line-height: 1;
             margin: 20px 0;
         }
 
         .referral-card .percent small {
             font-size: 24px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
         }
 
         .referral-cta {
             display: inline-block;
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             padding: 15px 40px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
             margin-top: 20px;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .referral-cta:hover {
-            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+            box-shadow: var(--shadow-green);
         }
 
-        /* Blog Section - NEW */
+        /* Blog Section */
         .blog-section {
             padding: 80px 20px;
-            background: linear-gradient(180deg, #0f0f0f 0%, var(--dark-bg) 100%);
+            background: linear-gradient(180deg, #050505 0%, var(--dark-bg) 100%);
         }
 
         .blog-container {
@@ -785,7 +925,7 @@
 
         .blog-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
@@ -812,12 +952,13 @@
         .blog-category {
             display: inline-block;
             padding: 5px 15px;
-            background: rgba(197, 160, 89, 0.1);
-            color: var(--primary);
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
             border-radius: 50px;
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 15px;
+            border: 1px solid rgba(21, 77, 53, 0.3);
         }
 
         .blog-title {
@@ -825,10 +966,11 @@
             font-weight: 700;
             margin-bottom: 10px;
             line-height: 1.4;
+            color: var(--silver-classic);
         }
 
         .blog-excerpt {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 20px;
@@ -838,18 +980,24 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 13px;
             margin-bottom: 15px;
         }
 
         .blog-meta i {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-right: 5px;
         }
 
         .read-more {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
             font-weight: 600;
             display: inline-flex;
@@ -860,6 +1008,10 @@
 
         .read-more:hover {
             gap: 10px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* Why Choose Us */
@@ -890,23 +1042,34 @@
         }
 
         .feature:hover {
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             transform: translateY(-5px);
         }
 
         .feature i {
             font-size: 45px;
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 15px;
+        }
+
+        .feature:hover i {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .feature h3 {
             font-size: 20px;
             margin-bottom: 10px;
+            color: var(--silver-classic);
         }
 
         .feature p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             line-height: 1.6;
             font-size: 14px;
         }
@@ -914,7 +1077,7 @@
         /* Contact Section */
         .contact-section {
             padding: 60px 20px;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #050505 0%, var(--dark-bg) 100%);
             position: relative;
             overflow: hidden;
         }
@@ -933,11 +1096,19 @@
         .contact-info h3 {
             font-size: clamp(28px, 5vw, 42px);
             margin-bottom: 15px;
+            color: var(--pearl);
+        }
+
+        .contact-info h3 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .contact-info p {
             font-size: 16px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin-bottom: 25px;
             line-height: 1.6;
         }
@@ -951,7 +1122,7 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
-            color: var(--text-light);
+            color: var(--silver-classic);
             font-size: 16px;
             flex-wrap: wrap;
         }
@@ -959,12 +1130,15 @@
         .contact-item i {
             width: 45px;
             height: 45px;
-            background: rgba(197, 160, 89, 0.1);
+            background: rgba(21, 77, 53, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 18px;
             flex-shrink: 0;
         }
@@ -984,10 +1158,10 @@
         .form-group textarea {
             width: 100%;
             padding: 14px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
             border-radius: 10px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 15px;
             transition: all 0.3s ease;
         }
@@ -995,8 +1169,8 @@
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: var(--primary);
-            background: rgba(197, 160, 89, 0.1);
+            border-color: var(--green-accent);
+            background: rgba(21, 77, 53, 0.1);
         }
 
         .form-group textarea {
@@ -1006,7 +1180,7 @@
 
         /* Footer */
         .footer {
-            background: #050505;
+            background: #000000;
             padding: 40px 20px 20px;
             border-top: 1px solid var(--border);
         }
@@ -1024,7 +1198,7 @@
         }
 
         .footer-about p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin: 15px 0;
             line-height: 1.6;
             font-size: 14px;
@@ -1038,20 +1212,20 @@
         .social-links a {
             width: 36px;
             height: 36px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 16px;
         }
 
         .social-links a:hover {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             transform: translateY(-3px);
         }
 
@@ -1059,7 +1233,7 @@
         .footer-contact h4 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: white;
+            color: var(--silver-classic);
         }
 
         .footer-links ul {
@@ -1071,24 +1245,31 @@
         }
 
         .footer-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 14px;
         }
 
         .footer-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             padding-left: 5px;
         }
 
         .footer-contact p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 14px;
+        }
+
+        .footer-contact p i {
+            color: var(--illustration-gold);
         }
 
         .footer-bottom {
@@ -1097,7 +1278,7 @@
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 13px;
             flex-wrap: wrap;
             gap: 10px;
@@ -1110,13 +1291,167 @@
         }
 
         .footer-bottom-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             font-size: 13px;
         }
 
         .footer-bottom-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Currency Selector in Footer */
+        .footer-currency {
+            margin-bottom: 20px;
+        }
+
+        .footer-currency h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--silver-classic);
+        }
+
+        .currency-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--silver-cool);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .currency-option:hover,
+        .currency-option.active {
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .currency-option span {
+            font-size: 18px;
+        }
+
+        /* Country Notification */
+        .country-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                        var(--gradient-green) border-box;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-content i {
+            font-size: 30px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--silver-classic);
+        }
+
+        .notification-text p {
+            color: var(--silver-cool);
+            font-size: 14px;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-notification {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-notification.yes {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-notification.yes:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+        .btn-notification.no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--silver-cool);
+        }
+
+        .btn-notification.no:hover {
+            border-color: var(--green-accent);
+            color: var(--pearl);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--silver-cool);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--pearl);
         }
 
         /* WhatsApp Float */
@@ -1148,161 +1483,7 @@
             transform: scale(1.05);
         }
 
-        /* Currency Selector in Footer - NEW */
-        .footer-currency {
-            margin-bottom: 20px;
-        }
-
-        .footer-currency h4 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: white;
-        }
-
-        .currency-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .currency-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            padding: 8px 0;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .currency-option:hover,
-        .currency-option.active {
-            color: var(--primary);
-        }
-
-        .currency-option span {
-            font-size: 18px;
-        }
-
-        /* Country Notification - NEW */
-        .country-notification {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            right: 30px;
-            max-width: 500px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--primary);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .notification-content {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            position: relative;
-        }
-
-        .notification-content i {
-            font-size: 30px;
-            color: var(--primary);
-        }
-
-        .notification-text strong {
-            display: block;
-            margin-bottom: 5px;
-            color: white;
-        }
-
-        .notification-text p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .notification-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .btn-notification {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .btn-notification.yes {
-            background: var(--primary);
-            color: #0a0a0a;
-        }
-
-        .btn-notification.yes:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-notification.no {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: white;
-        }
-
-        .btn-notification.no:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .notification-close {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 18px;
-            padding: 5px;
-        }
-
-        .notification-close:hover {
-            color: var(--primary);
-        }
-
-        @media (max-width: 600px) {
-            .country-notification {
-                left: 20px;
-                right: 20px;
-                bottom: 20px;
-                padding: 15px;
-            }
-            
-            .notification-buttons {
-                flex-direction: column;
-            }
-        }
-
-        /* Mobile Styles - FIXED */
+        /* Mobile Styles */
         @media (max-width: 900px) {
             .mobile-menu-btn {
                 display: block;
@@ -1315,7 +1496,7 @@
                 align-items: center;
                 gap: 15px;
                 padding: 20px 0 10px;
-                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
                 margin-top: 15px;
             }
 
@@ -1343,7 +1524,7 @@
 
         @media (max-width: 600px) {
             .logo-container img {
-                height: 45px; /* Larger on mobile */
+                height: 45px;
             }
 
             .logo-text h1 {
@@ -1361,7 +1542,7 @@
 
             .hero {
                 margin-top: 74px;
-                background-position: center 20%; /* Adjusted for mobile */
+                background-position: center 30%;
             }
 
             .hero-buttons .btn {
@@ -1422,12 +1603,20 @@
             }
 
             .whatsapp-btn span {
-                display: none; /* Hide text on very small screens */
+                display: none;
             }
 
             .whatsapp-btn i {
                 margin: 0;
                 font-size: 20px;
+            }
+
+            .hero h2 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 14px;
             }
         }
     </style>
@@ -1435,7 +1624,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header - COMPLETELY UNTOUCHED -->
+    <!-- Header -->
     <div class="header">
         <div class="header-container">
             <div class="logo-container">
@@ -1456,7 +1645,6 @@
                 <a href="cars.html">Buy Cars</a>
                 <a href="rentals.html">Rentals</a>
                 <a href="financing.html">Financing</a>
-                <a href="blog.html">Blog</a>
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
             </div>
@@ -1470,7 +1658,7 @@
         </div>
     </div>
 
-    <!-- Hero Section - UNTOUCHED -->
+    <!-- Hero Section - Now with visible car! -->
     <div class="hero">
         <div class="hero-content">
             <h2>Buy, Rent & <span>Finance Cars</span> with Confidence</h2>
@@ -1492,7 +1680,7 @@
         </div>
     </div>
 
-    <!-- Services Section - UNTOUCHED -->
+    <!-- Services Section -->
     <div class="services">
         <div class="services-container">
             <div class="section-title">
@@ -1537,7 +1725,7 @@
         </div>
     </div>
 
-    <!-- Featured Vehicles - UNTOUCHED (prices will be converted by JavaScript) -->
+    <!-- Featured Vehicles -->
     <div class="featured">
         <div class="featured-container">
             <div class="section-header">
@@ -1556,12 +1744,12 @@
         </div>
     </div>
 
-    <!-- About Section - UNTOUCHED -->
+    <!-- About Section -->
     <div class="about-section">
         <div class="about-container">
             <div class="about-grid">
                 <div class="about-content">
-                    <h2>Meet <span>Adedayo Aremu</span></h2>
+                    <h2>Meet Adedayo Aremu</h2>
                     <h3>Founder & CEO</h3>
                     <p>Adedayo Aremu is an entrepreneurial professional and founder of Adedayo Aremu Autos, a growing automotive enterprise committed to excellence, transparency, and customer-centered service. With a strategic mindset and strong business acumen, he has positioned his brand to deliver reliable vehicle sourcing, quality assurance, and value-driven automotive solutions.</p>
                     
@@ -1593,7 +1781,7 @@
         </div>
     </div>
 
-    <!-- Referral Program - UNTOUCHED -->
+    <!-- Referral Program -->
     <div class="referral-section">
         <div class="referral-container">
             <div class="referral-grid">
@@ -1622,14 +1810,14 @@
                         1.5% <small>per sale</small>
                     </div>
                     <p>On every successful vehicle purchase through your referral</p>
-                    <p style="color: var(--primary); font-weight: 600; margin-top: 20px;">Example: Refer a ₦10M car = ₦150,000</p>
+                    <p style="color: var(--illustration-gold); font-weight: 600; margin-top: 20px;">Example: Refer a ₦10M car = ₦150,000</p>
                     <a href="https://wa.me/2348012345678?text=I'm%20interested%20in%20your%20referral%20program" class="referral-cta">Start Referring</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Blog Section - UNTOUCHED -->
+    <!-- Blog Section -->
     <div class="blog-section">
         <div class="blog-container">
             <div class="section-title">
@@ -1713,7 +1901,7 @@
         </div>
     </div>
 
-    <!-- Why Choose Us - UNTOUCHED -->
+    <!-- Why Choose Us -->
     <div class="why-choose">
         <div class="why-choose-container">
             <div class="section-title">
@@ -1761,7 +1949,7 @@
         </div>
     </div>
 
-    <!-- Contact Section - UNTOUCHED -->
+    <!-- Contact Section -->
     <div class="contact-section">
         <div class="contact-container">
             <div class="contact-info">
@@ -1816,14 +2004,14 @@
         </div>
     </div>
 
-    <!-- Footer - UPDATED with Currency Selector (everything else untouched) -->
+    <!-- Footer -->
     <div class="footer">
         <div class="footer-container">
             <div class="footer-grid">
                 <div class="footer-about">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                         <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
-                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                        <h3 style="color: var(--silver-classic); font-size: 20px;">ADEDAYO AREMU <span style="background: var(--gradient-green); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AUTOS</span></h3>
                     </div>
                     <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
                     <div class="social-links">
@@ -1841,7 +2029,6 @@
                         <li><a href="cars.html">Buy Cars</a></li>
                         <li><a href="rentals.html">Rentals</a></li>
                         <li><a href="financing.html">Financing</a></li>
-                        <li><a href="blog.html">Blog</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
@@ -1858,7 +2045,7 @@
                     </ul>
                 </div>
                 
-                <!-- Currency Selector - NEW (added without affecting existing structure) -->
+                <!-- Currency Selector -->
                 <div class="footer-currency">
                     <h4>Currency</h4>
                     <div class="currency-options">
@@ -1889,7 +2076,7 @@
         </div>
     </div>
 
-    <!-- Country Notification - NEW -->
+    <!-- Country Notification -->
     <div class="country-notification" id="countryNotification" style="display: none;">
         <div class="notification-content">
             <i class="fas fa-globe"></i>
@@ -1905,25 +2092,25 @@
         </div>
     </div>
 
-    <!-- WhatsApp Float - UNTOUCHED -->
+    <!-- WhatsApp Float -->
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
         Chat with us
     </a>
 
     <script>
-        // Exchange rates (you can update these with live API later)
+        // Exchange rates
         const exchangeRates = {
             NGN: 1,
-            USD: 0.00065, // 1 NGN = 0.00065 USD
-            GBP: 0.00052, // 1 NGN = 0.00052 GBP
-            EUR: 0.00060, // 1 NGN = 0.00060 EUR
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
         };
 
         // Store original prices
         const originalPrices = new Map();
 
-        // Premium car data - UNTOUCHED (only added data-price-ngn attributes)
+        // Premium car data
         const cars = [
             {
                 name: "2020 Toyota Camry",
@@ -1979,7 +2166,7 @@
             }
         ];
         
-        // Display cars - UNTOUCHED (only added data attributes)
+        // Display cars
         const container = document.getElementById('featured-cars');
         cars.forEach(car => {
             const carHTML = `
@@ -2011,7 +2198,7 @@
             container.innerHTML += carHTML;
         });
 
-        // Mobile Menu Toggle - UNTOUCHED
+        // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
 
@@ -2027,7 +2214,7 @@
             }
         });
 
-        // Close menu when clicking on a link - UNTOUCHED
+        // Close menu when clicking on a link
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -2040,11 +2227,10 @@
             });
         });
 
-        // ========== NEW CURRENCY FUNCTIONS ==========
+        // ========== CURRENCY FUNCTIONS ==========
 
         // Initialize currency detection
         document.addEventListener('DOMContentLoaded', function() {
-            // Store original prices
             document.querySelectorAll('.car-price[data-price-ngn]').forEach(el => {
                 originalPrices.set(el, {
                     price: parseFloat(el.dataset.priceNgn),
@@ -2052,11 +2238,9 @@
                 });
             });
             
-            // Check if user has already made a currency choice
             const currencyChoice = localStorage.getItem('currencyChoice');
             if (currencyChoice === 'dismissed') return;
             
-            // Detect user's country (using free IP API)
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
@@ -2081,23 +2265,18 @@
                         currencyCode = 'EUR';
                     }
                     
-                    // Only show notification if user is not in Nigeria and not already set
                     if (countryCode !== 'NG' && !localStorage.getItem('manualCurrency')) {
                         document.getElementById('userCountry').textContent = country;
                         document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
                         document.getElementById('switchCurrencyCode').textContent = currencyCode;
                         document.getElementById('countryNotification').style.display = 'block';
                         
-                        // Store detected info
                         localStorage.setItem('detectedCurrency', currency);
                         localStorage.setItem('detectedSymbol', currencySymbol);
                     }
                 })
-                .catch(() => {
-                    // Silently fail if IP detection doesn't work
-                });
+                .catch(() => {});
             
-            // Load saved currency preference
             const savedCurrency = localStorage.getItem('manualCurrency');
             if (savedCurrency) {
                 let symbol = '₦';
@@ -2107,7 +2286,6 @@
                 
                 convertPrices(savedCurrency, symbol);
                 
-                // Update active state in footer
                 document.querySelectorAll('.currency-option').forEach(opt => {
                     opt.classList.remove('active');
                     if (opt.dataset.currency === savedCurrency) {
@@ -2124,32 +2302,26 @@
                 const currency = this.dataset.currency;
                 const symbol = this.dataset.symbol;
                 
-                // Convert prices
                 convertPrices(currency, symbol);
                 
-                // Update active state
                 document.querySelectorAll('.currency-option').forEach(opt => {
                     opt.classList.remove('active');
                 });
                 this.classList.add('active');
                 
-                // Save choice
                 localStorage.setItem('currencyChoice', 'manual');
                 localStorage.setItem('manualCurrency', currency);
                 
-                // Hide notification if visible
                 document.getElementById('countryNotification').style.display = 'none';
             });
         });
 
-        // Switch currency function (called from notification)
         function switchCurrency() {
             const currency = localStorage.getItem('detectedCurrency') || 'USD';
             const symbol = localStorage.getItem('detectedSymbol') || '$';
             
             convertPrices(currency, symbol);
             
-            // Update active state in footer
             document.querySelectorAll('.currency-option').forEach(opt => {
                 opt.classList.remove('active');
                 if (opt.dataset.currency === currency) {
@@ -2157,21 +2329,17 @@
                 }
             });
             
-            // Save choice
             localStorage.setItem('currencyChoice', 'accepted');
             localStorage.setItem('manualCurrency', currency);
             
-            // Dismiss notification
             dismissNotification();
         }
 
-        // Dismiss notification
         function dismissNotification() {
             document.getElementById('countryNotification').style.display = 'none';
             localStorage.setItem('currencyChoice', 'dismissed');
         }
 
-        // Convert prices function
         function convertPrices(targetCurrency, symbol) {
             const rate = exchangeRates[targetCurrency] || 1;
             
@@ -2183,7 +2351,6 @@
                     const convertedPrice = Math.round(ngnPrice * rate);
                     const convertedMonthly = Math.round(ngnMonthly * rate);
                     
-                    // Format with commas
                     const formattedPrice = convertedPrice.toLocaleString();
                     const formattedMonthly = convertedMonthly.toLocaleString();
                     
