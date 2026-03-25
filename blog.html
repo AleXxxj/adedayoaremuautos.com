@@ -13,24 +13,55 @@
         }
 
         body {
-            background-color: #0a0a0a;
-            color: #ffffff;
+            background-color: #0A0A0A;
+            color: #F0F0F0;
         }
 
+        /* Ultra-Premium Color Palette */
         :root {
-            --primary: #c5a059;
-            --primary-dark: #a88642;
-            --primary-light: #d4b57a;
-            --dark-bg: #0a0a0a;
-            --card-bg: #111111;
-            --card-hover: #1a1a1a;
-            --text-light: #e0e0e0;
-            --text-muted: #888888;
-            --border: #222222;
-            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+            --green-deep: #0F3B2A;
+            --green-dark: #1A4D35;
+            --green-medium: #2C5E42;
+            --green-accent: #3F7352;
+            --silver-platinum: #E5E5E5;
+            --silver-classic: #CCCCCC;
+            --silver-warm: #B8B8B8;
+            --silver-cool: #A0A0A0;
+            --silver-dark: #707070;
+            --charcoal-deep: #1A1A1A;
+            --charcoal: #2A2A2A;
+            --graphite: #3A3A3A;
+            --pearl: #F0F0F0;
+            --illustration-gold: #C4A962;
+            --illustration-bronze: #B17E4A;
+            --illustration-copper: #B87333;
+            --illustration-amber: #DAA520;
+            --illustration-steel: #4682B4;
+            
+            --primary: var(--green-deep);
+            --primary-dark: #0A2F1F;
+            --primary-medium: var(--green-dark);
+            --primary-light: var(--green-medium);
+            
+            --dark-bg: #0A0A0A;
+            --card-bg: #151515;
+            --card-hover: #202020;
+            
+            --text-primary: var(--pearl);
+            --text-secondary: var(--silver-classic);
+            --text-muted: var(--silver-cool);
+            
+            --border: var(--graphite);
+            --border-light: #4A4A4A;
+            
+            --shadow: 0 20px 40px rgba(0,0,0,0.9);
+            --shadow-green: 0 10px 30px rgba(15, 59, 42, 0.4);
+            
+            --gradient-green: linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 100%);
+            --gradient-silver: linear-gradient(135deg, var(--silver-warm) 0%, var(--silver-cool) 100%);
         }
 
-        /* Header Section - Same as homepage */
+        /* Header Section */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
@@ -39,7 +70,7 @@
             width: 100%;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+            border-bottom: 1px solid rgba(42, 92, 66, 0.2);
         }
 
         .header-container {
@@ -61,7 +92,7 @@
         .logo-container img {
             height: 50px;
             width: auto;
-            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+            filter: drop-shadow(0 0 15px rgba(15, 59, 42, 0.5));
         }
 
         .logo-text h1 {
@@ -71,30 +102,37 @@
             margin: 0;
             line-height: 1.2;
             white-space: nowrap;
-            color: white;
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .logo-text h1 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 900;
         }
 
         .logo-text p {
             font-size: 10px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             letter-spacing: 1.5px;
             margin: 3px 0 0;
             text-transform: uppercase;
             font-weight: 500;
         }
 
+        /* Navigation */
         .nav-menu {
             display: flex;
             gap: 25px;
         }
 
         .nav-menu a {
-            color: #ffffff;
+            color: var(--silver-classic);
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
@@ -112,7 +150,7 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--primary);
+            background: var(--gradient-green);
             transition: width 0.3s ease;
         }
 
@@ -123,9 +161,10 @@
 
         .nav-menu a:hover,
         .nav-menu a.active {
-            color: var(--primary);
+            color: var(--pearl);
         }
 
+        /* Header Actions */
         .header-actions {
             display: flex;
             align-items: center;
@@ -157,32 +196,33 @@
             box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
         }
 
+        /* Mobile Menu Button */
         .mobile-menu-btn {
             display: none;
             background: transparent;
-            border: 1px solid rgba(197, 160, 89, 0.3);
+            border: 1px solid rgba(42, 92, 66, 0.3);
             border-radius: 5px;
             padding: 8px 12px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .mobile-menu-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: var(--green-accent);
+            color: var(--pearl);
         }
 
-        /* Page Header */
+        /* Page Header - Blog */
         .page-header {
             margin-top: 90px;
             padding: 80px 20px 60px;
             text-align: center;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
                         url('https://images.unsplash.com/photo-1496449904464-d54c85e36f8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
             background-size: cover;
-            background-position: center;
+            background-position: center 40%;
             border-bottom: 1px solid var(--border);
             position: relative;
             overflow: hidden;
@@ -195,7 +235,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+            background: radial-gradient(circle at 70% 50%, rgba(21, 77, 53, 0.2) 0%, transparent 60%);
         }
 
         .page-header-content {
@@ -207,17 +247,24 @@
             font-size: clamp(42px, 8vw, 70px);
             margin-bottom: 20px;
             line-height: 1.1;
+            color: var(--pearl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .page-header h1 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
         }
 
         .page-header p {
-            color: var(--text-light);
+            color: var(--silver-classic);
             font-size: 20px;
             max-width: 600px;
             margin: 0 auto;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         /* Blog Categories */
@@ -232,22 +279,25 @@
         }
 
         .category-btn {
-            padding: 12px 25px;
+            padding: 12px 28px;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 50px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
             cursor: pointer;
+            font-size: 14px;
         }
 
         .category-btn:hover,
         .category-btn.active {
-            background: var(--primary);
-            color: #0a0a0a;
-            border-color: var(--primary);
+            background: var(--gradient-green);
+            color: var(--pearl);
+            border-color: var(--green-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
         }
 
         /* Featured Post */
@@ -270,7 +320,7 @@
 
         .featured-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
@@ -301,46 +351,73 @@
         .featured-category {
             display: inline-block;
             padding: 8px 20px;
-            background: rgba(197, 160, 89, 0.1);
-            color: var(--primary);
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
             border-radius: 50px;
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 20px;
             width: fit-content;
+            border: 1px solid rgba(21, 77, 53, 0.3);
         }
 
         .featured-content h2 {
             font-size: 36px;
             margin-bottom: 20px;
             line-height: 1.3;
+            color: var(--pearl);
         }
 
         .featured-content h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .featured-meta {
             display: flex;
             gap: 25px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 15px;
             margin-bottom: 20px;
         }
 
         .featured-meta i {
-            color: var(--primary);
+            color: var(--illustration-gold);
             margin-right: 8px;
         }
 
         .featured-excerpt {
-            color: var(--text-light);
+            color: var(--silver-classic);
             line-height: 1.8;
             font-size: 16px;
             margin-bottom: 30px;
         }
 
-        /* Blog Grid */
+        .read-more {
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            width: fit-content;
+        }
+
+        .read-more:hover {
+            gap: 12px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Blog Grid Section */
         .blog-grid-section {
             max-width: 1400px;
             margin: 60px auto;
@@ -355,14 +432,18 @@
         .section-title h2 {
             font-size: 36px;
             margin-bottom: 15px;
+            color: var(--pearl);
         }
 
         .section-title h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .section-title p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 18px;
         }
 
@@ -385,7 +466,7 @@
 
         .blog-card:hover {
             transform: translateY(-10px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
@@ -410,13 +491,14 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             padding: 6px 15px;
             border-radius: 50px;
             font-size: 12px;
             font-weight: 700;
             z-index: 2;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .blog-card-content {
@@ -434,49 +516,37 @@
         }
 
         .blog-card-title a {
-            color: white;
+            color: var(--silver-classic);
             text-decoration: none;
             transition: all 0.3s ease;
         }
 
         .blog-card-title a:hover {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .blog-card-meta {
             display: flex;
             gap: 20px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 13px;
             margin-bottom: 15px;
         }
 
         .blog-card-meta i {
-            color: var(--primary);
+            color: var(--illustration-gold);
             margin-right: 5px;
         }
 
         .blog-card-excerpt {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             line-height: 1.7;
             font-size: 14px;
             margin-bottom: 20px;
             flex: 1;
-        }
-
-        .read-more {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            margin-top: auto;
-        }
-
-        .read-more:hover {
-            gap: 12px;
         }
 
         /* Newsletter Section */
@@ -493,14 +563,18 @@
         .newsletter-content h2 {
             font-size: 36px;
             margin-bottom: 15px;
+            color: var(--pearl);
         }
 
         .newsletter-content h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .newsletter-content p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 18px;
             max-width: 600px;
             margin: 0 auto 30px;
@@ -516,32 +590,33 @@
         .newsletter-form input {
             flex: 1;
             padding: 15px 20px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
             border-radius: 50px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 16px;
         }
 
         .newsletter-form input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--green-accent);
         }
 
         .newsletter-form button {
             padding: 15px 30px;
-            background: var(--primary);
+            background: var(--gradient-green);
             border: none;
             border-radius: 50px;
-            color: #0a0a0a;
+            color: var(--pearl);
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .newsletter-form button:hover {
-            background: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
         }
 
         /* Pagination */
@@ -561,21 +636,172 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 10px;
-            color: white;
+            color: var(--silver-classic);
             text-decoration: none;
             transition: all 0.3s ease;
         }
 
         .page-link:hover,
         .page-link.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            border-color: var(--green-accent);
+            color: var(--pearl);
+        }
+
+        /* Currency Selector in Footer */
+        .footer-currency {
+            margin-bottom: 20px;
+        }
+
+        .footer-currency h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--silver-classic);
+        }
+
+        .currency-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--silver-cool);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .currency-option:hover,
+        .currency-option.active {
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .currency-option span {
+            font-size: 18px;
+        }
+
+        /* Country Notification */
+        .country-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                        var(--gradient-green) border-box;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-content i {
+            font-size: 30px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--silver-classic);
+        }
+
+        .notification-text p {
+            color: var(--silver-cool);
+            font-size: 14px;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-notification {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-notification.yes {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-notification.yes:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+        .btn-notification.no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--silver-cool);
+        }
+
+        .btn-notification.no:hover {
+            border-color: var(--green-accent);
+            color: var(--pearl);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--silver-cool);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--pearl);
         }
 
         /* Footer */
         .footer {
-            background: #050505;
+            background: #000000;
             padding: 40px 20px 20px;
             border-top: 1px solid var(--border);
         }
@@ -593,7 +819,7 @@
         }
 
         .footer-about p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin: 15px 0;
             line-height: 1.6;
             font-size: 14px;
@@ -607,20 +833,20 @@
         .social-links a {
             width: 36px;
             height: 36px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 16px;
         }
 
         .social-links a:hover {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             transform: translateY(-3px);
         }
 
@@ -628,7 +854,7 @@
         .footer-contact h4 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: white;
+            color: var(--silver-classic);
         }
 
         .footer-links ul {
@@ -640,19 +866,22 @@
         }
 
         .footer-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 14px;
         }
 
         .footer-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             padding-left: 5px;
         }
 
         .footer-contact p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -660,12 +889,16 @@
             font-size: 14px;
         }
 
+        .footer-contact p i {
+            color: var(--illustration-gold);
+        }
+
         .footer-bottom {
             border-top: 1px solid var(--border);
             padding-top: 20px;
             display: flex;
             justify-content: space-between;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 13px;
             flex-wrap: wrap;
             gap: 10px;
@@ -678,13 +911,16 @@
         }
 
         .footer-bottom-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             font-size: 13px;
         }
 
         .footer-bottom-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* WhatsApp Float */
@@ -729,7 +965,7 @@
                 align-items: center;
                 gap: 15px;
                 padding: 20px 0 10px;
-                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
                 margin-top: 15px;
             }
 
@@ -757,6 +993,10 @@
                 font-size: 28px;
             }
 
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+
             .newsletter-form {
                 flex-direction: column;
             }
@@ -777,6 +1017,7 @@
 
             .whatsapp-btn {
                 padding: 8px 12px;
+                font-size: 13px;
             }
 
             .featured-content {
@@ -787,12 +1028,13 @@
                 font-size: 24px;
             }
 
-            .blog-grid {
-                grid-template-columns: 1fr;
+            .featured-meta {
+                flex-direction: column;
+                gap: 10px;
             }
 
             .newsletter-section {
-                padding: 40px 20px;
+                padding: 40px 25px;
             }
 
             .footer-bottom {
@@ -826,9 +1068,9 @@
                 padding: 8px 10px;
             }
 
-            .featured-meta {
-                flex-direction: column;
-                gap: 10px;
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
             }
         }
     </style>
@@ -856,9 +1098,9 @@
                 <a href="cars.html">Buy Cars</a>
                 <a href="rentals.html">Rentals</a>
                 <a href="financing.html">Financing</a>
-                <a href="blog.html" class="active">Blog</a>
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
+                <a href="blog.html" class="active">Blog</a>
             </div>
             
             <div class="header-actions">
@@ -885,7 +1127,9 @@
         <a href="#" class="category-btn" data-category="financing">Financing</a>
         <a href="#" class="category-btn" data-category="used">Used Cars</a>
         <a href="#" class="category-btn" data-category="maintenance">Maintenance</a>
+        <a href="#" class="category-btn" data-category="luxury">Luxury Cars</a>
         <a href="#" class="category-btn" data-category="rental">Rental Tips</a>
+        <a href="#" class="category-btn" data-category="inspection">Inspection</a>
     </div>
 
     <!-- Featured Post -->
@@ -908,15 +1152,32 @@
         </div>
     </div>
 
-    <!-- Blog Grid -->
+    <!-- Blog Grid Section -->
     <div class="blog-grid-section">
         <div class="section-title">
             <h2>Latest <span>Articles</span></h2>
             <p>Stay updated with the latest automotive insights</p>
         </div>
 
-        <div class="blog-grid">
-            <!-- Article 1 -->
+        <div class="blog-grid" id="blogGrid">
+            <!-- Article 1 - SUV Guide -->
+            <div class="blog-card" data-category="buying">
+                <div class="blog-card-image">
+                    <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="SUV guide">
+                    <span class="blog-card-category">🚗 Buying Guide</span>
+                </div>
+                <div class="blog-card-content">
+                    <h3 class="blog-card-title"><a href="blog-suv-guide.html">Top 5 SUVs for Nigerian Roads</a></h3>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Mar 5, 2024</span>
+                        <span><i class="fas fa-clock"></i> 8 min read</span>
+                    </div>
+                    <p class="blog-card-excerpt">Discover the best SUVs built to handle Nigerian terrain - from rugged roads to city driving. We review durability, fuel efficiency, and value for money.</p>
+                    <a href="blog-suv-guide.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Article 2 - Finance Guide -->
             <div class="blog-card" data-category="financing">
                 <div class="blog-card-image">
                     <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car financing">
@@ -928,12 +1189,12 @@
                         <span><i class="fas fa-calendar"></i> Feb 20, 2024</span>
                         <span><i class="fas fa-clock"></i> 7 min read</span>
                     </div>
-                    <p class="blog-card-excerpt">A complete guide to car financing in Nigeria. Learn about down payments, interest rates, documentation, and how to qualify for the best terms. Includes tips from industry experts.</p>
+                    <p class="blog-card-excerpt">A complete guide to car financing in Nigeria. Learn about down payments, interest rates, documentation, and how to qualify for the best terms.</p>
                     <a href="blog-finance-guide.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <!-- Article 2 -->
+            <!-- Article 3 - Foreign Used -->
             <div class="blog-card" data-category="used">
                 <div class="blog-card-image">
                     <img src="images/foreign_used.JPG" alt="Foreign used cars">
@@ -945,12 +1206,12 @@
                         <span><i class="fas fa-calendar"></i> Feb 10, 2024</span>
                         <span><i class="fas fa-clock"></i> 6 min read</span>
                     </div>
-                    <p class="blog-card-excerpt">Everything you need to know about foreign used (Tokunbo) cars - from inspection checklists to customs clearance and documentation. Learn how to avoid common pitfalls.</p>
+                    <p class="blog-card-excerpt">Everything you need to know about foreign used (Tokunbo) cars - from inspection checklists to customs clearance and documentation.</p>
                     <a href="blog-foreign-used.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <!-- Article 3 -->
+            <!-- Article 4 - Maintenance Tips -->
             <div class="blog-card" data-category="maintenance">
                 <div class="blog-card-image">
                     <img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car maintenance">
@@ -962,29 +1223,29 @@
                         <span><i class="fas fa-calendar"></i> Jan 25, 2024</span>
                         <span><i class="fas fa-clock"></i> 4 min read</span>
                     </div>
-                    <p class="blog-card-excerpt">Keep your vehicle running smoothly with these essential maintenance tips from our expert mechanics. Save money and extend your car's life with simple regular checks.</p>
+                    <p class="blog-card-excerpt">Keep your vehicle running smoothly with these essential maintenance tips from our expert mechanics. Save money and extend your car's life.</p>
                     <a href="blog-maintenance-tips.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <!-- Article 4 -->
-            <div class="blog-card" data-category="buying">
+            <!-- Article 5 - Luxury Guide -->
+            <div class="blog-card" data-category="luxury">
                 <div class="blog-card-image">
                     <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Luxury cars">
-                    <span class="blog-card-category">🏎️ Buying Guide</span>
+                    <span class="blog-card-category">🏎️ Luxury Cars</span>
                 </div>
                 <div class="blog-card-content">
                     <h3 class="blog-card-title"><a href="blog-luxury-guide.html">Luxury Cars vs Regular Cars: Is the Premium Worth It?</a></h3>
                     <div class="blog-card-meta">
                         <span><i class="fas fa-calendar"></i> Jan 15, 2024</span>
-                        <span><i class="fas fa-clock"></i> 5 min read</span>
+                        <span><i class="fas fa-clock"></i> 7 min read</span>
                     </div>
                     <p class="blog-card-excerpt">We compare luxury vehicles with regular cars to help you decide if the premium price tag is worth it. From maintenance costs to resale value, we cover it all.</p>
                     <a href="blog-luxury-guide.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <!-- Article 5 -->
+            <!-- Article 6 - Rental Guide -->
             <div class="blog-card" data-category="rental">
                 <div class="blog-card-image">
                     <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car rental">
@@ -994,24 +1255,24 @@
                     <h3 class="blog-card-title"><a href="blog-rental-guide.html">Car Rental Guide: What to Look for Before Signing</a></h3>
                     <div class="blog-card-meta">
                         <span><i class="fas fa-calendar"></i> Jan 5, 2024</span>
-                        <span><i class="fas fa-clock"></i> 4 min read</span>
+                        <span><i class="fas fa-clock"></i> 6 min read</span>
                     </div>
                     <p class="blog-card-excerpt">Planning to rent a car? Read our comprehensive guide on what to check before signing the rental agreement, including insurance coverage, mileage limits, and hidden fees.</p>
                     <a href="blog-rental-guide.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <!-- Article 6 -->
-            <div class="blog-card" data-category="maintenance">
+            <!-- Article 7 - Inspection Guide -->
+            <div class="blog-card" data-category="inspection">
                 <div class="blog-card-image">
                     <img src="https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Car inspection">
-                    <span class="blog-card-category">🔧 Maintenance</span>
+                    <span class="blog-card-category">🔍 Inspection</span>
                 </div>
                 <div class="blog-card-content">
                     <h3 class="blog-card-title"><a href="blog-inspection-guide.html">Pre-Purchase Car Inspection: A 20-Point Checklist</a></h3>
                     <div class="blog-card-meta">
                         <span><i class="fas fa-calendar"></i> Dec 18, 2023</span>
-                        <span><i class="fas fa-clock"></i> 6 min read</span>
+                        <span><i class="fas fa-clock"></i> 8 min read</span>
                     </div>
                     <p class="blog-card-excerpt">Never buy a used car without this comprehensive 20-point inspection checklist. Learn what to look for, from engine condition to hidden damage and potential problems.</p>
                     <a href="blog-inspection-guide.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
@@ -1023,8 +1284,6 @@
         <div class="pagination">
             <a href="#" class="page-link active">1</a>
             <a href="#" class="page-link">2</a>
-            <a href="#" class="page-link">3</a>
-            <a href="#" class="page-link">4</a>
             <a href="#" class="page-link"><i class="fas fa-chevron-right"></i></a>
         </div>
     </div>
@@ -1048,7 +1307,7 @@
                 <div class="footer-about">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                         <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
-                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                        <h3 style="color: var(--silver-classic); font-size: 20px;">ADEDAYO AREMU <span style="background: var(--gradient-green); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AUTOS</span></h3>
                     </div>
                     <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
                     <div class="social-links">
@@ -1066,7 +1325,6 @@
                         <li><a href="cars.html">Buy Cars</a></li>
                         <li><a href="rentals.html">Rentals</a></li>
                         <li><a href="financing.html">Financing</a></li>
-                        <li><a href="blog.html">Blog</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
@@ -1083,12 +1341,22 @@
                     </ul>
                 </div>
                 
-                <div class="footer-contact">
-                    <h4>Contact Info</h4>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
-                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
-                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
-                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                <div class="footer-currency">
+                    <h4>Currency</h4>
+                    <div class="currency-options">
+                        <a href="#" class="currency-option active" data-currency="NGN" data-symbol="₦">
+                            <span>🇳🇬</span> NGN (₦)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="USD" data-symbol="$">
+                            <span>🇺🇸</span> USD ($)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="GBP" data-symbol="£">
+                            <span>🇬🇧</span> GBP (£)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="EUR" data-symbol="€">
+                            <span>🇪🇺</span> EUR (€)
+                        </a>
+                    </div>
                 </div>
             </div>
             
@@ -1103,13 +1371,102 @@
         </div>
     </div>
 
-    <!-- WhatsApp Float -->
+    <div class="country-notification" id="countryNotification" style="display: none;">
+        <div class="notification-content">
+            <i class="fas fa-globe"></i>
+            <div class="notification-text">
+                <strong>We noticed you're visiting from <span id="userCountry"></span>!</strong>
+                <p>Would you like to see prices in <span id="userCurrency"></span>?</p>
+            </div>
+            <div class="notification-buttons">
+                <button class="btn-notification yes" onclick="switchCurrency()">Yes, switch to <span id="switchCurrencyCode"></span></button>
+                <button class="btn-notification no" onclick="dismissNotification()">No, keep ₦ NGN</button>
+            </div>
+            <button class="notification-close" onclick="dismissNotification()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
         Chat with us
     </a>
 
     <script>
+        // Exchange rates
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        let currentCurrency = 'NGN';
+        let currentSymbol = '₦';
+
+        // No prices on blog page, but we need currency for consistency
+        function convertPrices(targetCurrency, symbol) {
+            currentCurrency = targetCurrency;
+            currentSymbol = symbol;
+        }
+
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            if (savedCurrency && savedCurrency !== 'NGN') {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
+        }
+
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
+        }
+
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
@@ -1159,6 +1516,50 @@
                     }
                 });
             });
+        });
+
+        // Page Load Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCurrencyListeners();
+            loadSavedCurrency();
+            
+            const currencyChoice = localStorage.getItem('currencyChoice');
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country_name;
+                    const countryCode = data.country_code;
+                    
+                    let currency = 'NGN';
+                    let currencySymbol = '₦';
+                    let currencyCode = 'NGN';
+                    
+                    if (countryCode === 'US') {
+                        currency = 'USD';
+                        currencySymbol = '$';
+                        currencyCode = 'USD';
+                    } else if (countryCode === 'GB') {
+                        currency = 'GBP';
+                        currencySymbol = '£';
+                        currencyCode = 'GBP';
+                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                        currency = 'EUR';
+                        currencySymbol = '€';
+                        currencyCode = 'EUR';
+                    }
+                    
+                    if (countryCode !== 'NG') {
+                        document.getElementById('userCountry').textContent = country;
+                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                        document.getElementById('countryNotification').style.display = 'block';
+                        localStorage.setItem('detectedCurrency', currency);
+                        localStorage.setItem('detectedSymbol', currencySymbol);
+                    }
+                })
+                .catch(() => {});
         });
     </script>
 </body>
