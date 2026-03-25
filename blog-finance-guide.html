@@ -13,24 +13,55 @@
         }
 
         body {
-            background-color: #0a0a0a;
-            color: #ffffff;
+            background-color: #0A0A0A;
+            color: #F0F0F0;
         }
 
+        /* Ultra-Premium Color Palette */
         :root {
-            --primary: #c5a059;
-            --primary-dark: #a88642;
-            --primary-light: #d4b57a;
-            --dark-bg: #0a0a0a;
-            --card-bg: #111111;
-            --card-hover: #1a1a1a;
-            --text-light: #e0e0e0;
-            --text-muted: #888888;
-            --border: #222222;
-            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+            --green-deep: #0F3B2A;
+            --green-dark: #1A4D35;
+            --green-medium: #2C5E42;
+            --green-accent: #3F7352;
+            --silver-platinum: #E5E5E5;
+            --silver-classic: #CCCCCC;
+            --silver-warm: #B8B8B8;
+            --silver-cool: #A0A0A0;
+            --silver-dark: #707070;
+            --charcoal-deep: #1A1A1A;
+            --charcoal: #2A2A2A;
+            --graphite: #3A3A3A;
+            --pearl: #F0F0F0;
+            --illustration-gold: #C4A962;
+            --illustration-bronze: #B17E4A;
+            --illustration-copper: #B87333;
+            --illustration-amber: #DAA520;
+            --illustration-steel: #4682B4;
+            
+            --primary: var(--green-deep);
+            --primary-dark: #0A2F1F;
+            --primary-medium: var(--green-dark);
+            --primary-light: var(--green-medium);
+            
+            --dark-bg: #0A0A0A;
+            --card-bg: #151515;
+            --card-hover: #202020;
+            
+            --text-primary: var(--pearl);
+            --text-secondary: var(--silver-classic);
+            --text-muted: var(--silver-cool);
+            
+            --border: var(--graphite);
+            --border-light: #4A4A4A;
+            
+            --shadow: 0 20px 40px rgba(0,0,0,0.9);
+            --shadow-green: 0 10px 30px rgba(15, 59, 42, 0.4);
+            
+            --gradient-green: linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 100%);
+            --gradient-silver: linear-gradient(135deg, var(--silver-warm) 0%, var(--silver-cool) 100%);
         }
 
-        /* Header Section - Same as homepage */
+        /* Header Section */
         .header {
             background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(10px);
@@ -39,7 +70,7 @@
             width: 100%;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+            border-bottom: 1px solid rgba(42, 92, 66, 0.2);
         }
 
         .header-container {
@@ -61,7 +92,7 @@
         .logo-container img {
             height: 50px;
             width: auto;
-            filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.5));
+            filter: drop-shadow(0 0 15px rgba(15, 59, 42, 0.5));
         }
 
         .logo-text h1 {
@@ -71,17 +102,23 @@
             margin: 0;
             line-height: 1.2;
             white-space: nowrap;
-            color: white;
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .logo-text h1 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 900;
         }
 
         .logo-text p {
             font-size: 10px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             letter-spacing: 1.5px;
             margin: 3px 0 0;
             text-transform: uppercase;
@@ -94,7 +131,7 @@
         }
 
         .nav-menu a {
-            color: #ffffff;
+            color: var(--silver-classic);
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
@@ -112,7 +149,7 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--primary);
+            background: var(--gradient-green);
             transition: width 0.3s ease;
         }
 
@@ -123,7 +160,7 @@
 
         .nav-menu a:hover,
         .nav-menu a.active {
-            color: var(--primary);
+            color: var(--pearl);
         }
 
         .header-actions {
@@ -160,28 +197,29 @@
         .mobile-menu-btn {
             display: none;
             background: transparent;
-            border: 1px solid rgba(197, 160, 89, 0.3);
+            border: 1px solid rgba(42, 92, 66, 0.3);
             border-radius: 5px;
             padding: 8px 12px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .mobile-menu-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            border-color: var(--green-accent);
+            color: var(--pearl);
         }
 
         /* Blog Post Header */
         .post-header {
             margin-top: 90px;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%),
+            padding: 80px 20px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
                         url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
             background-size: cover;
-            background-position: center;
+            background-position: center 40%;
             border-bottom: 1px solid var(--border);
             position: relative;
             overflow: hidden;
@@ -194,49 +232,53 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.1) 0%, transparent 60%);
+            background: radial-gradient(circle at 70% 50%, rgba(21, 77, 53, 0.2) 0%, transparent 60%);
         }
 
         .post-header-content {
-            max-width: 800px;
-            margin: 0 auto;
             position: relative;
             z-index: 2;
-            text-align: center;
         }
 
         .post-category {
             display: inline-block;
             padding: 8px 20px;
-            background: rgba(197, 160, 89, 0.1);
-            color: var(--primary);
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
             border-radius: 50px;
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 20px;
+            border: 1px solid rgba(21, 77, 53, 0.3);
         }
 
         .post-header h1 {
-            font-size: clamp(36px, 6vw, 56px);
+            font-size: clamp(42px, 8vw, 65px);
             margin-bottom: 20px;
             line-height: 1.2;
+            color: var(--pearl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .post-header h1 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
         }
 
         .post-meta {
             display: flex;
             justify-content: center;
             gap: 30px;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 16px;
             flex-wrap: wrap;
         }
 
         .post-meta i {
-            color: var(--primary);
+            color: var(--illustration-gold);
             margin-right: 8px;
         }
 
@@ -255,9 +297,16 @@
         }
 
         .blog-content h2 {
-            font-size: 28px;
-            margin: 40px 0 20px;
-            color: var(--primary);
+            font-size: 32px;
+            margin: 45px 0 20px;
+            color: var(--pearl);
+        }
+
+        .blog-content h2 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .blog-content h2:first-of-type {
@@ -265,13 +314,13 @@
         }
 
         .blog-content h3 {
-            font-size: 22px;
-            margin: 30px 0 15px;
-            color: var(--text-light);
+            font-size: 24px;
+            margin: 35px 0 15px;
+            color: var(--silver-classic);
         }
 
         .blog-content p {
-            color: var(--text-light);
+            color: var(--silver-classic);
             line-height: 1.8;
             margin-bottom: 20px;
             font-size: 16px;
@@ -280,7 +329,7 @@
         .blog-content ul, .blog-content ol {
             margin: 20px 0;
             padding-left: 20px;
-            color: var(--text-light);
+            color: var(--silver-classic);
         }
 
         .blog-content li {
@@ -289,17 +338,17 @@
         }
 
         .blog-content li::marker {
-            color: var(--primary);
+            color: var(--illustration-gold);
         }
 
         .blog-content blockquote {
-            background: rgba(197, 160, 89, 0.05);
-            border-left: 4px solid var(--primary);
-            padding: 20px 30px;
-            margin: 30px 0;
-            border-radius: 0 15px 15px 0;
+            background: rgba(21, 77, 53, 0.05);
+            border-left: 4px solid var(--green-accent);
+            padding: 25px 35px;
+            margin: 35px 0;
+            border-radius: 0 20px 20px 0;
             font-style: italic;
-            color: var(--text-muted);
+            color: var(--silver-cool);
         }
 
         .blog-content blockquote p {
@@ -309,14 +358,14 @@
         .blog-content blockquote cite {
             display: block;
             margin-top: 10px;
-            color: var(--primary);
+            color: var(--illustration-gold);
             font-style: normal;
             font-weight: 600;
         }
 
         .blog-image {
             margin: 40px 0;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
             border: 1px solid var(--border);
         }
@@ -330,64 +379,24 @@
         .blog-image figcaption {
             padding: 15px;
             background: rgba(0,0,0,0.3);
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 14px;
             text-align: center;
         }
 
         /* Finance-specific styles */
-        .finance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            background: rgba(255,255,255,0.02);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .finance-table th {
-            background: var(--primary);
-            color: #0a0a0a;
-            padding: 15px;
-            text-align: left;
-        }
-
-        .finance-table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-light);
-        }
-
-        .finance-table tr:last-child td {
-            border-bottom: none;
-        }
-
         .highlight-box {
-            background: rgba(197, 160, 89, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 15px;
+            background: rgba(21, 77, 53, 0.1);
+            border: 1px solid var(--green-accent);
+            border-radius: 20px;
             padding: 30px;
-            margin: 30px 0;
+            margin: 35px 0;
         }
 
         .highlight-box h4 {
-            color: var(--primary);
+            color: var(--illustration-gold);
             margin-bottom: 15px;
             font-size: 20px;
-        }
-
-        .calculator-preview {
-            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-
-        .calculator-preview .btn {
-            display: inline-block;
-            margin-top: 20px;
         }
 
         .step-list {
@@ -403,13 +412,19 @@
             background: rgba(255,255,255,0.02);
             border-radius: 15px;
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step-list li:hover {
+            border-color: var(--green-accent);
+            transform: translateX(5px);
         }
 
         .step-number {
             width: 50px;
             height: 50px;
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -417,12 +432,88 @@
             font-size: 24px;
             font-weight: 800;
             flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .step-content h4 {
-            color: var(--primary);
+            color: var(--illustration-gold);
             margin-bottom: 8px;
             font-size: 18px;
+        }
+
+        .finance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .finance-table th {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .finance-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver-classic);
+        }
+
+        .finance-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .calculator-preview {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
+            border-radius: 20px;
+            padding: 35px;
+            margin: 35px 0;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .calculator-preview .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--gradient-green);
+            color: var(--pearl);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .calculator-preview .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+        .faq-item {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .faq-question {
+            color: var(--illustration-gold);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .faq-answer {
+            color: var(--silver-cool);
+            line-height: 1.7;
         }
 
         /* Author Box */
@@ -441,7 +532,7 @@
             height: 100px;
             border-radius: 50%;
             overflow: hidden;
-            border: 3px solid var(--primary);
+            border: 3px solid var(--green-accent);
         }
 
         .author-image img {
@@ -453,14 +544,18 @@
         .author-info h3 {
             font-size: 22px;
             margin-bottom: 10px;
+            color: var(--silver-classic);
         }
 
         .author-info h3 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .author-info p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             line-height: 1.7;
             margin-bottom: 15px;
         }
@@ -471,13 +566,13 @@
         }
 
         .author-social a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 18px;
             transition: all 0.3s ease;
         }
 
         .author-social a:hover {
-            color: var(--primary);
+            color: var(--illustration-gold);
         }
 
         /* Related Posts */
@@ -489,10 +584,14 @@
             font-size: 28px;
             margin-bottom: 30px;
             text-align: center;
+            color: var(--pearl);
         }
 
         .related-posts h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .related-grid {
@@ -511,7 +610,7 @@
 
         .related-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--green-accent);
             box-shadow: var(--shadow);
         }
 
@@ -542,16 +641,19 @@
         }
 
         .related-content h4 a {
-            color: white;
+            color: var(--silver-classic);
             text-decoration: none;
         }
 
         .related-content h4 a:hover {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .related-meta {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 12px;
         }
 
@@ -574,17 +676,18 @@
 
         .share-tag {
             padding: 8px 15px;
-            background: rgba(197, 160, 89, 0.1);
-            color: var(--primary);
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
             border-radius: 50px;
             font-size: 13px;
             text-decoration: none;
             transition: all 0.3s ease;
+            border: 1px solid rgba(21, 77, 53, 0.3);
         }
 
         .share-tag:hover {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
         }
 
         .share-icons {
@@ -595,19 +698,19 @@
         .share-icon {
             width: 40px;
             height: 40px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
         }
 
         .share-icon:hover {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             transform: translateY(-3px);
         }
 
@@ -619,10 +722,14 @@
         .comments-section h2 {
             font-size: 28px;
             margin-bottom: 30px;
+            color: var(--pearl);
         }
 
         .comments-section h2 span {
-            color: var(--primary);
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .comment-form {
@@ -644,17 +751,18 @@
         .comment-form textarea {
             width: 100%;
             padding: 15px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
             border-radius: 10px;
-            color: white;
+            color: var(--silver-classic);
             font-size: 15px;
         }
 
         .comment-form input:focus,
         .comment-form textarea:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--green-accent);
+            background: rgba(21, 77, 53, 0.1);
         }
 
         .comment-form textarea {
@@ -664,24 +772,25 @@
 
         .comment-form button {
             padding: 15px 30px;
-            background: var(--primary);
+            background: var(--gradient-green);
             border: none;
             border-radius: 50px;
-            color: #0a0a0a;
+            color: var(--pearl);
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .comment-form button:hover {
-            background: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
         }
 
         .comment {
             display: flex;
             gap: 20px;
-            padding: 30px;
+            padding: 25px;
             background: var(--card-bg);
             border-radius: 20px;
             border: 1px solid var(--border);
@@ -689,8 +798,8 @@
         }
 
         .comment-avatar {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             overflow: hidden;
             flex-shrink: 0;
@@ -710,31 +819,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
             gap: 10px;
         }
 
         .comment-header h4 {
-            color: var(--primary);
+            color: var(--illustration-gold);
+            font-size: 16px;
         }
 
         .comment-date {
-            color: var(--text-muted);
-            font-size: 13px;
+            color: var(--silver-cool);
+            font-size: 12px;
         }
 
         .comment-content p {
-            color: var(--text-light);
-            line-height: 1.7;
-            margin-bottom: 10px;
+            color: var(--silver-classic);
+            line-height: 1.6;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
         .comment-reply {
-            color: var(--primary);
+            color: var(--illustration-gold);
             text-decoration: none;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             display: inline-flex;
             align-items: center;
             gap: 5px;
@@ -744,9 +855,160 @@
             gap: 8px;
         }
 
+        /* Currency Selector */
+        .footer-currency {
+            margin-bottom: 20px;
+        }
+
+        .footer-currency h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--silver-classic);
+        }
+
+        .currency-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .currency-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--silver-cool);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .currency-option:hover,
+        .currency-option.active {
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .currency-option span {
+            font-size: 18px;
+        }
+
+        /* Country Notification */
+        .country-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                        var(--gradient-green) border-box;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notification-content i {
+            font-size: 30px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--silver-classic);
+        }
+
+        .notification-text p {
+            color: var(--silver-cool);
+            font-size: 14px;
+        }
+
+        .notification-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-notification {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-notification.yes {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-notification.yes:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+        .btn-notification.no {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--silver-cool);
+        }
+
+        .btn-notification.no:hover {
+            border-color: var(--green-accent);
+            color: var(--pearl);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--silver-cool);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .notification-close:hover {
+            color: var(--pearl);
+        }
+
         /* Footer */
         .footer {
-            background: #050505;
+            background: #000000;
             padding: 40px 20px 20px;
             border-top: 1px solid var(--border);
         }
@@ -764,7 +1026,7 @@
         }
 
         .footer-about p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin: 15px 0;
             line-height: 1.6;
             font-size: 14px;
@@ -778,20 +1040,20 @@
         .social-links a {
             width: 36px;
             height: 36px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.03);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 16px;
         }
 
         .social-links a:hover {
-            background: var(--primary);
-            color: #0a0a0a;
+            background: var(--gradient-green);
+            color: var(--pearl);
             transform: translateY(-3px);
         }
 
@@ -799,7 +1061,7 @@
         .footer-contact h4 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: white;
+            color: var(--silver-classic);
         }
 
         .footer-links ul {
@@ -811,19 +1073,22 @@
         }
 
         .footer-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             transition: all 0.3s ease;
             font-size: 14px;
         }
 
         .footer-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             padding-left: 5px;
         }
 
         .footer-contact p {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -831,12 +1096,16 @@
             font-size: 14px;
         }
 
+        .footer-contact p i {
+            color: var(--illustration-gold);
+        }
+
         .footer-bottom {
             border-top: 1px solid var(--border);
             padding-top: 20px;
             display: flex;
             justify-content: space-between;
-            color: var(--text-muted);
+            color: var(--silver-cool);
             font-size: 13px;
             flex-wrap: wrap;
             gap: 10px;
@@ -849,13 +1118,16 @@
         }
 
         .footer-bottom-links a {
-            color: var(--text-muted);
+            color: var(--silver-cool);
             text-decoration: none;
             font-size: 13px;
         }
 
         .footer-bottom-links a:hover {
-            color: var(--primary);
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* WhatsApp Float */
@@ -900,7 +1172,7 @@
                 align-items: center;
                 gap: 15px;
                 padding: 20px 0 10px;
-                border-top: 1px solid rgba(197, 160, 89, 0.2);
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
                 margin-top: 15px;
             }
 
@@ -918,6 +1190,19 @@
                 text-align: center;
             }
 
+            .finance-table {
+                font-size: 14px;
+            }
+
+            .finance-table th,
+            .finance-table td {
+                padding: 10px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
             .author-box {
                 flex-direction: column;
                 align-items: center;
@@ -926,10 +1211,6 @@
 
             .author-social {
                 justify-content: center;
-            }
-
-            .related-grid {
-                grid-template-columns: 1fr;
             }
 
             .share-section {
@@ -967,24 +1248,20 @@
 
             .whatsapp-btn {
                 padding: 8px 12px;
+                font-size: 13px;
             }
 
             .blog-content {
                 padding: 30px 20px;
             }
 
+            .blog-content h2 {
+                font-size: 28px;
+            }
+
             .post-meta {
                 flex-direction: column;
                 gap: 10px;
-            }
-
-            .finance-table {
-                font-size: 14px;
-            }
-
-            .finance-table th,
-            .finance-table td {
-                padding: 10px;
             }
 
             .footer-bottom {
@@ -1017,6 +1294,19 @@
             .whatsapp-btn {
                 padding: 8px 10px;
             }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .post-header h1 {
+                font-size: 32px;
+            }
+
+            .blog-content h3 {
+                font-size: 22px;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -1043,9 +1333,9 @@
                 <a href="cars.html">Buy Cars</a>
                 <a href="rentals.html">Rentals</a>
                 <a href="financing.html">Financing</a>
-                <a href="blog.html">Blog</a>
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
+                <a href="blog.html">Blog</a>
             </div>
             
             <div class="header-actions">
@@ -1077,9 +1367,6 @@
             
             <p>In this comprehensive guide, we'll walk you through everything you need to know about financing your first car in Nigeria – from understanding the basics to choosing the right plan for your budget.</p>
 
-            <h2>What is Car Financing?</h2>
-            <p>Car financing is essentially a loan specifically designed for purchasing a vehicle. Instead of paying the full amount upfront, you make a down payment (typically 30% of the car's value) and then pay the remaining balance in installments over an agreed period, usually 6 to 36 months, with interest.</p>
-
             <div class="highlight-box">
                 <h4>Key Benefits of Car Financing</h4>
                 <ul>
@@ -1090,6 +1377,9 @@
                     <li><strong>Affordable Monthly Payments:</strong> Spread the cost over months or years</li>
                 </ul>
             </div>
+
+            <h2>What is Car Financing?</h2>
+            <p>Car financing is essentially a loan specifically designed for purchasing a vehicle. Instead of paying the full amount upfront, you make a down payment (typically 30% of the car's value) and then pay the remaining balance in installments over an agreed period, usually 6 to 36 months, with interest.</p>
 
             <h2>The 3-Step Financing Process</h2>
             <p>At Adedayo Aremu Autos, we've simplified car financing into three straightforward steps:</p>
@@ -1118,14 +1408,13 @@
                 </li>
             </ul>
 
-            <h2>Eligibility Requirements</h2>
-            <p>To qualify for car financing with us, you'll need to meet these basic requirements:</p>
-
             <div class="blog-image">
                 <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Documents for financing">
                 <figcaption>Required documents for car financing application</figcaption>
             </div>
 
+            <h2>Eligibility Requirements</h2>
+            <p>To qualify for car financing with us, you'll need to meet these basic requirements:</p>
             <ul>
                 <li><strong>Valid ID:</strong> Driver's License, International Passport, or National ID</li>
                 <li><strong>Proof of Income:</strong> Last 3 months' payslips (for salaried employees) or bank statements (for self-employed)</li>
@@ -1153,38 +1442,36 @@
                         <td><strong>6 Months</strong></td>
                         <td>30% (₦1.5M)</td>
                         <td>5%</td>
-                        <td>₦645,833</td>
+                        <td class="amount">₦645,833</td>
                         <td>₦5,375,000</td>
                     </tr>
                     <tr>
                         <td><strong>12 Months</strong></td>
                         <td>30% (₦1.5M)</td>
                         <td>8%</td>
-                        <td>₦350,000</td>
+                        <td class="amount">₦350,000</td>
                         <td>₦5,700,000</td>
                     </tr>
                     <tr>
                         <td><strong>24 Months</strong></td>
                         <td>30% (₦1.5M)</td>
                         <td>12%</td>
-                        <td>₦196,667</td>
+                        <td class="amount">₦196,667</td>
                         <td>₦6,220,000</td>
                     </tr>
                     <tr>
                         <td><strong>36 Months</strong></td>
                         <td>30% (₦1.5M)</td>
                         <td>15%</td>
-                        <td>₦147,222</td>
+                        <td class="amount">₦147,222</td>
                         <td>₦6,800,000</td>
                     </tr>
                 </tbody>
             </table>
-
             <p><em>Note: Interest rates are subject to change based on market conditions and individual credit assessment.</em></p>
 
             <h2>Understanding Interest Rates</h2>
             <p>Interest rates on car loans typically range from 5% to 15% depending on the loan term. Here's what affects your rate:</p>
-
             <ul>
                 <li><strong>Loan Duration:</strong> Longer terms usually have higher interest rates</li>
                 <li><strong>Down Payment Size:</strong> Larger down payments may qualify for better rates</li>
@@ -1196,11 +1483,10 @@
             <div class="calculator-preview">
                 <h3>Try Our Finance Calculator</h3>
                 <p>Use our interactive calculator to estimate your monthly payments based on your preferred car price, down payment, and loan term.</p>
-                <a href="financing.html#calculator" class="btn btn-primary">Go to Calculator →</a>
+                <a href="financing.html#calculator" class="btn">Go to Calculator →</a>
             </div>
 
             <h2>Tips for First-Time Borrowers</h2>
-
             <h3>1. Assess Your Budget Realistically</h3>
             <p>Before applying, calculate your monthly income and expenses. Your car payment shouldn't exceed 30% of your monthly income. Remember to factor in insurance, fuel, maintenance, and parking costs.</p>
 
@@ -1218,25 +1504,35 @@
 
             <h2>Common Questions About Car Financing</h2>
 
-            <h3>Can I finance a used car?</h3>
-            <p>Yes! We offer financing for both new and used (foreign or Nigerian used) vehicles. Interest rates may vary slightly based on the vehicle's age and condition.</p>
+            <div class="faq-item">
+                <div class="faq-question">Can I finance a used car?</div>
+                <div class="faq-answer">Yes! We offer financing for both new and used (foreign or Nigerian used) vehicles. Interest rates may vary slightly based on the vehicle's age and condition.</div>
+            </div>
 
-            <h3>What happens if I miss a payment?</h3>
-            <p>Contact us immediately. We can discuss options like payment restructuring. Consistent missed payments may affect your credit and could lead to vehicle repossession.</p>
+            <div class="faq-item">
+                <div class="faq-question">What happens if I miss a payment?</div>
+                <div class="faq-answer">Contact us immediately. We can discuss options like payment restructuring. Consistent missed payments may affect your credit and could lead to vehicle repossession.</div>
+            </div>
 
-            <h3>Can I pay off my loan early?</h3>
-            <p>Yes, you can. Some plans may include early repayment benefits. Check your agreement for any prepayment terms.</p>
+            <div class="faq-item">
+                <div class="faq-question">Can I pay off my loan early?</div>
+                <div class="faq-answer">Yes, you can. Some plans may include early repayment benefits. Check your agreement for any prepayment terms.</div>
+            </div>
 
-            <h3>Do I need car insurance?</h3>
-            <p>Yes, comprehensive insurance is required for financed vehicles to protect both you and the lender.</p>
+            <div class="faq-item">
+                <div class="faq-question">Do I need car insurance?</div>
+                <div class="faq-answer">Yes, comprehensive insurance is required for financed vehicles to protect both you and the lender.</div>
+            </div>
 
-            <h3>What documents do I need to apply?</h3>
-            <p>Valid ID, proof of income, BVN, proof of residence, and passport photographs. Self-employed applicants should provide 6 months of bank statements.</p>
+            <div class="faq-item">
+                <div class="faq-question">What documents do I need to apply?</div>
+                <div class="faq-answer">Valid ID, proof of income, BVN, proof of residence, and passport photographs. Self-employed applicants should provide 6 months of bank statements.</div>
+            </div>
 
             <div class="highlight-box">
                 <h4>Ready to Finance Your First Car?</h4>
                 <p>At Adedayo Aremu Autos, we're committed to making car ownership accessible through transparent, flexible financing. Our team guides you through every step, ensuring you understand all terms before signing.</p>
-                <p style="margin-top: 15px;"><a href="financing.html" style="color: var(--primary); font-weight: 600;">Apply for Financing →</a></p>
+                <p style="margin-top: 15px;"><a href="financing.html" style="color: var(--illustration-gold); font-weight: 600;">Apply for Financing →</a></p>
             </div>
 
             <blockquote>
@@ -1389,7 +1685,7 @@
                 <div class="footer-about">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                         <img src="images/aaa_logo.PNG" alt="Logo" style="height: 45px;">
-                        <h3 style="color: white; font-size: 20px;">ADEDAYO AREMU <span style="color: var(--primary);">AUTOS</span></h3>
+                        <h3 style="color: var(--silver-classic); font-size: 20px;">ADEDAYO AREMU <span style="background: var(--gradient-green); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AUTOS</span></h3>
                     </div>
                     <p>Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle.</p>
                     <div class="social-links">
@@ -1407,7 +1703,6 @@
                         <li><a href="cars.html">Buy Cars</a></li>
                         <li><a href="rentals.html">Rentals</a></li>
                         <li><a href="financing.html">Financing</a></li>
-                        <li><a href="blog.html">Blog</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
@@ -1424,12 +1719,22 @@
                     </ul>
                 </div>
                 
-                <div class="footer-contact">
-                    <h4>Contact Info</h4>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Lagos, Nigeria</p>
-                    <p><i class="fas fa-phone" style="color: var(--primary);"></i> +234 801 234 5678</p>
-                    <p><i class="fas fa-envelope" style="color: var(--primary);"></i> info@adedayoaremuautos.com</p>
-                    <p><i class="fas fa-clock" style="color: var(--primary);"></i> Mon-Sat: 9am - 6pm</p>
+                <div class="footer-currency">
+                    <h4>Currency</h4>
+                    <div class="currency-options">
+                        <a href="#" class="currency-option active" data-currency="NGN" data-symbol="₦">
+                            <span>🇳🇬</span> NGN (₦)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="USD" data-symbol="$">
+                            <span>🇺🇸</span> USD ($)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="GBP" data-symbol="£">
+                            <span>🇬🇧</span> GBP (£)
+                        </a>
+                        <a href="#" class="currency-option" data-currency="EUR" data-symbol="€">
+                            <span>🇪🇺</span> EUR (€)
+                        </a>
+                    </div>
                 </div>
             </div>
             
@@ -1444,13 +1749,126 @@
         </div>
     </div>
 
-    <!-- WhatsApp Float -->
+    <div class="country-notification" id="countryNotification" style="display: none;">
+        <div class="notification-content">
+            <i class="fas fa-globe"></i>
+            <div class="notification-text">
+                <strong>We noticed you're visiting from <span id="userCountry"></span>!</strong>
+                <p>Would you like to see prices in <span id="userCurrency"></span>?</p>
+            </div>
+            <div class="notification-buttons">
+                <button class="btn-notification yes" onclick="switchCurrency()">Yes, switch to <span id="switchCurrencyCode"></span></button>
+                <button class="btn-notification no" onclick="dismissNotification()">No, keep ₦ NGN</button>
+            </div>
+            <button class="notification-close" onclick="dismissNotification()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <a href="https://wa.me/2348012345678" class="whatsapp-float" target="_blank">
         <i class="fab fa-whatsapp"></i>
         Chat with us
     </a>
 
     <script>
+        // Exchange rates
+        const exchangeRates = {
+            NGN: 1,
+            USD: 0.00065,
+            GBP: 0.00052,
+            EUR: 0.00060,
+        };
+
+        let currentCurrency = 'NGN';
+        let currentSymbol = '₦';
+
+        function convertPrices(targetCurrency, symbol) {
+            currentCurrency = targetCurrency;
+            currentSymbol = symbol;
+            const rate = exchangeRates[targetCurrency] || 1;
+            
+            // Convert monthly payment amounts in tables
+            document.querySelectorAll('.amount').forEach(el => {
+                const text = el.textContent;
+                const match = text.match(/[\d,]+/);
+                if (match) {
+                    const ngnAmount = parseFloat(match[0].replace(/,/g, ''));
+                    const converted = Math.round(ngnAmount * rate);
+                    el.textContent = `${symbol}${converted.toLocaleString()}`;
+                }
+            });
+            
+            // Convert other numeric values in tables
+            document.querySelectorAll('.finance-table td').forEach(el => {
+                const text = el.textContent;
+                const match = text.match(/[\d,]+(?:\.\d+)?/);
+                if (match && !el.classList.contains('amount')) {
+                    const ngnAmount = parseFloat(match[0].replace(/,/g, ''));
+                    if (!isNaN(ngnAmount) && ngnAmount > 100000) {
+                        const converted = Math.round(ngnAmount * rate);
+                        el.innerHTML = el.innerHTML.replace(match[0], `${symbol}${converted.toLocaleString()}`);
+                    }
+                }
+            });
+        }
+
+        function setActiveCurrency(currency) {
+            document.querySelectorAll('.currency-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.currency === currency) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function handleCurrencyClick(e) {
+            e.preventDefault();
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'manual');
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            document.getElementById('countryNotification').style.display = 'none';
+        }
+
+        function attachCurrencyListeners() {
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.removeEventListener('click', handleCurrencyClick);
+                option.addEventListener('click', handleCurrencyClick);
+            });
+        }
+
+        function loadSavedCurrency() {
+            const savedCurrency = localStorage.getItem('manualCurrency');
+            if (savedCurrency && savedCurrency !== 'NGN') {
+                let symbol = '₦';
+                if (savedCurrency === 'USD') symbol = '$';
+                else if (savedCurrency === 'GBP') symbol = '£';
+                else if (savedCurrency === 'EUR') symbol = '€';
+                convertPrices(savedCurrency, symbol);
+                setActiveCurrency(savedCurrency);
+            } else {
+                setActiveCurrency('NGN');
+            }
+        }
+
+        function switchCurrency() {
+            const currency = localStorage.getItem('detectedCurrency') || 'USD';
+            const symbol = localStorage.getItem('detectedSymbol') || '$';
+            
+            localStorage.setItem('manualCurrency', currency);
+            localStorage.setItem('currencyChoice', 'accepted');
+            convertPrices(currency, symbol);
+            setActiveCurrency(currency);
+            dismissNotification();
+        }
+
+        function dismissNotification() {
+            document.getElementById('countryNotification').style.display = 'none';
+            localStorage.setItem('currencyChoice', 'dismissed');
+        }
+
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
@@ -1477,6 +1895,50 @@
                     icon.classList.add('fa-bars');
                 }
             });
+        });
+
+        // Page Load Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCurrencyListeners();
+            loadSavedCurrency();
+            
+            const currencyChoice = localStorage.getItem('currencyChoice');
+            if (currencyChoice === 'dismissed' || localStorage.getItem('manualCurrency')) return;
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const country = data.country_name;
+                    const countryCode = data.country_code;
+                    
+                    let currency = 'NGN';
+                    let currencySymbol = '₦';
+                    let currencyCode = 'NGN';
+                    
+                    if (countryCode === 'US') {
+                        currency = 'USD';
+                        currencySymbol = '$';
+                        currencyCode = 'USD';
+                    } else if (countryCode === 'GB') {
+                        currency = 'GBP';
+                        currencySymbol = '£';
+                        currencyCode = 'GBP';
+                    } else if (['DE', 'FR', 'IT', 'ES', 'NL', 'BE'].includes(countryCode)) {
+                        currency = 'EUR';
+                        currencySymbol = '€';
+                        currencyCode = 'EUR';
+                    }
+                    
+                    if (countryCode !== 'NG') {
+                        document.getElementById('userCountry').textContent = country;
+                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
+                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
+                        document.getElementById('countryNotification').style.display = 'block';
+                        localStorage.setItem('detectedCurrency', currency);
+                        localStorage.setItem('detectedSymbol', currencySymbol);
+                    }
+                })
+                .catch(() => {});
         });
     </script>
 </body>
