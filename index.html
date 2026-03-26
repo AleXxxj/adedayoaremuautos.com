@@ -1619,61 +1619,6 @@
                 font-size: 14px;
             }
         }
-
-            /* ===== LIGHT THEME ===== */
-
-body.light {
-
-    background: #F5F5F5;
-    color: #111;
-
-}
-
-body.light .services,
-body.light .about-section,
-body.light .why-choose,
-body.light .referral-section {
-
-    background: #FFFFFF;
-
-}
-
-body.light .featured,
-body.light .blog-section,
-body.light .contact-section {
-
-    background: #F7F7F7;
-
-}
-
-body.light .service-card,
-body.light .car-card,
-body.light .blog-card,
-body.light .feature,
-body.light .about-stat,
-body.light .contact-form,
-body.light .referral-card {
-
-    background: #FFFFFF;
-    border: 1px solid #E5E5E5;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-
-}
-
-body.light h1,
-body.light h2,
-body.light h3 {
-
-    color: #111;
-
-}
-
-body.light p,
-body.light span {
-
-    color: #555;
-
-      }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1706,15 +1651,6 @@ body.light span {
             </div>
             
             <div class="header-actions">
-                <button id="themeToggle" style="
-                 margin-right:10px;
-                 padding:8px 12px;
-                 border-radius:8px;
-                 border:none;
-                 cursor:pointer;
-                 font-weight:600;">
-                 🌙
-                </button>
                 <a href="https://wa.me/2348012345678" class="whatsapp-btn">
                     <i class="fab fa-whatsapp"></i>
                     <span>Chat Now</span>
@@ -2432,35 +2368,6 @@ body.light span {
                 }
             });
         }
-
-                // ===== THEME SWITCH =====
-
-        const toggle = document.getElementById("themeToggle");
-
-        if (localStorage.getItem("theme") === "light") {
-
-        document.body.classList.add("light");
-        toggle.textContent = "☀️";
-
-         }
-
-        toggle.addEventListener("click", () => {
-
-        document.body.classList.toggle("light");
-
-       if (document.body.classList.contains("light")) {
-
-        localStorage.setItem("theme", "light");
-        toggle.textContent = "☀️";
-
-        } else {
-
-        localStorage.setItem("theme", "dark");
-        toggle.textContent = "🌙";
-
-      }
-
-      });
     </script>
 </body>
 </html>
