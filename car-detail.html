@@ -247,32 +247,111 @@
             gap: 50px;
         }
 
-        /* Gallery */
+        /* Gallery - Enhanced */
         .car-gallery {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
             border: 1px solid var(--border);
+            position: relative;
         }
 
-        .main-image {
+        .media-container {
+            position: relative;
             width: 100%;
             height: 400px;
             border-radius: 15px;
             overflow: hidden;
             margin-bottom: 15px;
-            border: 1px solid var(--border);
+            background: #000;
         }
 
-        .main-image img {
+        .media-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            visibility: hidden;
+        }
+
+        .media-slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .media-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
+        .media-slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Navigation Buttons */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 45px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gradient-green);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-prev {
+            left: 15px;
+        }
+
+        .nav-next {
+            right: 15px;
+        }
+
+        /* Media Type Indicator */
+        .media-type {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .media-type i {
+            color: var(--illustration-gold);
+        }
+
+        /* Thumbnail Grid - 8-10 thumbnails */
         .thumbnail-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
         }
 
@@ -283,6 +362,7 @@
             cursor: pointer;
             border: 2px solid transparent;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .thumbnail:hover,
@@ -294,6 +374,41 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .thumbnail .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        /* Auto-Play Indicator */
+        .auto-play-indicator {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .auto-play-indicator i {
+            font-size: 14px;
         }
 
         /* Car Info */
@@ -428,54 +543,108 @@
             color: var(--pearl);
         }
 
-        .inspection-request {
+        /* Contact Options Modal */
+        .contact-modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 30px 30px 0 0;
+            padding: 30px;
+            z-index: 1001;
+            transition: bottom 0.4s ease;
+            border-top: 2px solid var(--green-accent);
+        }
+
+        .contact-modal.active {
+            bottom: 0;
+        }
+
+        .contact-modal h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contact-option {
+            flex: 1;
+            min-width: 150px;
+            padding: 20px;
             background: rgba(255,255,255,0.02);
             border-radius: 15px;
-            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
             border: 1px solid var(--border);
         }
 
-        .inspection-request h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
+        .contact-option:hover {
+            border-color: var(--green-accent);
+            transform: translateY(-5px);
+        }
+
+        .contact-option i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .contact-option.whatsapp i {
+            color: #25D366;
+        }
+
+        .contact-option.call i {
             color: var(--illustration-gold);
         }
 
-        .inspection-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .inspection-form input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--silver-classic);
-            font-size: 14px;
-        }
-
-        .inspection-form input:focus {
-            outline: none;
-            border-color: var(--green-accent);
-        }
-
-        .inspection-form button {
-            padding: 12px;
-            background: var(--gradient-green);
-            border: none;
-            border-radius: 8px;
-            color: var(--pearl);
+        .contact-option span {
+            display: block;
+            font-size: 18px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            margin-top: 10px;
         }
 
-        .inspection-form button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-green);
+        .contact-option p {
+            color: var(--silver-cool);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--silver-cool);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--pearl);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
         }
 
         /* Tabs */
@@ -1051,8 +1220,12 @@
                 grid-template-columns: 1fr;
             }
 
-            .main-image {
+            .media-container {
                 height: 300px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
 
             .features-list {
@@ -1061,6 +1234,10 @@
 
             .related-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .contact-options {
+                flex-direction: column;
             }
         }
 
@@ -1088,6 +1265,10 @@
 
             .key-specs {
                 gap: 12px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
 
             .footer-bottom {
@@ -1128,6 +1309,10 @@
 
             .cash-price .value {
                 font-size: 22px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -1179,24 +1364,29 @@
     <!-- Car Detail Section -->
     <div class="car-detail-section">
         <div class="car-detail-grid">
-            <!-- Left Column - Gallery -->
+            <!-- Left Column - Enhanced Gallery -->
             <div class="car-gallery">
-                <div class="main-image" id="mainImage">
-                    <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="2020 Toyota Camry">
+                <div class="media-container" id="mediaContainer">
+                    <!-- Media slides will be dynamically inserted -->
                 </div>
+                
+                <!-- Navigation Buttons -->
+                <div class="nav-btn nav-prev" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="nav-btn nav-next" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <!-- Auto-Play Indicator -->
+                <div class="auto-play-indicator" id="autoPlayIndicator">
+                    <i class="fas fa-play" id="autoPlayIcon"></i>
+                    <span>Auto Play</span>
+                </div>
+                
+                <!-- Thumbnail Grid -->
                 <div class="thumbnail-grid" id="thumbnailGrid">
-                    <div class="thumbnail active" data-img="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                        <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 1">
-                    </div>
-                    <div class="thumbnail" data-img="https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                        <img src="https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 2">
-                    </div>
-                    <div class="thumbnail" data-img="https://images.unsplash.com/photo-1607853202273-797f1c22a38e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                        <img src="https://images.unsplash.com/photo-1607853202273-797f1c22a38e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 3">
-                    </div>
-                    <div class="thumbnail" data-img="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Thumbnail 4">
-                    </div>
+                    <!-- Thumbnails will be dynamically inserted -->
                 </div>
             </div>
 
@@ -1224,20 +1414,20 @@
                 </div>
 
                 <div class="action-buttons">
-                    <a href="https://wa.me/2348012345678?text=I'm%20interested%20in%20the%202020%20Toyota%20Camry" class="btn btn-primary" target="_blank">
-                        <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
-                    </a>
+                    <button class="btn btn-primary" id="contactBtn">
+                        <i class="fas fa-phone-alt"></i> Contact Us
+                    </button>
                     <a href="financing.html" class="btn btn-outline">
                         <i class="fas fa-hand-holding-usd"></i> Apply for Financing
                     </a>
                 </div>
 
                 <div class="inspection-request">
-                    <h3>Request Inspection</h3>
+                    <h3>Request Test Drive</h3>
                     <form class="inspection-form">
                         <input type="text" placeholder="Your Name" required>
                         <input type="tel" placeholder="Phone Number" required>
-                        <button type="submit">Request Test Drive</button>
+                        <button type="submit">Schedule Test Drive</button>
                     </form>
                 </div>
             </div>
@@ -1363,6 +1553,25 @@
         </div>
     </div>
 
+    <!-- Contact Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="contact-modal" id="contactModal">
+        <button class="close-modal" id="closeModal">&times;</button>
+        <h3>Contact <span style="color: var(--illustration-gold);">Us</span></h3>
+        <div class="contact-options">
+            <a href="https://wa.me/2348012345678?text=I'm%20interested%20in%20the%202020%20Toyota%20Camry" class="contact-option whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                <span>WhatsApp</span>
+                <p>+234 801 234 5678</p>
+            </a>
+            <a href="tel:+2348012345678" class="contact-option call">
+                <i class="fas fa-phone-alt"></i>
+                <span>Call Us</span>
+                <p>+234 801 234 5678</p>
+            </a>
+        </div>
+    </div>
+
     <!-- Footer -->
     <div class="footer">
         <div class="footer-container">
@@ -1456,6 +1665,203 @@
     </a>
 
     <script>
+        // Media data - 8 images + 1 video
+        const mediaItems = [
+            { type: 'image', src: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1607853202273-797f1c22a38e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1607853202273-797f1c22a38e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'image', src: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', thumbnail: 'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' },
+            { type: 'video', src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', thumbnail: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80' }
+        ];
+
+        let currentIndex = 0;
+        let autoPlayInterval = null;
+        let isAutoPlaying = true;
+        let currentVideo = null;
+
+        // DOM elements
+        const mediaContainer = document.getElementById('mediaContainer');
+        const thumbnailGrid = document.getElementById('thumbnailGrid');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const autoPlayIndicator = document.getElementById('autoPlayIndicator');
+        const autoPlayIcon = document.getElementById('autoPlayIcon');
+
+        // Build media slides
+        function buildMediaSlides() {
+            let slidesHtml = '';
+            let thumbnailsHtml = '';
+            
+            mediaItems.forEach((item, index) => {
+                if (item.type === 'image') {
+                    slidesHtml += `
+                        <div class="media-slide" data-index="${index}" data-type="image">
+                            <img src="${item.src}" alt="Car image ${index + 1}">
+                        </div>
+                    `;
+                } else {
+                    slidesHtml += `
+                        <div class="media-slide" data-index="${index}" data-type="video">
+                            <video src="${item.src}" muted loop playsinline></video>
+                        </div>
+                    `;
+                }
+                
+                thumbnailsHtml += `
+                    <div class="thumbnail" data-index="${index}" data-type="${item.type}">
+                        <img src="${item.thumbnail}" alt="Thumbnail ${index + 1}">
+                        ${item.type === 'video' ? '<div class="play-overlay"><i class="fas fa-play"></i></div>' : ''}
+                    </div>
+                `;
+            });
+            
+            mediaContainer.innerHTML = slidesHtml;
+            thumbnailGrid.innerHTML = thumbnailsHtml;
+        }
+
+        // Show slide at index
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.media-slide');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            if (slides.length === 0) return;
+            
+            // Stop current video if playing
+            if (currentVideo) {
+                currentVideo.pause();
+                currentVideo.currentTime = 0;
+            }
+            
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                    
+                    // Handle video auto-play
+                    if (mediaItems[index].type === 'video') {
+                        const video = slide.querySelector('video');
+                        if (video) {
+                            currentVideo = video;
+                            video.play().catch(e => console.log('Auto-play prevented:', e));
+                        }
+                    }
+                }
+            });
+            
+            thumbnails.forEach((thumb, i) => {
+                thumb.classList.remove('active');
+                if (i === index) {
+                    thumb.classList.add('active');
+                }
+            });
+            
+            currentIndex = index;
+        }
+
+        // Next slide
+        function nextSlide() {
+            let newIndex = currentIndex + 1;
+            if (newIndex >= mediaItems.length) {
+                newIndex = 0;
+            }
+            showSlide(newIndex);
+        }
+
+        // Previous slide
+        function prevSlide() {
+            let newIndex = currentIndex - 1;
+            if (newIndex < 0) {
+                newIndex = mediaItems.length - 1;
+            }
+            showSlide(newIndex);
+        }
+
+        // Start auto-play
+        function startAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => {
+                nextSlide();
+            }, 5000);
+            isAutoPlaying = true;
+            autoPlayIcon.className = 'fas fa-pause';
+            autoPlayIndicator.querySelector('span').textContent = 'Pause';
+        }
+
+        // Stop auto-play
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            isAutoPlaying = false;
+            autoPlayIcon.className = 'fas fa-play';
+            autoPlayIndicator.querySelector('span').textContent = 'Auto Play';
+        }
+
+        // Toggle auto-play
+        function toggleAutoPlay() {
+            if (isAutoPlaying) {
+                stopAutoPlay();
+            } else {
+                startAutoPlay();
+            }
+        }
+
+        // Initialize gallery
+        function initGallery() {
+            buildMediaSlides();
+            showSlide(0);
+            startAutoPlay();
+            
+            // Event listeners
+            prevBtn.addEventListener('click', () => {
+                stopAutoPlay();
+                prevSlide();
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                stopAutoPlay();
+                nextSlide();
+            });
+            
+            autoPlayIndicator.addEventListener('click', toggleAutoPlay);
+            
+            // Thumbnail click
+            document.querySelectorAll('.thumbnail').forEach(thumb => {
+                thumb.addEventListener('click', function() {
+                    stopAutoPlay();
+                    const index = parseInt(this.dataset.index);
+                    showSlide(index);
+                });
+            });
+        }
+
+        // Contact modal functions
+        const contactBtn = document.getElementById('contactBtn');
+        const contactModal = document.getElementById('contactModal');
+        const overlay = document.getElementById('overlay');
+        const closeModal = document.getElementById('closeModal');
+
+        function openModal() {
+            contactModal.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModalFunc() {
+            contactModal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        contactBtn.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeModalFunc);
+        overlay.addEventListener('click', closeModalFunc);
+
         // Exchange rates
         const exchangeRates = {
             NGN: 1,
@@ -1472,33 +1878,6 @@
             priceNgn: 12500000,
             monthlyNgn: 350000
         };
-
-        // Gallery thumbnail click
-        const thumbnails = document.querySelectorAll('.thumbnail');
-        const mainImage = document.getElementById('mainImage').querySelector('img');
-
-        thumbnails.forEach(thumb => {
-            thumb.addEventListener('click', function() {
-                thumbnails.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                const imgSrc = this.dataset.img;
-                mainImage.src = imgSrc;
-            });
-        });
-
-        // Tabs
-        const tabHeaders = document.querySelectorAll('.tab-header');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabHeaders.forEach(header => {
-            header.addEventListener('click', function() {
-                const tabId = this.dataset.tab;
-                tabHeaders.forEach(h => h.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById(tabId).classList.add('active');
-            });
-        });
 
         // Finance calculator
         function calculatePayment() {
@@ -1605,6 +1984,20 @@
             localStorage.setItem('currencyChoice', 'dismissed');
         }
 
+        // Tabs
+        const tabHeaders = document.querySelectorAll('.tab-header');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                tabHeaders.forEach(h => h.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
@@ -1635,6 +2028,7 @@
 
         // Page Load Initialization
         document.addEventListener('DOMContentLoaded', function() {
+            initGallery();
             attachCurrencyListeners();
             loadSavedCurrency();
             
