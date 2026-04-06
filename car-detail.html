@@ -328,27 +328,28 @@
             right: 15px;
         }
 
-        /* Media Type Indicator */
-        .media-type {
+        /* Auto-Play Indicator */
+        .auto-play-indicator {
             position: absolute;
             bottom: 15px;
-            right: 15px;
-            background: rgba(0,0,0,0.7);
+            left: 15px;
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px);
             padding: 5px 12px;
             border-radius: 50px;
             font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             z-index: 10;
+            cursor: pointer;
         }
 
-        .media-type i {
-            color: var(--illustration-gold);
+        .auto-play-indicator i {
+            font-size: 14px;
         }
 
-        /* Thumbnail Grid - 8-10 thumbnails */
+        /* Thumbnail Grid */
         .thumbnail-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -388,27 +389,6 @@
             justify-content: center;
             color: white;
             font-size: 20px;
-        }
-
-        /* Auto-Play Indicator */
-        .auto-play-indicator {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            padding: 5px 12px;
-            border-radius: 50px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 10;
-            cursor: pointer;
-        }
-
-        .auto-play-indicator i {
-            font-size: 14px;
         }
 
         /* Car Info */
@@ -543,7 +523,58 @@
             color: var(--pearl);
         }
 
-        /* Contact Options Modal */
+        /* Request Test Drive Form - FIXED */
+        .inspection-request {
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .inspection-request h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--illustration-gold);
+        }
+
+        .inspection-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .inspection-form input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--silver-classic);
+            font-size: 14px;
+        }
+
+        .inspection-form input:focus {
+            outline: none;
+            border-color: var(--green-accent);
+        }
+
+        .inspection-form button {
+            padding: 12px;
+            background: var(--gradient-green);
+            border: none;
+            border-radius: 8px;
+            color: var(--pearl);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .inspection-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+        /* Contact Modal */
         .contact-modal {
             position: fixed;
             bottom: -100%;
@@ -1380,8 +1411,8 @@
                 
                 <!-- Auto-Play Indicator -->
                 <div class="auto-play-indicator" id="autoPlayIndicator">
-                    <i class="fas fa-play" id="autoPlayIcon"></i>
-                    <span>Auto Play</span>
+                    <i class="fas fa-pause" id="autoPlayIcon"></i>
+                    <span>Pause</span>
                 </div>
                 
                 <!-- Thumbnail Grid -->
@@ -1422,12 +1453,13 @@
                     </a>
                 </div>
 
+                <!-- Request Test Drive Form - FIXED (added id for form) -->
                 <div class="inspection-request">
                     <h3>Request Test Drive</h3>
-                    <form class="inspection-form">
-                        <input type="text" placeholder="Your Name" required>
-                        <input type="tel" placeholder="Phone Number" required>
-                        <button type="submit">Schedule Test Drive</button>
+                    <form class="inspection-form" id="testDriveForm">
+                        <input type="text" id="testDriveName" placeholder="Your Name" required>
+                        <input type="tel" id="testDrivePhone" placeholder="Phone Number" required>
+                        <button type="submit" id="testDriveSubmit">Schedule Test Drive</button>
                     </form>
                 </div>
             </div>
@@ -1700,7 +1732,7 @@
                 if (item.type === 'image') {
                     slidesHtml += `
                         <div class="media-slide" data-index="${index}" data-type="image">
-                            <img src="${item.src}" alt="Car image ${index + 1}">
+                            <img src="${item.src}" alt="Car image ${index + 1}" loading="lazy">
                         </div>
                     `;
                 } else {
@@ -1713,7 +1745,7 @@
                 
                 thumbnailsHtml += `
                     <div class="thumbnail" data-index="${index}" data-type="${item.type}">
-                        <img src="${item.thumbnail}" alt="Thumbnail ${index + 1}">
+                        <img src="${item.thumbnail}" alt="Thumbnail ${index + 1}" loading="lazy">
                         ${item.type === 'video' ? '<div class="play-overlay"><i class="fas fa-play"></i></div>' : ''}
                     </div>
                 `;
@@ -1830,13 +1862,32 @@
             
             autoPlayIndicator.addEventListener('click', toggleAutoPlay);
             
-            // Thumbnail click
-            document.querySelectorAll('.thumbnail').forEach(thumb => {
-                thumb.addEventListener('click', function() {
+            // Thumbnail click - use event delegation
+            thumbnailGrid.addEventListener('click', function(e) {
+                const thumb = e.target.closest('.thumbnail');
+                if (thumb) {
                     stopAutoPlay();
-                    const index = parseInt(this.dataset.index);
+                    const index = parseInt(thumb.dataset.index);
                     showSlide(index);
-                });
+                }
+            });
+        }
+
+        // Test Drive Form Handler - FIXED (separate from gallery)
+        const testDriveForm = document.getElementById('testDriveForm');
+        if (testDriveForm) {
+            testDriveForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('testDriveName').value;
+                const phone = document.getElementById('testDrivePhone').value;
+                
+                if (name && phone) {
+                    // Show success message
+                    alert(`Thank you ${name}! We will contact you at ${phone} within 24 hours to schedule your test drive.`);
+                    testDriveForm.reset();
+                } else {
+                    alert('Please fill in all fields.');
+                }
             });
         }
 
@@ -1858,9 +1909,15 @@
             document.body.style.overflow = '';
         }
 
-        contactBtn.addEventListener('click', openModal);
-        closeModal.addEventListener('click', closeModalFunc);
-        overlay.addEventListener('click', closeModalFunc);
+        if (contactBtn) {
+            contactBtn.addEventListener('click', openModal);
+        }
+        if (closeModal) {
+            closeModal.addEventListener('click', closeModalFunc);
+        }
+        if (overlay) {
+            overlay.addEventListener('click', closeModalFunc);
+        }
 
         // Exchange rates
         const exchangeRates = {
@@ -1905,8 +1962,15 @@
             }
         }
 
-        document.getElementById('loanTerm').addEventListener('change', calculatePayment);
-        document.getElementById('interestRate').addEventListener('input', calculatePayment);
+        const loanTermSelect = document.getElementById('loanTerm');
+        const interestRateInput = document.getElementById('interestRate');
+        
+        if (loanTermSelect) {
+            loanTermSelect.addEventListener('change', calculatePayment);
+        }
+        if (interestRateInput) {
+            interestRateInput.addEventListener('input', calculatePayment);
+        }
         calculatePayment();
 
         // Currency conversion
@@ -1918,10 +1982,15 @@
             const convertedPrice = Math.round(carData.priceNgn * rate);
             const convertedMonthly = Math.round(carData.monthlyNgn * rate);
             
-            document.getElementById('cashPrice').textContent = `${symbol}${convertedPrice.toLocaleString()}`;
-            document.getElementById('financePrice').textContent = `${symbol}${convertedMonthly.toLocaleString()}/month*`;
-            document.getElementById('carPrice').value = `${symbol}${convertedPrice.toLocaleString()}`;
-            document.getElementById('downPayment').value = `${symbol}${Math.round(convertedPrice * 0.3).toLocaleString()}`;
+            const cashPriceEl = document.getElementById('cashPrice');
+            const financePriceEl = document.getElementById('financePrice');
+            const carPriceInput = document.getElementById('carPrice');
+            const downPaymentInput = document.getElementById('downPayment');
+            
+            if (cashPriceEl) cashPriceEl.textContent = `${symbol}${convertedPrice.toLocaleString()}`;
+            if (financePriceEl) financePriceEl.textContent = `${symbol}${convertedMonthly.toLocaleString()}/month*`;
+            if (carPriceInput) carPriceInput.value = `${symbol}${convertedPrice.toLocaleString()}`;
+            if (downPaymentInput) downPaymentInput.value = `${symbol}${Math.round(convertedPrice * 0.3).toLocaleString()}`;
             
             calculatePayment();
         }
@@ -1944,7 +2013,8 @@
             localStorage.setItem('currencyChoice', 'manual');
             convertPrices(currency, symbol);
             setActiveCurrency(currency);
-            document.getElementById('countryNotification').style.display = 'none';
+            const notification = document.getElementById('countryNotification');
+            if (notification) notification.style.display = 'none';
         }
 
         function attachCurrencyListeners() {
@@ -1980,7 +2050,8 @@
         }
 
         function dismissNotification() {
-            document.getElementById('countryNotification').style.display = 'none';
+            const notification = document.getElementById('countryNotification');
+            if (notification) notification.style.display = 'none';
             localStorage.setItem('currencyChoice', 'dismissed');
         }
 
@@ -1994,7 +2065,8 @@
                 tabHeaders.forEach(h => h.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
-                document.getElementById(tabId).classList.add('active');
+                const activeTab = document.getElementById(tabId);
+                if (activeTab) activeTab.classList.add('active');
             });
         });
 
@@ -2002,26 +2074,30 @@
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
 
-        mobileMenuBtn.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-            const icon = this.querySelector('i');
-            if (navMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+                const icon = this.querySelector('i');
+                if (navMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        }
 
         const navLinks = document.querySelectorAll('.nav-menu a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
-                if (window.innerWidth <= 900) {
+                if (window.innerWidth <= 900 && navMenu) {
                     navMenu.classList.remove('active');
                     const icon = mobileMenuBtn.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
                 }
             });
         });
@@ -2060,10 +2136,17 @@
                     }
                     
                     if (countryCode !== 'NG') {
-                        document.getElementById('userCountry').textContent = country;
-                        document.getElementById('userCurrency').textContent = `${currencySymbol} ${currencyCode}`;
-                        document.getElementById('switchCurrencyCode').textContent = currencyCode;
-                        document.getElementById('countryNotification').style.display = 'block';
+                        const userCountrySpan = document.getElementById('userCountry');
+                        const userCurrencySpan = document.getElementById('userCurrency');
+                        const switchCurrencyCodeSpan = document.getElementById('switchCurrencyCode');
+                        
+                        if (userCountrySpan) userCountrySpan.textContent = country;
+                        if (userCurrencySpan) userCurrencySpan.textContent = `${currencySymbol} ${currencyCode}`;
+                        if (switchCurrencyCodeSpan) switchCurrencyCodeSpan.textContent = currencyCode;
+                        
+                        const notification = document.getElementById('countryNotification');
+                        if (notification) notification.style.display = 'block';
+                        
                         localStorage.setItem('detectedCurrency', currency);
                         localStorage.setItem('detectedSymbol', currencySymbol);
                     }
