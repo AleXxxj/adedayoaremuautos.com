@@ -1,0 +1,783 @@
+/* =====================================================
+   ADEDAYO AREMU AUTOS — THEME SYSTEM
+   Dark Mode (default) + Light Mode (flyer-inspired)
+   ===================================================== */
+
+/* ──────────────────────────────────────────────────
+   DARK THEME (default — existing site look)
+   ────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+    --green-deep: #0F3B2A;
+    --green-dark: #1A4D35;
+    --green-medium: #2C5E42;
+    --green-accent: #3F7352;
+
+    --silver-platinum: #E5E5E5;
+    --silver-classic: #CCCCCC;
+    --silver-warm: #B8B8B8;
+    --silver-cool: #A0A0A0;
+    --silver-dark: #707070;
+
+    --charcoal-deep: #1A1A1A;
+    --charcoal: #2A2A2A;
+    --graphite: #3A3A3A;
+    --pearl: #F0F0F0;
+
+    --illustration-gold: #C4A962;
+    --illustration-bronze: #B17E4A;
+    --illustration-copper: #B87333;
+    --illustration-amber: #DAA520;
+    --illustration-steel: #4682B4;
+
+    --primary: var(--green-deep);
+    --primary-dark: #0A2F1F;
+    --primary-medium: var(--green-dark);
+    --primary-light: var(--green-medium);
+
+    --dark-bg: #0A0A0A;
+    --card-bg: #151515;
+    --card-hover: #202020;
+
+    --text-primary: var(--pearl);
+    --text-secondary: var(--silver-classic);
+    --text-muted: var(--silver-cool);
+
+    --border: var(--graphite);
+    --border-light: #4A4A4A;
+
+    --shadow: 0 20px 40px rgba(0,0,0,0.9);
+    --shadow-green: 0 10px 30px rgba(15, 59, 42, 0.4);
+
+    --gradient-green: linear-gradient(135deg, #0F3B2A 0%, #1A4D35 100%);
+    --gradient-silver: linear-gradient(135deg, #B8B8B8 0%, #A0A0A0 100%);
+
+    /* Theme toggle button appearance */
+    --toggle-bg: #1A1A1A;
+    --toggle-border: #3A3A3A;
+    --toggle-icon-color: #C4A962;
+    --toggle-text: #CCCCCC;
+}
+
+/* Body base for dark */
+[data-theme="dark"] body,
+body:not([data-theme="light"]) {
+    background-color: #0A0A0A;
+    color: #F0F0F0;
+}
+
+/* ──────────────────────────────────────────────────
+   LIGHT THEME — inspired by the AAA sales flyer
+   White + Black + Deep Forest Green + Lime Green
+   ────────────────────────────────────────────────── */
+[data-theme="light"] {
+    /* Greens — pulled straight from flyer */
+    --green-deep: #0A3D1C;
+    --green-dark: #1A5C2A;
+    --green-medium: #2E7D40;
+    --green-accent: #39B54A;
+
+    /* "Silver" palette repurposed as dark grays on white */
+    --silver-platinum: #1A1A1A;
+    --silver-classic: #2A2A2A;
+    --silver-warm: #3A3A3A;
+    --silver-cool: #555555;
+    --silver-dark: #777777;
+
+    /* Neutral surface colors */
+    --charcoal-deep: #F8F8F8;
+    --charcoal: #F0F0F0;
+    --graphite: #DDDDDD;
+    --pearl: #0A0A0A;
+
+    /* Accent palette */
+    --illustration-gold: #1A5C2A;
+    --illustration-bronze: #0A3D1C;
+    --illustration-copper: #2E7D40;
+    --illustration-amber: #39B54A;
+    --illustration-steel: #0A3D1C;
+
+    /* Structural */
+    --primary: var(--green-deep);
+    --primary-dark: #061A0B;
+    --primary-medium: var(--green-dark);
+    --primary-light: var(--green-medium);
+
+    --dark-bg: #FFFFFF;
+    --card-bg: #F5F5F5;
+    --card-hover: #EBEBEB;
+
+    --text-primary: #0A0A0A;
+    --text-secondary: #1A1A1A;
+    --text-muted: #555555;
+
+    --border: #CCCCCC;
+    --border-light: #E0E0E0;
+
+    --shadow: 0 20px 40px rgba(0,0,0,0.12);
+    --shadow-green: 0 10px 30px rgba(26, 92, 42, 0.25);
+
+    --gradient-green: linear-gradient(135deg, #0A3D1C 0%, #1A5C2A 100%);
+    --gradient-silver: linear-gradient(135deg, #2A2A2A 0%, #555555 100%);
+
+    /* Toggle button */
+    --toggle-bg: #FFFFFF;
+    --toggle-border: #CCCCCC;
+    --toggle-icon-color: #1A5C2A;
+    --toggle-text: #2A2A2A;
+}
+
+/* ── Light body base ── */
+[data-theme="light"] body {
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+}
+
+/* ── Light: header ── */
+[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.98);
+    border-bottom: 1px solid #E0E0E0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* ── Light: nav links ── */
+[data-theme="light"] .nav-menu a {
+    color: #2A2A2A;
+}
+[data-theme="light"] .nav-menu a:hover,
+[data-theme="light"] .nav-menu a.active {
+    color: #0A0A0A;
+}
+
+/* ── Light: logo tagline ── */
+[data-theme="light"] .logo-text p {
+    color: #555555;
+}
+
+/* ── Light: mobile menu button ── */
+[data-theme="light"] .mobile-menu-btn {
+    border-color: rgba(10, 61, 28, 0.3);
+    color: #2A2A2A;
+}
+
+/* ── Light: hero section — keep dark overlay, it looks great ── */
+[data-theme="light"] .hero {
+    background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 100%),
+                url('images/hero-image-benz2001.PNG');
+    background-size: cover;
+    background-position: center 40%;
+}
+
+/* ── Light: hero text ── */
+[data-theme="light"] .hero h2,
+[data-theme="light"] .hero p {
+    /* keep white text on dark hero bg */
+    color: #FFFFFF;
+    -webkit-text-fill-color: #FFFFFF;
+}
+
+/* ── Light: section backgrounds ── */
+[data-theme="light"] .services,
+[data-theme="light"] .why-choose,
+[data-theme="light"] .referral-section {
+    background: #FFFFFF;
+}
+[data-theme="light"] .featured {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
+}
+[data-theme="light"] .about-section {
+    background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%);
+}
+[data-theme="light"] .blog-section {
+    background: linear-gradient(180deg, #F0F0F0 0%, #FFFFFF 100%);
+}
+[data-theme="light"] .contact-section {
+    background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%);
+}
+
+/* ── Light: cards ── */
+[data-theme="light"] .service-card,
+[data-theme="light"] .car-card,
+[data-theme="light"] .blog-card,
+[data-theme="light"] .feature,
+[data-theme="light"] .related-card,
+[data-theme="light"] .type-card,
+[data-theme="light"] .step-card,
+[data-theme="light"] .requirement-card,
+[data-theme="light"] .mv-card,
+[data-theme="light"] .objective-card,
+[data-theme="light"] .value-item,
+[data-theme="light"] .stat-item,
+[data-theme="light"] .timeline-content,
+[data-theme="light"] .rental-card {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .service-card:hover,
+[data-theme="light"] .car-card:hover,
+[data-theme="light"] .blog-card:hover,
+[data-theme="light"] .feature:hover {
+    border-color: #39B54A;
+    box-shadow: 0 8px 24px rgba(26,92,42,0.15);
+}
+
+/* ── Light: section titles ── */
+[data-theme="light"] .section-title h2,
+[data-theme="light"] .section-header h2,
+[data-theme="light"] .about-content h2,
+[data-theme="light"] .referral-content h2,
+[data-theme="light"] .contact-info h3,
+[data-theme="light"] .page-header h1,
+[data-theme="light"] .blog-content h2,
+[data-theme="light"] .blog-content h3 {
+    color: #0A0A0A;
+}
+[data-theme="light"] .section-title p,
+[data-theme="light"] .section-header p {
+    color: #555555;
+}
+
+/* ── Light: card text ── */
+[data-theme="light"] .service-card h3,
+[data-theme="light"] .car-title,
+[data-theme="light"] .blog-title,
+[data-theme="light"] .feature h3,
+[data-theme="light"] .about-content p,
+[data-theme="light"] .referral-content p,
+[data-theme="light"] .blog-excerpt,
+[data-theme="light"] .blog-card-excerpt,
+[data-theme="light"] .blog-content p {
+    color: #2A2A2A;
+}
+[data-theme="light"] .car-specs span,
+[data-theme="light"] .feature p,
+[data-theme="light"] .blog-meta,
+[data-theme="light"] .section-title p {
+    color: #555555;
+}
+
+/* ── Light: car price ── */
+[data-theme="light"] .car-price {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Light: about stats ── */
+[data-theme="light"] .about-stat {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .about-stat .number {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="light"] .about-stat .label {
+    color: #555555;
+}
+
+/* ── Light: referral section ── */
+[data-theme="light"] .referral-grid {
+    background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%);
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .referral-card {
+    background: #FFFFFF;
+    border-color: #39B54A;
+}
+[data-theme="light"] .referral-card h3,
+[data-theme="light"] .referral-features li {
+    color: #2A2A2A;
+}
+[data-theme="light"] .referral-content .highlight {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="light"] .referral-card .percent {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Light: blog categories ── */
+[data-theme="light"] .blog-category {
+    background: rgba(26, 92, 42, 0.08);
+    color: #1A5C2A;
+    border-color: rgba(26, 92, 42, 0.2);
+}
+
+/* ── Light: "Why Choose Us" features ── */
+[data-theme="light"] .feature i {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Light: contact section ── */
+[data-theme="light"] .contact-form {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .form-group input,
+[data-theme="light"] .form-group textarea {
+    background: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .form-group input::placeholder,
+[data-theme="light"] .form-group textarea::placeholder {
+    color: #999999;
+}
+[data-theme="light"] .form-group input:focus,
+[data-theme="light"] .form-group textarea:focus {
+    border-color: #39B54A;
+    background: #FFFFFF;
+}
+
+/* ── Light: contact info items ── */
+[data-theme="light"] .contact-item {
+    color: #2A2A2A;
+}
+[data-theme="light"] .contact-info p {
+    color: #555555;
+}
+
+/* ── Light: footer ── */
+[data-theme="light"] .footer {
+    background: #0A0A0A;
+    border-top: 2px solid #39B54A;
+}
+/* Keep footer text light on dark footer */
+[data-theme="light"] .footer-about p,
+[data-theme="light"] .footer-links a,
+[data-theme="light"] .footer-contact p,
+[data-theme="light"] .footer-bottom,
+[data-theme="light"] .footer-bottom-links a,
+[data-theme="light"] .footer-links h4,
+[data-theme="light"] .footer-contact h4,
+[data-theme="light"] .footer-currency h4 {
+    color: #CCCCCC;
+}
+[data-theme="light"] .footer-links a:hover {
+    color: #39B54A;
+}
+
+/* ── Light: currency notification ── */
+[data-theme="light"] .country-notification {
+    background: #FFFFFF;
+    border: 2px solid transparent;
+    background: linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+                var(--gradient-green) border-box;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+}
+[data-theme="light"] .notification-text strong {
+    color: #0A0A0A;
+}
+[data-theme="light"] .notification-text p {
+    color: #555555;
+}
+[data-theme="light"] .btn-notification.no {
+    border-color: #CCCCCC;
+    color: #555555;
+}
+
+/* ── Light: filters (cars page) ── */
+[data-theme="light"] .filters-section {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .filter-group select,
+[data-theme="light"] .sort-dropdown select {
+    background: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .filter-group label {
+    color: #555555;
+}
+[data-theme="light"] .results-count {
+    color: #555555;
+}
+[data-theme="light"] .sort-dropdown label {
+    color: #555555;
+}
+[data-theme="light"] .btn-reset {
+    border-color: #CCCCCC;
+    color: #2A2A2A;
+}
+
+/* ── Light: rental type cards ── */
+[data-theme="light"] .rental-prices {
+    background: rgba(26, 92, 42, 0.04);
+    border-color: rgba(26, 92, 42, 0.15);
+}
+[data-theme="light"] .price-row .duration,
+[data-theme="light"] .deposit-info {
+    color: #555555;
+}
+[data-theme="light"] .terms-section {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .term-item {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .term-item h4 {
+    color: #0A0A0A;
+}
+[data-theme="light"] .term-item p {
+    color: #555555;
+}
+
+/* ── Light: financing page ── */
+[data-theme="light"] .eligibility-section,
+[data-theme="light"] .plans-section,
+[data-theme="light"] .calculator-section,
+[data-theme="light"] .application-section {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .requirement-card,
+[data-theme="light"] .step-card {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .step-card h3,
+[data-theme="light"] .requirement-card h4 {
+    color: #0A0A0A;
+}
+[data-theme="light"] .requirement-card p,
+[data-theme="light"] .step-card p {
+    color: #555555;
+}
+[data-theme="light"] .plans-table {
+    background: #FFFFFF;
+}
+[data-theme="light"] .plans-table td {
+    color: #2A2A2A;
+    border-color: #E0E0E0;
+}
+[data-theme="light"] .calculator-inputs {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .calc-group input,
+[data-theme="light"] .calc-group select {
+    background: #F5F5F5;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .calc-group label {
+    color: #2A2A2A;
+}
+[data-theme="light"] .application-form input,
+[data-theme="light"] .application-form select {
+    background: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .form-group label {
+    color: #2A2A2A;
+}
+
+/* ── Light: blog page ── */
+[data-theme="light"] .category-btn {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+    color: #555555;
+}
+[data-theme="light"] .featured-card,
+[data-theme="light"] .blog-card {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .featured-content h2,
+[data-theme="light"] .blog-card-title a {
+    color: #0A0A0A;
+}
+[data-theme="light"] .featured-excerpt,
+[data-theme="light"] .blog-card-excerpt {
+    color: #555555;
+}
+[data-theme="light"] .featured-meta {
+    color: #555555;
+}
+[data-theme="light"] .newsletter-section {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .newsletter-content h2 {
+    color: #0A0A0A;
+}
+[data-theme="light"] .newsletter-content p {
+    color: #555555;
+}
+[data-theme="light"] .newsletter-form input {
+    background: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .pagination .page-link {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+    color: #2A2A2A;
+}
+
+/* ── Light: blog post ── */
+[data-theme="light"] .blog-content {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .blog-content blockquote {
+    background: rgba(26, 92, 42, 0.04);
+    border-left-color: #39B54A;
+    color: #555555;
+}
+[data-theme="light"] .blog-image {
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .blog-image figcaption {
+    background: rgba(0,0,0,0.05);
+    color: #555555;
+}
+[data-theme="light"] .vehicle-card,
+[data-theme="light"] .inspection-item,
+[data-theme="light"] .maintenance-card,
+[data-theme="light"] .faq-item,
+[data-theme="light"] .scenario-card,
+[data-theme="light"] .decision-option,
+[data-theme="light"] .highlight-box,
+[data-theme="light"] .insurance-box {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .comment {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .comment-content p {
+    color: #2A2A2A;
+}
+[data-theme="light"] .comment-form {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .comment-form input,
+[data-theme="light"] .comment-form textarea {
+    background: #FFFFFF;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .author-box {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .author-info p {
+    color: #555555;
+}
+[data-theme="light"] .share-section {
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .share-icon {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+    color: #555555;
+}
+
+/* ── Light: about page ── */
+[data-theme="light"] .section-light {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .executive-bio,
+[data-theme="light"] .full-bio {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .executive-bio p,
+[data-theme="light"] .full-bio p {
+    color: #2A2A2A;
+}
+[data-theme="light"] .value-item:hover {
+    background: var(--gradient-green);
+}
+[data-theme="light"] .stat-number {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="light"] .stat-label {
+    color: #555555;
+}
+
+/* ── Light: contact page ── */
+[data-theme="light"] .contact-info,
+[data-theme="light"] .contact-form {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .info-card {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .info-content h3 {
+    color: #0A0A0A;
+}
+[data-theme="light"] .info-content p,
+[data-theme="light"] .info-content a {
+    color: #555555;
+}
+[data-theme="light"] .map-container {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .social-icon {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+    color: #555555;
+}
+
+/* ── Light: car detail page ── */
+[data-theme="light"] .car-gallery,
+[data-theme="light"] .car-tabs .tab-content {
+    background: #F5F5F5;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .price-box {
+    background: rgba(26, 92, 42, 0.04);
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .cash-price .value {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="light"] .cash-price .label,
+[data-theme="light"] .finance-price .label {
+    color: #555555;
+}
+[data-theme="light"] .specs-table td {
+    color: #2A2A2A;
+    border-color: #EEEEEE;
+}
+[data-theme="light"] .inspection-request {
+    background: #FFFFFF;
+    border-color: #DDDDDD;
+}
+[data-theme="light"] .inspection-form input {
+    background: #F5F5F5;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+[data-theme="light"] .tab-header {
+    color: #555555;
+}
+[data-theme="light"] .tab-header.active {
+    color: #0A3D1C;
+}
+[data-theme="light"] .finance-calculator {
+    background: #FFFFFF;
+}
+[data-theme="light"] .calc-input input,
+[data-theme="light"] .calc-input select {
+    background: #F5F5F5;
+    border-color: #CCCCCC;
+    color: #0A0A0A;
+}
+
+/* ── Light: breadcrumb ── */
+[data-theme="light"] .breadcrumb a {
+    color: #555555;
+}
+[data-theme="light"] .breadcrumb span {
+    color: #0A0A0A;
+}
+
+/* ── Light: page headers with bg image (keep dark overlay) ── */
+[data-theme="light"] .post-header,
+[data-theme="light"] .page-header {
+    /* Keep dark overlay intact — looks great on both themes */
+}
+
+/* ── Light: "view all" and link gradients ── */
+[data-theme="light"] .view-all {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+[data-theme="light"] .service-link,
+[data-theme="light"] .read-more {
+    background: var(--gradient-green);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Light: mobile nav menu background ── */
+[data-theme="light"] .nav-menu.active {
+    background: #FFFFFF;
+    border-top-color: #EEEEEE;
+}
+
+/* ──────────────────────────────────────────────────
+   THEME TOGGLE BUTTON — appears on all pages
+   ────────────────────────────────────────────────── */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--toggle-bg, #1A1A1A);
+    border: 1px solid var(--toggle-border, #3A3A3A);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--toggle-text, #CCCCCC);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin-left: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    border-color: var(--green-accent);
+    transform: translateY(-1px);
+}
+
+.theme-toggle .toggle-icon {
+    font-size: 16px;
+    color: var(--toggle-icon-color, #C4A962);
+    transition: transform 0.4s ease;
+}
+
+.theme-toggle:hover .toggle-icon {
+    transform: rotate(20deg);
+}
+
+.theme-toggle .toggle-label {
+    display: inline;
+}
+
+/* Hide text label on very small screens, keep icon */
+@media (max-width: 480px) {
+    .theme-toggle .toggle-label {
+        display: none;
+    }
+    .theme-toggle {
+        padding: 8px 10px;
+    }
+}
