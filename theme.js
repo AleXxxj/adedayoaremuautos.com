@@ -8,7 +8,6 @@
 (function () {
 ‘use strict’;
 
-```
 var STORAGE_KEY = 'aaa-theme';
 var DARK = 'dark';
 var LIGHT = 'light';
@@ -205,5 +204,4 @@ if (document.readyState === 'loading') {
     init();
 }
 ```
-
 })();
