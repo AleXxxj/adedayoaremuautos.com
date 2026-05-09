@@ -1,327 +1,316 @@
 /**
- * ADEDAYO AREMU AUTOS — THEME SWITCHER v3
- *
- * Mobile strategy:
- *   - Desktop (>900px): theme toggle sits in .header-actions alongside WhatsApp btn
- *   - Mobile (≤900px): WhatsApp btn is HIDDEN from header-actions (display:none via CSS)
- *                      Theme toggle replaces it in header (icon only, no label)
- *                      When nav opens: floating pill (WhatsApp + theme toggle) appears bottom-right
- *
- * Include: <script src="theme.js"></script> before </body> on every page.
- */
+
+- ADEDAYO AREMU AUTOS — THEME SWITCHER v5 (FINAL)
+- 
+- Mobile (≤900px):
+- Header: [Logo] [Hamburger] [Theme ☀️]   ← WA hidden from header
+- Nav open: floating pill bottom-right → [WA 💬] [Theme ☀️]
+- 
+- Desktop (>900px):
+- Header: [Logo] [Nav] [WA btn] [Theme ☀️]
+- No floating pill.
+  */
 
 (function () {
-    'use strict';
+‘use strict’;
 
-    const STORAGE_KEY = 'aaa-theme';
-    const DARK  = 'dark';
-    const LIGHT = 'light';
+const STORAGE_KEY = 'aaa-theme';
+const DARK  = 'dark';
+const LIGHT = 'light';
 
-    /* ─── Theme helpers ─────────────────────────────── */
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-    }
-    function getSaved()   { return localStorage.getItem(STORAGE_KEY) || DARK; }
-    function saveTheme(t) { localStorage.setItem(STORAGE_KEY, t); }
-
-    function updateAllToggles(theme) {
-        document.querySelectorAll('.aaa-theme-btn').forEach(btn => {
-            const icon  = btn.querySelector('.ti');
-            const label = btn.querySelector('.tl');
-            if (theme === LIGHT) {
-                if (icon)  icon.textContent  = '🌙';
-                if (label) label.textContent = 'Dark';
-                btn.title = 'Switch to dark mode';
-            } else {
-                if (icon)  icon.textContent  = '☀️';
-                if (label) label.textContent = 'Light';
-                btn.title = 'Switch to light mode';
-            }
-        });
-    }
-
-    function toggleTheme() {
-        const current = document.documentElement.getAttribute('data-theme') || DARK;
-        const next = current === DARK ? LIGHT : DARK;
-        applyTheme(next);
-        saveTheme(next);
-        updateAllToggles(next);
-        document.body.style.transition = 'background-color 0.35s ease, color 0.35s ease';
-        setTimeout(() => { document.body.style.transition = ''; }, 420);
-    }
-
-    /* ─── Build a theme button ──────────────────────── */
-    function makeThemeBtn(extraClass, showLabel) {
-        const btn = document.createElement('button');
-        btn.className = 'aaa-theme-btn ' + (extraClass || '');
-        btn.setAttribute('aria-label', 'Toggle colour theme');
-        btn.innerHTML =
-            '<span class="ti">☀️</span>' +
-            (showLabel ? '<span class="tl">Light</span>' : '');
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            toggleTheme();
-        });
-        return btn;
-    }
-
-    /* ─── Inject header toggle (replaces WhatsApp on mobile) ── */
-    function injectHeaderToggle() {
-        if (document.getElementById('headerThemeToggle')) return;
-
-        const btn = makeThemeBtn('header-theme-toggle', false);
-        btn.id = 'headerThemeToggle';
-
-        const actions = document.querySelector('.header-actions');
-        if (actions) {
-            // Insert BEFORE the WhatsApp button so it sits left of it on desktop
-            const waBtn = actions.querySelector('.whatsapp-btn');
-            if (waBtn) {
-                actions.insertBefore(btn, waBtn);
-            } else {
-                actions.appendChild(btn);
-            }
-        }
-    }
-
-    /* ─── Floating nav pill (WhatsApp + theme) ────────
-       Appears bottom-right when mobile nav is open      */
-    function createNavPill() {
-        if (document.getElementById('navFloatPill')) return;
-
-        // Find the original WhatsApp href
-        const waHref = (function() {
-            const a = document.querySelector('.header-actions .whatsapp-btn');
-            return a ? a.href : 'https://wa.me/2348012345678';
-        })();
-
-        const pill = document.createElement('div');
-        pill.id = 'navFloatPill';
-        pill.className = 'nav-float-pill';
-        pill.innerHTML =
-            '<a href="' + waHref + '" target="_blank" class="pill-wa" aria-label="WhatsApp">' +
-                '<i class="fab fa-whatsapp"></i>' +
-            '</a>';
-
-        const themeBtn = makeThemeBtn('pill-theme', false);
-        pill.appendChild(themeBtn);
-
-        document.body.appendChild(pill);
-    }
-
-    /* ─── Hook into existing mobile menu toggle ────── */
-    function hookMobileMenu() {
-        const menuBtn = document.getElementById('mobileMenuBtn');
-        const navMenu = document.getElementById('navMenu');
-        if (!menuBtn || !navMenu) return;
-
-        // Watch nav open/close via class mutation
-        const observer = new MutationObserver(function() {
-            const pill = document.getElementById('navFloatPill');
-            if (!pill) return;
-            if (navMenu.classList.contains('active')) {
-                pill.classList.add('visible');
-            } else {
-                pill.classList.remove('visible');
-            }
-        });
-        observer.observe(navMenu, { attributes: true, attributeFilter: ['class'] });
-    }
-
-    /* ─── Fix geo-detection popup blank country bug ── */
-    function fixGeoPopup() {
-        const notification = document.getElementById('countryNotification');
-        if (!notification) return;
-
-        const currencyChoice = localStorage.getItem('currencyChoice');
-        if (currencyChoice === 'dismissed' || currencyChoice === 'accepted') return;
-
-        // Use a more reliable IP geolocation API with timeout
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-
-        fetch('https://ipapi.co/json/', { signal: controller.signal })
-            .then(r => r.json())
-            .then(data => {
-                clearTimeout(timeout);
-                const country     = data.country_name || '';
-                const countryCode = data.country_code  || '';
-                if (!country || !countryCode) return;
-
-                let currency = 'NGN', symbol = '₦', code = 'NGN';
-                if      (countryCode === 'US') { currency = 'USD'; symbol = '$';  code = 'USD'; }
-                else if (countryCode === 'GB') { currency = 'GBP'; symbol = '£';  code = 'GBP'; }
-                else if (['DE','FR','IT','ES','NL','BE','AT','PT','GR','FI','IE'].includes(countryCode))
-                                               { currency = 'EUR'; symbol = '€';  code = 'EUR'; }
-
-                if (countryCode !== 'NG' && !localStorage.getItem('manualCurrency')) {
-                    const elCountry   = document.getElementById('userCountry');
-                    const elCurrency  = document.getElementById('userCurrency');
-                    const elSwitch    = document.getElementById('switchCurrencyCode');
-                    if (elCountry)  elCountry.textContent  = country;
-                    if (elCurrency) elCurrency.textContent = symbol + ' ' + code;
-                    if (elSwitch)   elSwitch.textContent   = code;
-                    notification.style.display = 'block';
-                    localStorage.setItem('detectedCurrency', currency);
-                    localStorage.setItem('detectedSymbol',   symbol);
-                }
-            })
-            .catch(() => { clearTimeout(timeout); });
-    }
-
-    /* ─── Inject all CSS ───────────────────────────── */
-    function injectStyles() {
-        if (document.getElementById('aaaThemeStyles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'aaaThemeStyles';
-        style.textContent = `
-
-/* ══ Header theme toggle button ══════════════════ */
-.header-theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    background: transparent;
-    border: 1.5px solid rgba(255,255,255,0.15);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-left: 8px;
-    line-height: 1;
-    padding: 0;
+function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
 }
-.header-theme-toggle:hover {
-    border-color: #39B54A;
-    background: rgba(57,181,74,0.10);
-    transform: scale(1.08);
-}
-[data-theme="light"] .header-theme-toggle {
-    border-color: rgba(0,0,0,0.15);
-    background: #FFFFFF;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.10);
-}
-[data-theme="light"] .header-theme-toggle:hover {
-    border-color: #39B54A;
-    background: rgba(57,181,74,0.08);
+function getSaved()   { return localStorage.getItem(STORAGE_KEY) || DARK; }
+function saveTheme(t) { localStorage.setItem(STORAGE_KEY, t); }
+
+function updateAllIcons(theme) {
+    document.querySelectorAll('.aaa-ti').forEach(function(el) {
+        el.textContent = theme === LIGHT ? '🌙' : '☀️';
+    });
+    document.querySelectorAll('.aaa-theme-btn').forEach(function(btn) {
+        btn.title = theme === LIGHT ? 'Switch to dark mode' : 'Switch to light mode';
+    });
 }
 
-/* ══ Hide WhatsApp btn on mobile (≤900px) ═════════
-   The pill handles it when nav opens              */
-@media (max-width: 900px) {
-    .header-actions .whatsapp-btn {
-        display: none !important;
-    }
-    /* Keep toggle visible and properly sized */
-    .header-theme-toggle {
-        width: 40px;
-        height: 40px;
-        font-size: 17px;
-        margin-left: 6px;
-    }
+function toggleTheme() {
+    const cur  = document.documentElement.getAttribute('data-theme') || DARK;
+    const next = cur === DARK ? LIGHT : DARK;
+    applyTheme(next);
+    saveTheme(next);
+    updateAllIcons(next);
+    document.body.style.transition = 'background-color 0.35s ease, color 0.35s ease';
+    setTimeout(function() { document.body.style.transition = ''; }, 420);
 }
 
-/* ══ Floating pill (nav open state) ══════════════ */
-.nav-float-pill {
-    position: fixed;
-    bottom: 90px;
-    right: 16px;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
-    z-index: 1100;
-    opacity: 0;
-    transform: translateY(12px);
-    pointer-events: none;
-    transition: opacity 0.28s ease, transform 0.28s ease;
-}
-.nav-float-pill.visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: all;
-}
+/* ── 1. Header toggle button ── */
+function injectHeaderToggle() {
+    if (document.getElementById('aaaHeaderToggle')) return;
 
-/* WA button inside pill */
-.nav-float-pill .pill-wa {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: #25D366;
-    border-radius: 50%;
-    color: #FFFFFF;
-    font-size: 22px;
-    text-decoration: none;
-    box-shadow: 0 4px 14px rgba(37,211,102,0.40);
-    transition: all 0.25s ease;
-    flex-shrink: 0;
-}
-.nav-float-pill .pill-wa:hover {
-    background: #128C7E;
-    transform: scale(1.08);
-}
+    const btn = document.createElement('button');
+    btn.id        = 'aaaHeaderToggle';
+    btn.className = 'aaa-theme-btn aaa-header-toggle';
+    btn.innerHTML = '<span class="aaa-ti">☀️</span>';
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleTheme();
+    });
 
-/* Theme button inside pill */
-.nav-float-pill .pill-theme {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: #1A1A1A;
-    border: 1.5px solid #3A3A3A;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-    transition: all 0.25s ease;
-    flex-shrink: 0;
-    padding: 0;
-}
-.nav-float-pill .pill-theme:hover {
-    border-color: #39B54A;
-    transform: scale(1.08);
-}
-[data-theme="light"] .nav-float-pill .pill-theme {
-    background: #FFFFFF;
-    border-color: #DDDDDD;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-}
-
-/* Only show pill on mobile */
-@media (min-width: 901px) {
-    .nav-float-pill { display: none !important; }
-}
-
-        `;
-        document.head.appendChild(style);
-    }
-
-    /* ─── Init ──────────────────────────────────────── */
-    function init() {
-        const saved = getSaved();
-        applyTheme(saved);
-        injectStyles();
-        injectHeaderToggle();
-        createNavPill();
-        hookMobileMenu();
-        updateAllToggles(saved);
-        fixGeoPopup();
-    }
-
-    // Apply theme immediately (no flash)
-    applyTheme(getSaved());
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+    const actions = document.querySelector('.header-actions');
+    if (!actions) return;
+    const wa = actions.querySelector('.whatsapp-btn');
+    if (wa) {
+        actions.insertBefore(btn, wa);
     } else {
-        init();
+        actions.appendChild(btn);
     }
+}
+
+/* ── 2. Floating pill: WA + Theme ── */
+function buildFloatingPill() {
+    const existing = document.getElementById('aaaNavPill');
+    if (existing) existing.remove();
+
+    const waAnchor = document.querySelector('.header-actions .whatsapp-btn');
+    const waHref   = waAnchor ? waAnchor.getAttribute('href') : 'https://wa.me/2348012345678';
+
+    const pill = document.createElement('div');
+    pill.id        = 'aaaNavPill';
+    pill.className = 'aaa-nav-pill';
+
+    // WhatsApp circle button
+    const waBtn = document.createElement('a');
+    waBtn.href      = waHref;
+    waBtn.target    = '_blank';
+    waBtn.className = 'aaa-pill-wa';
+    waBtn.setAttribute('aria-label', 'Chat on WhatsApp');
+    waBtn.innerHTML = '<i class="fab fa-whatsapp"></i>';
+
+    // Theme toggle circle button
+    const themeBtn = document.createElement('button');
+    themeBtn.className = 'aaa-theme-btn aaa-pill-theme';
+    themeBtn.innerHTML = '<span class="aaa-ti">☀️</span>';
+    themeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleTheme();
+    });
+
+    pill.appendChild(waBtn);
+    pill.appendChild(themeBtn);
+    document.body.appendChild(pill);
+}
+
+/* ── 3. Show/hide pill when nav opens/closes ── */
+function hookMobileNav() {
+    const navMenu = document.getElementById('navMenu');
+    if (!navMenu) return;
+
+    const observer = new MutationObserver(function() {
+        const pill = document.getElementById('aaaNavPill');
+        if (!pill) return;
+        const isOpen = navMenu.classList.contains('active');
+        pill.classList.toggle('aaa-pill-visible', isOpen);
+    });
+    observer.observe(navMenu, { attributes: true, attributeFilter: ['class'] });
+}
+
+/* ── 4. Fix geo-detection popup blank country ── */
+function fixGeoPopup() {
+    const notification = document.getElementById('countryNotification');
+    if (!notification) return;
+    const stored = localStorage.getItem('currencyChoice');
+    if (stored === 'dismissed' || stored === 'accepted') return;
+    if (localStorage.getItem('manualCurrency')) return;
+
+    const ctrl    = new AbortController();
+    const timeout = setTimeout(function() { ctrl.abort(); }, 7000);
+
+    fetch('https://ipapi.co/json/', { signal: ctrl.signal })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            clearTimeout(timeout);
+            const country     = (data.country_name || '').trim();
+            const countryCode = (data.country_code  || '').trim();
+            if (!country || !countryCode || countryCode === 'NG') return;
+
+            let currency = 'NGN', symbol = '₦', code = 'NGN';
+            if      (countryCode === 'US') { currency='USD'; symbol='$';  code='USD'; }
+            else if (countryCode === 'GB') { currency='GBP'; symbol='£';  code='GBP'; }
+            else if (['DE','FR','IT','ES','NL','BE','AT','PT','GR','FI','IE'].includes(countryCode))
+                                           { currency='EUR'; symbol='€';  code='EUR'; }
+
+            const setEl = function(id, val) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+            setEl('userCountry',        country);
+            setEl('userCurrency',       symbol + ' ' + code);
+            setEl('switchCurrencyCode', code);
+
+            notification.style.display = 'block';
+            localStorage.setItem('detectedCurrency', currency);
+            localStorage.setItem('detectedSymbol',   symbol);
+        })
+        .catch(function() { clearTimeout(timeout); });
+}
+
+/* ── 5. Inject CSS ── */
+function injectStyles() {
+    if (document.getElementById('aaaThemeCSS')) return;
+
+    const style = document.createElement('style');
+    style.id = 'aaaThemeCSS';
+    style.textContent = `
+```
+
+/* ═══ HEADER THEME TOGGLE ════════════════════════ */
+.aaa-header-toggle {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 42px;
+height: 42px;
+border-radius: 50%;
+background: transparent;
+border: 1.5px solid rgba(255,255,255,0.18);
+cursor: pointer;
+font-size: 19px;
+flex-shrink: 0;
+padding: 0;
+line-height: 1;
+transition: all 0.25s ease;
+margin-left: 8px;
+}
+.aaa-header-toggle:hover {
+border-color: #39B54A;
+background: rgba(57,181,74,0.12);
+transform: scale(1.08);
+}
+[data-theme=“light”] .aaa-header-toggle {
+border-color: rgba(0,0,0,0.15);
+background: #FFFFFF;
+box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+}
+[data-theme=“light”] .aaa-header-toggle:hover {
+border-color: #39B54A;
+background: rgba(57,181,74,0.08);
+}
+
+/* ═══ HIDE WA BTN IN HEADER ON MOBILE ═══════════
+Header becomes: [Logo] [Hamburger ☰] [Theme ☀️]  */
+@media (max-width: 900px) {
+.header-actions .whatsapp-btn {
+display: none !important;
+}
+.aaa-header-toggle {
+width: 40px;
+height: 40px;
+font-size: 18px;
+margin-left: 6px;
+}
+}
+
+/* ═══ FLOATING PILL (mobile, nav-open only) ══════
+Position: bottom-right, above “Chat with us”    */
+.aaa-nav-pill {
+position: fixed;
+bottom: 82px;
+right: 16px;
+display: flex;
+flex-direction: row;
+gap: 10px;
+align-items: center;
+z-index: 1050;
+opacity: 0;
+transform: translateY(10px) scale(0.92);
+pointer-events: none;
+transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.aaa-nav-pill.aaa-pill-visible {
+opacity: 1;
+transform: translateY(0) scale(1);
+pointer-events: all;
+}
+
+/* WhatsApp circle in pill */
+.aaa-pill-wa {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 48px;
+height: 48px;
+background: #25D366;
+border-radius: 50%;
+color: #FFFFFF;
+font-size: 22px;
+text-decoration: none;
+box-shadow: 0 4px 14px rgba(37,211,102,0.40);
+transition: all 0.25s ease;
+flex-shrink: 0;
+}
+.aaa-pill-wa:hover {
+background: #128C7E;
+transform: scale(1.08);
+}
+
+/* Theme circle in pill */
+.aaa-pill-theme {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 48px;
+height: 48px;
+background: #1A1A1A;
+border: 1.5px solid #3A3A3A;
+border-radius: 50%;
+font-size: 21px;
+cursor: pointer;
+box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+transition: all 0.25s ease;
+flex-shrink: 0;
+padding: 0;
+line-height: 1;
+}
+.aaa-pill-theme:hover {
+border-color: #39B54A;
+transform: scale(1.08);
+}
+[data-theme=“light”] .aaa-pill-theme {
+background: #FFFFFF;
+border-color: #DDDDDD;
+box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+[data-theme=“light”] .aaa-pill-theme:hover {
+border-color: #39B54A;
+}
+
+/* Hide pill on desktop */
+@media (min-width: 901px) {
+.aaa-nav-pill { display: none !important; }
+}
+
+```
+    `;
+    document.head.appendChild(style);
+}
+
+/* ── 6. Init ── */
+function init() {
+    const saved = getSaved();
+    applyTheme(saved);
+    injectStyles();
+    injectHeaderToggle();
+    buildFloatingPill();
+    hookMobileNav();
+    updateAllIcons(saved);
+    fixGeoPopup();
+}
+
+applyTheme(getSaved()); // immediate — no flash
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 
 })();
