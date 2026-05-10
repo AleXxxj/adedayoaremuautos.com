@@ -82,7 +82,7 @@ function injectStyles(){
     '[data-theme="light"] .aaa-header-toggle{border-color:rgba(0,0,0,0.15);background:#FFFFFF;box-shadow:0 1px 6px rgba(0,0,0,0.10);}',
     '[data-theme="light"] .aaa-header-toggle:hover{border-color:#39B54A;background:rgba(57,181,74,0.08);}',
     '@media (max-width:900px){.header-actions .whatsapp-btn{display:none !important;}.aaa-header-toggle{width:40px;height:40px;font-size:18px;margin-left:6px;}}',
-    '.aaa-nav-pill{position:fixed;bottom:160px;right:16px;display:flex;flex-direction:row;gap:10px;align-items:center;z-index:1050;opacity:0;transform:translateY(10px) scale(0.92);pointer-events:none;transition:opacity 0.28s ease,transform 0.28s ease;}',
+    '.aaa-nav-pill{position:fixed;bottom:180px;right:16px;display:flex;flex-direction:row;gap:10px;align-items:center;z-index:1050;opacity:0;transform:translateY(10px) scale(0.92);pointer-events:none;transition:opacity 0.28s ease,transform 0.28s ease;}',
     '.aaa-nav-pill.aaa-pill-visible{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}',
     '.aaa-pill-wa{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#25D366;border-radius:50%;color:#FFFFFF;font-size:22px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,0.40);transition:all 0.25s ease;flex-shrink:0;}',
     '.aaa-pill-wa:hover{background:#128C7E;transform:scale(1.08);}',
