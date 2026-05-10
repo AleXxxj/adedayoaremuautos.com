@@ -228,7 +228,7 @@
 /* ══ Floating pill (nav open state) ══════════════ */
 .nav-float-pill {
     position: fixed;
-    bottom: 271px;
+    bottom: 274px;
     right: 16px;
     display: flex;
     flex-direction: row;
