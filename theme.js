@@ -99,7 +99,7 @@ function injectStyles(){
 }
 function init(){
   var saved=getSaved();
-  applyTheme(saved);injectStyles();
+  applyTheme(saved);injectStyles();injectHeaderToggle();
   buildFloatingPill();hookMobileNav();updateAllIcons(saved);fixGeoPopup();
 }
 applyTheme(getSaved());
