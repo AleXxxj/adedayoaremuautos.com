@@ -85,8 +85,8 @@
     }
 
     /* ─── Floating nav pill (WhatsApp + theme) ────────
-       Appears bottom-right when mobile nav is open      */
-    function createNavPill() {
+       Appears bottom-right when mobile nav is open. for now we will achieve this function, including hookMobileMenu() the goal is to remove the pill entirely and keep only the header toggle. */
+    /*function createNavPill() {
         if (document.getElementById('navFloatPill')) return;
 
         // Find the original WhatsApp href
@@ -110,7 +110,7 @@
     }
 
     /* ─── Hook into existing mobile menu toggle ────── */
-    function hookMobileMenu() {
+    /*function hookMobileMenu() {
         const menuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
         if (!menuBtn || !navMenu) return;
@@ -126,7 +126,7 @@
             }
         });
         observer.observe(navMenu, { attributes: true, attributeFilter: ['class'] });
-    }
+    } 
 
     /* ─── Fix geo-detection popup blank country bug ── */
     function fixGeoPopup() {
@@ -309,8 +309,8 @@
         applyTheme(saved);
         injectStyles();
         injectHeaderToggle();
-        createNavPill();
-        hookMobileMenu();
+        /*createNavPill();
+        hookMobileMenu();*/
         updateAllToggles(saved);
         fixGeoPopup();
     }
