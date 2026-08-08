@@ -41,6 +41,9 @@ export function AdminChrome({
             <Link href="/admin/leads" className="hover:text-[var(--text-primary)]">
               Leads
             </Link>
+            <Link href="/admin/deals" className="hover:text-[var(--text-primary)]">
+              Deals
+            </Link>
           </nav>
 
           <div className="ml-auto flex items-center gap-4 text-sm">
