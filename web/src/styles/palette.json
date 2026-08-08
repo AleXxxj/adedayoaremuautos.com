@@ -1,0 +1,83 @@
+{
+  "$comment": "Single source of truth for brand color. Consumed by tokens.css and validated by scripts/check-contrast.mjs. Edit here, not in CSS.",
+
+  "brand": {
+    "50":  "#E8F7EF",
+    "100": "#C6EBD6",
+    "200": "#97DBB6",
+    "300": "#5FC791",
+    "400": "#2FB26C",
+    "500": "#15964F",
+    "600": "#0D7B40",
+    "700": "#0A6134",
+    "800": "#074828",
+    "900": "#04301A"
+  },
+
+  "accent": {
+    "$comment": "Gold. Reserved for premium signals: featured badges, certified tags, price emphasis. Never for body text.",
+    "300": "#FFDE8A",
+    "400": "#FFC94D",
+    "500": "#F5B324",
+    "600": "#D1900C",
+    "700": "#9E6C07"
+  },
+
+  "darkSurface": {
+    "$comment": "Luminance ladder. Each step is a measurable jump, with a faint green undertone so neutrals read as intentional rather than dead grey. Steps are wider than they look because contrast ratios compress badly near black — validated by check-contrast.mjs, not by eye.",
+    "0": "#070C0A",
+    "1": "#141E19",
+    "2": "#223029",
+    "3": "#31423A",
+    "4": "#42564C"
+  },
+
+  "darkText": {
+    "primary":   "#F1F6F3",
+    "secondary": "#BDCCC4",
+    "muted":     "#94A69C"
+  },
+
+  "darkBorder": {
+    "subtle": "#1E2A23",
+    "default": "#33443B",
+    "strong": "#69806F"
+  },
+
+  "focus": {
+    "$comment": "Focus rings are a dedicated token, never a border color. They must clear 3:1 against every surface they can land on.",
+    "dark": "#5FC791",
+    "light": "#0A6134"
+  },
+
+  "lightSurface": {
+    "0": "#FFFFFF",
+    "1": "#F6F8F7",
+    "2": "#EDF1EF",
+    "3": "#E1E8E4",
+    "4": "#D3DCD7"
+  },
+
+  "lightText": {
+    "primary":   "#0B1410",
+    "secondary": "#33443B",
+    "muted":     "#5A6D63"
+  },
+
+  "lightBorder": {
+    "subtle": "#E4EAE7",
+    "default": "#CFD9D4",
+    "strong": "#78897F"
+  },
+
+  "semantic": {
+    "successDark": "#2FB26C",
+    "warningDark": "#F5B324",
+    "dangerDark":  "#FF6B5E",
+    "infoDark":    "#5AB9E8",
+    "successLight": "#0A6134",
+    "warningLight": "#8A5D05",
+    "dangerLight":  "#B3251A",
+    "infoLight":    "#12628C"
+  }
+}
