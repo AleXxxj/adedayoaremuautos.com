@@ -51,9 +51,32 @@ export interface FeedVehicle {
   updatedAt: Date;
 }
 
+/**
+ * The canonical origin for absolute URLs in feeds, sitemap and robots.
+ *
+ * Resolution order matters:
+ *
+ * 1. `NEXT_PUBLIC_SITE_URL` — an explicit override, for local development or
+ *    when the canonical domain differs from the deployment.
+ * 2. `VERCEL_PROJECT_PRODUCTION_URL` — set by Vercel to the project's
+ *    production domain, and updated automatically when a custom domain is
+ *    added. This means the feeds start pointing at adedayoaremuautos.com the
+ *    moment the domain is attached, with no redeploy and nothing to remember.
+ * 3. localhost, for a bare local run.
+ *
+ * This exists because a hand-set value was wrong the first time: the deployment
+ * landed on `adedayoaremuautos-com.vercel.app` while the variable said
+ * `adedayoaremuautos.vercel.app`, so every URL in every feed pointed at a
+ * domain that does not resolve.
+ */
 export function siteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  return raw.replace(/\/$/, "");
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/+$/, "");
+
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercel) return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
+
+  return "http://localhost:3000";
 }
 
 /**
