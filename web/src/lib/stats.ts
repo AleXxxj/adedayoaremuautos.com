@@ -1,6 +1,7 @@
-import { count, eq, sql } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
+import type { MarketCode } from "./market";
 
 /**
  * Vehicles sold before this platform existed, as stated by the owner.
@@ -24,7 +25,21 @@ export interface SiteStats {
   available: number;
 }
 
-export async function getSiteStats(): Promise<SiteStats> {
+/**
+ * @param market scopes the availability count.
+ *
+ * The two figures have deliberately different scopes:
+ *
+ * - `vehiclesSold` is a claim about the BUSINESS, so it spans both markets.
+ *   HISTORICAL_SALES is a single company-wide number and would be
+ *   double-counted if it were added per market.
+ * - `available` is a claim about what THIS visitor can buy today, so it must be
+ *   scoped. Counting globally told a Greensboro visitor "1 Available now" when
+ *   the only car was in Lagos — while the inventory page one click away
+ *   correctly said none. Two numbers on the same site contradicting each other
+ *   is worse than either being absent.
+ */
+export async function getSiteStats(market: MarketCode): Promise<SiteStats> {
   const [[sold], [available]] = await Promise.all([
     db
       .select({ n: count() })
@@ -33,7 +48,9 @@ export async function getSiteStats(): Promise<SiteStats> {
     db
       .select({ n: count() })
       .from(vehicles)
-      .where(eq(vehicles.status, "available")),
+      .where(
+        and(eq(vehicles.status, "available"), eq(vehicles.marketCode, market)),
+      ),
   ]);
 
   const salesOnPlatform = Number(sold.n);

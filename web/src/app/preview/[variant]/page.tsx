@@ -39,7 +39,7 @@ export default async function PreviewPage({
 
   const [{ vehicles }, stats, makes, sites] = await Promise.all([
     listInventory(code, { limit: 3 }),
-    getSiteStats(),
+    getSiteStats(code),
     availableMakes(code),
     listLocations(code),
   ]);

@@ -18,7 +18,7 @@ export default async function MarketHome({
   const market = MARKETS[code];
   const [{ vehicles, total }, stats] = await Promise.all([
     listInventory(code, { limit: 3 }),
-    getSiteStats(),
+    getSiteStats(code),
   ]);
 
   return (
