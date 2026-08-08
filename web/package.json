@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run tokens && npm run check:contrast && npm run test:schema && next build",
+    "build": "npm run tokens && npm run check:contrast && npm run test:schema && npm run test:deal && next build",
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
@@ -15,7 +15,8 @@
     "test:schema": "node scripts/verify-schema.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed.mjs",
     "db:inspect": "node --env-file=.env.local scripts/inspect-db.mjs",
-    "staff:create": "node --env-file=.env.local scripts/create-staff.mjs"
+    "staff:create": "node --env-file=.env.local scripts/create-staff.mjs",
+    "test:deal": "tsx scripts/verify-deal-math.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.11",
     "typescript": "^5"
   }
 }

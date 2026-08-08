@@ -15,6 +15,20 @@
       "when": 1786140229577,
       "tag": "0001_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786202058671,
+      "tag": "0002_deal_flow",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786202084877,
+      "tag": "0003_deal_constraints",
+      "breakpoints": true
     }
   ]
 }

@@ -306,6 +306,127 @@ if (String(roundTrip.rows[0].price_minor) === String(bigNaira)) {
   bad("value did not round-trip", `${bigNaira} -> ${roundTrip.rows[0].price_minor}`);
 }
 
+
+// ── Deal flow ──────────────────────────────────────────────────────────────
+console.log("\nDeal flow");
+
+await allows(
+  db,
+  "staff row for the salesperson",
+  `INSERT INTO staff (id, email, role) VALUES
+     ('99999999-9999-4999-8999-999999999999','sales@example.com','sales')`,
+);
+
+const appt = (id, from, to, status, vehicle = "'11111111-1111-1111-1111-111111111111'") => `
+  INSERT INTO appointments (id, market_code, vehicle_id, staff_id, kind, status,
+                            period, customer_name)
+  VALUES ('${id}','us',${vehicle},'99999999-9999-4999-8999-999999999999',
+          'test_drive','${status}', tstzrange('${from}','${to}','[)'), 'Test Customer')`;
+
+await allows(
+  db,
+  "first test drive, Sat 14:00-15:00",
+  appt("bbbbbbbb-0000-0000-0000-000000000001", "2026-09-05T14:00Z", "2026-09-05T15:00Z", "scheduled"),
+);
+
+await rejects(
+  db,
+  "REJECTS a second test drive of the same car at 14:30",
+  appt("bbbbbbbb-0000-0000-0000-000000000002", "2026-09-05T14:30Z", "2026-09-05T15:30Z", "confirmed"),
+  "appointments_no_vehicle_overlap",
+);
+
+await allows(
+  db,
+  "allows the next slot at 15:00",
+  appt("bbbbbbbb-0000-0000-0000-000000000003", "2026-09-05T15:00Z", "2026-09-05T16:00Z", "scheduled"),
+);
+
+await allows(
+  db,
+  "allows an overlapping CANCELLED appointment",
+  appt("bbbbbbbb-0000-0000-0000-000000000004", "2026-09-05T14:15Z", "2026-09-05T14:45Z", "cancelled"),
+);
+
+const deal = (id, extra = "", status = "draft") => `
+  INSERT INTO deals (id, market_code, vehicle_id, deal_number, customer_name,
+                     customer_phone, currency, vehicle_price_minor, status ${extra ? "," + extra.split("=")[0] : ""})
+  VALUES ('${id}','us','11111111-1111-1111-1111-111111111111','AAA-US-2026-${id.slice(-4)}',
+          'Test Buyer','+13365550100','USD',2850000,'${status}'
+          ${extra ? "," + extra.split("=")[1] : ""})`;
+
+await allows(db, "draft deal", deal("cccccccc-0000-0000-0000-000000000001"));
+
+await rejects(
+  db,
+  "rejects a deal priced in the wrong currency",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9001',
+           'X','+1','NGN',2850000)`,
+  "deals_currency_matches_market",
+);
+
+await rejects(
+  db,
+  "rejects an APR entered as 79000 bps (790%)",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor,
+                      is_financed, apr_bps, term_months)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9002',
+           'X','+1','USD',2850000,true,79000,60)`,
+  "deals_rates_sane",
+);
+
+await rejects(
+  db,
+  "rejects a financed deal with no terms",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor, is_financed)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9003',
+           'X','+1','USD',2850000,true)`,
+  "deals_financed_requires_terms",
+);
+
+await rejects(
+  db,
+  "REJECTS delivery without a signed contract",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor, status)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9004',
+           'X','+1','USD',2850000,'delivered')`,
+  "deals_delivery_requires_contract",
+);
+
+await allows(
+  db,
+  "allows delivery once contracted",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor, status, contracted_at)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9005',
+           'X','+1','USD',2850000,'delivered', now())`,
+);
+
+await rejects(
+  db,
+  "rejects a lost deal with no reason recorded",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor, status)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9006',
+           'X','+1','USD',2850000,'lost')`,
+  "deals_lost_requires_reason",
+);
+
+await rejects(
+  db,
+  "rejects duplicate deal numbers",
+  `INSERT INTO deals (market_code, vehicle_id, deal_number, customer_name,
+                      customer_phone, currency, vehicle_price_minor)
+   VALUES ('us','11111111-1111-1111-1111-111111111111','AAA-US-2026-9005',
+           'X','+1','USD',2850000)`,
+  "deals_number_idx",
+);
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mSCHEMA NOT VERIFIED\x1b[0m\n" : "  \x1b[32mSchema verified.\x1b[0m\n"),

@@ -439,3 +439,172 @@ export type RentalBooking = typeof rentalBookings.$inferSelect;
 export type NewRentalBooking = typeof rentalBookings.$inferInsert;
 
 export const SCHEMA_VERSION_NOTE = sql`-- see src/db/migrations`;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DEAL FLOW
+
+   The part that turns an enquiry into a sale. The legacy site had none of it:
+   a lead arrived (in theory) and then nothing was tracked until, presumably,
+   a WhatsApp thread. This is where a dealership actually makes money, so it
+   gets the same treatment as inventory — real states, real constraints, real
+   money arithmetic.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export const appointmentKind = pgEnum("appointment_kind", [
+  "test_drive",
+  "inspection",
+  "delivery",
+  "handover",
+]);
+
+export const appointmentStatus = pgEnum("appointment_status", [
+  "scheduled",
+  "confirmed",
+  "completed",
+  "no_show",
+  "cancelled",
+]);
+
+export const dealStatus = pgEnum("deal_status", [
+  "draft",       // being built by a salesperson
+  "negotiating", // numbers with the customer
+  "agreed",      // terms accepted, not yet papered
+  "financing",   // awaiting a credit decision
+  "contracted",  // signed
+  "delivered",   // keys handed over — this is what marks the vehicle sold
+  "lost",
+]);
+
+export const appointments = pgTable(
+  "appointments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    leadId: uuid("lead_id").references(() => leads.id, { onDelete: "set null" }),
+    vehicleId: uuid("vehicle_id").references(() => vehicles.id, {
+      onDelete: "set null",
+    }),
+    staffId: uuid("staff_id").references(() => staff.id),
+
+    kind: appointmentKind("kind").notNull().default("test_drive"),
+    status: appointmentStatus("status").notNull().default("scheduled"),
+
+    /**
+     * Stored as a range rather than a start time plus duration, so the same
+     * exclusion-constraint trick that protects rentals also protects this:
+     * one vehicle cannot be out on two test drives at once.
+     */
+    period: tstzrange("period").notNull(),
+
+    customerName: text("customer_name").notNull(),
+    customerPhone: text("customer_phone"),
+    notes: text("notes"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("appointments_vehicle_idx").on(t.vehicleId),
+    index("appointments_staff_idx").on(t.staffId),
+    index("appointments_status_idx").on(t.status),
+  ],
+);
+
+export const deals = pgTable(
+  "deals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    leadId: uuid("lead_id").references(() => leads.id, { onDelete: "set null" }),
+    vehicleId: uuid("vehicle_id").references(() => vehicles.id),
+    salespersonId: uuid("salesperson_id").references(() => staff.id),
+
+    status: dealStatus("status").notNull().default("draft"),
+    dealNumber: text("deal_number").notNull(),
+
+    customerName: text("customer_name").notNull(),
+    customerPhone: text("customer_phone").notNull(),
+    customerEmail: text("customer_email"),
+
+    currency: currencyCode("currency").notNull(),
+
+    /** Agreed selling price — not necessarily the list price. */
+    vehiclePriceMinor: bigint("vehicle_price_minor", { mode: "number" }).notNull(),
+
+    /** Trade-in. Allowance is what we credit; payoff is what we settle. */
+    tradeInDescription: text("trade_in_description"),
+    tradeInAllowanceMinor: bigint("trade_in_allowance_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+    tradeInPayoffMinor: bigint("trade_in_payoff_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+
+    downPaymentMinor: bigint("down_payment_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+
+    /** [{ label, amountMinor, taxable }] — doc fee, title, registration. */
+    fees: jsonb("fees").$type<{ label: string; amountMinor: number; taxable: boolean }[]>().default([]),
+
+    /** Basis points, so 3% is 300. Never a float. */
+    taxRateBps: integer("tax_rate_bps").notNull().default(0),
+    taxMinor: bigint("tax_minor", { mode: "number" }).notNull().default(0),
+
+    /** Out-the-door total. */
+    totalMinor: bigint("total_minor", { mode: "number" }).notNull().default(0),
+
+    isFinanced: boolean("is_financed").notNull().default(false),
+    aprBps: integer("apr_bps"),
+    termMonths: integer("term_months"),
+    amountFinancedMinor: bigint("amount_financed_minor", { mode: "number" }),
+    monthlyPaymentMinor: bigint("monthly_payment_minor", { mode: "number" }),
+
+    contractedAt: timestamp("contracted_at", { withTimezone: true }),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    lostReason: text("lost_reason"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("deals_number_idx").on(t.dealNumber),
+    index("deals_market_status_idx").on(t.marketCode, t.status),
+    index("deals_vehicle_idx").on(t.vehicleId),
+    index("deals_created_idx").on(t.createdAt),
+  ],
+);
+
+/** Every stage change, with who did it. A deal's history is not optional. */
+export const dealEvents = pgTable(
+  "deal_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id"),
+    actorEmail: text("actor_email"),
+    fromStatus: text("from_status"),
+    toStatus: text("to_status").notNull(),
+    note: text("note"),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("deal_events_deal_idx").on(t.dealId, t.at)],
+);
+
+export type Deal = typeof deals.$inferSelect;
+export type NewDeal = typeof deals.$inferInsert;
+export type Appointment = typeof appointments.$inferSelect;
