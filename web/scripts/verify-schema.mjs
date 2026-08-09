@@ -427,6 +427,119 @@ await rejects(
   "deals_number_idx",
 );
 
+
+// ── Finance ledger ─────────────────────────────────────────────────────────
+console.log("\nFinance ledger");
+
+const AG = "'eeeeeeee-0000-0000-0000-00000000000e'";
+
+await allows(
+  db,
+  "create an agreement",
+  `INSERT INTO finance_agreements (id, market_code, agreement_number, customer_name,
+     customer_phone, currency, principal_minor, apr_bps, term_months,
+     regular_payment_minor, total_interest_minor, first_due_date)
+   VALUES (${AG},'us','AAA-FIN-US-0001','Test Buyer','+13365550100','USD',
+           2000000, 790, 60, 40457, 427432, '2026-09-01')`,
+);
+
+await rejects(
+  db,
+  "rejects an agreement in the wrong currency",
+  `INSERT INTO finance_agreements (market_code, agreement_number, customer_name,
+     customer_phone, currency, principal_minor, apr_bps, term_months,
+     regular_payment_minor, first_due_date)
+   VALUES ('us','AAA-FIN-US-9001','X','+1','NGN',2000000,790,60,40457,'2026-09-01')`,
+  "agreements_currency_matches_market",
+);
+
+await rejects(
+  db,
+  "rejects a 200-month term",
+  `INSERT INTO finance_agreements (market_code, agreement_number, customer_name,
+     customer_phone, currency, principal_minor, apr_bps, term_months,
+     regular_payment_minor, first_due_date)
+   VALUES ('us','AAA-FIN-US-9002','X','+1','USD',2000000,790,200,40457,'2026-09-01')`,
+  "agreements_terms_sane",
+);
+
+await allows(
+  db,
+  "instalment where amount = interest + principal",
+  `INSERT INTO instalments (agreement_id, number, due_date, amount_minor,
+     interest_minor, principal_minor, balance_after_minor)
+   VALUES (${AG}, 1, '2026-09-01', 40457, 13167, 27290, 1972710)`,
+);
+
+await rejects(
+  db,
+  "REJECTS an instalment whose parts do not add up",
+  `INSERT INTO instalments (agreement_id, number, due_date, amount_minor,
+     interest_minor, principal_minor, balance_after_minor)
+   VALUES (${AG}, 2, '2026-10-01', 40457, 13167, 27000, 1945710)`,
+  "instalments_amount_is_interest_plus_principal",
+);
+
+await rejects(
+  db,
+  "rejects a duplicate instalment number",
+  `INSERT INTO instalments (agreement_id, number, due_date, amount_minor,
+     interest_minor, principal_minor, balance_after_minor)
+   VALUES (${AG}, 1, '2026-10-01', 40457, 13167, 27290, 1945710)`,
+  "instalments_agreement_number_idx",
+);
+
+await rejects(
+  db,
+  "rejects paying more into an instalment than it is worth",
+  `UPDATE instalments SET paid_minor = 50000 WHERE agreement_id = ${AG} AND number = 1`,
+  "instalments_no_overpayment",
+);
+
+await rejects(
+  db,
+  "REJECTS 'paid' while money is still outstanding",
+  `UPDATE instalments SET state = 'paid', paid_minor = 10000
+   WHERE agreement_id = ${AG} AND number = 1`,
+  "instalments_state_matches_money",
+);
+
+await allows(
+  db,
+  "allows 'partial' with a part payment",
+  `UPDATE instalments SET state = 'partial', paid_minor = 10000
+   WHERE agreement_id = ${AG} AND number = 1`,
+);
+
+await allows(
+  db,
+  "allows 'paid' when settled in full",
+  `UPDATE instalments SET state = 'paid', paid_minor = 40457, paid_at = now()
+   WHERE agreement_id = ${AG} AND number = 1`,
+);
+
+await rejects(
+  db,
+  "rejects a zero-value payment",
+  `INSERT INTO finance_payments (agreement_id, amount_minor, currency)
+   VALUES (${AG}, 0, 'USD')`,
+  "finance_payments_positive",
+);
+
+await allows(
+  db,
+  "records a real payment",
+  `INSERT INTO finance_payments (agreement_id, amount_minor, currency, method, reference)
+   VALUES (${AG}, 40457, 'USD', 'bank_transfer', 'FT26090100123')`,
+);
+
+await rejects(
+  db,
+  "rejects settling with no settlement date",
+  `UPDATE finance_agreements SET status = 'settled' WHERE id = ${AG}`,
+  "agreements_settled_has_date",
+);
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mSCHEMA NOT VERIFIED\x1b[0m\n" : "  \x1b[32mSchema verified.\x1b[0m\n"),

@@ -608,3 +608,134 @@ export const dealEvents = pgTable(
 export type Deal = typeof deals.$inferSelect;
 export type NewDeal = typeof deals.$inferInsert;
 export type Appointment = typeof appointments.$inferSelect;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINANCE LEDGER
+
+   Offering 6-24 month in-house instalment plans makes this business a lender.
+   A lender without a ledger loses money quietly: nobody knows who is behind,
+   by how much, or since when.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export const agreementStatus = pgEnum("agreement_status", [
+  "active",
+  "settled",     // paid in full
+  "defaulted",
+  "written_off",
+]);
+
+export const instalmentState = pgEnum("instalment_state", [
+  "due",
+  "paid",
+  "partial",
+  "late",
+  "written_off",
+]);
+
+export const paymentMethod = pgEnum("payment_method", [
+  "cash",
+  "bank_transfer",
+  "card",
+  "cheque",
+  "other",
+]);
+
+export const financeAgreements = pgTable(
+  "finance_agreements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    dealId: uuid("deal_id").references(() => deals.id),
+    agreementNumber: text("agreement_number").notNull(),
+
+    customerName: text("customer_name").notNull(),
+    customerPhone: text("customer_phone").notNull(),
+
+    currency: currencyCode("currency").notNull(),
+    /** Amount financed at signing. Never changes. */
+    principalMinor: bigint("principal_minor", { mode: "number" }).notNull(),
+    aprBps: integer("apr_bps").notNull().default(0),
+    termMonths: integer("term_months").notNull(),
+    /** The level payment. The final instalment may differ by a few units. */
+    regularPaymentMinor: bigint("regular_payment_minor", { mode: "number" }).notNull(),
+    totalInterestMinor: bigint("total_interest_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+
+    firstDueDate: timestamp("first_due_date", { withTimezone: true }).notNull(),
+    status: agreementStatus("status").notNull().default("active"),
+    settledAt: timestamp("settled_at", { withTimezone: true }),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("agreements_number_idx").on(t.agreementNumber),
+    index("agreements_market_status_idx").on(t.marketCode, t.status),
+    index("agreements_deal_idx").on(t.dealId),
+  ],
+);
+
+export const instalments = pgTable(
+  "instalments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agreementId: uuid("agreement_id")
+      .notNull()
+      .references(() => financeAgreements.id, { onDelete: "cascade" }),
+    number: integer("number").notNull(),
+    dueDate: timestamp("due_date", { withTimezone: true }).notNull(),
+
+    /** Generated once at signing and never recomputed — the customer signed
+        this schedule, so it is a record, not a derived value. */
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    interestMinor: bigint("interest_minor", { mode: "number" }).notNull(),
+    principalMinor: bigint("principal_minor", { mode: "number" }).notNull(),
+    balanceAfterMinor: bigint("balance_after_minor", { mode: "number" }).notNull(),
+
+    paidMinor: bigint("paid_minor", { mode: "number" }).notNull().default(0),
+    state: instalmentState("state").notNull().default("due"),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("instalments_agreement_number_idx").on(t.agreementId, t.number),
+    index("instalments_due_idx").on(t.dueDate, t.state),
+  ],
+);
+
+export const financePayments = pgTable(
+  "finance_payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agreementId: uuid("agreement_id")
+      .notNull()
+      .references(() => financeAgreements.id, { onDelete: "cascade" }),
+
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+    method: paymentMethod("method").notNull().default("bank_transfer"),
+    receivedAt: timestamp("received_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    /** Bank reference, teller number, receipt id. */
+    reference: text("reference"),
+    note: text("note"),
+
+    recordedBy: uuid("recorded_by").references(() => staff.id),
+    recordedByEmail: text("recorded_by_email"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("finance_payments_agreement_idx").on(t.agreementId, t.receivedAt)],
+);
+
+export type FinanceAgreement = typeof financeAgreements.$inferSelect;
+export type Instalment = typeof instalments.$inferSelect;
+export type FinancePayment = typeof financePayments.$inferSelect;
