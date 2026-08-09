@@ -115,6 +115,7 @@ export default async function EditVehiclePage({
               historyReportUrl: vehicle.historyReportUrl,
               status: vehicle.status,
               isFeatured: vehicle.isFeatured,
+              featuresText: ((vehicle.features ?? []) as string[]).join("\n"),
             }}
           />
 

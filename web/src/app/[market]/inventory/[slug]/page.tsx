@@ -7,7 +7,8 @@ import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { formatMoney, money, toMajor, monthlyPayment } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
 import { requiresBuyersGuide } from "@/lib/compliance/disclosures";
-import { LegacyGallery, LegacyCalculator } from "@/components/LegacyCarDetail";
+import { LegacyGallery } from "@/components/LegacyCarDetail";
+import { LegacyCarTabs, LegacyTestDriveForm, type SpecRow } from "@/components/LegacyCarTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -101,17 +102,29 @@ export default async function CarDetailPage({
       : {}),
   };
 
-  const specs: [string, string, string | null][] = [
-    ["fa-calendar", "Year", String(v.year)],
-    ["fa-tachometer-alt", "Mileage", v.mileage != null ? formatDistance(v.mileage, market) : null],
-    ["fa-gas-pump", "Fuel", v.fuelType],
-    ["fa-cog", "Transmission", v.transmission],
-    ["fa-car-side", "Body", v.bodyStyle],
-    ["fa-road", "Drivetrain", v.drivetrain],
-    ["fa-palette", "Exterior", v.exteriorColor],
-    ["fa-couch", "Interior", v.interiorColor],
-    ["fa-fingerprint", market.vehicleIdLabel, v.vin ?? v.chassisNo],
-  ];
+  const specs: SpecRow[] = (
+    [
+      ["Make", v.make],
+      ["Model", v.model],
+      ["Trim", v.trim],
+      ["Year", String(v.year)],
+      ["Condition", v.condition],
+      ["Mileage", v.mileage != null ? formatDistance(v.mileage, market) : null],
+      ["Engine", v.engine],
+      ["Transmission", v.transmission],
+      ["Fuel Type", v.fuelType],
+      ["Drivetrain", v.drivetrain],
+      ["Body Style", v.bodyStyle],
+      ["Colour", v.exteriorColor],
+      ["Interior Colour", v.interiorColor],
+      ["Seats", v.seats != null ? String(v.seats) : null],
+      [market.vehicleIdLabel, v.vin ?? v.chassisNo],
+      ["Stock Number", v.stockNumber],
+    ] as [string, string | null][]
+  )
+    .filter((r): r is [string, string] => Boolean(r[1]))
+    .map(([label, value]) => ({ label, value }));
+
 
   return (
     <>
@@ -179,18 +192,12 @@ export default async function CarDetailPage({
               )}
             </div>
 
-            <div className="inspection-request">
-              <Link
-                href={`/${code}/contact?vehicle=${v.slug}&type=test_drive`}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-key" /> Book a Test Drive
+            <div className="car-actions-row">
+              <Link href={`/${code}/contact?vehicle=${v.slug}`} className="btn btn-primary">
+                <i className="fas fa-phone-alt" /> Contact Us
               </Link>
-              <Link
-                href={`/${code}/contact?vehicle=${v.slug}`}
-                className="btn btn-outline"
-              >
-                <i className="fas fa-envelope" /> Enquire About This Car
+              <Link href={`/${code}/financing`} className="btn btn-outline">
+                <i className="fas fa-hand-holding-usd" /> Apply for Financing
               </Link>
               {site?.phone && (
                 <a
@@ -206,6 +213,8 @@ export default async function CarDetailPage({
               )}
             </div>
 
+            <LegacyTestDriveForm market={code} vehicleSlug={v.slug} />
+
             {v.historyReportUrl && (
               <p style={{ marginTop: 16 }}>
                 <a href={v.historyReportUrl} target="_blank" rel="noopener noreferrer">
@@ -214,62 +223,16 @@ export default async function CarDetailPage({
               </p>
             )}
 
-            {price && (
-              <LegacyCalculator market={market} priceMajor={toMajor(price)} />
-            )}
           </div>
         </div>
 
-        {/* ── Overview ─────────────────────────────────────────────────── */}
-        {v.description && (
-          <div className="section-title" style={{ marginTop: 60 }}>
-            <h2>
-              Vehicle <span>Overview</span>
-            </h2>
-          </div>
-        )}
-        {v.description && (
-          <p style={{ maxWidth: 820, margin: "0 auto", textAlign: "center", lineHeight: 1.8 }}>
-            {v.description}
-          </p>
-        )}
-
-        {/* ── Specification ────────────────────────────────────────────── */}
-        <div className="section-title" style={{ marginTop: 60 }}>
-          <h2>
-            Technical <span>Specifications</span>
-          </h2>
-        </div>
-        <div className="features-grid">
-          {specs
-            .filter(([, , value]) => value)
-            .map(([icon, label, value]) => (
-              <div className="feature" key={label}>
-                <div className="feature-icon">
-                  <i className={`fas ${icon}`} />
-                </div>
-                <h3>{label}</h3>
-                <p>{value}</p>
-              </div>
-            ))}
-        </div>
-
-        {requiresBuyersGuide(market, v.condition) && (
-          <p
-            style={{
-              maxWidth: 760,
-              margin: "30px auto 0",
-              textAlign: "center",
-              fontSize: 12,
-              lineHeight: 1.6,
-              color: "var(--silver-cool)",
-            }}
-          >
-            An FTC Buyers Guide is displayed on this vehicle at our Greensboro
-            location and forms part of the sale contract. It overrides any
-            contrary provision in the contract of sale.
-          </p>
-        )}
+        <LegacyCarTabs
+          market={market}
+          overview={v.description}
+          specs={specs}
+          features={(v.features ?? []) as string[]}
+          priceMajor={price ? toMajor(price) : null}
+        />
 
         {/* ── Related ──────────────────────────────────────────────────── */}
         {related.filter((r) => r.id !== v.id).length > 0 && (

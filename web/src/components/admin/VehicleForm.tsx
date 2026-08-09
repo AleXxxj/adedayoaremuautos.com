@@ -34,6 +34,7 @@ export interface VehicleDefaults {
   historyReportUrl?: string | null;
   status?: string;
   isFeatured?: boolean;
+  featuresText?: string;
 }
 
 export function VehicleForm({
@@ -227,6 +228,20 @@ export function VehicleForm({
 
         <Field label="Headline (optional)" full>
           <input name="headline" defaultValue={defaults.headline ?? ""} className={input} />
+        </Field>
+
+        <Field label="Features — one per line" full>
+          <textarea
+            name="featuresText"
+            rows={6}
+            defaultValue={defaults.featuresText ?? ""}
+            placeholder={"Leather seats\nReverse camera with sensors\nApple CarPlay & Android Auto"}
+            className={input}
+          />
+          <Hint>
+            These appear under the Features tab on the listing. Leave blank and
+            the tab is hidden rather than shown empty.
+          </Hint>
         </Field>
 
         <Field label="Description" full>

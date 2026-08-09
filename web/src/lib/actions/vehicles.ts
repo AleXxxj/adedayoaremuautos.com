@@ -52,6 +52,8 @@ const baseSchema = z.object({
   historyReportUrl: z.string().trim().url("Must be a valid URL").optional().or(z.literal("")),
   status: z.enum(["draft", "available", "pending", "sold", "unlisted"]),
   isFeatured: z.coerce.boolean().optional(),
+  /** One feature per line in the admin; stored as a jsonb array. */
+  featuresText: z.string().optional(),
 });
 
 const vehicleSchema = baseSchema
@@ -134,6 +136,13 @@ function parseForm(formData: FormData) {
   );
 }
 
+
+/** "Leather seats\nReverse camera" -> ["Leather seats", "Reverse camera"] */
+function parseFeatures(text?: string): string[] {
+  if (!text) return [];
+  return [...new Set(text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean))].slice(0, 60);
+}
+
 /* ── Actions ───────────────────────────────────────────────────────────── */
 
 export async function createVehicle(
@@ -190,6 +199,7 @@ export async function createVehicle(
         historyReportUrl: v.historyReportUrl || null,
         status: v.status,
         isFeatured: Boolean(v.isFeatured),
+        features: parseFeatures(v.featuresText),
         slug,
         publishedAt: v.status === "available" ? new Date() : null,
       })
@@ -262,6 +272,7 @@ export async function updateVehicle(
         historyReportUrl: v.historyReportUrl || null,
         status: v.status,
         isFeatured: Boolean(v.isFeatured),
+        features: parseFeatures(v.featuresText),
         slug,
         publishedAt:
           v.status === "available" && !before.publishedAt
