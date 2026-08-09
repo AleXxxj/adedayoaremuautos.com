@@ -41,6 +41,7 @@ export default async function MarketHome({
 
   const site = sites[0];
   const articles = articlesFor(code).slice(0, 4);
+  const CONTACT_EMAIL = "info@adedayoaremuautos.com";
   const fmt = (m: number) => formatMoney(money(m, market.currency), market.locale);
 
   return (
@@ -389,9 +390,11 @@ export default async function MarketHome({
       <div className="contact-section" id="contact">
         <div className="contact-container">
           <div className="contact-info">
-            <h2>
+            {/* h3, not h2 — the stylesheet styles `.contact-info h3`, so an h2
+                here rendered as unstyled small text. */}
+            <h3>
               Get in <span>Touch</span>
-            </h2>
+            </h3>
             <p>Ready to find your perfect vehicle? Contact us today for personalised assistance.</p>
 
             <div className="contact-details">
@@ -401,6 +404,10 @@ export default async function MarketHome({
                   <a href={`tel:${site.phone}`}>{formatPhone(site.phone)}</a>
                 </div>
               )}
+              <div className="contact-item">
+                <i className="fas fa-envelope" />
+                <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+              </div>
               {site && (
                 <div className="contact-item">
                   <i className="fas fa-map-marker-alt" />
@@ -417,6 +424,25 @@ export default async function MarketHome({
                 </div>
               )}
             </div>
+
+            {/* WhatsApp is driven by the location's real number. The legacy site
+                hardcoded wa.me/2348012345678, which is not a number the
+                business owns — so it is rendered only where we have a real one
+                rather than pointing customers at a stranger. */}
+            {site?.phone ? (
+              <a
+                href={`https://wa.me/${site.phone.replace(/[^0-9]/g, "")}`}
+                className="btn btn-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i className="fab fa-whatsapp" /> CHAT ON WHATSAPP
+              </a>
+            ) : (
+              <Link href={`/${code}/contact`} className="btn btn-primary">
+                <i className="fas fa-paper-plane" /> SEND US A MESSAGE
+              </Link>
+            )}
           </div>
 
           <LegacyContactForm market={code} />
