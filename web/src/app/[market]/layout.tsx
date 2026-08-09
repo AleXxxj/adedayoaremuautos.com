@@ -47,6 +47,15 @@ export default async function MarketLayout({
             <Link href={`/${code}/rentals`} className="hover:text-[var(--text-primary)]">
               Rentals
             </Link>
+            <Link href={`/${code}/financing`} className="hover:text-[var(--text-primary)]">
+              Financing
+            </Link>
+            <Link href={`/${code}/about`} className="hover:text-[var(--text-primary)]">
+              About
+            </Link>
+            <Link href={`/${code}/blog`} className="hover:text-[var(--text-primary)]">
+              Guides
+            </Link>
             <Link href={`/${code}/contact`} className="hover:text-[var(--text-primary)]">
               Contact
             </Link>
