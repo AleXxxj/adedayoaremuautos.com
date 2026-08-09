@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { inter, fraunces, spaceGrotesk } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +12,11 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     // Dark is the default theme; the toggle swaps this attribute.
-    <html lang="en" data-theme="dark">
+    <html
+      lang="en"
+      data-theme="dark"
+      className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

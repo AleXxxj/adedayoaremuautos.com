@@ -1,0 +1,248 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Motion, depth and editorial typography.
+
+   The public site was competent and flat: bordered rectangles on one surface,
+   a single type scale, hover states and nothing else. This is the layer that
+   makes it feel made rather than assembled.
+
+   Scroll reveals use CSS scroll-driven animations (`animation-timeline: view()`)
+   rather than an IntersectionObserver. No JavaScript, nothing to hydrate, and
+   the work happens off the main thread — so it stays smooth on the mid-range
+   Android a lot of Nigerian traffic will arrive on.
+
+   Everything degrades to "just visible" where the feature is unsupported, and
+   everything is switched off under prefers-reduced-motion.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    /* One easing for entrances, one for exits. Consistency reads as intent. */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Editorial display scale. clamp() so headlines are dramatic on a laptop
+       and still readable on a 360px phone without a media query. */
+    --display-xl: clamp(2.75rem, 8vw, 6.5rem);
+    --display-lg: clamp(2.25rem, 5.5vw, 4.25rem);
+    --display-md: clamp(1.75rem, 3.5vw, 2.75rem);
+    --eyebrow: clamp(0.7rem, 1vw, 0.78rem);
+  }
+
+  /* Display type: tight, optically sized, balanced line breaks. */
+  .display {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
+  .display-sans {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-size: var(--eyebrow);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Long-form paragraphs read better slightly wider-spaced and unbalanced. */
+  .prose-body {
+    text-wrap: pretty;
+    line-height: 1.7;
+  }
+}
+
+@layer utilities {
+  /* ── Scroll reveals ──────────────────────────────────────────────────── */
+
+  .reveal,
+  .reveal-up,
+  .reveal-scale {
+    /* Visible by default. Animation only *adds* the entrance where supported,
+       so nothing is ever stuck invisible if the feature is missing. */
+    opacity: 1;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal,
+      .reveal-up,
+      .reveal-scale {
+        animation-timeline: view();
+        animation-range: entry 0% entry 55%;
+        animation-fill-mode: both;
+        animation-duration: 1ms; /* driven by scroll, not time */
+        animation-timing-function: var(--ease-out-expo);
+      }
+
+      .reveal {
+        animation-name: fade-in;
+      }
+      .reveal-up {
+        animation-name: rise-in;
+      }
+      .reveal-scale {
+        animation-name: scale-in;
+      }
+
+      /* Stagger children of a group without writing per-child rules. */
+      .stagger > * {
+        animation-timeline: view();
+        animation-range: entry 0% entry 60%;
+        animation-fill-mode: both;
+        animation-duration: 1ms;
+        animation-timing-function: var(--ease-out-expo);
+        animation-name: rise-in;
+      }
+      .stagger > *:nth-child(2) { animation-range: entry 4% entry 64%; }
+      .stagger > *:nth-child(3) { animation-range: entry 8% entry 68%; }
+      .stagger > *:nth-child(4) { animation-range: entry 12% entry 72%; }
+      .stagger > *:nth-child(5) { animation-range: entry 16% entry 76%; }
+      .stagger > *:nth-child(6) { animation-range: entry 20% entry 80%; }
+    }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(2.5rem); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ── Hero: slow drift ────────────────────────────────────────────────── */
+  /* A still photograph of a stationary car is inert. A very slow push-in
+     reads as film rather than as a slideshow — 20s and 6% is deliberately
+     below the threshold where it becomes noticeable as movement. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ken-burns {
+      animation: ken-burns 20s var(--ease-out-quart) infinite alternate;
+    }
+  }
+  @keyframes ken-burns {
+    from { transform: scale(1) translate3d(0, 0, 0); }
+    to   { transform: scale(1.06) translate3d(-1%, -1%, 0); }
+  }
+
+  /* ── Marquee ─────────────────────────────────────────────────────────── */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+      animation: marquee 38s linear infinite;
+    }
+    .marquee:hover .marquee-track {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes marquee {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+
+  /* ── Depth ───────────────────────────────────────────────────────────── */
+
+  /* Grain. Flat digital gradients are the giveaway of a template; a barely
+     perceptible noise layer is what stops large dark areas looking plastic. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Radial bloom behind a focal element. */
+  .bloom {
+    position: relative;
+  }
+  .bloom::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 60%;
+    pointer-events: none;
+    background: radial-gradient(
+      60% 60% at 50% 0%,
+      color-mix(in oklab, var(--brand-500) 22%, transparent) 0%,
+      transparent 70%
+    );
+  }
+
+  /* Vignette so mismatched vehicle photography still reads as one set. */
+  .vignette::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      120% 100% at 50% 40%,
+      transparent 45%,
+      rgb(0 0 0 / 0.45) 100%
+    );
+  }
+
+  /* Hairline rule that fades at both ends — reads as finer than a 1px border. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--border-default) 15%,
+      var(--border-default) 85%,
+      transparent
+    );
+  }
+
+  /* ── Interaction ─────────────────────────────────────────────────────── */
+
+  .lift {
+    transition:
+      transform 0.5s var(--ease-out-expo),
+      box-shadow 0.5s var(--ease-out-expo);
+  }
+  .lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .zoom-media img {
+    transition: transform 0.7s var(--ease-out-expo);
+  }
+  .zoom-media:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Arrow that slides on hover — small, but it makes a link feel alive. */
+  .arrow-slide svg,
+  .arrow-slide .arrow {
+    transition: transform 0.35s var(--ease-out-expo);
+  }
+  .arrow-slide:hover svg,
+  .arrow-slide:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  /* Numerals in a spec table should never jitter as values change. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
