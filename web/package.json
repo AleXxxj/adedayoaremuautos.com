@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run tokens && npm run check:contrast && npm run test:schema && npm run test:deal && npm run test:amort && next build",
+    "build": "npm run tokens && npm run check:contrast && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && next build",
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
@@ -17,7 +17,8 @@
     "db:inspect": "node --env-file=.env.local scripts/inspect-db.mjs",
     "staff:create": "node --env-file=.env.local scripts/create-staff.mjs",
     "test:deal": "tsx scripts/verify-deal-math.ts",
-    "test:amort": "tsx scripts/verify-amortization.ts"
+    "test:amort": "tsx scripts/verify-amortization.ts",
+    "test:ledger": "tsx scripts/verify-ledger.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

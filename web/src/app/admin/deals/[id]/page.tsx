@@ -7,6 +7,8 @@ import { requireStaff, canAccessMarket } from "@/lib/auth";
 import { AdminChrome } from "../../layout";
 import { DealWorksheet } from "@/components/admin/DealWorksheet";
 import { DealStage } from "@/components/admin/DealStage";
+import { CreateAgreement } from "@/components/admin/CreateAgreement";
+import { financeAgreements } from "@/db/schema";
 import { MARKETS } from "@/lib/market";
 import { toMajor, money } from "@/lib/money";
 
@@ -31,11 +33,19 @@ export default async function DealPage({
     ? await db.select().from(vehicles).where(eq(vehicles.id, deal.vehicleId))
     : [undefined];
 
-  const history = await db
-    .select()
-    .from(dealEvents)
-    .where(eq(dealEvents.dealId, id))
-    .orderBy(desc(dealEvents.at));
+  const [history, agreementRows] = await Promise.all([
+    db
+      .select()
+      .from(dealEvents)
+      .where(eq(dealEvents.dealId, id))
+      .orderBy(desc(dealEvents.at)),
+    db
+      .select({ id: financeAgreements.id, number: financeAgreements.agreementNumber })
+      .from(financeAgreements)
+      .where(eq(financeAgreements.dealId, id))
+      .limit(1),
+  ]);
+  const agreement = agreementRows[0];
 
   const major = (minor: number | null) =>
     minor == null ? 0 : toMajor(money(minor, cur));
@@ -77,6 +87,30 @@ export default async function DealPage({
           </h2>
           <DealStage dealId={deal.id} status={deal.status} />
         </div>
+
+        {/* Financed deals become a ledger once contracted. */}
+        {deal.isFinanced &&
+          (deal.status === "contracted" || deal.status === "delivered") && (
+            <div className="mb-8 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                Finance
+              </h2>
+              {agreement ? (
+                <p className="text-sm">
+                  Agreement{" "}
+                  <Link
+                    href={`/admin/finance/${agreement.id}`}
+                    className="font-mono text-[var(--link)] hover:underline"
+                  >
+                    {agreement.number}
+                  </Link>{" "}
+                  is live for this deal.
+                </p>
+              ) : (
+                <CreateAgreement dealId={deal.id} />
+              )}
+            </div>
+          )}
 
         <DealWorksheet
           dealId={deal.id}
