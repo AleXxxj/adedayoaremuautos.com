@@ -21,6 +21,7 @@ export type SortKey =
 export interface InventoryFilters {
   make?: string;
   condition?: string;
+  transmission?: string;
   minPriceMinor?: number;
   maxPriceMinor?: number;
   minYear?: number;
@@ -47,6 +48,7 @@ export async function listInventory(
   const {
     make,
     condition,
+    transmission,
     minPriceMinor,
     maxPriceMinor,
     minYear,
@@ -64,6 +66,7 @@ export async function listInventory(
     or(eq(vehicles.status, "available"), eq(vehicles.status, "pending")),
     make ? eq(vehicles.make, make) : undefined,
     condition ? eq(vehicles.condition, condition) : undefined,
+    transmission ? eq(vehicles.transmission, transmission) : undefined,
     minPriceMinor !== undefined ? gte(vehicles.priceMinor, minPriceMinor) : undefined,
     maxPriceMinor !== undefined ? lte(vehicles.priceMinor, maxPriceMinor) : undefined,
     minYear !== undefined ? gte(vehicles.year, minYear) : undefined,
@@ -161,4 +164,38 @@ export async function allListedSlugs(market: MarketCode) {
         or(eq(vehicles.status, "available"), eq(vehicles.status, "pending")),
       ),
     );
+}
+
+/**
+ * Distinct values present in a market, for building the filter selects.
+ *
+ * Driven off real inventory rather than a hardcoded list, so the Brand
+ * dropdown never offers a marque with nothing behind it — the legacy site
+ * listed Range Rover and BMW permanently, both of which returned no results.
+ */
+export async function filterOptions(market: MarketCode) {
+  const rows = await db
+    .select({
+      make: vehicles.make,
+      year: vehicles.year,
+      transmission: vehicles.transmission,
+      fuelType: vehicles.fuelType,
+    })
+    .from(vehicles)
+    .where(
+      and(
+        eq(vehicles.marketCode, market),
+        or(eq(vehicles.status, "available"), eq(vehicles.status, "pending")),
+      ),
+    );
+
+  const uniq = <T,>(xs: (T | null)[]) =>
+    [...new Set(xs.filter((x): x is T => x != null && x !== ""))];
+
+  return {
+    makes: uniq(rows.map((r) => r.make)).sort(),
+    years: uniq(rows.map((r) => r.year)).sort((a, b) => b - a),
+    transmissions: uniq(rows.map((r) => r.transmission)).sort(),
+    fuels: uniq(rows.map((r) => r.fuelType)).sort(),
+  };
 }
