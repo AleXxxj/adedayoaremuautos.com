@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { vehicles, vehicleMedia, auditLog } from "@/db/schema";
+import { vehicles, vehicleMedia, auditLog, rentalRates } from "@/db/schema";
 import { requireStaff, allowedMarkets, canAccessMarket } from "@/lib/auth";
 import {
   updateVehicle,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/vehicles";
 import { VehicleForm } from "@/components/admin/VehicleForm";
 import { PhotoManager } from "@/components/admin/PhotoManager";
+import { TariffForm } from "@/components/admin/TariffForm";
 import { AdminChrome } from "../../layout";
 import { MARKETS } from "@/lib/market";
 import { toMajor, money } from "@/lib/money";
@@ -32,7 +33,7 @@ export default async function EditVehiclePage({
   if (!vehicle) notFound();
   if (!canAccessMarket(user, vehicle.marketCode)) notFound();
 
-  const [photos, history] = await Promise.all([
+  const [photos, history, tariffRows] = await Promise.all([
     db
       .select()
       .from(vehicleMedia)
@@ -44,7 +45,9 @@ export default async function EditVehiclePage({
       .where(eq(auditLog.entityId, id))
       .orderBy(desc(auditLog.at))
       .limit(10),
+    db.select().from(rentalRates).where(eq(rentalRates.vehicleId, id)).limit(1),
   ]);
+  const tariff = tariffRows[0];
 
   const market = MARKETS[vehicle.marketCode];
   const isPublic = vehicle.status === "available" || vehicle.status === "pending";
@@ -121,6 +124,35 @@ export default async function EditVehiclePage({
             upload={uploadVehiclePhotoAction}
             remove={deleteVehiclePhotoAction}
           />
+
+          <section>
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              Rental tariff
+            </h2>
+            <p className="mb-4 text-sm text-[var(--text-muted)]">
+              A vehicle appears on the rentals page only when it is offered for
+              hire and has a daily rate.
+            </p>
+            <TariffForm
+              vehicleId={vehicle.id}
+              currency={market.currency}
+              defaults={{
+                inFleet:
+                  vehicle.listingKind === "rental" || vehicle.listingKind === "both",
+                daily: tariff ? toMajor(money(tariff.dailyMinor, market.currency)) : 0,
+                weekly: tariff?.weeklyMinor != null
+                  ? toMajor(money(tariff.weeklyMinor, market.currency)) : "",
+                monthly: tariff?.monthlyMinor != null
+                  ? toMajor(money(tariff.monthlyMinor, market.currency)) : "",
+                deposit: tariff ? toMajor(money(tariff.depositMinor, market.currency)) : 0,
+                minDays: tariff?.minDays ?? 1,
+                maxDays: tariff?.maxDays ?? "",
+                withDriver: tariff?.withDriverAvailable ?? false,
+                driverDaily: tariff?.driverDailyMinor != null
+                  ? toMajor(money(tariff.driverDailyMinor, market.currency)) : "",
+              }}
+            />
+          </section>
 
           {history.length > 0 && (
             <section>

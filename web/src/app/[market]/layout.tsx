@@ -35,7 +35,7 @@ export default async function MarketLayout({
           </Link>
 
           {/*
-            Only routes that exist are linked. Rentals and Financing get added
+            Only routes that exist are linked. Financing and About get added
             here as they are built — the legacy site's habit of linking to pages
             that 404 is what produced five straight commits titled "Update
             footer links to point to correct pages".
@@ -43,6 +43,9 @@ export default async function MarketLayout({
           <nav className="hidden gap-5 text-sm text-[var(--text-secondary)] md:flex">
             <Link href={`/${code}/inventory`} className="hover:text-[var(--text-primary)]">
               Inventory
+            </Link>
+            <Link href={`/${code}/rentals`} className="hover:text-[var(--text-primary)]">
+              Rentals
             </Link>
             <Link href={`/${code}/contact`} className="hover:text-[var(--text-primary)]">
               Contact
