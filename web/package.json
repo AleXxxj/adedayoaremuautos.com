@@ -22,6 +22,7 @@
     "test:rental": "tsx scripts/verify-rental.ts"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.3.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",
     "drizzle-orm": "^0.45.2",

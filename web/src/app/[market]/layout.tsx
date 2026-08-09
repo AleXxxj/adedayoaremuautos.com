@@ -7,11 +7,27 @@ import {
   formatPhone,
   type OpeningHour,
 } from "@/lib/repositories/locations";
+// Order matters. Scoping the original's `*` reset to `.legacy-theme *` raised
+// its specificity from 0,0,0 to 0,1,0, which ties with Font Awesome's `.fas`
+// — so whichever loads last wins the icon font. Legacy first, icons second.
+import "@/styles/legacy.css";
+// Self-hosted rather than the CDN the original used: the CDN stylesheet
+// loaded but its webfonts did not, so every icon rendered as a fallback box.
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
 }
 
+/**
+ * Public chrome, reproducing the original site's header and footer markup and
+ * class names exactly so the extracted stylesheet applies unchanged.
+ *
+ * The differences from the original are only where it was factually wrong:
+ * links point at real routes, the location block comes from the database
+ * rather than a hardcoded Lagos placeholder, and the currency list is gone —
+ * it converted Naira prices at a rate frozen in the markup.
+ */
 export default async function MarketLayout({
   children,
   params,
@@ -25,120 +41,135 @@ export default async function MarketLayout({
   const market = MARKETS[code];
   const other = MARKET_CODES.filter((c) => c !== code);
   const sites = await listLocations(code);
+  const site = sites[0];
+
+  const nav = [
+    { href: `/${code}`, label: "Home" },
+    { href: `/${code}/inventory`, label: "Buy Cars" },
+    { href: `/${code}/rentals`, label: "Rentals" },
+    { href: `/${code}/financing`, label: "Financing" },
+    { href: `/${code}/blog`, label: "Blog" },
+    { href: `/${code}/about`, label: "About" },
+    { href: `/${code}/contact`, label: "Contact" },
+  ];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-0)]/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
-          <Link href={`/${code}`} className="font-semibold tracking-tight">
-            ADEDAYO AREMU <span className="text-[var(--brand-400)]">AUTOS</span>
-          </Link>
+    <div className="legacy-theme">
+      <div className="header">
+        <div className="header-container">
+          <div className="logo-container">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/img/logo.png" alt="Adedayo Aremu Autos Logo" />
+            <div className="logo-text">
+              <h1>
+                ADEDAYO AREMU <span>AUTOS</span>
+              </h1>
+              <p>PREMIUM CARS • RENTAL • FINANCING</p>
+            </div>
+          </div>
 
-          {/*
-            Only routes that exist are linked. Financing and About get added
-            here as they are built — the legacy site's habit of linking to pages
-            that 404 is what produced five straight commits titled "Update
-            footer links to point to correct pages".
-          */}
-          <nav className="hidden gap-5 text-sm text-[var(--text-secondary)] md:flex">
-            <Link href={`/${code}/inventory`} className="hover:text-[var(--text-primary)]">
-              Inventory
-            </Link>
-            <Link href={`/${code}/rentals`} className="hover:text-[var(--text-primary)]">
-              Rentals
-            </Link>
-            <Link href={`/${code}/financing`} className="hover:text-[var(--text-primary)]">
-              Financing
-            </Link>
-            <Link href={`/${code}/about`} className="hover:text-[var(--text-primary)]">
-              About
-            </Link>
-            <Link href={`/${code}/blog`} className="hover:text-[var(--text-primary)]">
-              Guides
-            </Link>
-            <Link href={`/${code}/contact`} className="hover:text-[var(--text-primary)]">
-              Contact
-            </Link>
-          </nav>
+          <div className="nav-menu" id="navMenu">
+            {nav.map((n) => (
+              <Link key={n.href} href={n.href}>
+                {n.label}
+              </Link>
+            ))}
+          </div>
 
-          <div className="ml-auto flex items-center gap-3">
-            {/*
-              Switching market switches inventory, not currency. The label names
-              the place, so it never reads as a price-conversion control.
-            */}
+          <div className="header-actions">
             {other.map((c) => (
               <Link
                 key={c}
                 href={`/${c}`}
-                className="rounded-full border border-[var(--border-default)] px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                className="btn btn-outline"
+                style={{ padding: "0.55rem 1rem", fontSize: "0.8rem" }}
               >
-                Go to {MARKETS[c].name}
+                <i className="fas fa-globe" /> {MARKETS[c].name}
               </Link>
             ))}
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="flex-1">{children}</main>
+      {children}
 
-      <footer className="border-t border-[var(--border-subtle)] bg-[var(--surface-1)]">
-        <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <p className="font-semibold tracking-tight">
-                ADEDAYO AREMU{" "}
-                <span className="text-[var(--brand-400)]">AUTOS</span>
-              </p>
-              <p className="mt-2 text-sm text-[var(--text-muted)]">
-                Vehicle sales, rental and financing.
-              </p>
-            </div>
-
-            {/* Real locations from the database. Nothing here is hardcoded, so
-                a change of address is a data edit, not a nineteen-file
-                find-and-replace. */}
-            {sites.map((site) => {
-              const hours = summariseHours(
-                site.hours as OpeningHour[] | null,
-                market.locale,
-              );
-              const phone = formatPhone(site.phone);
-              return (
-                <address key={site.id} className="text-sm not-italic">
-                  <p className="font-medium text-[var(--text-primary)]">
-                    {site.name}
-                  </p>
-                  <p className="mt-1 text-[var(--text-muted)]">
-                    {site.addressLine1}
-                    {site.addressLine2 && <>, {site.addressLine2}</>}
-                    <br />
-                    {site.city}
-                    {site.region && <>, {site.region}</>} {site.postalCode}
-                  </p>
-                  {phone && (
-                    <p className="mt-2">
-                      <a
-                        href={`tel:${site.phone}`}
-                        className="text-[var(--link)] hover:underline"
-                      >
-                        {phone}
-                      </a>
-                    </p>
-                  )}
-                  {hours && (
-                    <p className="mt-1 text-[var(--text-muted)]">{hours}</p>
-                  )}
-                </address>
-              );
-            })}
+      <div className="footer">
+        <div className="footer-container">
+          <div className="footer-about">
+            <h3>
+              ADEDAYO AREMU <span>AUTOS</span>
+            </h3>
+            <p>
+              {code === "us"
+                ? "Your trusted partner for premium car sales, rentals and financing in Greensboro and across the Triad."
+                : "Your trusted partner for premium car sales, rentals and financing in Nigeria."}
+            </p>
           </div>
 
-          <p className="mt-10 border-t border-[var(--border-subtle)] pt-6 text-sm text-[var(--text-muted)]">
-            © {new Date().getFullYear()} Adedayo Aremu Autos. All rights
-            reserved. Prices shown in {market.currency}.
+          <div className="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+              {nav.map((n) => (
+                <li key={n.href}>
+                  <Link href={n.href}>{n.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="footer-links">
+            <h4>Contact</h4>
+            <ul>
+              {site ? (
+                <>
+                  <li>
+                    <i className="fas fa-map-marker-alt" /> {site.addressLine1},{" "}
+                    {site.city}
+                    {site.region ? `, ${site.region}` : ""} {site.postalCode}
+                  </li>
+                  {site.phone && (
+                    <li>
+                      <a href={`tel:${site.phone}`}>
+                        <i className="fas fa-phone-alt" /> {formatPhone(site.phone)}
+                      </a>
+                    </li>
+                  )}
+                  {summariseHours(site.hours as OpeningHour[] | null, market.locale) && (
+                    <li>
+                      <i className="fas fa-clock" />{" "}
+                      {summariseHours(site.hours as OpeningHour[] | null, market.locale)}
+                    </li>
+                  )}
+                </>
+              ) : (
+                <li>
+                  <Link href={`/${code}/contact`}>
+                    <i className="fas fa-envelope" /> Send us a message
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          <div className="footer-links">
+            <h4>Vehicles</h4>
+            <ul>
+              {["Toyota", "Lexus", "Honda", "Mercedes-Benz", "BMW"].map((b) => (
+                <li key={b}>
+                  <Link href={`/${code}/inventory?make=${encodeURIComponent(b)}`}>{b}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>
+            © {new Date().getFullYear()} Adedayo Aremu Autos. All rights reserved.
+            Prices shown in {market.currency}.
           </p>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
