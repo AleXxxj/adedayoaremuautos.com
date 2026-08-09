@@ -14,6 +14,7 @@ import "@/styles/legacy.css";
 // Self-hosted rather than the CDN the original used: the CDN stylesheet
 // loaded but its webfonts did not, so every icon rendered as a fallback box.
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -24,9 +25,8 @@ export function generateStaticParams() {
  * class names exactly so the extracted stylesheet applies unchanged.
  *
  * The differences from the original are only where it was factually wrong:
- * links point at real routes, the location block comes from the database
- * rather than a hardcoded Lagos placeholder, and the currency list is gone —
- * it converted Naira prices at a rate frozen in the markup.
+ * links point at real routes, and the location block comes from the database
+ * rather than a hardcoded Lagos placeholder.
  */
 export default async function MarketLayout({
   children,
@@ -95,79 +95,64 @@ export default async function MarketLayout({
 
       <div className="footer">
         <div className="footer-container">
-          <div className="footer-about">
-            <h3>
-              ADEDAYO AREMU <span>AUTOS</span>
-            </h3>
-            <p>
-              {code === "us"
-                ? "Your trusted partner for premium car sales, rentals and financing in Greensboro and across the Triad."
-                : "Your trusted partner for premium car sales, rentals and financing in Nigeria."}
-            </p>
-          </div>
+          {/* .footer-grid is what makes this four columns. Omitting it last
+              time is why the whole footer stacked into one column. */}
+          <div className="footer-grid">
+            <div className="footer-about">
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 15 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/img/logo.png" alt="Logo" style={{ height: 45 }} />
+                <h3 style={{ color: "var(--silver-classic)", fontSize: 20 }}>
+                  ADEDAYO AREMU <span>AUTOS</span>
+                </h3>
+              </div>
+              <p>
+                {code === "us"
+                  ? "Your trusted partner for premium car sales, rentals, and financing in Greensboro and across the Triad. We deliver excellence with every vehicle."
+                  : "Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle."}
+              </p>
+              <div className="social-links">
+                <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f" /></a>
+                <a href="#" aria-label="Instagram"><i className="fab fa-instagram" /></a>
+                <a href="#" aria-label="Twitter"><i className="fab fa-twitter" /></a>
+                <a href="#" aria-label="LinkedIn"><i className="fab fa-linkedin-in" /></a>
+              </div>
+            </div>
 
-          <div className="footer-links">
-            <h4>Quick Links</h4>
-            <ul>
-              {nav.map((n) => (
-                <li key={n.href}>
-                  <Link href={n.href}>{n.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="footer-links">
-            <h4>Contact</h4>
-            <ul>
-              {site ? (
-                <>
-                  <li>
-                    <i className="fas fa-map-marker-alt" /> {site.addressLine1},{" "}
-                    {site.city}
-                    {site.region ? `, ${site.region}` : ""} {site.postalCode}
+            <div className="footer-links">
+              <h4>Quick Links</h4>
+              <ul>
+                {nav.map((n) => (
+                  <li key={n.href}>
+                    <Link href={n.href}>{n.label}</Link>
                   </li>
-                  {site.phone && (
-                    <li>
-                      <a href={`tel:${site.phone}`}>
-                        <i className="fas fa-phone-alt" /> {formatPhone(site.phone)}
-                      </a>
-                    </li>
-                  )}
-                  {summariseHours(site.hours as OpeningHour[] | null, market.locale) && (
-                    <li>
-                      <i className="fas fa-clock" />{" "}
-                      {summariseHours(site.hours as OpeningHour[] | null, market.locale)}
-                    </li>
-                  )}
-                </>
-              ) : (
-                <li>
-                  <Link href={`/${code}/contact`}>
-                    <i className="fas fa-envelope" /> Send us a message
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </div>
+                ))}
+              </ul>
+            </div>
 
-          <div className="footer-links">
-            <h4>Vehicles</h4>
-            <ul>
-              {["Toyota", "Lexus", "Honda", "Mercedes-Benz", "BMW"].map((b) => (
-                <li key={b}>
-                  <Link href={`/${code}/inventory?make=${encodeURIComponent(b)}`}>{b}</Link>
-                </li>
-              ))}
-            </ul>
+            <div className="footer-links">
+              <h4>Vehicles</h4>
+              <ul>
+                {["Toyota", "Lexus", "Honda", "Mercedes-Benz", "BMW"].map((b) => (
+                  <li key={b}>
+                    <Link href={`/${code}/inventory?make=${encodeURIComponent(b)}`}>{b}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <CurrencySwitcher base={market.currency} />
           </div>
         </div>
 
         <div className="footer-bottom">
           <p>
             © {new Date().getFullYear()} Adedayo Aremu Autos. All rights reserved.
-            Prices shown in {market.currency}.
           </p>
+          <div className="footer-bottom-links">
+            <Link href={`/${code}/contact`}>Contact</Link>
+            {site?.phone && <a href={`tel:${site.phone}`}>{formatPhone(site.phone)}</a>}
+          </div>
         </div>
       </div>
     </div>

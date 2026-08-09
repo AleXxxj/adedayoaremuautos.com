@@ -7,6 +7,7 @@ import { getSiteStats, formatMilestone } from "@/lib/stats";
 import { articlesFor } from "@/content/articles";
 import { formatMoney, money } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
+import { LegacyContactForm } from "@/components/LegacyContactForm";
 
 export const dynamic = "force-dynamic";
 
@@ -267,6 +268,52 @@ export default async function MarketHome({
         </div>
       </div>
 
+
+      {/* ── Referral programme ───────────────────────────────────────────── */}
+      <div className="referral-section">
+        <div className="referral-container">
+          <div className="referral-grid">
+            <div className="referral-content">
+              <h2>
+                Earn with <span>Our Referral Program</span>
+              </h2>
+              <p>
+                Know someone looking for a quality vehicle? Refer them to us and
+                earn a commission on every successful purchase.
+              </p>
+              <div className="highlight">
+                1.5% <small>commission</small>
+              </div>
+              <ul className="referral-features">
+                <li><i className="fas fa-check-circle" /> Earn on every successful vehicle purchase</li>
+                <li><i className="fas fa-check-circle" /> No limits - refer as many buyers as you want</li>
+                <li><i className="fas fa-check-circle" /> Fast payout after transaction completion</li>
+                <li><i className="fas fa-check-circle" /> Track your referrals easily</li>
+              </ul>
+              <Link href={`/${code}/contact?type=referral`} className="btn btn-primary">
+                Become a Partner
+              </Link>
+            </div>
+            <div className="referral-card">
+              <i className="fas fa-hand-holding-usd" />
+              <h3>Refer &amp; Earn</h3>
+              <div className="percent">
+                1.5% <small>per sale</small>
+              </div>
+              <p>On every successful vehicle purchase through your referral</p>
+              <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
+                {code === "us"
+                  ? "Example: Refer a $30,000 car = $450"
+                  : "Example: Refer a ₦10M car = ₦150,000"}
+              </p>
+              <Link href={`/${code}/contact?type=referral`} className="btn btn-primary">
+                Start Referring
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Blog / insights ──────────────────────────────────────────────── */}
       {articles.length > 0 && (
         <div className="blog-section">
@@ -280,6 +327,12 @@ export default async function MarketHome({
             <div className="blog-grid">
               {articles.map((a) => (
                 <div className="blog-card" key={a.slug}>
+                  {a.image && (
+                    <div className="blog-image">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={a.image} alt={a.title} loading="lazy" />
+                    </div>
+                  )}
                   <div className="blog-content">
                     <span className="blog-category">{a.category}</span>
                     <h3 className="blog-title">
@@ -364,13 +417,12 @@ export default async function MarketHome({
                 </div>
               )}
             </div>
-
-            <Link href={`/${code}/contact`} className="btn btn-primary">
-              <i className="fas fa-paper-plane" /> SEND US A MESSAGE
-            </Link>
           </div>
+
+          <LegacyContactForm market={code} />
         </div>
       </div>
+
     </>
   );
 }
