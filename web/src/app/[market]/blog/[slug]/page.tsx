@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { ARTICLES, articleBySlug, articlesFor, type Block } from "@/content/articles";
+import { ARTICLE_BODIES } from "@/content/articleBodies";
 import { approvedComments } from "@/lib/actions/blog";
 import { socialLinks } from "@/lib/contact";
 import { LegacyCommentForm, LegacyShare } from "@/components/LegacyBlog";
@@ -107,6 +108,7 @@ export default async function ArticlePage({
 
   const market = MARKETS[code];
   const related = articlesFor(code).filter((a) => a.slug !== slug).slice(0, 3);
+  const body = ARTICLE_BODIES[slug];
   const comments = await approvedComments(slug);
   const authorSocials = socialLinks(code);
 
@@ -175,16 +177,19 @@ export default async function ArticlePage({
           <Link href={`/${code}/blog`}>Blog</Link> &gt; <span>{article.title}</span>
         </div>
 
-        <div className="blog-content">
-          {article.image && (
-            <div className="blog-image">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={article.image} alt="" />
-            </div>
-          )}
-
-          {renderBlocks(article.blocks)}
-        </div>
+        {/* The body is the legacy page's own markup, held in this repository
+            and rendered against the stylesheet that shipped with it, so the
+            vehicle cards, spec grids, pros-and-cons panels, captions and
+            comparison tables survive. The flattened `blocks` are the fallback
+            for anything written after the migration. */}
+        {body ? (
+          <div
+            className="blog-content"
+            dangerouslySetInnerHTML={{ __html: body }}
+          />
+        ) : (
+          <div className="blog-content">{renderBlocks(article.blocks)}</div>
+        )}
 
         <LegacyShare title={article.title} tags={tagsFor(article.title, article.category)} />
 
