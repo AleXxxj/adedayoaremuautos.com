@@ -12,6 +12,9 @@ import "@/styles/legacy.css";
 // Self-hosted rather than the CDN the original used: the CDN stylesheet
 // loaded but its webfonts did not, so every icon rendered as a fallback box.
 import "@fortawesome/fontawesome-free/css/all.min.css";
+// Refinement layer, last so it can lift the ported sheet from one place.
+// Removing this import returns the site to the faithful port.
+import "@/styles/refine.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { socialLinks } from "@/lib/contact";

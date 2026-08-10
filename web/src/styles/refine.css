@@ -1,0 +1,280 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Refinement layer.
+
+   Loaded after legacy.css and scoped to .legacy-theme, so it lifts the whole
+   site from one place rather than editing eight thousand lines of ported CSS.
+   Every rule here is an intentional upgrade to the existing design language —
+   the layout, palette and structure are unchanged. Delete this file and the
+   site returns exactly to the faithful port.
+
+   Ordered by how much each one changes the first impression.
+   ------------------------------------------------------------------------ */
+
+/* ── 1. Typography ─────────────────────────────────────────────────────────
+   The single biggest defect on the site. legacy.css asks for
+   `font-family: 'Inter'`, but next/font does not register that name — it
+   exposes a generated family through --font-inter. The match failed silently
+   and every page has been rendering in the system fallback.
+
+   Body is Inter. Display is Space Grotesk: a technical grotesk whose flat
+   terminals and tight apertures read mechanical rather than decorative, which
+   is the right register for vehicles and money. */
+.legacy-theme {
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.legacy-theme h1,
+.legacy-theme h2,
+.legacy-theme h3,
+.legacy-theme .logo-text h1,
+.legacy-theme .stat-number,
+.legacy-theme .result-amount,
+.legacy-theme .price,
+.legacy-theme .car-price {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+}
+
+/* Large type needs negative tracking; small caps-y labels need positive.
+   The original used one letter-spacing everywhere, which is why the headlines
+   read loose and the labels read cramped. */
+.legacy-theme .hero h2,
+.legacy-theme .page-header h1,
+.legacy-theme .page-hero h1,
+.legacy-theme .post-header h1 {
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+}
+
+.legacy-theme .section-title h2,
+.legacy-theme .car-title,
+.legacy-theme .blog-card-title {
+    letter-spacing: -0.02em;
+}
+
+/* Money and specs line up in a column only with tabular figures. Proportional
+   digits make a price list look hand-set in the wrong way. */
+.legacy-theme .car-price,
+.legacy-theme .price,
+.legacy-theme .amount,
+.legacy-theme .stat-number,
+.legacy-theme .result-amount,
+.legacy-theme .plans-table td,
+.legacy-theme .specs-table td,
+.legacy-theme .price-row .amount {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* Long-form reading measure. Body copy running the full width of a 1400px
+   container is the fastest way to make a page feel unedited. */
+.legacy-theme .blog-content p,
+.legacy-theme .policy-section p,
+.legacy-theme .full-bio p,
+.legacy-theme .executive-bio p {
+    max-width: 68ch;
+}
+
+/* ── 2. The hero ───────────────────────────────────────────────────────────
+   The headline sits directly on a photograph with only a flat 40–60% wash
+   behind it, so "Finance Cars" lands on the windscreen and disappears. A
+   directional scrim — dark where the text is, clear where the car is — fixes
+   legibility without dimming the photograph. */
+.legacy-theme .hero {
+    position: relative;
+    isolation: isolate;
+}
+
+.legacy-theme .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            100deg,
+            rgba(4, 8, 6, 0.94) 0%,
+            rgba(4, 8, 6, 0.88) 38%,
+            rgba(4, 8, 6, 0.55) 58%,
+            rgba(4, 8, 6, 0.2) 78%,
+            rgba(4, 8, 6, 0.45) 100%
+        ),
+        linear-gradient(to top, rgba(4, 8, 6, 0.85) 0%, transparent 45%);
+}
+
+.legacy-theme .hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* With a real scrim behind it the text no longer needs a shadow to survive,
+   and dropping it removes the muddy halo around every letter. */
+.legacy-theme .hero h2,
+.legacy-theme .hero p {
+    text-shadow: none;
+}
+
+.legacy-theme .hero h2 {
+    /* Wide enough to break after "Cars" rather than mid-phrase. A measure set
+       purely for line length ignores where the sentence wants to fold. */
+    max-width: 19ch;
+    font-weight: 700;
+}
+
+/* The emphasised half of the headline is silver-gradient text. That reads well
+   on the dark page headers, but here it lands on a brightly lit bonnet and
+   washes out. Green carries the same emphasis and holds against the photo. */
+.legacy-theme .hero h2 span {
+    background: linear-gradient(135deg, #7ac9a0 0%, #4e9d76 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.legacy-theme .hero p {
+    max-width: 46ch;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+/* A short rule above the headline: a small, cheap signal of deliberate art
+   direction, and it anchors the text block to the left edge. */
+.legacy-theme .hero-content::before {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 2px;
+    margin-bottom: 28px;
+    background: linear-gradient(90deg, var(--green-accent), transparent);
+}
+
+/* ── 3. Button hierarchy ───────────────────────────────────────────────────
+   Three identical green pills means no primary action. One filled, the rest
+   quiet, so the eye is told where to go. */
+.legacy-theme .btn {
+    letter-spacing: 0.04em;
+    transition:
+        transform 0.18s cubic-bezier(0.2, 0.7, 0.3, 1),
+        box-shadow 0.18s ease,
+        background-color 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.legacy-theme .hero-buttons .btn:not(.btn-primary),
+.legacy-theme .btn-outline {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    color: var(--pearl);
+}
+
+.legacy-theme .hero-buttons .btn:not(.btn-primary):hover,
+.legacy-theme .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.legacy-theme .btn-primary {
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.14) inset,
+        0 8px 24px -8px rgba(21, 77, 53, 0.9);
+}
+
+.legacy-theme .btn:hover {
+    transform: translateY(-2px);
+}
+
+.legacy-theme .btn:active {
+    transform: translateY(0);
+}
+
+/* ── 4. Surfaces ───────────────────────────────────────────────────────────
+   Flat #151515 panels on a #0A0A0A page read as boxes drawn on a wall. A
+   hairline top highlight and a real shadow give them a light source, which is
+   most of the difference between "template" and "considered". */
+.legacy-theme .car-card,
+.legacy-theme .blog-card,
+.legacy-theme .type-card,
+.legacy-theme .step-card,
+.legacy-theme .info-card,
+.legacy-theme .mv-card,
+.legacy-theme .objective-card,
+.legacy-theme .value-item,
+.legacy-theme .stat-item,
+.legacy-theme .requirement-card,
+.legacy-theme .contact-form,
+.legacy-theme .featured-card {
+    position: relative;
+    background-image: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.045) 0%,
+        rgba(255, 255, 255, 0) 120px
+    );
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+        0 1px 2px rgba(0, 0, 0, 0.4),
+        0 12px 32px -16px rgba(0, 0, 0, 0.8);
+}
+
+.legacy-theme .car-card,
+.legacy-theme .blog-card,
+.legacy-theme .type-card {
+    transition:
+        transform 0.28s cubic-bezier(0.2, 0.7, 0.3, 1),
+        border-color 0.28s ease,
+        box-shadow 0.28s ease;
+}
+
+.legacy-theme .car-card:hover,
+.legacy-theme .blog-card:hover,
+.legacy-theme .type-card:hover {
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+        0 24px 48px -24px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(42, 92, 66, 0.5);
+}
+
+/* ── 5. Focus ──────────────────────────────────────────────────────────────
+   The original relied on the browser default, which the dark palette all but
+   swallows. Keyboard users get a visible ring; mouse users see nothing new. */
+.legacy-theme a:focus-visible,
+.legacy-theme button:focus-visible,
+.legacy-theme input:focus-visible,
+.legacy-theme select:focus-visible,
+.legacy-theme textarea:focus-visible {
+    outline: 2px solid var(--green-accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.legacy-theme input:focus,
+.legacy-theme select:focus,
+.legacy-theme textarea:focus {
+    border-color: var(--green-accent);
+    box-shadow: 0 0 0 3px rgba(42, 92, 66, 0.22);
+}
+
+/* ── 6. Images ─────────────────────────────────────────────────────────────
+   Vehicle photographs arrive from a dozen sources at a dozen exposures. A
+   slight, uniform lift keeps a grid from looking like a scrapbook. */
+.legacy-theme .car-image img,
+.legacy-theme .blog-card-image img,
+.legacy-theme .related-image img {
+    filter: saturate(1.05) contrast(1.03);
+}
+
+/* ── 7. Motion ─────────────────────────────────────────────────────────────
+   Everything above uses transform and opacity only, so it stays on the
+   compositor. Anyone who has asked their system for less motion gets none. */
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme *,
+    .legacy-theme *::before,
+    .legacy-theme *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
