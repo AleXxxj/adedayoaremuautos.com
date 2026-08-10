@@ -106,7 +106,7 @@ export default async function InventoryPage({
 
   return (
     <>
-      <div className="page-header">
+      <div className="page-header page-header--inventory">
         <h1>
           Cars for <span>Sale</span>
         </h1>

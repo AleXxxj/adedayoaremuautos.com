@@ -97,7 +97,7 @@ export default async function FinancingPage({
 
   return (
     <>
-      <div className="page-header">
+      <div className="page-header page-header--financing">
         <div className="page-header-content">
           <h1>
             Car <span>Financing</span>

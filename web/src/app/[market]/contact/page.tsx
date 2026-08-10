@@ -106,7 +106,7 @@ export default async function ContactPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="page-header">
+      <div className="page-header page-header--contact">
         <div className="page-header-content">
           <h1>
             Contact <span>Us</span>

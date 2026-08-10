@@ -1,10 +1,22 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
-import { FOUNDER_STORY, MISSION, VISION, VALUES, WHY_US } from "@/content/site";
+import {
+  FOUNDER_STORY,
+  EXECUTIVE_BIO,
+  MISSION,
+  VISION,
+  VALUES,
+  OBJECTIVES,
+  TIMELINE,
+  FOUNDED_YEAR,
+} from "@/content/site";
 import { getSiteStats, formatMilestone } from "@/lib/stats";
-import { listLocations, summariseHours, formatPhone, type OpeningHour } from "@/lib/repositories/locations";
+import {
+  listLocations,
+  summariseHours,
+  type OpeningHour,
+} from "@/lib/repositories/locations";
 
 export const dynamic = "force-dynamic";
 
@@ -14,16 +26,25 @@ export async function generateMetadata({
   params: Promise<{ market: string }>;
 }): Promise<Metadata> {
   const { market } = await params;
+  if (!isMarketCode(market)) return {};
   return {
-    title: "About — Adedayo Aremu Autos",
+    title: "About Adedayo Aremu Autos",
     description:
-      "The story behind Adedayo Aremu Autos, and how we work.",
+      "The founder's story, our mission and vision, and how we work — building a legacy of trust and excellence in automotive service.",
     alternates: {
       canonical: `/${market}/about`,
       languages: { "en-US": "/us/about", "en-NG": "/ng/about" },
     },
   };
 }
+
+/** Icons matching the original's value tiles. */
+const VALUE_ICONS: Record<string, string> = {
+  Integrity: "fas fa-gem",
+  Excellence: "fas fa-medal",
+  Trust: "fas fa-handshake",
+  Innovation: "fas fa-lightbulb",
+};
 
 export default async function AboutPage({
   params,
@@ -36,158 +57,200 @@ export default async function AboutPage({
 
   const [stats, sites] = await Promise.all([getSiteStats(code), listLocations(code)]);
   const site = sites[0];
+  const hours = summariseHours(site?.hours as OpeningHour[] | null, market.locale);
+
+  // Derived, not typed in, so it does not quietly go stale the way the
+  // original's "5+ Years Experience" did.
+  const years = new Date().getFullYear() - FOUNDED_YEAR;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "AutoDealer",
+    name: "Adedayo Aremu Autos",
+    foundingDate: String(FOUNDED_YEAR),
+    founder: { "@type": "Person", name: "Adedayo Aremu" },
+    areaServed: market.name,
+  };
 
   return (
-    <div>
-      <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight">
-            Built on transparency, quality and long-term relationships.
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className="page-header page-header--about">
+        <div className="page-header-content">
+          <h1>
+            About <span>Adedayo Aremu Autos</span>
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-[var(--text-secondary)]">
-            {code === "us"
-              ? "Adedayo Aremu Autos sells, hires and finances vehicles from Greensboro, North Carolina."
-              : "Adedayo Aremu Autos sells, hires and finances vehicles across Nigeria."}
+          {/* The original said "in Nigeria" on both markets. */}
+          <p>
+            Building a legacy of trust, excellence, and premium automotive
+            service in {code === "us" ? "Greensboro and across the Triad" : "Nigeria"}
           </p>
         </div>
-      </header>
+      </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-14">
-        {/* ── Founder ──────────────────────────────────────────────────── */}
-        <section className="mb-16 grid gap-10 lg:grid-cols-[280px_1fr]">
-          <div>
-            <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/img/ceo.png"
-                alt="Adedayo Aremu, Founder and CEO"
-                className="aspect-[4/5] w-full object-cover"
-              />
+      {/* Stats. The original published "50+ Vehicles Sold", "100% Happy
+          Clients", "24/7 Customer Support" and "5+ Years Experience". None of
+          the first three was true or supportable — 24/7 support directly
+          contradicted the opening hours in the footer, and an unsupportable
+          satisfaction claim is a liability in the US market. Every figure here
+          is either counted live or derived. */}
+      <div className="section">
+        <div className="stats-grid">
+          <div className="stat-item">
+            <div className="stat-number">
+              {formatMilestone(stats.vehiclesSold, market.locale)}
             </div>
-            <p className="mt-3 font-semibold">Adedayo Aremu</p>
-            <p className="text-sm text-[var(--text-muted)]">Founder &amp; CEO</p>
+            <div className="stat-label">Vehicles Sold</div>
           </div>
-
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">The founder&rsquo;s story</h2>
-            <div className="mt-5 space-y-4 leading-relaxed text-[var(--text-secondary)]">
-              {FOUNDER_STORY.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+          <div className="stat-item">
+            <div className="stat-number">{stats.available}</div>
+            <div className="stat-label">
+              Available Now{code === "us" ? " in Greensboro" : " in Nigeria"}
             </div>
           </div>
-        </section>
-
-        {/* ── Live figures ─────────────────────────────────────────────── */}
-        <section className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <Figure
-            value={formatMilestone(stats.vehiclesSold, market.locale)}
-            label="Vehicles sold"
-            note="Counted live as each sale completes"
-          />
-          <Figure
-            value={String(stats.available)}
-            label="Available now"
-            note={`In ${market.name}`}
-          />
-          <Figure
-            value={code === "us" ? "Greensboro, NC" : "Nigeria"}
-            label="Where we are"
-            note={site ? site.addressLine1 : "Contact us for an appointment"}
-          />
-        </section>
-
-        {/* ── Mission & vision ─────────────────────────────────────────── */}
-        <section className="mb-16 grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-7">
-            <h2 className="text-lg font-bold tracking-tight">Mission</h2>
-            <p className="mt-3 leading-relaxed text-[var(--text-secondary)]">{MISSION}</p>
+          <div className="stat-item">
+            <div className="stat-number">{years}+</div>
+            <div className="stat-label">Years Trading</div>
           </div>
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-7">
-            <h2 className="text-lg font-bold tracking-tight">Vision</h2>
-            <p className="mt-3 leading-relaxed text-[var(--text-secondary)]">{VISION}</p>
+          <div className="stat-item">
+            <div className="stat-number">2</div>
+            <div className="stat-label">Markets Served</div>
           </div>
-        </section>
+        </div>
 
-        {/* ── Values ───────────────────────────────────────────────────── */}
-        <section className="mb-16">
-          <h2 className="mb-2 text-2xl font-bold tracking-tight">Our values</h2>
-          <p className="mb-7 text-[var(--text-secondary)]">
-            The principles that guide everything we do.
+        {hours && (
+          <p className="stats-note">
+            <i className="fas fa-clock" /> Open {hours}
+            {site ? ` · ${site.city}` : ""}
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {VALUES.map((v) => (
-              <div
-                key={v.title}
-                className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5"
-              >
-                <h3 className="font-semibold text-[var(--brand-400)]">{v.title}</h3>
-                <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{v.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Why us ───────────────────────────────────────────────────── */}
-        <section className="mb-16">
-          <h2 className="mb-7 text-2xl font-bold tracking-tight">How we work</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {WHY_US[code].map((w) => (
-              <div
-                key={w.title}
-                className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5"
-              >
-                <h3 className="font-semibold">{w.title}</h3>
-                <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{w.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Visit ────────────────────────────────────────────────────── */}
-        {site && (
-          <section className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-8">
-            <h2 className="text-xl font-bold tracking-tight">Come and see us</h2>
-            <address className="mt-3 not-italic text-[var(--text-secondary)]">
-              {site.addressLine1}
-              <br />
-              {site.city}
-              {site.region && <>, {site.region}</>} {site.postalCode}
-            </address>
-            {summariseHours(site.hours as OpeningHour[] | null, market.locale) && (
-              <p className="mt-2 text-sm text-[var(--text-muted)]">
-                {summariseHours(site.hours as OpeningHour[] | null, market.locale)}
-              </p>
-            )}
-            <div className="mt-6 flex flex-wrap gap-3">
-              {site.phone && (
-                <a
-                  href={`tel:${site.phone}`}
-                  className="rounded-lg bg-[var(--cta-bg)] px-6 py-3 font-semibold text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)]"
-                >
-                  Call {formatPhone(site.phone)}
-                </a>
-              )}
-              <Link
-                href={`/${code}/contact`}
-                className="rounded-lg border border-[var(--border-strong)] px-6 py-3 font-medium hover:bg-[var(--surface-2)]"
-              >
-                Send a message
-              </Link>
-            </div>
-          </section>
         )}
       </div>
-    </div>
-  );
-}
 
-function Figure({ value, label, note }: { value: string; label: string; note: string }) {
-  return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] px-5 py-6">
-      <div className="text-2xl font-bold tracking-tight sm:text-3xl">{value}</div>
-      <div className="mt-1 text-xs uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
-      <div className="mt-2 text-xs text-[var(--text-muted)]">{note}</div>
-    </div>
+      <div className="section">
+        <div className="section-title">
+          <h2>
+            Meet the <span>Founder</span>
+          </h2>
+          <p>The vision and leadership behind Adedayo Aremu Autos</p>
+        </div>
+
+        <div className="two-column">
+          <div className="executive-bio">
+            <h3>Adedayo Aremu</h3>
+            {EXECUTIVE_BIO.map((p) => (
+              <p key={p.slice(0, 40)}>{p}</p>
+            ))}
+            <span className="position">Founder &amp; CEO, Adedayo Aremu Autos</span>
+          </div>
+
+          <div className="full-bio">
+            <h3>The Founder&rsquo;s Story</h3>
+            {FOUNDER_STORY.map((p) => (
+              <p key={p.slice(0, 40)}>{p}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="mv-grid">
+          <div className="mv-card">
+            <div className="icon">
+              <i className="fas fa-bullseye" />
+            </div>
+            <h3>Mission</h3>
+            <p>{MISSION}</p>
+          </div>
+
+          <div className="mv-card">
+            <div className="icon">
+              <i className="fas fa-eye" />
+            </div>
+            <h3>Vision</h3>
+            <p>{VISION}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="section section-light">
+        <div className="section-title">
+          <h2>
+            Strategic <span>Objectives</span>
+          </h2>
+          <p>Our roadmap for sustainable growth and market leadership</p>
+        </div>
+
+        <div className="objectives-grid">
+          {OBJECTIVES.map((o, i) => (
+            <div
+              // The original spanned the last card with an inline style. As a
+              // class instead: an inline `grid-column: span 2` survives the
+              // media query that collapses the grid to one column and forces
+              // an implicit second one back, so the whole section stayed
+              // two-up and unreadable on a phone.
+              className={
+                i === OBJECTIVES.length - 1 && OBJECTIVES.length % 2 === 1
+                  ? "objective-card objective-card--wide"
+                  : "objective-card"
+              }
+              key={o.title}
+            >
+              <h4>
+                <i className={o.icon} /> {o.title}
+              </h4>
+              <ul>
+                {o.points.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="section-title">
+          <h2>
+            Our Core <span>Values</span>
+          </h2>
+          <p>The principles that guide everything we do</p>
+        </div>
+
+        <div className="values-grid">
+          {VALUES.map((v) => (
+            <div className="value-item" key={v.title}>
+              <i className={VALUE_ICONS[v.title] ?? "fas fa-check"} />
+              <h5>{v.title}</h5>
+              <p>{v.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="section section-light">
+        <div className="section-title">
+          <h2>
+            Our <span>Journey</span>
+          </h2>
+          <p>Milestones in building a trusted automotive brand</p>
+        </div>
+
+        <div className="timeline">
+          {TIMELINE.map((m) => (
+            <div className="timeline-item" key={m.year}>
+              <div className="timeline-year">{m.year}</div>
+              <div className="timeline-content">
+                <h4>{m.title}</h4>
+                <p>{m.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

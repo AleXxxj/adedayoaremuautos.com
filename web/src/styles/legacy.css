@@ -5473,3 +5473,89 @@
 .plans-table .amount a:hover {
     text-decoration: underline;
 }
+
+/* Per-page header images.
+   Each legacy page carried its own `.page-header` rule in its own <style>
+   block, so the selectors were identical and only differed by which file the
+   browser had loaded. Merged into one stylesheet they all collapse onto the
+   last one, and every page ended up wearing contact.html's photograph while
+   about.html's founder portrait was dropped by the dedupe entirely. Scoping
+   the background to a modifier class restores the original intent. */
+.page-header--rentals {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+.page-header--financing {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+/* The only header image the business actually owns. */
+.page-header--about {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('/img/ceo.png');
+    background-size: cover;
+    background-position: center 22%;
+}
+
+.page-header--blog {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('https://images.unsplash.com/photo-1496449904464-d54c85e36f8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+.page-header--contact {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+        url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+/* cars.html had no photograph behind its header — a plain gradient. Restoring
+   that rather than letting it inherit whichever page's image landed last. */
+.page-header--inventory {
+    background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+}
+
+/* The stats row now states opening hours beside the counters, because the
+   original's "24/7 Customer Support" tile contradicted the hours in its own
+   footer. */
+.stats-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 25px auto 0;
+    font-size: 14px;
+    color: var(--silver-cool);
+}
+
+.stats-note i {
+    color: var(--illustration-gold);
+}
+
+/* Last objective card fills the row on desktop, as the original did inline —
+   but only above the width where the grid is still two columns. */
+@media (min-width: 1025px) {
+    .objective-card--wide {
+        grid-column: span 2;
+    }
+
+    /* The original also forced this card's bullets into two columns inline. */
+    .objective-card--wide ul {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+}

@@ -38,6 +38,113 @@ export const MISSION =
 export const VISION =
   "To establish Adedayo Aremu Autos as a trusted and distinguished automotive brand recognised for integrity, professionalism, and customer satisfaction, while expanding into a scalable multi-location dealership known for quality inventory, strong market presence, and positive community impact.";
 
+/** The short executive version, the owner's own words from the legacy page. */
+export const EXECUTIVE_BIO: string[] = [
+  "Adedayo Aremu is an entrepreneurial professional and founder of Adedayo Aremu Autos, a growing automotive enterprise committed to excellence, transparency, and customer-centered service. With a strategic mindset and strong business acumen, he has positioned his brand to deliver reliable vehicle sourcing, quality assurance, and value-driven automotive solutions.",
+  "Adedayo's approach to business is grounded in integrity, operational efficiency, and long-term relationship building. He understands that success in the automotive industry requires more than transactions — it demands trust, market insight, and consistent performance. By leveraging digital platforms, data-informed decision-making, and disciplined execution, he continues to expand his brand presence and customer base.",
+  "Focused on sustainable growth, Adedayo is building a dealership model that prioritises professionalism, financial intelligence, and scalable systems. His long-term vision is to establish Adedayo Aremu Autos as a recognised and respected name in the automotive marketplace, known for quality inventory, competitive pricing, and exceptional client experience.",
+];
+
+export interface Objective {
+  title: string;
+  icon: string;
+  points: string[];
+}
+
+/** The strategic objectives, carried over from the legacy page unchanged. */
+export const OBJECTIVES: Objective[] = [
+  {
+    title: "Customer Excellence",
+    icon: "fas fa-star",
+    points: [
+      "Provide dependable, high-quality vehicles that meet diverse customer needs",
+      "Deliver a premium, service-driven automotive experience",
+      "Build long-term relationships based on transparency and trust",
+    ],
+  },
+  {
+    title: "Operational Growth",
+    icon: "fas fa-chart-line",
+    points: [
+      "Achieve sustainable annual revenue growth through disciplined execution",
+      "Optimise inventory sourcing and turnover using data-driven insights",
+      "Develop strategic financing partnerships to expand vehicle accessibility",
+    ],
+  },
+  {
+    title: "Brand & Digital Expansion",
+    icon: "fas fa-globe",
+    points: [
+      "Build a recognisable, high-conversion digital automotive platform",
+      "Strengthen brand visibility through modern marketing and technology",
+      "Establish structured systems that support scalable dealership operations",
+    ],
+  },
+  {
+    title: "Community & Ethical Impact",
+    icon: "fas fa-hand-holding-heart",
+    points: [
+      "Conduct business with honesty, integrity, and responsible stewardship",
+      "Create employment and mentorship opportunities",
+      "Contribute positively to the community while honouring faith-centred values",
+    ],
+  },
+  {
+    title: "Long-Term Expansion",
+    icon: "fas fa-building",
+    points: [
+      "Launch a physical dealership hub within defined milestones",
+      "Expand into multiple locations with strong regional market presence",
+      "Position the brand as a respected name in both everyday and luxury automotive markets",
+    ],
+  },
+];
+
+/** The year the business was founded, per the legacy timeline. */
+export const FOUNDED_YEAR = 2020;
+
+export interface Milestone {
+  year: number;
+  title: string;
+  body: string;
+}
+
+/**
+ * The journey, carried over from the legacy timeline.
+ *
+ * One change: the 2021 entry claimed "20+ vehicles", which contradicts the
+ * owner's own figure of 15 sold to date and would have had the same page
+ * asserting two different numbers. The milestone is kept; the count is not,
+ * because the live counter elsewhere on the page is the number of record.
+ */
+export const TIMELINE: Milestone[] = [
+  {
+    year: 2020,
+    title: "Foundation",
+    body: "Adedayo Aremu Autos was established with a vision to transform the automotive buying experience.",
+  },
+  {
+    year: 2021,
+    title: "First Major Milestone",
+    body: "Built a reputation for quality and transparency on the strength of early sales.",
+  },
+  {
+    year: 2022,
+    title: "Digital Expansion",
+    body: "Launched our online platform, making vehicle browsing and financing accessible nationwide.",
+  },
+  {
+    year: 2023,
+    title: "Rental & Financing",
+    body: "Expanded services to include flexible rental options and tailored financing plans.",
+  },
+  {
+    year: 2024,
+    title: "Building the Hub",
+    body: "Working towards a physical dealership hub while serving customers across Nigeria.",
+  },
+];
+
 export const VALUES: { title: string; body: string }[] = [
   { title: "Integrity", body: "Honest dealings and transparent communication, on every vehicle and every figure." },
   { title: "Excellence", body: "Premium quality in every vehicle we put our name to." },
