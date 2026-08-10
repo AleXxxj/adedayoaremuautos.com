@@ -556,3 +556,51 @@
 .legacy-theme .car-card:hover .car-image img {
     transform: scale(1.04);
 }
+
+/* ── 11. Section rhythm ────────────────────────────────────────────────────
+   The port carried three different section paddings — 60px, 80px, and
+   whatever a page happened to set — so the vertical spacing wandered as you
+   scrolled. One scale, driven by viewport width, gives the page a beat. */
+.legacy-theme .services,
+.legacy-theme .featured,
+.legacy-theme .about-section,
+.legacy-theme .blog-section,
+.legacy-theme .features,
+.legacy-theme .contact-section,
+.legacy-theme .rental-types,
+.legacy-theme .terms-section,
+.legacy-theme .steps-section,
+.legacy-theme .eligibility-section,
+.legacy-theme .plans-section,
+.legacy-theme .calculator-section,
+.legacy-theme .application-section,
+.legacy-theme .how-we-work,
+.legacy-theme .blog-grid-section {
+    padding-top: clamp(64px, 8vw, 112px);
+    padding-bottom: clamp(64px, 8vw, 112px);
+}
+
+/* The heading and its supporting line are one unit; they were spaced as two. */
+.legacy-theme .section-title {
+    margin-bottom: clamp(36px, 4vw, 56px);
+}
+
+.legacy-theme .section-title h2 {
+    margin-bottom: 14px;
+}
+
+.legacy-theme .section-title p {
+    max-width: 58ch;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+}
+
+/* ── 12. Scroll choreography ───────────────────────────────────────────────
+   Handled by components/ScrollReveal.tsx, which writes the initial state as an
+   inline style after mount and removes it to reveal. Deliberately not done
+   here: a stylesheet rule would hide content for anyone whose JavaScript never
+   runs, and a cross-tree selector has to win against eight thousand lines of
+   ported CSS to do it. Inline styles answer both.
+
+   Transform and opacity only, so it stays on the compositor. */

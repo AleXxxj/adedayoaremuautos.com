@@ -17,6 +17,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/styles/refine.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
 
@@ -60,6 +61,8 @@ export default async function MarketLayout({
 
   return (
     <div className="legacy-theme">
+      <ScrollReveal />
+
       <div className="header">
         <div className="header-container">
           <div className="logo-container">

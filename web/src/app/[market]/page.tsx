@@ -228,6 +228,69 @@ export default async function MarketHome({
         </div>
       </div>
 
+      {/* ── How we work ──────────────────────────────────────────────────
+          Every claim here is one the platform actually enforces, not a
+          promise. Written for a buyer, but each line is a thing the site does
+          rather than a thing the copy says. */}
+      <div className="how-we-work">
+        <div className="how-we-work-container">
+          <div className="section-title">
+            <h2>
+              How We <span>Work</span>
+            </h2>
+            <p>
+              The part most dealerships leave to a phone call and a promise.
+            </p>
+          </div>
+
+          <div className="work-grid">
+            <div className="work-step">
+              <span className="work-step-index">01</span>
+              <i className="fas fa-inbox" aria-hidden="true" />
+              <h3>Your enquiry is recorded, not just sent</h3>
+              <p>
+                Every message is written down the moment you send it and lands
+                with a named person. Nothing depends on someone noticing an
+                email.
+              </p>
+            </div>
+
+            <div className="work-step">
+              <span className="work-step-index">02</span>
+              <i className="fas fa-calculator" aria-hidden="true" />
+              <h3>The figures you see are the figures you sign</h3>
+              <p>
+                Payment estimates run the same arithmetic as the agreement
+                itself — not a separate calculator that happens to sit on the
+                website.
+              </p>
+            </div>
+
+            <div className="work-step">
+              <span className="work-step-index">03</span>
+              <i className="fas fa-calendar-check" aria-hidden="true" />
+              <h3>A reserved vehicle is reserved</h3>
+              <p>
+                Hire dates are checked against live bookings before they are
+                confirmed. Two customers cannot be given the same vehicle for
+                the same days.
+              </p>
+            </div>
+
+            <div className="work-step">
+              <span className="work-step-index">04</span>
+              <i className="fas fa-shield-halved" aria-hidden="true" />
+              <h3>We do not ask for what we do not need</h3>
+              <p>
+                No {code === "ng" ? "BVN" : "Social Security Number"}, bank
+                details or ID number through this website. Identity is verified
+                in person, with the paperwork.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── About / founder ──────────────────────────────────────────────── */}
       <div className="about-section">
         <div className="about-container">
