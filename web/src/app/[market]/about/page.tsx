@@ -112,9 +112,15 @@ export default async function AboutPage({
               Available Now{code === "us" ? " in Greensboro" : " in Nigeria"}
             </div>
           </div>
+          {/* Inside the founding year there is no honest "N+ years" to print,
+              so it states the year instead of rounding up to a claim. */}
           <div className="stat-item">
-            <div className="stat-number">{years}+</div>
-            <div className="stat-label">Years Trading</div>
+            <div className="stat-number">
+              {years >= 1 ? `${years}+` : FOUNDED_YEAR}
+            </div>
+            <div className="stat-label">
+              {years >= 1 ? "Years Trading" : "Trading Since"}
+            </div>
           </div>
           <div className="stat-item">
             <div className="stat-number">2</div>

@@ -5559,3 +5559,1922 @@
         gap: 15px;
     }
 }
+
+/* ── Article pages ──────────────────────────────────────────────────────
+   The seven blog-*.html article pages were never part of the original CSS
+   merge, so every rule below — the post header, share row, author box,
+   related grid and comment thread — was missing entirely and those
+   sections rendered unstyled. Extracted from the article pages verbatim,
+   skipping any selector the merged sheet already defines.
+   ------------------------------------------------------------------ */
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 80px 20px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center 40%;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+.post-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 70% 50%, rgba(21, 77, 53, 0.2) 0%, transparent 60%);
+        }
+
+.post-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+.post-category {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid rgba(21, 77, 53, 0.3);
+        }
+
+.post-header h1 {
+            font-size: clamp(42px, 8vw, 65px);
+            margin-bottom: 20px;
+            line-height: 1.2;
+            color: var(--pearl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+.post-header h1 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+.post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            color: var(--silver-cool);
+            font-size: 16px;
+            flex-wrap: wrap;
+        }
+
+.post-meta i {
+            color: var(--illustration-gold);
+            margin-right: 8px;
+        }
+
+/* Blog Post Content */
+        .blog-container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+.blog-content h2 {
+            font-size: 32px;
+            margin: 45px 0 20px;
+            color: var(--pearl);
+        }
+
+.blog-content h2 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+.blog-content h2:first-of-type {
+            margin-top: 0;
+        }
+
+.blog-content h3 {
+            font-size: 24px;
+            margin: 35px 0 15px;
+            color: var(--silver-classic);
+        }
+
+.blog-content p {
+            color: var(--silver-classic);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+.blog-content ul, .blog-content ol {
+            margin: 20px 0;
+            padding-left: 20px;
+            color: var(--silver-classic);
+        }
+
+.blog-content li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+.blog-content li::marker {
+            color: var(--illustration-gold);
+        }
+
+.blog-content blockquote {
+            background: rgba(21, 77, 53, 0.05);
+            border-left: 4px solid var(--green-accent);
+            padding: 25px 35px;
+            margin: 35px 0;
+            border-radius: 0 20px 20px 0;
+            font-style: italic;
+            color: var(--silver-cool);
+        }
+
+.blog-content blockquote p {
+            margin-bottom: 10px;
+        }
+
+.blog-content blockquote cite {
+            display: block;
+            margin-top: 10px;
+            color: var(--illustration-gold);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+.blog-image figcaption {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            color: var(--silver-cool);
+            font-size: 14px;
+            text-align: center;
+        }
+
+.finance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+.finance-table th {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+.finance-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver-classic);
+        }
+
+.finance-table tr:last-child td {
+            border-bottom: none;
+        }
+
+/* Author Box */
+        .author-box {
+            display: flex;
+            gap: 30px;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin: 60px 0 30px;
+        }
+
+.author-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--green-accent);
+        }
+
+.author-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+.author-info h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: var(--silver-classic);
+        }
+
+.author-info h3 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+.author-info p {
+            color: var(--silver-cool);
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+.author-social {
+            display: flex;
+            gap: 15px;
+        }
+
+.author-social a {
+            color: var(--silver-cool);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+.author-social a:hover {
+            color: var(--illustration-gold);
+        }
+
+/* Related Posts */
+        .related-posts {
+            margin: 60px 0;
+        }
+
+.related-posts h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--pearl);
+        }
+
+.related-posts h2 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+.related-meta {
+            color: var(--silver-cool);
+            font-size: 12px;
+        }
+
+/* Share Section */
+        .share-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+.share-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+.share-tag {
+            padding: 8px 15px;
+            background: rgba(21, 77, 53, 0.1);
+            color: var(--illustration-gold);
+            border-radius: 50px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(21, 77, 53, 0.3);
+        }
+
+.share-tag:hover {
+            background: var(--gradient-green);
+            color: var(--pearl);
+        }
+
+.share-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+.share-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--silver-cool);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+.share-icon:hover {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            transform: translateY(-3px);
+        }
+
+/* Comments Section */
+        .comments-section {
+            margin: 60px 0;
+        }
+
+.comments-section h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: var(--pearl);
+        }
+
+.comments-section h2 span {
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+.comment-form {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+.comment-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+.comment-form input,
+        .comment-form textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--silver-classic);
+            font-size: 15px;
+        }
+
+.comment-form input:focus,
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: var(--green-accent);
+            background: rgba(21, 77, 53, 0.1);
+        }
+
+.comment-form textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+.comment-form button {
+            padding: 15px 30px;
+            background: var(--gradient-green);
+            border: none;
+            border-radius: 50px;
+            color: var(--pearl);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+.comment-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-green);
+        }
+
+.comment {
+            display: flex;
+            gap: 20px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+.comment-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+.comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+.comment-content {
+            flex: 1;
+        }
+
+.comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+.comment-header h4 {
+            color: var(--illustration-gold);
+            font-size: 16px;
+        }
+
+.comment-date {
+            color: var(--silver-cool);
+            font-size: 12px;
+        }
+
+.comment-content p {
+            color: var(--silver-classic);
+            line-height: 1.6;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('/img/foreign_used.JPG');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+.post-header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+.post-header h1 {
+            font-size: clamp(36px, 6vw, 56px);
+            margin-bottom: 20px;
+            line-height: 1.2;
+            color: var(--pearl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+.blog-content h2 {
+            font-size: 28px;
+            margin: 40px 0 20px;
+            color: var(--pearl);
+        }
+
+.blog-content h3 {
+            font-size: 22px;
+            margin: 30px 0 15px;
+            color: var(--silver-classic);
+        }
+
+.blog-content blockquote {
+            background: rgba(21, 77, 53, 0.05);
+            border-left: 4px solid var(--green-accent);
+            padding: 20px 30px;
+            margin: 30px 0;
+            border-radius: 0 15px 15px 0;
+            font-style: italic;
+            color: var(--silver-cool);
+        }
+
+/* Foreign Used-specific styles */
+        .country-flags {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+.doc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+.doc-table th {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+.doc-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver-classic);
+        }
+
+.doc-table tr:last-child td {
+            border-bottom: none;
+        }
+
+.comment {
+            display: flex;
+            gap: 20px;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+.comment-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+.comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+.comment-header h4 {
+            color: var(--illustration-gold);
+        }
+
+.comment-date {
+            color: var(--silver-cool);
+            font-size: 13px;
+        }
+
+.comment-content p {
+            color: var(--silver-classic);
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+.inspection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+.inspection-item-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+.inspection-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 47px;
+            color: var(--silver-cool);
+            font-size: 12px;
+        }
+
+.inspection-check i {
+            color: #27ae60;
+        }
+
+.red-flags {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+.test-drive-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+/* Luxury-specific styles */
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+.comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+.comparison-row:last-child {
+            border-bottom: none;
+        }
+
+.brand-showcase {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+.pros-cons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+.decision-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+.popular-models {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+.tip-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+.schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+.schedule-table th {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+.schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver-classic);
+        }
+
+.schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+
+.warning-signs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+.seasonal-tips {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+/* Rental-specific styles */
+        .rental-types-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+.checklist-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+.terms-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+.terms-table th {
+            background: var(--gradient-green);
+            color: var(--pearl);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+.terms-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--silver-classic);
+        }
+
+.terms-table tr:last-child td {
+            border-bottom: none;
+        }
+
+.dos-donts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+/* Blog Post Header */
+        .post-header {
+            margin-top: 90px;
+            padding: 80px 20px 60px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%),
+                        url('https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center 75%;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+/* SUV-specific styles */
+        .vehicle-card {
+            background: rgba(255,255,255,0.02);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 40px 0;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+.vehicle-card:hover {
+            border-color: var(--green-accent);
+            transform: translateY(-5px);
+        }
+
+.vehicle-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            background: var(--gradient-green);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+.specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+.pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+.pros, .cons {
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+.pros {
+            background: rgba(39, 174, 96, 0.05);
+            border: 1px solid #27ae60;
+        }
+
+.cons {
+            background: rgba(192, 57, 43, 0.05);
+            border: 1px solid #c0392b;
+        }
+
+.pros h4, .cons h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+.pros h4 i {
+            color: #27ae60;
+        }
+
+.cons h4 i {
+            color: #c0392b;
+        }
+
+.pros ul, .cons ul {
+            list-style: none;
+            padding: 0;
+        }
+
+.pros li, .cons li {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+.pros li::before {
+            content: '✓';
+            color: #27ae60;
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+.cons li::before {
+            content: '✗';
+            color: #c0392b;
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+
+.price-tag {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gradient-silver);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+/* Newsletter and comment feedback. The originals had neither: the newsletter
+   form had no action and the comment form no handler, so there was never
+   anything to report back. */
+.newsletter-error {
+    margin-top: 14px;
+    color: #f0a0a0;
+    font-size: 14px;
+}
+
+.newsletter-privacy {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--silver-cool);
+}
+
+.newsletter-form button[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.comment-thanks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 16px 18px;
+    border: 1px solid rgba(21, 77, 53, 0.4);
+    background: rgba(21, 77, 53, 0.1);
+    border-radius: 12px;
+    color: var(--silver-classic);
+}
+
+.comment-thanks i {
+    color: var(--green-accent);
+}
+
+.comment-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--silver-cool);
+}
+
+.comment-form .form-error,
+.comment-form .field-error {
+    display: block;
+    margin-top: 6px;
+    color: #f0a0a0;
+    font-size: 13px;
+}
+
+.comment-form button[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* The original hand-wrote its share tags as links to nowhere; they are labels,
+   so they render as spans and need the anchor styling applied directly. */
+span.share-tag {
+    cursor: default;
+}
+
+/* ── Article page responsive rules ──────────────────────────────────────────
+   These must come after the article base rules above. They were restored
+   earlier in the file, before those base rules existed; equal specificity
+   means source order decides, so the base two-column rules were winning and
+   .comment-form-row stayed side-by-side on a phone.
+   ---------------------------------------------------------------------- */
+/* blog-finance-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .step-list li {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .finance-table {
+                font-size: 14px;
+            }
+
+            .finance-table th,
+            .finance-table td {
+                padding: 10px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-finance-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .blog-content h2 {
+                font-size: 28px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-finance-guide.html */
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .post-header h1 {
+                font-size: 32px;
+            }
+
+            .blog-content h3 {
+                font-size: 22px;
+            }
+        }
+
+/* blog-foreign-used.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .country-flags {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-foreign-used.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .country-flags {
+                grid-template-columns: 1fr;
+            }
+
+            .doc-table {
+                font-size: 14px;
+            }
+
+            .doc-table th,
+            .doc-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-foreign-used.html */
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+        }
+
+/* blog-inspection-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .inspection-grid,
+            .red-flags,
+            .test-drive-grid,
+            .rating-summary ul {
+                grid-template-columns: 1fr;
+            }
+
+            .test-drive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-inspection-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .test-drive-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .inspection-item-header {
+                flex-wrap: wrap;
+            }
+
+            .inspection-item p,
+            .inspection-check {
+                margin-left: 0;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-luxury-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .comparison-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .brand-showcase {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pros-cons-grid,
+            .popular-models {
+                grid-template-columns: 1fr;
+            }
+
+            .decision-options {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-luxury-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .comparison-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .brand-showcase {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-maintenance-tips.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .tip-grid,
+            .warning-signs,
+            .seasonal-tips {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-maintenance-tips.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .maintenance-card h3 {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .schedule-table {
+                font-size: 14px;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-rental-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .rental-types-grid,
+            .checklist-items,
+            .dos-donts {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-rental-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .terms-table {
+                font-size: 14px;
+            }
+
+            .terms-table th,
+            .terms-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-suv-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .specs-grid,
+            .pros-cons,
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* blog-suv-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .blog-content h2 {
+                font-size: 28px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .vehicle-title {
+                font-size: 24px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* blog-suv-guide.html */
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .post-header h1 {
+                font-size: 32px;
+            }
+        }
+
+/* Each of the seven article pages set its own photograph on `.post-header`
+   with the same selector, so merged into one stylesheet the last one won and
+   every article wore the SUV picture. The image is already a field on the
+   article record, so the rule keeps only the geometry and the page supplies
+   the picture inline — one source of truth instead of seven rules. */
+.post-header {
+    background-color: #0a0a0a;
+    background-image: none;
+    background-size: cover;
+    background-position: center;
+}

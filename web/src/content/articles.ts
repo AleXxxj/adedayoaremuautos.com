@@ -43,7 +43,7 @@ export const ARTICLES: Article[] = [
     excerpt: "For many Nigerians, owning a car is a significant milestone. However, with rising vehicle costs, paying cash upfront isn't always feasible. Car financing offers a practical solution, allowing you to spread the cost over ",
     publishedOn: null,
     readMinutes: 7,
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     blocks: [
       { tag: "p", text: "For many Nigerians, owning a car is a significant milestone. However, with rising vehicle costs, paying cash upfront isn't always feasible. Car financing offers a practical solution, allowing you to spread the cost over time while enjoying the benefits of vehicle ownership immediately." },
       { tag: "p", text: "In this comprehensive guide, we'll walk you through everything you need to know about financing your first car in Nigeria – from understanding the basics to choosing the right plan for your budget." },
@@ -107,7 +107,7 @@ export const ARTICLES: Article[] = [
     excerpt: "In Nigeria, \"Tokunbo\" has become synonymous with quality, value, and aspiration. These foreign used cars, imported primarily from Europe, America, and Asia, dominate our roads and offer an accessible entry point into car",
     publishedOn: null,
     readMinutes: 8,
-    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "/img/foreign-used.jpg",
     blocks: [
       { tag: "p", text: "In Nigeria, \"Tokunbo\" has become synonymous with quality, value, and aspiration. These foreign used cars, imported primarily from Europe, America, and Asia, dominate our roads and offer an accessible entry point into car ownership for millions of Nigerians." },
       { tag: "p", text: "But navigating the world of Tokunbo cars can be tricky. From understanding import grades to avoiding common pitfalls, this comprehensive guide will equip you with everything you need to know before making your purchase." },
@@ -204,7 +204,7 @@ export const ARTICLES: Article[] = [
     excerpt: "Buying a used car – whether Nigerian-used or Tokunbo – is one of the biggest financial decisions you'll make. Without a proper inspection, you could be buying someone else's problems. A vehicle that looks perfect on the ",
     publishedOn: null,
     readMinutes: 8,
-    image: "https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     blocks: [
       { tag: "p", text: "Buying a used car – whether Nigerian-used or Tokunbo – is one of the biggest financial decisions you'll make. Without a proper inspection, you could be buying someone else's problems. A vehicle that looks perfect on the surface might have hidden issues that will cost you millions in repairs." },
       { tag: "p", text: "This comprehensive 20-point checklist will guide you through every aspect of inspecting a used car. Print it out, take it with you, and check off each item. Your future self (and your wallet) will thank you." },
@@ -275,7 +275,7 @@ export const ARTICLES: Article[] = [
     excerpt: "The debate is as old as the automotive industry itself: is it worth paying a premium for a luxury vehicle, or does a regular car offer everything you need at a fraction of the cost? In Nigeria, where brands like Lexus, M",
     publishedOn: null,
     readMinutes: 7,
-    image: "https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     blocks: [
       { tag: "p", text: "The debate is as old as the automotive industry itself: is it worth paying a premium for a luxury vehicle, or does a regular car offer everything you need at a fraction of the cost? In Nigeria, where brands like Lexus, Mercedes-Benz, and BMW command significant respect (and prices), this question is particularly relevant." },
       { tag: "p", text: "In this comprehensive comparison, we'll examine the real differences between luxury and regular vehicles, helping you decide which category truly fits your needs, budget, and lifestyle." },
@@ -400,7 +400,7 @@ export const ARTICLES: Article[] = [
     excerpt: "Your car is likely one of the biggest investments you'll make. Yet many Nigerian car owners neglect regular maintenance, leading to costly repairs and premature vehicle failure. The good news? Proper maintenance doesn't ",
     publishedOn: null,
     readMinutes: 6,
-    image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     blocks: [
       { tag: "p", text: "Your car is likely one of the biggest investments you'll make. Yet many Nigerian car owners neglect regular maintenance, leading to costly repairs and premature vehicle failure. The good news? Proper maintenance doesn't require a mechanic's license – just knowledge of a few key principles and consistent attention." },
       { tag: "p", text: "In this guide, we'll cover five essential maintenance tips that will keep your vehicle running smoothly, save you money, and extend its lifespan significantly." },
@@ -478,7 +478,7 @@ export const ARTICLES: Article[] = [
     excerpt: "Whether you need a car for a weekend getaway, a business trip, or while yours is in the shop, renting a vehicle offers flexibility without the long-term commitment of ownership. However, the rental process can be filled ",
     publishedOn: null,
     readMinutes: 6,
-    image: "https://images.unsplash.com/photo-1625047509168-a702ecf7a4b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+    image: "https://images.unsplash.com/photo-1568605117036-5fe5e7fa0ab9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     blocks: [
       { tag: "p", text: "Whether you need a car for a weekend getaway, a business trip, or while yours is in the shop, renting a vehicle offers flexibility without the long-term commitment of ownership. However, the rental process can be filled with hidden fees, confusing terms, and potential pitfalls." },
       { tag: "p", text: "This comprehensive guide will walk you through everything you need to know before signing that rental agreement – helping you avoid common mistakes and ensuring a smooth, cost-effective experience." },

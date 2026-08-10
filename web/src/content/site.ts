@@ -100,8 +100,16 @@ export const OBJECTIVES: Objective[] = [
   },
 ];
 
-/** The year the business was founded, per the legacy timeline. */
-export const FOUNDED_YEAR = 2020;
+/**
+ * The year the business was founded.
+ *
+ * The legacy timeline dated the milestones 2020–2024; the owner has since
+ * confirmed they all happened in 2026. The dates in TIMELINE below are still
+ * the legacy ones and are pending correction — this constant is the one the
+ * public "years trading" figure is derived from, so it is set to the year we
+ * have actually been told.
+ */
+export const FOUNDED_YEAR = 2026;
 
 export interface Milestone {
   year: number;

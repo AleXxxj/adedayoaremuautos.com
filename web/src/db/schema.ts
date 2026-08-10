@@ -739,3 +739,80 @@ export const financePayments = pgTable(
 export type FinanceAgreement = typeof financeAgreements.$inferSelect;
 export type Instalment = typeof instalments.$inferSelect;
 export type FinancePayment = typeof financePayments.$inferSelect;
+
+/* ── Blog ──────────────────────────────────────────────────────────────── */
+
+/**
+ * Newsletter subscribers.
+ *
+ * The legacy form had no action attribute, so every address typed into it was
+ * discarded on submit. Consent is recorded per address: under GDPR-style rules
+ * and the US CAN-SPAM Act it must be possible to show when and from where
+ * someone opted in, and to honour an unsubscribe.
+ */
+export const newsletterSubscribers = pgTable(
+  "newsletter_subscribers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    /** Where on the site they subscribed, for attribution. */
+    source: text("source"),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+    /** Random token so an unsubscribe link needs no login and leaks no id. */
+    unsubscribeToken: text("unsubscribe_token").notNull(),
+    consentIp: text("consent_ip"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("newsletter_email_unique").on(t.email)],
+);
+
+export const commentStatus = pgEnum("comment_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+/**
+ * Article comments, held for moderation.
+ *
+ * The legacy page printed three hardcoded comments from people who do not
+ * exist, above a form that posted nowhere. Real comments on a dealership site
+ * are a reputational surface, so nothing appears publicly until a member of
+ * staff approves it — default status is `pending` and the public query filters
+ * on `approved`.
+ */
+export const articleComments = pgTable(
+  "article_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    articleSlug: text("article_slug").notNull(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    authorName: text("author_name").notNull(),
+    authorEmail: text("author_email"),
+    body: text("body").notNull(),
+
+    status: commentStatus("status").notNull().default("pending"),
+    moderatedAt: timestamp("moderated_at", { withTimezone: true }),
+    moderatedByEmail: text("moderated_by_email"),
+
+    authorIp: text("author_ip"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("article_comments_slug_idx").on(t.articleSlug, t.status, t.createdAt),
+  ],
+);
+
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type ArticleComment = typeof articleComments.$inferSelect;

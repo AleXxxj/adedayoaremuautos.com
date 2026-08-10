@@ -43,6 +43,13 @@
       "when": 1786250385620,
       "tag": "0005_finance_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786362545581,
+      "tag": "0006_blog",
+      "breakpoints": true
     }
   ]
 }
