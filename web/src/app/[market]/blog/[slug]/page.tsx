@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { ARTICLES, articleBySlug, articlesFor, type Block } from "@/content/articles";
 import { ARTICLE_BODIES } from "@/content/articleBodies";
+import { ARTICLE_HEADS } from "@/content/articleHeads";
 import { approvedComments } from "@/lib/actions/blog";
 import { socialLinks } from "@/lib/contact";
 import { LegacyCommentForm, LegacyShare } from "@/components/LegacyBlog";
@@ -109,12 +110,14 @@ export default async function ArticlePage({
   const market = MARKETS[code];
   const related = articlesFor(code).filter((a) => a.slug !== slug).slice(0, 3);
   const body = ARTICLE_BODIES[slug];
+  const head = ARTICLE_HEADS[slug];
   const comments = await approvedComments(slug);
   const authorSocials = socialLinks(code);
 
-  const published = article.publishedOn
+  const publishedOn = head?.publishedOn ?? article.publishedOn;
+  const published = publishedOn
     ? new Intl.DateTimeFormat(market.locale, { dateStyle: "long", timeZone: "UTC" }).format(
-        new Date(article.publishedOn),
+        new Date(publishedOn),
       )
     : null;
 
@@ -126,13 +129,15 @@ export default async function ArticlePage({
     articleSection: article.category,
     inLanguage: market.locale,
     ...(article.image ? { image: article.image } : {}),
-    ...(article.publishedOn ? { datePublished: article.publishedOn } : {}),
+    ...(publishedOn ? { datePublished: publishedOn } : {}),
     author: { "@type": "Person", name: "Adedayo Aremu" },
     publisher: { "@type": "Organization", name: "Adedayo Aremu Autos" },
   };
 
   return (
-    <>
+    // The article stylesheet is scoped to this class: several of its selectors
+    // collide with rules used elsewhere on the site.
+    <div className="article-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -154,7 +159,13 @@ export default async function ArticlePage({
           <span className="post-category">
             {CATEGORY_EMOJI[article.category] ?? "📰"} {article.category}
           </span>
-          <h1>{article.title}</h1>
+          {/* The headline keeps its span: the design highlights part of every
+              title, and which part is the author's choice per article. */}
+          {head ? (
+            <h1 dangerouslySetInnerHTML={{ __html: head.titleHtml }} />
+          ) : (
+            <h1>{article.title}</h1>
+          )}
           <div className="post-meta">
             {published && (
               <span>
@@ -295,6 +306,6 @@ export default async function ArticlePage({
           <LegacyCommentForm market={code} articleSlug={slug} />
         </div>
       </div>
-    </>
+    </div>
   );
 }
