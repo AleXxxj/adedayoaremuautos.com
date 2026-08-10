@@ -29,6 +29,7 @@ const base = {
   description: null,
   features: [],
   historyReportUrl: null,
+  rentalTierId: null,
   inspectionNotes: null,
   isFeatured: false,
   createdAt: new Date(),
