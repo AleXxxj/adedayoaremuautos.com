@@ -81,6 +81,10 @@ export default async function MarketLayout({
                 key={c}
                 href={`/${c}`}
                 className="market-switch"
+                /* The globe carries the destination country's colour, so the
+                   control still says where it goes when the label is hidden
+                   on a phone. */
+                data-market={c}
                 /* The label is hidden below 600px, so the accessible name has
                    to come from the attribute rather than the text node. */
                 aria-label={`Switch to ${MARKETS[c].name}`}

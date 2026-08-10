@@ -49,6 +49,18 @@ export default async function MarketHome({
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div className="hero">
         <div className="hero-content">
+          {/* Which market you are looking at, stated rather than implied. The
+              two sites are otherwise near-identical, so without this a visitor
+              cannot tell whether the prices and stock are the ones near them. */}
+          <div className="market-flag" data-market={code}>
+            <i className="fas fa-location-dot" aria-hidden="true" />
+            <span className="market-flag-label">
+              {code === "us" ? "Greensboro, North Carolina" : "Nigeria"}
+            </span>
+            <span className="market-flag-sep" aria-hidden="true" />
+            <span className="market-flag-currency">{market.currency}</span>
+          </div>
+
           <h2>
             Buy, Rent &amp; <span>Finance Cars</span> with Confidence
           </h2>

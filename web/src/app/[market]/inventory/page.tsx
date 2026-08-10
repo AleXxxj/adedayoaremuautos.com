@@ -7,6 +7,7 @@ import { listInventory, filterOptions, type SortKey } from "@/lib/repositories/v
 import { formatMoney, money, fromMajor } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
 import { LegacyFilters, ActiveFilters } from "@/components/LegacyFilters";
+import { EmptyState } from "@/components/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,16 @@ export default async function InventoryPage({
     filterOptions(code),
   ]);
 
+  // Whether the visitor narrowed the search, and how much stock the market
+  // holds regardless of it — the two facts the empty state needs to tell
+  // "nothing matches" apart from "nothing yet".
+  const hasFilters = ["make", "year", "price", "condition", "transmission", "fuel", "q"].some(
+    (k) => Boolean(sp[k as keyof typeof sp]),
+  );
+  const marketTotal = hasFilters
+    ? (await listInventory(code, { limit: 1 })).total
+    : total;
+
   const pages = Math.max(1, Math.ceil(total / PER_PAGE));
   const pageHref = (n: number) => {
     const next = new URLSearchParams(
@@ -136,24 +147,48 @@ export default async function InventoryPage({
             <ActiveFilters />
           </Suspense>
 
-          <div className="results-count">
-            {total === 0
-              ? "No vehicles match"
-              : `Showing ${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, total)} of ${total} vehicle${total === 1 ? "" : "s"}`}
-          </div>
+          {/* A count is only worth showing when there is something to count.
+              "No vehicles match" sitting above a panel that explains the
+              market has no stock yet says the same thing twice, in a way that
+              contradicts it. */}
+          {total > 0 && (
+            <div className="results-count">
+              {`Showing ${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, total)} of ${total} vehicle${total === 1 ? "" : "s"}`}
+            </div>
+          )}
 
           {vehicles.length === 0 ? (
-            <div className="no-results">
-              <i className="fas fa-car" />
-              <h3>No vehicles found</h3>
-              <p>
-                Try widening your filters — or tell us what you are looking for
-                and we will source it.
-              </p>
-              <Link href={`/${code}/contact`} className="btn btn-primary">
-                <i className="fas fa-paper-plane" /> Tell us what you want
-              </Link>
-            </div>
+            /* An empty filter and an empty market are different situations.
+               Showing one message for both is what makes a page read broken:
+               "no vehicles found" under no filters says the business has
+               nothing, when it means the stock has not been uploaded yet. */
+            hasFilters ? (
+              <EmptyState
+                icon="fas fa-filter-circle-xmark"
+                title="Nothing matches those filters"
+                body={`There ${marketTotal === 1 ? "is" : "are"} ${marketTotal} vehicle${marketTotal === 1 ? "" : "s"} available in ${market.name}. Widen the search, or tell us what you are after and we will source it.`}
+                actions={[
+                  { href: `/${code}/inventory`, label: "Clear filters", icon: "fas fa-rotate-left", primary: true },
+                  { href: `/${code}/contact`, label: "Tell us what you want", icon: "fas fa-paper-plane" },
+                ]}
+              />
+            ) : (
+              <EmptyState
+                icon="fas fa-warehouse"
+                eyebrow={`${market.name} showroom`}
+                title="Stock is being prepared"
+                body="Vehicles for this market are being inspected and photographed before they go on the site. Tell us what you are looking for and we will come to you first when it lands."
+                points={[
+                  "Every vehicle inspected before it is listed",
+                  "Photographs and full specification on each listing",
+                  "Financing and hire arranged in-house",
+                ]}
+                actions={[
+                  { href: `/${code}/contact`, label: "Tell us what you want", icon: "fas fa-paper-plane", primary: true },
+                  { href: `/${code}/financing`, label: "See financing terms", icon: "fas fa-hand-holding-dollar" },
+                ]}
+              />
+            )
           ) : (
             <div className="cars-grid">
               {vehicles.map((v) => {
