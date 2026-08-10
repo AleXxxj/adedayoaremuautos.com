@@ -5324,7 +5324,8 @@
    it posted to an unconfigured Formspree endpoint, so there was nothing to
    report back. These borrow the form's own spacing and the palette's danger
    colour rather than introducing a new look. */
-.contact-form .form-error {
+.contact-form .form-error,
+.application-form .form-error {
     margin-bottom: 15px;
     padding: 12px 14px;
     border: 1px solid rgba(220, 90, 90, 0.4);
@@ -5334,7 +5335,8 @@
     font-size: 14px;
 }
 
-.contact-form .form-note {
+.contact-form .form-note,
+.application-form .form-note {
     margin-bottom: 15px;
     padding: 12px 14px;
     border: 1px solid var(--border);
@@ -5343,7 +5345,8 @@
     font-size: 14px;
 }
 
-.contact-form .field-error {
+.contact-form .field-error,
+.application-form .field-error {
     display: block;
     margin-top: 6px;
     color: #f0a0a0;
@@ -5356,7 +5359,8 @@
     color: var(--silver-cool);
 }
 
-.contact-form button[disabled] {
+.contact-form button[disabled],
+.application-form button[disabled] {
     opacity: 0.6;
     cursor: progress;
 }
@@ -5401,4 +5405,71 @@
     color: var(--silver-cool);
     font-size: 14px;
     letter-spacing: 0.5px;
+}
+
+/* Financing page additions. The original had no consent step, no disclosure
+   line under the payment, and no statement about what it does not collect —
+   it simply asked for a BVN or SSN in a plain text input. */
+.calc-disclosure {
+    margin: 14px 0 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--silver-cool);
+}
+
+.result-amount.result-pending {
+    color: var(--silver-cool);
+    -webkit-text-fill-color: currentColor;
+}
+
+.consent-group {
+    margin: 20px 0;
+}
+
+.consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--silver-cool);
+    cursor: pointer;
+}
+
+.consent-label input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex: 0 0 auto;
+    accent-color: var(--green-accent);
+}
+
+.application-privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 auto 25px;
+    padding: 14px 16px;
+    border: 1px solid rgba(21, 77, 53, 0.35);
+    background: rgba(21, 77, 53, 0.08);
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--silver-cool);
+}
+
+.application-privacy i {
+    margin-top: 3px;
+    color: var(--green-accent);
+}
+
+.plans-table .amount a {
+    color: var(--green-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.plans-table .amount a:hover {
+    text-decoration: underline;
 }
