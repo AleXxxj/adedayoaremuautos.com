@@ -52,6 +52,7 @@ export default async function MarketLayout({
   const nav = [
     { href: `/${code}`, label: "Home" },
     { href: `/${code}/inventory`, label: "Buy Cars" },
+    { href: `/${code}/rent-to-own`, label: "Rent to Own" },
     { href: `/${code}/rentals`, label: "Rentals" },
     { href: `/${code}/financing`, label: "Financing" },
     { href: `/${code}/blog`, label: "Blog" },

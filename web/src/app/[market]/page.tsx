@@ -228,6 +228,47 @@ export default async function MarketHome({
         </div>
       </div>
 
+      {/* ── Rent to own ──────────────────────────────────────────────────
+          The business now leads with this, so it sits directly under the
+          vehicles rather than further down: the first thing after the stock
+          is what to do about it. */}
+      <div className="rto-banner">
+        <div className="rto-banner-inner">
+          <div className="rto-banner-copy">
+            <span className="rto-banner-eyebrow">
+              <i className="fas fa-key" aria-hidden="true" /> New
+            </span>
+            <h2>
+              Rent it. Then <span>own it.</span>
+            </h2>
+            <p>
+              Hire by the day or the week and every payment counts towards
+              keeping the car. Reach the total for your category and it is
+              yours — no balloon payment, no obligation to continue.
+            </p>
+            <div className="rto-banner-actions">
+              <Link href={`/${code}/rent-to-own`} className="btn btn-primary">
+                <i className="fas fa-key" /> How Rent to Own works
+              </Link>
+              <Link href={`/${code}/rent-to-own#calculator`} className="btn btn-outline">
+                <i className="fas fa-calculator" /> When would it be mine?
+              </Link>
+            </div>
+          </div>
+
+          <div className="rto-banner-figure" aria-hidden="true">
+            <div className="rto-banner-track">
+              <span className="rto-banner-fill" />
+            </div>
+            <div className="rto-banner-marks">
+              <span>Week 1</span>
+              <span>Halfway</span>
+              <span className="is-end">Yours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── How we work ──────────────────────────────────────────────────
           Every claim here is one the platform actually enforces, not a
           promise. Written for a buyer, but each line is a thing the site does

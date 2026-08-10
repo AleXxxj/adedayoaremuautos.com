@@ -800,3 +800,537 @@
         animation: none;
     }
 }
+
+/* ── 16. Rent to own ───────────────────────────────────────────────────────
+   The headline product. Given more room and more contrast than anything else
+   on the site, because it is the offer the business now leads with. */
+.legacy-theme .rto-intro,
+.legacy-theme .rto-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 96px) 20px;
+}
+
+.legacy-theme .rto-intro {
+    padding-bottom: 0;
+    text-align: center;
+}
+
+.legacy-theme .rto-section--tiers,
+.legacy-theme .rto-section--calc {
+    max-width: none;
+    background:
+        radial-gradient(80% 60% at 50% 0%, rgba(42, 92, 66, 0.12) 0%, transparent 70%),
+        #0d0d0d;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.legacy-theme .rto-section--tiers > *,
+.legacy-theme .rto-section--calc > * {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── Steps ─────────────────────────────────────────────────────────────── */
+.legacy-theme .rto-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 22px;
+}
+
+.legacy-theme .rto-step {
+    position: relative;
+    padding: 30px 24px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 130px),
+        var(--card-bg);
+}
+
+.legacy-theme .rto-step-index {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.07);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .rto-step > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(42, 92, 66, 0.45);
+    background: rgba(42, 92, 66, 0.14);
+    color: var(--green-accent);
+    font-size: 17px;
+}
+
+.legacy-theme .rto-step h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-step p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--silver-cool);
+}
+
+/* ── Tier cards ────────────────────────────────────────────────────────── */
+.legacy-theme .rto-tiers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.legacy-theme .rto-tier {
+    display: flex;
+    flex-direction: column;
+    padding: 32px 28px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 160px),
+        var(--card-bg);
+    box-shadow:
+        0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
+        0 20px 48px -28px rgba(0, 0, 0, 0.9);
+    transition:
+        transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1),
+        border-color 0.3s ease;
+}
+
+.legacy-theme .rto-tier:hover {
+    transform: translateY(-4px);
+    border-color: rgba(42, 92, 66, 0.65);
+}
+
+.legacy-theme .rto-tier-head h3 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-tier-head p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-tier-rates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin: 26px 0 22px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.legacy-theme .rto-rate {
+    display: block;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--pearl);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .rto-per {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--silver-cool);
+}
+
+/* The whole proposition, so it gets the accent and the weight. */
+.legacy-theme .rto-tier-own {
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(42, 92, 66, 0.45);
+    border-radius: 14px;
+    background: rgba(42, 92, 66, 0.12);
+}
+
+.legacy-theme .rto-tier-own--hire {
+    border-color: var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .rto-own-label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--illustration-gold);
+}
+
+.legacy-theme .rto-own-amount {
+    display: block;
+    margin: 6px 0 4px;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--pearl);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .rto-own-time {
+    display: block;
+    font-size: 13px;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-tier .btn {
+    margin-top: auto;
+    justify-content: center;
+}
+
+.legacy-theme .rto-more {
+    max-width: 760px;
+    margin: 36px auto 0;
+    padding: 16px 18px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-more i {
+    margin-right: 8px;
+    color: var(--illustration-gold);
+}
+
+/* ── Calculator ────────────────────────────────────────────────────────── */
+.legacy-theme .rto-calc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.legacy-theme .rto-calc-inputs,
+.legacy-theme .rto-calc-result {
+    padding: 32px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--card-bg);
+}
+
+.legacy-theme .rto-calc-result {
+    display: flex;
+    flex-direction: column;
+    border-color: rgba(42, 92, 66, 0.5);
+    background:
+        radial-gradient(100% 80% at 50% 0%, rgba(42, 92, 66, 0.18) 0%, transparent 70%),
+        var(--card-bg);
+}
+
+.legacy-theme .rto-calc-note {
+    margin: 18px 0 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-calc-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--illustration-gold);
+}
+
+.legacy-theme .rto-calc-headline {
+    display: block;
+    margin: 8px 0 24px;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: clamp(34px, 5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-calc-rows {
+    margin: 0 0 20px;
+    padding: 18px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legacy-theme .rto-calc-rows > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+}
+
+.legacy-theme .rto-calc-rows dt {
+    color: var(--silver-cool);
+    font-size: 14px;
+}
+
+.legacy-theme .rto-calc-rows dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--silver-classic);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .rto-calc-total {
+    font-size: 18px;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-calc-fine {
+    margin: auto 0 0;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--silver-cool);
+}
+
+/* ── Disclosure ────────────────────────────────────────────────────────── */
+.legacy-theme .rto-disclosure {
+    max-width: 900px;
+}
+
+.legacy-theme .rto-disclosure h3 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-disclosure h3 i {
+    margin-right: 10px;
+    color: var(--illustration-gold);
+}
+
+.legacy-theme .rto-disclosure ul {
+    margin: 0;
+    padding-left: 20px;
+    display: grid;
+    gap: 12px;
+}
+
+.legacy-theme .rto-disclosure li {
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-disclosure strong {
+    color: var(--silver-classic);
+}
+
+.legacy-theme .rto-disclosure-note {
+    margin: 22px 0 0;
+    font-size: 13px;
+    color: var(--silver-cool);
+}
+
+/* ── Closing call to action ────────────────────────────────────────────── */
+.legacy-theme .rto-cta {
+    padding: clamp(64px, 8vw, 104px) 20px;
+    text-align: center;
+    background:
+        radial-gradient(70% 100% at 50% 100%, rgba(42, 92, 66, 0.2) 0%, transparent 70%),
+        #0a0a0a;
+    border-top: 1px solid var(--border);
+}
+
+.legacy-theme .rto-cta h2 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.02em;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-cta > p {
+    max-width: 52ch;
+    margin: 0 auto 30px;
+    line-height: 1.7;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+}
+
+@media (max-width: 900px) {
+    .legacy-theme .rto-calc {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .legacy-theme .rto-calc-inputs,
+    .legacy-theme .rto-calc-result {
+        padding: 24px 20px;
+    }
+
+    .legacy-theme .rto-cta-actions .btn,
+    .legacy-theme .rto-tier .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ── 17. Rent to own, on the homepage ──────────────────────────────────────
+   The offer the business now leads with, placed directly under the stock: the
+   first thing after "here are the cars" is "here is how you keep one". */
+.legacy-theme .rto-banner {
+    padding: clamp(56px, 7vw, 96px) 20px;
+    background:
+        radial-gradient(75% 120% at 12% 0%, rgba(42, 92, 66, 0.28) 0%, transparent 62%),
+        linear-gradient(180deg, #0e1310 0%, #0a0a0a 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.legacy-theme .rto-banner-inner {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.legacy-theme .rto-banner-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 6px 14px;
+    border: 1px solid rgba(42, 92, 66, 0.6);
+    border-radius: 50px;
+    background: rgba(42, 92, 66, 0.18);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8fd9b3;
+}
+
+.legacy-theme .rto-banner-copy h2 {
+    margin: 0 0 16px;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--pearl);
+}
+
+.legacy-theme .rto-banner-copy h2 span {
+    background: linear-gradient(135deg, #7ac9a0 0%, #4e9d76 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.legacy-theme .rto-banner-copy > p {
+    max-width: 52ch;
+    margin: 0 0 28px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+/* A progress bar as the illustration: it explains the whole product without a
+   sentence, and it is the one image on the site that costs nothing to serve
+   and cannot be a stock photograph of somebody else's car. */
+.legacy-theme .rto-banner-figure {
+    padding: 34px 30px;
+    border: 1px solid rgba(42, 92, 66, 0.4);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .rto-banner-track {
+    position: relative;
+    height: 12px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+}
+
+.legacy-theme .rto-banner-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 72%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #2a5c42 0%, #7ac9a0 100%);
+    animation: rto-fill 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes rto-fill {
+    from {
+        width: 4%;
+    }
+    to {
+        width: 72%;
+    }
+}
+
+.legacy-theme .rto-banner-marks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--silver-cool);
+}
+
+.legacy-theme .rto-banner-marks .is-end {
+    color: #8fd9b3;
+    font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .rto-banner-fill {
+        animation: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .legacy-theme .rto-banner-inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .legacy-theme .rto-banner-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
