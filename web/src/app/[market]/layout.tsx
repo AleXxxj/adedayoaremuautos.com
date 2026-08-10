@@ -14,6 +14,7 @@ import "@/styles/legacy.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
+import { socialLinks } from "@/lib/contact";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -40,6 +41,7 @@ export default async function MarketLayout({
   const market = MARKETS[code];
   const other = MARKET_CODES.filter((c) => c !== code);
   const sites = await listLocations(code);
+  const socials = socialLinks(code);
   const site = sites[0];
 
   const nav = [
@@ -108,12 +110,24 @@ export default async function MarketLayout({
                   ? "Your trusted partner for premium car sales, rentals, and financing in Greensboro and across the Triad. We deliver excellence with every vehicle."
                   : "Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle."}
               </p>
-              <div className="social-links">
-                <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f" /></a>
-                <a href="#" aria-label="Instagram"><i className="fab fa-instagram" /></a>
-                <a href="#" aria-label="Twitter"><i className="fab fa-twitter" /></a>
-                <a href="#" aria-label="LinkedIn"><i className="fab fa-linkedin-in" /></a>
-              </div>
+              {/* The original linked every icon to `#`. A dead social icon on
+                  a dealership site reads as an abandoned account, so these
+                  render only once a handle exists in lib/contact. */}
+              {socials.length > 0 && (
+                <div className="social-links">
+                  {socials.map((s) => (
+                    <a
+                      key={s.key}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={s.label}
+                    >
+                      <i className={s.icon} />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="footer-links">

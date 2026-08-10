@@ -54,6 +54,9 @@ try {
     close: "18:00",
   }));
 
+  // sql.json, not JSON.stringify: postgres.js serialises the value itself, so
+  // stringifying first stored the array as a jsonb *string*. summariseHours
+  // then received text, spread it into characters, and printed nothing.
   await sql`
     INSERT INTO locations
       (id, market_code, name, address_line1, city, region, postal_code,
@@ -61,7 +64,7 @@ try {
     VALUES
       ('00000000-0000-4000-8000-000000000001', 'us', 'Greensboro',
        '507 Gillespie St', 'Greensboro', 'NC', '27401',
-       'US', '+13362076521', ${JSON.stringify(hours)}::jsonb, true)
+       'US', '+13362076521', ${sql.json(hours)}, true)
     ON CONFLICT (id) DO UPDATE SET
       name          = EXCLUDED.name,
       address_line1 = EXCLUDED.address_line1,
