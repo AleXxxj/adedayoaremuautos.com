@@ -15,6 +15,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { socialLinks } from "@/lib/contact";
+import { legalNav } from "@/content/legal";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -160,7 +161,14 @@ export default async function MarketLayout({
           <p>
             © {new Date().getFullYear()} Adedayo Aremu Autos. All rights reserved.
           </p>
+          {/* The original listed the three policies here; they were dropped
+              when the footer was first ported. */}
           <div className="footer-bottom-links">
+            {legalNav(code).map((l) => (
+              <Link key={l.href} href={l.href}>
+                {l.label.replace(/<[^>]+>/g, "")}
+              </Link>
+            ))}
             <Link href={`/${code}/contact`}>Contact</Link>
             {site?.phone && <a href={`tel:${site.phone}`}>{formatPhone(site.phone)}</a>}
           </div>
