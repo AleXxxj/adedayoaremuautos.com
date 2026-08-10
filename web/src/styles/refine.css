@@ -604,3 +604,88 @@
    ported CSS to do it. Inline styles answer both.
 
    Transform and opacity only, so it stays on the compositor. */
+
+/* ── 13. How we work ───────────────────────────────────────────────────────
+   The operational claims, given the same weight as the vehicles. Numbered so
+   it reads as a sequence rather than four unrelated boasts. */
+.legacy-theme .how-we-work {
+    padding-left: 20px;
+    padding-right: 20px;
+    background:
+        radial-gradient(90% 60% at 50% 0%, rgba(42, 92, 66, 0.1) 0%, transparent 70%),
+        #0d0d0d;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.legacy-theme .how-we-work-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.legacy-theme .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.legacy-theme .work-step {
+    position: relative;
+    padding: 32px 26px 30px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 140px),
+        var(--card-bg);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+    transition:
+        border-color 0.3s ease,
+        transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.legacy-theme .work-step:hover {
+    transform: translateY(-4px);
+    border-color: rgba(42, 92, 66, 0.6);
+}
+
+/* Large, quiet and set behind the content: a sequence marker, not a headline. */
+.legacy-theme .work-step-index {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.07);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .work-step > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(42, 92, 66, 0.45);
+    background: rgba(42, 92, 66, 0.14);
+    color: var(--green-accent);
+    font-size: 18px;
+}
+
+.legacy-theme .work-step h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--pearl);
+}
+
+.legacy-theme .work-step p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--silver-cool);
+}
