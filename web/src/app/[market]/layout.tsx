@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 import { MARKETS, MARKET_CODES, isMarketCode } from "@/lib/market";
 import {
   listLocations,
-  summariseHours,
   formatPhone,
-  type OpeningHour,
 } from "@/lib/repositories/locations";
 // Order matters. Scoping the original's `*` reset to `.legacy-theme *` raised
 // its specificity from 0,0,0 to 0,1,0, which ties with Font Awesome's `.fas`
@@ -15,6 +13,7 @@ import "@/styles/legacy.css";
 // loaded but its webfonts did not, so every icon rendered as a fallback box.
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { LegacyNav } from "@/components/LegacyNav";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -68,23 +67,21 @@ export default async function MarketLayout({
             </div>
           </div>
 
-          <div className="nav-menu" id="navMenu">
-            {nav.map((n) => (
-              <Link key={n.href} href={n.href}>
-                {n.label}
-              </Link>
-            ))}
-          </div>
+          <LegacyNav items={nav} />
 
           <div className="header-actions">
             {other.map((c) => (
               <Link
                 key={c}
                 href={`/${c}`}
-                className="btn btn-outline"
-                style={{ padding: "0.55rem 1rem", fontSize: "0.8rem" }}
+                className="market-switch"
+                /* The label is hidden below 600px, so the accessible name has
+                   to come from the attribute rather than the text node. */
+                aria-label={`Switch to ${MARKETS[c].name}`}
+                title={`Switch to ${MARKETS[c].name}`}
               >
-                <i className="fas fa-globe" /> {MARKETS[c].name}
+                <i className="fas fa-globe" aria-hidden="true" />
+                <span>{MARKETS[c].name}</span>
               </Link>
             ))}
           </div>

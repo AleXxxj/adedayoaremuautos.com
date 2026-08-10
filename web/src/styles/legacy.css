@@ -4143,3 +4143,1179 @@
                 font-size: 20px;
             }
         }
+
+/* ── Responsive blocks lost to a prefix-based dedupe in the original merge ── */
+/* restored from car-detail.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .car-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .media-container {
+                height: 300px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-options {
+                flex-direction: column;
+            }
+        }
+
+/* restored from rentals.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .rental-types {
+                grid-template-columns: 1fr;
+                margin-top: 20px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .terms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+/* restored from financing.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .steps-grid,
+            .eligibility-grid,
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .plans-section,
+            .eligibility-section,
+            .calculator-section,
+            .application-section {
+                padding: 40px 20px;
+            }
+        }
+
+/* restored from blog.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .featured-card {
+                grid-template-columns: 1fr;
+            }
+
+            .featured-image {
+                min-height: 300px;
+            }
+
+            .featured-content {
+                padding: 30px;
+            }
+
+            .featured-content h2 {
+                font-size: 28px;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+        }
+
+/* restored from contact.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info,
+            .contact-form {
+                padding: 35px;
+            }
+        }
+
+/* restored from Terms-of-service.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn { display: block; }
+            .nav-menu { display: none; width: 100%; flex-direction: column; align-items: center; gap: 15px; padding: 20px 0 10px; border-top: 1px solid rgba(21,77,53,0.2); margin-top: 15px; }
+            .nav-menu.active { display: flex; }
+            .toc-list { grid-template-columns: 1fr; }
+            .terms-table { font-size: 13px; }
+        }
+
+/* restored from Terms-of-service.html */
+@media (max-width: 480px) { .whatsapp-btn span { display: none; } }
+
+/* restored from blog-finance-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .step-list li {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .finance-table {
+                font-size: 14px;
+            }
+
+            .finance-table th,
+            .finance-table td {
+                padding: 10px;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-finance-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .blog-content h2 {
+                font-size: 28px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-finance-guide.html */
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .post-header h1 {
+                font-size: 32px;
+            }
+
+            .blog-content h3 {
+                font-size: 22px;
+            }
+        }
+
+/* restored from blog-foreign-used.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .country-flags {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-foreign-used.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .country-flags {
+                grid-template-columns: 1fr;
+            }
+
+            .doc-table {
+                font-size: 14px;
+            }
+
+            .doc-table th,
+            .doc-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-inspection-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .inspection-grid,
+            .red-flags,
+            .test-drive-grid,
+            .rating-summary ul {
+                grid-template-columns: 1fr;
+            }
+
+            .test-drive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-inspection-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .test-drive-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .inspection-item-header {
+                flex-wrap: wrap;
+            }
+
+            .inspection-item p,
+            .inspection-check {
+                margin-left: 0;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-luxury-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .comparison-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .brand-showcase {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pros-cons-grid,
+            .popular-models {
+                grid-template-columns: 1fr;
+            }
+
+            .decision-options {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-luxury-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .comparison-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .brand-showcase {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-maintenance-tips.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .tip-grid,
+            .warning-signs,
+            .seasonal-tips {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-maintenance-tips.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .maintenance-card h3 {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .schedule-table {
+                font-size: 14px;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-rental-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .rental-types-grid,
+            .checklist-items,
+            .dos-donts {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-rental-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .terms-table {
+                font-size: 14px;
+            }
+
+            .terms-table th,
+            .terms-table td {
+                padding: 10px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-suv-guide.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                padding: 20px 0 10px;
+                border-top: 1px solid rgba(21, 77, 53, 0.2);
+                margin-top: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+
+            .specs-grid,
+            .pros-cons,
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .author-box {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .author-social {
+                justify-content: center;
+            }
+
+            .share-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .comment-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .comment {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .comment-header {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-suv-guide.html */
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .blog-content {
+                padding: 30px 20px;
+            }
+
+            .blog-content h2 {
+                font-size: 28px;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .vehicle-title {
+                font-size: 24px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+
+/* restored from blog-suv-guide.html */
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .post-header h1 {
+                font-size: 32px;
+            }
+        }
+
+/* restored from privacy-policy.html */
+@media (max-width: 900px) {
+            .mobile-menu-btn { display: block; }
+            .nav-menu { display: none; width: 100%; flex-direction: column; align-items: center; gap: 15px; padding: 20px 0 10px; border-top: 1px solid rgba(21,77,53,0.2); margin-top: 15px; }
+            .nav-menu.active { display: flex; }
+            .toc-list { grid-template-columns: 1fr; }
+        }
+
+/* ── Additions ──────────────────────────────────────────────────────────────
+   Not from the original. The original's header-actions held a single WhatsApp
+   pill; this build puts the market switch there instead, so it needs the same
+   compact geometry — otherwise it wraps to a second row, the fixed header
+   grows past the 90px the page content is offset by, and the header covers the
+   breadcrumb on a phone. Same treatment as the original gave its pill: the
+   label drops below 600px and the globe carries the meaning.
+   ------------------------------------------------------------------------ */
+.market-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid rgba(42, 92, 66, 0.6);
+    border-radius: 50px;
+    color: var(--pearl, #f5f5f5);
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.market-switch:hover {
+    border-color: var(--green-accent, #2a5c42);
+    background: rgba(42, 92, 66, 0.15);
+}
+
+@media (max-width: 600px) {
+    .market-switch span {
+        display: none;
+    }
+
+    .market-switch {
+        padding: 10px 12px;
+    }
+}
+
+/* The original sets `white-space: nowrap` on the wordmark and drops it to 16px
+   below 480px. At 375px that is still ~214px of text against ~160px of room
+   once the logo, menu button and switch are placed, so the wordmark runs under
+   the menu button. Letting it wrap onto two lines fits without shrinking the
+   type to an unreadable size; the header stays a single row either way. */
+@media (max-width: 480px) {
+    .logo-text {
+        min-width: 0;
+    }
+
+    .logo-text h1 {
+        white-space: normal;
+    }
+}
