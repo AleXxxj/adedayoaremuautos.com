@@ -689,3 +689,114 @@
     line-height: 1.7;
     color: var(--silver-cool);
 }
+
+/* ── 14. Loading ───────────────────────────────────────────────────────────
+   Skeletons in the shape of the content that is coming, rather than a spinner
+   in the middle of an empty page. The layout is already correct when the data
+   arrives, so nothing jumps.
+
+   The sweep is a background-position animation on a gradient — no layout, no
+   paint of anything but the element itself. */
+.legacy-theme .skeleton-block,
+.legacy-theme .skeleton-line {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.045);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.06) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-sweep {
+    from {
+        background-position: 180% 0;
+    }
+    to {
+        background-position: -80% 0;
+    }
+}
+
+.legacy-theme .skeleton-card {
+    pointer-events: none;
+}
+
+.legacy-theme .skeleton-block {
+    border-radius: 0;
+}
+
+.legacy-theme .skeleton-line {
+    height: 14px;
+    margin-bottom: 12px;
+}
+
+.legacy-theme .skeleton-line--title {
+    width: 78%;
+    height: 20px;
+}
+
+.legacy-theme .skeleton-line--specs {
+    width: 60%;
+}
+
+.legacy-theme .skeleton-line--price {
+    width: 42%;
+    height: 26px;
+    margin-top: 18px;
+}
+
+.legacy-theme .skeleton-line--button {
+    width: 100%;
+    height: 42px;
+    border-radius: 10px;
+    margin-top: 18px;
+    margin-bottom: 0;
+}
+
+/* A sweep that never stops is a distraction for anyone who asked for less
+   motion; the block still reads as a placeholder without it. */
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .skeleton-block,
+    .legacy-theme .skeleton-line {
+        animation: none;
+    }
+}
+
+/* ── 15. Interaction ───────────────────────────────────────────────────────
+   Anything that submits or navigates should say so while it is working. */
+.legacy-theme button[disabled],
+.legacy-theme .btn[aria-disabled="true"] {
+    cursor: progress;
+    opacity: 0.65;
+}
+
+/* Photographs arrive at different times over a slow connection; fading them in
+   as they decode stops the grid flashing. */
+.legacy-theme .car-image img,
+.legacy-theme .blog-card-image img,
+.legacy-theme .related-image img {
+    animation: image-in 0.45s ease both;
+}
+
+@keyframes image-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .car-image img,
+    .legacy-theme .blog-card-image img,
+    .legacy-theme .related-image img {
+        animation: none;
+    }
+}
