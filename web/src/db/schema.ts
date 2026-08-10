@@ -185,6 +185,8 @@ export const vehicles = pgTable(
 
     /** URL of a third-party history report. US buyers expect this. */
     historyReportUrl: text("history_report_url"),
+    /** Which rent-to-own category this vehicle is offered in, if any. */
+    rentalTierId: uuid("rental_tier_id"),
     inspectionNotes: text("inspection_notes"),
 
     isFeatured: boolean("is_featured").notNull().default(false),
@@ -816,3 +818,50 @@ export const articleComments = pgTable(
 
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 export type ArticleComment = typeof articleComments.$inferSelect;
+
+/* ── Rent to own ───────────────────────────────────────────────────────── */
+
+/**
+ * Rental tiers on a path to ownership.
+ *
+ * A tier carries its own pricing and the amount of accumulated rent at which
+ * the vehicle becomes the customer's. Pricing lives on the tier rather than
+ * the vehicle because the offer is sold by category — "Economy is $40 a day,
+ * $250 a week, yours at $5,000" — and every vehicle in that category shares
+ * the terms.
+ *
+ * Market-scoped and currency-bearing: $5,000 is not a threshold anyone has
+ * agreed to in naira, so Nigeria has no tiers until the business sets them.
+ */
+export const rentalTiers = pgTable(
+  "rental_tiers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    tagline: text("tagline"),
+    /** Display order, lowest first. */
+    position: integer("position").notNull().default(0),
+
+    dailyMinor: bigint("daily_minor", { mode: "number" }).notNull(),
+    weeklyMinor: bigint("weekly_minor", { mode: "number" }),
+    monthlyMinor: bigint("monthly_minor", { mode: "number" }),
+    /**
+     * Total rent that must accumulate before ownership transfers. Null means
+     * the tier is hire-only — the category exists but does not lead to
+     * ownership, which the business may want for its most expensive stock.
+     */
+    ownershipThresholdMinor: bigint("ownership_threshold_minor", { mode: "number" }),
+    depositMinor: bigint("deposit_minor", { mode: "number" }).notNull().default(0),
+    currency: currencyCode("currency").notNull(),
+
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("rental_tiers_market_slug_unique").on(t.marketCode, t.slug)],
+);
+
+export type RentalTier = typeof rentalTiers.$inferSelect;

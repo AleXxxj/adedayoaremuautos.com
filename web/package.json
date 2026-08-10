@@ -19,7 +19,8 @@
     "test:deal": "tsx scripts/verify-deal-math.ts",
     "test:amort": "tsx scripts/verify-amortization.ts",
     "test:ledger": "tsx scripts/verify-ledger.ts",
-    "test:rental": "tsx scripts/verify-rental.ts"
+    "test:rental": "tsx scripts/verify-rental.ts",
+    "verify:rto": "tsx scripts/verify-rent-to-own.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
