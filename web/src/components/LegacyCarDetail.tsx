@@ -24,7 +24,9 @@ export function LegacyGallery({
     return (
       <div className="car-gallery">
         <div className="media-container">
-          <div className="car-image-placeholder">Photography coming soon</div>
+          <div className="media-slide active">
+            <div className="car-image-placeholder">Photography coming soon</div>
+          </div>
         </div>
       </div>
     );
@@ -34,9 +36,20 @@ export function LegacyGallery({
 
   return (
     <div className="car-gallery">
+      {/* Each photo needs a .media-slide wrapper: .media-container is a fixed
+          400px box and the slides are absolutely positioned to fill it. A bare
+          <img> sits at its natural size and leaves the rest of the box black. */}
       <div className="media-container" id="mediaContainer">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={images[i]} alt={`${alt} — photo ${i + 1} of ${images.length}`} />
+        {images.map((src, n) => (
+          <div className={`media-slide${n === i ? " active" : ""}`} key={src}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt={n === i ? `${alt} — photo ${n + 1} of ${images.length}` : ""}
+              loading={n === 0 ? "eager" : "lazy"}
+            />
+          </div>
+        ))}
       </div>
 
       {images.length > 1 && (

@@ -24,7 +24,6 @@
    so this stays comparable to the live legacy site.
    ───────────────────────────────────────────────────────────────────────── */
 
-
 /* ── index.html ──────────────────────────────────────── */
 .legacy-theme *:where(:not([class*="fa-"])),
 .legacy-theme *:where(:not([class*="fa-"]))::before,
@@ -1724,6 +1723,42 @@
                 flex-direction: column;
             }
         }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .results-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
 @media (max-width: 480px) {
             .logo-container img {
                 height: 40px;
@@ -2347,6 +2382,79 @@
         .footer-currency {
             margin-bottom: 20px;
         }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .key-specs {
+                gap: 12px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .cash-price .value {
+                font-size: 22px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
 
 /* ── rentals.html ──────────────────────────────────────── */
 /* Page Header - Rentals */
@@ -2530,6 +2638,42 @@
             color: var(--silver-cool);
             font-size: 14px;
             line-height: 1.6;
+        }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .results-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .terms-section {
+                padding: 30px 20px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
         }
 
 /* ── financing.html ──────────────────────────────────────── */
@@ -2842,6 +2986,67 @@
 .btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-green);
+        }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .result-amount {
+                font-size: 40px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .result-amount {
+                font-size: 32px;
+            }
         }
 
 /* ── about.html ──────────────────────────────────────── */
@@ -3239,6 +3444,89 @@
                 padding-left: 30px;
             }
         }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .values-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .executive-bio,
+            .full-bio {
+                padding: 30px 25px;
+            }
+
+            .section-light {
+                padding: 40px 25px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header h1 {
+                font-size: 36px;
+            }
+        }
 
 /* ── blog.html ──────────────────────────────────────── */
 /* Page Header - Blog */
@@ -3501,6 +3789,50 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-green);
         }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .featured-content {
+                padding: 25px;
+            }
+
+            .featured-content h2 {
+                font-size: 24px;
+            }
+
+            .featured-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .newsletter-section {
+                padding: 40px 25px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
 
 /* ── contact.html ──────────────────────────────────────── */
 /* Page Header - Contact */
@@ -3720,4 +4052,94 @@
             color: var(--pearl);
             transform: translateY(-5px);
             border-color: var(--green-accent);
+        }
+@media (max-width: 600px) {
+            .logo-container img {
+                height: 45px;
+            }
+
+            .logo-text h1 {
+                font-size: 18px;
+            }
+
+            .logo-text p {
+                font-size: 9px;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .info-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .info-icon {
+                margin-bottom: 10px;
+            }
+
+            .map-embed {
+                height: 300px;
+            }
+
+            .social-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+        }
+@media (max-width: 480px) {
+            .logo-container img {
+                height: 40px;
+            }
+
+            .logo-text h1 {
+                font-size: 16px;
+            }
+
+            .logo-text p {
+                font-size: 8px;
+            }
+
+            .whatsapp-btn span {
+                display: none;
+            }
+
+            .whatsapp-btn {
+                padding: 8px 10px;
+            }
+
+            .whatsapp-btn i {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .contact-info,
+            .contact-form {
+                padding: 25px;
+            }
+
+            .contact-info h2,
+            .contact-form h2 {
+                font-size: 28px;
+            }
+
+            .social-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
         }

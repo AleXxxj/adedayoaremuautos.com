@@ -192,7 +192,7 @@ export default async function CarDetailPage({
               )}
             </div>
 
-            <div className="car-actions-row">
+            <div className="action-buttons">
               <Link href={`/${code}/contact?vehicle=${v.slug}`} className="btn btn-primary">
                 <i className="fas fa-phone-alt" /> Contact Us
               </Link>
