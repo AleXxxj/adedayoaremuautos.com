@@ -18,6 +18,8 @@ import "@/styles/refine.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { CountryNotice } from "@/components/CountryNotice";
+import { suggestMarket } from "@/lib/geo";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
 
@@ -47,6 +49,7 @@ export default async function MarketLayout({
   const other = MARKET_CODES.filter((c) => c !== code);
   const sites = await listLocations(code);
   const socials = socialLinks(code);
+  const suggested = await suggestMarket(code);
   const site = sites[0];
 
   const nav = [
@@ -63,6 +66,7 @@ export default async function MarketLayout({
   return (
     <div className="legacy-theme">
       <ScrollReveal />
+      <CountryNotice currentMarket={code} suggested={suggested} />
 
       <div className="header">
         <div className="header-container">

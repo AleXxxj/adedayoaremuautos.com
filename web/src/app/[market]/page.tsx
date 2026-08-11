@@ -66,6 +66,7 @@ export default async function MarketHome({
             body:
               "Hire by the day or the week, and every payment counts towards keeping the car. Reach the total for your category and it is yours.",
             image: "/img/hero-benz.png",
+            art: "ownership",
             actions: [
               { href: `/${code}/rent-to-own`, label: "HOW IT WORKS", icon: "fas fa-key", primary: true },
               { href: `/${code}/rent-to-own#calculator`, label: "WHEN WOULD IT BE MINE?", icon: "fas fa-calculator" },
@@ -90,6 +91,7 @@ export default async function MarketHome({
             body:
               "Payment estimates run the same arithmetic as the agreement itself. Work out what a vehicle costs before you speak to anyone.",
             image: "/img/hero-wide.png",
+            art: "figures",
             actions: [
               { href: `/${code}/financing`, label: "APPLY FOR FINANCING", icon: "fas fa-hand-holding-usd", primary: true },
               { href: `/${code}/financing#calculator`, label: "USE THE CALCULATOR", icon: "fas fa-calculator" },

@@ -11,6 +11,8 @@ export interface HeroSlide {
   title: [string, string, string];
   body: string;
   image: string;
+  /** Optional designed composition, shown beside the copy on wide screens. */
+  art?: "ownership" | "figures";
   actions: { href: string; label: string; icon: string; primary?: boolean }[];
 }
 
@@ -37,6 +39,67 @@ const INTERVAL_MS = 7000;
  *  - Reduced motion means no autoplay at all: the controls still work, the
  *    slide simply never moves on its own.
  */
+/**
+ * The illustration for a slide, drawn rather than photographed.
+ *
+ * A photograph of a car does not say "ownership" or "these figures are the
+ * real ones" — it says "car", which the middle slide already says. These carry
+ * the idea instead: an arc filling towards a key, and a figure resolving.
+ *
+ * Drawn in SVG and CSS because it costs a few hundred bytes, scales to any
+ * screen, needs no photographer, and cannot be mistaken for stock.
+ */
+function HeroArt({ kind }: { kind: "ownership" | "figures" }) {
+  if (kind === "ownership") {
+    // 72% of the way round: far enough to read as real progress, short enough
+    // that the eye finishes the journey.
+    const r = 86;
+    const circumference = 2 * Math.PI * r;
+    return (
+      <div className="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 220 220" className="hero-art-ring">
+          <circle className="hero-art-track" cx="110" cy="110" r={r} />
+          <circle
+            className="hero-art-progress"
+            cx="110"
+            cy="110"
+            r={r}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * 0.28}
+          />
+        </svg>
+        <div className="hero-art-centre">
+          <i className="fas fa-key" />
+          <span className="hero-art-caption">rent paid</span>
+          <strong className="hero-art-value">towards yours</strong>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hero-art hero-art--figures" aria-hidden="true">
+      <div className="hero-art-rows">
+        <div>
+          <span>Vehicle</span>
+          <em />
+        </div>
+        <div>
+          <span>Deposit</span>
+          <em />
+        </div>
+        <div className="is-total">
+          <span>Monthly</span>
+          <em />
+        </div>
+      </div>
+      <div className="hero-art-stamp">
+        <i className="fas fa-equals" /> same figures on the agreement
+      </div>
+    </div>
+  );
+}
+
 export function HeroSlider({
   slides,
   market,
@@ -145,6 +208,8 @@ export function HeroSlider({
               ))}
             </div>
           </div>
+
+          {s.art && <HeroArt kind={s.art} />}
         </div>
       ))}
 

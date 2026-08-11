@@ -1598,3 +1598,184 @@
         padding: 150px 0 120px;
     }
 }
+
+/* ── 19. Hero art ──────────────────────────────────────────────────────────
+   Drawn, not photographed. Two of the three slides are about an idea rather
+   than a car — ownership, and figures you can trust — and a photograph of a
+   vehicle says neither. A few hundred bytes of SVG says both, scales to any
+   screen, and cannot be mistaken for someone else's stock library. */
+.legacy-theme .hero-slide {
+    position: relative;
+}
+
+.legacy-theme .hero-art {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: clamp(40px, 7vw, 120px);
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 300px;
+    pointer-events: none;
+}
+
+/* ── Ownership arc ─────────────────────────────────────────────────────── */
+.legacy-theme .hero-art-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* Start the arc at twelve o'clock rather than three. */
+    transform: rotate(-90deg);
+}
+
+.legacy-theme .hero-art-track,
+.legacy-theme .hero-art-progress {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+}
+
+.legacy-theme .hero-art-track {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+.legacy-theme .hero-art-progress {
+    stroke: url(#none);
+    stroke: #7ac9a0;
+    filter: drop-shadow(0 0 12px rgba(122, 201, 160, 0.45));
+    animation: hero-arc 2.2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* Drawn from empty, so the arc performs the idea rather than stating it. */
+@keyframes hero-arc {
+    from {
+        stroke-dashoffset: 540;
+    }
+}
+
+.legacy-theme .hero-art-centre {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.legacy-theme .hero-art-centre i {
+    font-size: 30px;
+    color: #7ac9a0;
+    margin-bottom: 6px;
+}
+
+.legacy-theme .hero-art-caption {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.legacy-theme .hero-art-value {
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--pearl);
+}
+
+/* ── Figures ───────────────────────────────────────────────────────────── */
+.legacy-theme .hero-art--figures {
+    width: 320px;
+    height: auto;
+    padding: 26px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    background: rgba(8, 14, 11, 0.55);
+    backdrop-filter: blur(14px);
+    align-items: stretch;
+}
+
+.legacy-theme .hero-art-rows {
+    display: grid;
+    gap: 14px;
+}
+
+.legacy-theme .hero-art-rows > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legacy-theme .hero-art-rows > div:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.legacy-theme .hero-art-rows span {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Bars rather than invented amounts: a number here would be a price the
+   business has not quoted, sitting on the homepage looking like one. */
+.legacy-theme .hero-art-rows em {
+    height: 10px;
+    width: 96px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.legacy-theme .hero-art-rows .is-total em {
+    width: 128px;
+    height: 14px;
+    background: linear-gradient(90deg, #2a5c42, #7ac9a0);
+}
+
+.legacy-theme .hero-art-stamp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.14);
+    font-size: 12px;
+    color: #8fd9b3;
+}
+
+/* The copy needs the full width before the art does; below this the art would
+   sit on top of the headline. */
+@media (max-width: 1100px) {
+    .legacy-theme .hero-art {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .hero-art-progress {
+        animation: none;
+    }
+}
+
+/* ── 20. Country notice ────────────────────────────────────────────────────
+   The legacy sheet styles .country-notification already; it only needs to be
+   above the fixed header and out of the way on a phone. */
+.legacy-theme .country-notification {
+    z-index: 1200;
+}
+
+@media (max-width: 600px) {
+    .legacy-theme .country-notification {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+}
