@@ -50,6 +50,9 @@ export function AdminChrome({
             <Link href="/admin/rentals" className="hover:text-[var(--text-primary)]">
               Rentals
             </Link>
+            <Link href="/admin/tiers" className="hover:text-[var(--text-primary)]">
+              Rent to Own
+            </Link>
             <Link href="/admin/comments" className="hover:text-[var(--text-primary)]">
               Comments
             </Link>
