@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroSlider } from "@/components/HeroSlider";
 import { notFound } from "next/navigation";
 import { MARKETS, isMarketCode, formatDistance } from "@/lib/market";
 import { listInventory } from "@/lib/repositories/vehicles";
@@ -47,44 +48,55 @@ export default async function MarketHome({
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <div className="hero">
-        <div className="hero-content">
-          {/* Which market you are looking at, stated rather than implied. The
-              two sites are otherwise near-identical, so without this a visitor
-              cannot tell whether the prices and stock are the ones near them. */}
-          <div className="market-flag" data-market={code}>
-            <i className="fas fa-location-dot" aria-hidden="true" />
-            <span className="market-flag-label">
-              {code === "us" ? "Greensboro, North Carolina" : "Nigeria"}
-            </span>
-            <span className="market-flag-sep" aria-hidden="true" />
-            <span className="market-flag-currency">{market.currency}</span>
-          </div>
-
-          <h2>
-            Buy, Rent &amp; <span>Finance Cars</span> with Confidence
-          </h2>
-          <p>
-            {code === "us"
-              ? "Premium vehicles, verified quality, and flexible payment plans tailored for you. Serving Greensboro and the Triad."
-              : "Premium vehicles, verified quality, and flexible payment plans tailored for you. Experience luxury and reliability with every ride."}
-          </p>
-          <div className="hero-buttons">
-            <Link href={`/${code}/inventory`} className="btn btn-primary">
-              <i className="fas fa-car" />
-              VIEW CARS
-            </Link>
-            <Link href={`/${code}/rentals`} className="btn btn-outline">
-              <i className="fas fa-key" />
-              RENT A CAR
-            </Link>
-            <Link href={`/${code}/financing`} className="btn btn-outline-light">
-              <i className="fas fa-hand-holding-usd" />
-              APPLY FOR FINANCING
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* The hero leads with rent to own, because that is what the business
+          now leads with. The first slide is server-rendered, so the marketing
+          message is the first thing painted and the first thing a crawler
+          reads — "opens on first load" without an interstitial to dismiss. */}
+      <HeroSlider
+        market={{
+          code,
+          label: code === "us" ? "Greensboro, North Carolina" : "Nigeria",
+          currency: market.currency,
+        }}
+        slides={[
+          {
+            key: "rent-to-own",
+            eyebrow: { icon: "fas fa-key", text: "New — Rent to Own" },
+            title: ["Rent it. Then ", "own it.", ""],
+            body:
+              "Hire by the day or the week, and every payment counts towards keeping the car. Reach the total for your category and it is yours.",
+            image: "/img/hero-benz.png",
+            actions: [
+              { href: `/${code}/rent-to-own`, label: "HOW IT WORKS", icon: "fas fa-key", primary: true },
+              { href: `/${code}/rent-to-own#calculator`, label: "WHEN WOULD IT BE MINE?", icon: "fas fa-calculator" },
+            ],
+          },
+          {
+            key: "buy",
+            title: ["Buy, Rent & ", "Finance Cars", " with Confidence"],
+            body:
+              code === "us"
+                ? "Premium vehicles, verified quality, and flexible payment plans tailored for you. Serving Greensboro and the Triad."
+                : "Premium vehicles, verified quality, and flexible payment plans tailored for you. Experience luxury and reliability with every ride.",
+            image: "/img/hero-nissan.png",
+            actions: [
+              { href: `/${code}/inventory`, label: "VIEW CARS", icon: "fas fa-car", primary: true },
+              { href: `/${code}/rentals`, label: "RENT A CAR", icon: "fas fa-key" },
+            ],
+          },
+          {
+            key: "finance",
+            title: ["Figures you see are the ", "figures you sign", ""],
+            body:
+              "Payment estimates run the same arithmetic as the agreement itself. Work out what a vehicle costs before you speak to anyone.",
+            image: "/img/hero-wide.png",
+            actions: [
+              { href: `/${code}/financing`, label: "APPLY FOR FINANCING", icon: "fas fa-hand-holding-usd", primary: true },
+              { href: `/${code}/financing#calculator`, label: "USE THE CALCULATOR", icon: "fas fa-calculator" },
+            ],
+          },
+        ]}
+      />
 
       {/* ── Services ─────────────────────────────────────────────────────── */}
       <div className="services">

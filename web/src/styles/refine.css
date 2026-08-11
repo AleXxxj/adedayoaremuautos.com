@@ -1334,3 +1334,267 @@
         justify-content: center;
     }
 }
+
+/* ── 18. Hero slider ───────────────────────────────────────────────────────
+   The ported `.hero` carried its own background image and min-height; the
+   slider keeps that shell and puts each slide's photograph on the slide
+   instead, so the layout and the scrim above are unchanged. */
+.legacy-theme .hero--slider {
+    background-image: none;
+    display: grid;
+}
+
+/* Every slide occupies the same grid cell, so the hero never changes height
+   between slides and nothing below it moves. */
+.legacy-theme .hero-slide {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    min-height: inherit;
+    padding: 100px 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.7s cubic-bezier(0.2, 0.7, 0.3, 1),
+        visibility 0s linear 0.7s;
+}
+
+.legacy-theme .hero-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition:
+        opacity 0.7s cubic-bezier(0.2, 0.7, 0.3, 1),
+        visibility 0s;
+}
+
+/* The scrim belongs to each slide now, since each carries its own photograph. */
+.legacy-theme .hero-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            100deg,
+            rgba(4, 8, 6, 0.94) 0%,
+            rgba(4, 8, 6, 0.88) 38%,
+            rgba(4, 8, 6, 0.55) 58%,
+            rgba(4, 8, 6, 0.2) 78%,
+            rgba(4, 8, 6, 0.45) 100%
+        ),
+        linear-gradient(to top, rgba(4, 8, 6, 0.85) 0%, transparent 45%);
+}
+
+/* The shell's own scrim would double up now that each slide has one. */
+.legacy-theme .hero--slider::after {
+    display: none;
+}
+
+.legacy-theme .hero-slide .hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* The badge already marks the market; a second rule above the headline is one
+   mark too many on a slide that also carries an eyebrow. */
+.legacy-theme .hero-slide .hero-content::before {
+    display: none;
+}
+
+.legacy-theme .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 6px 14px;
+    border: 1px solid rgba(42, 92, 66, 0.65);
+    border-radius: 50px;
+    background: rgba(42, 92, 66, 0.22);
+    backdrop-filter: blur(8px);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8fd9b3;
+}
+
+/* Slide content arrives just after the slide does, so a change reads as a
+   deliberate transition rather than a swap. */
+.legacy-theme .hero-slide.is-active .hero-content > * {
+    animation: hero-rise 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.legacy-theme .hero-slide.is-active .hero-content > *:nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+.legacy-theme .hero-slide.is-active .hero-content > *:nth-child(3) {
+    animation-delay: 0.12s;
+}
+
+.legacy-theme .hero-slide.is-active .hero-content > *:nth-child(4) {
+    animation-delay: 0.18s;
+}
+
+@keyframes hero-rise {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ── Controls ──────────────────────────────────────────────────────────── */
+/* Placed in the same grid cell as the slides and aligned to its end, rather
+   than positioned absolutely. The hero's containing block is not what an
+   absolute child resolves against here, and the controls ended up two pixels
+   from the bottom edge, clipped by the overflow. A grid cell cannot be wrong
+   about where its own end is. */
+.legacy-theme .hero-controls {
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: start;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 34px 20px;
+}
+
+.legacy-theme .hero-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    color: var(--pearl);
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.legacy-theme .hero-arrow:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.legacy-theme .hero-dots {
+    display: flex;
+    gap: 10px;
+}
+
+/* A wide track rather than a circle, so it can carry the timer. */
+.legacy-theme .hero-dot {
+    position: relative;
+    width: 46px;
+    height: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.22);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+/* The tap target is 44px tall even though the mark is 4px. */
+.legacy-theme .hero-dot::before {
+    content: "";
+    position: absolute;
+    inset: -20px 0;
+}
+
+.legacy-theme .hero-dot.is-active {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.legacy-theme .hero-dot-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #2a5c42, #8fd9b3);
+}
+
+/* Only the running dot animates; the attribute is set by the component and
+   removed the moment autoplay stops, so the bar cannot keep filling while the
+   slide is held. */
+.legacy-theme .hero-dot-fill[data-running] {
+    animation: hero-dot-fill linear both;
+}
+
+.legacy-theme .hero-dot.is-active .hero-dot-fill:not([data-running]) {
+    width: 100%;
+}
+
+@keyframes hero-dot-fill {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+/* No autoplay under reduced motion, so the timer bar would be a lie; the
+   active dot simply stays filled. */
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .hero-slide,
+    .legacy-theme .hero-slide.is-active .hero-content > * {
+        transition: none;
+        animation: none;
+    }
+
+    .legacy-theme .hero-dot-fill[data-running] {
+        animation: none;
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .legacy-theme .hero-controls {
+        justify-self: center;
+        margin: 0 0 24px;
+    }
+
+    .legacy-theme .hero-dot {
+        width: 32px;
+    }
+}
+
+/* The hero is a viewport-height stage: without a fixed height the tallest
+   slide sets it, and the controls anchored to the bottom fall past the fold.
+   Capped on desktop, released on small screens where the copy needs the room
+   more than the geometry needs to be tidy. */
+.legacy-theme .hero--slider {
+    height: 100vh;
+    min-height: 620px;
+    overflow: hidden;
+}
+
+.legacy-theme .hero-slide {
+    padding: 96px 0 136px;
+}
+
+
+@media (max-width: 900px) {
+    .legacy-theme .hero--slider {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .legacy-theme .hero-slide {
+        padding: 150px 0 120px;
+    }
+}
