@@ -1751,11 +1751,67 @@
     color: #8fd9b3;
 }
 
-/* The copy needs the full width before the art does; below this the art would
-   sit on top of the headline. */
+/* Below this the art cannot sit beside the copy, so it stacks under it rather
+   than being dropped. Hiding it was the wrong call: these two slides are the
+   marketing, and most of the traffic is on a phone. */
 @media (max-width: 1100px) {
+    .legacy-theme .hero-slide {
+        flex-direction: column;
+        justify-content: center;
+        gap: 32px;
+    }
+
+    /* relative, not static. The ring is an absolutely positioned SVG sized
+       to its parent; taking the parent out of positioning entirely makes the
+       ring resolve against the slide instead and swell to fill it. */
     .legacy-theme .hero-art {
-        display: none;
+        position: relative;
+        top: auto;
+        right: auto;
+        transform: none;
+        align-self: center;
+        width: 220px;
+        height: 220px;
+    }
+
+    .legacy-theme .hero-art--figures {
+        width: min(100%, 340px);
+        height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .legacy-theme .hero-slide {
+        gap: 26px;
+    }
+
+    .legacy-theme .hero-art {
+        width: 186px;
+        height: 186px;
+    }
+
+    .legacy-theme .hero-art-centre i {
+        font-size: 24px;
+    }
+
+    .legacy-theme .hero-art-value {
+        font-size: 15px;
+    }
+
+    /* The panel sits in the slide, which has no side padding — the copy gets
+       its 20px from .hero-content. Matching that keeps the two aligned instead
+       of the panel running to the screen edges. */
+    .legacy-theme .hero-art--figures {
+        width: calc(100% - 40px);
+        padding: 20px 18px;
+    }
+
+    .legacy-theme .hero-art-rows em {
+        width: 72px;
+    }
+
+    .legacy-theme .hero-art-rows .is-total em {
+        width: 96px;
     }
 }
 
