@@ -1835,3 +1835,24 @@
         bottom: 12px;
     }
 }
+
+/* ── 21. Grids with only one or two cards ──────────────────────────────────
+   `repeat(auto-fit, minmax(250px, 1fr))` collapses its empty tracks, so the
+   single remaining track absorbs the whole row: one vehicle in stock became a
+   card 1400px wide, and the 4:3 image with it — a car photograph a metre tall
+   on the homepage.
+
+   auto-fill keeps the empty tracks instead, so one card is the same size as it
+   would be with six. This is the state the site is in for a dealership that
+   has just uploaded its first vehicle, which is exactly when it matters. */
+.legacy-theme .cars-grid,
+.legacy-theme .blog-grid,
+.legacy-theme .related-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* A belt-and-braces cap. Even if a container ever gives a card more width than
+   intended, a photograph must never become the tallest thing on the page. */
+.legacy-theme .car-card .car-image {
+    max-height: 320px;
+}
