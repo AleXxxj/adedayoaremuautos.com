@@ -77,7 +77,7 @@ export default async function MarketLayout({
               <h1>
                 ADEDAYO AREMU <span>AUTOS</span>
               </h1>
-              <p>PREMIUM CARS • RENTAL • FINANCING</p>
+              <p>BUY • RENT • RENT-TO-OWN • FINANCE</p>
             </div>
           </div>
 

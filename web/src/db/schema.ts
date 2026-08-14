@@ -74,6 +74,7 @@ export const leadType = pgEnum("lead_type", [
   "trade_in",
   "rental",
   "referral",
+  "rent_to_own",
 ]);
 
 export const leadStatus = pgEnum("lead_status", [

@@ -125,6 +125,24 @@ export default async function MarketHome({
               </Link>
             </div>
 
+            {/* Second, directly after buying: it is the offer the business
+                now leads with, and it reads as the step between renting and
+                owning only if it sits between them. */}
+            <div className="service-card">
+              <div className="service-icon">
+                <i className="fas fa-hand-holding-heart" />
+              </div>
+              <h3>Rent to Own</h3>
+              <p>
+                Hire by the day or the week and every payment counts towards
+                keeping the car. Reach the total for your category and it is
+                yours — no balloon payment, and no obligation to continue.
+              </p>
+              <Link href={`/${code}/rent-to-own`} className="service-link">
+                How It Works <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+
             <div className="service-card">
               <div className="service-icon">
                 <i className="fas fa-key" />

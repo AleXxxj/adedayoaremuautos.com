@@ -57,6 +57,13 @@
       "when": 1786405105933,
       "tag": "0007_rent_to_own",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786747654486,
+      "tag": "0008_rent_to_own_lead",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import type { MarketConfig } from "@/lib/market";
 /** The original's four options, mapped onto the lead types the pipeline uses. */
 const INTERESTS: { value: string; label: string }[] = [
   { value: "contact", label: "Buying a Car" },
+  { value: "rent_to_own", label: "Rent to Own" },
   { value: "rental", label: "Renting a Car" },
   { value: "finance", label: "Car Financing" },
   { value: "trade_in", label: "Value my Trade-In" },
