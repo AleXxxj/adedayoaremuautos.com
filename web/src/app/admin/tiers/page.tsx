@@ -1,6 +1,7 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { rentalTiers } from "@/db/schema";
+import { assertSection } from "@/lib/adminNav";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { TierList, type TierRow } from "@/components/admin/TierList";
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminTiersPage() {
   const user = await requireStaff();
+  assertSection(user.role, "/admin/tiers");
   const markets = allowedMarkets(user);
 
   const rows = await db

@@ -1,3 +1,4 @@
+import { assertSection } from "@/lib/adminNav";
 import { requireStaff } from "@/lib/auth";
 import { listCommentsForModeration } from "@/lib/actions/blog";
 import { AdminChrome } from "../layout";
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminCommentsPage() {
   const user = await requireStaff();
+  assertSection(user.role, "/admin/comments");
   const all = await listCommentsForModeration();
 
   const pending = all.filter((c) => c.status === "pending");

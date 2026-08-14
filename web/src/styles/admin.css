@@ -1,0 +1,245 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Admin chrome.
+
+   The navigation was a row of plain text links: on a phone it wrapped into a
+   paragraph, and nothing indicated which section you were in. This gives it a
+   real shape — pills with an active state, a drawer below 900px — without
+   pulling the public site's stylesheet into the admin, which has its own
+   tokens and would fight it.
+   ------------------------------------------------------------------------ */
+
+.admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+    backdrop-filter: blur(12px);
+}
+
+.admin-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 10px 20px;
+}
+
+.admin-brand {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.admin-brand span {
+    color: var(--brand-400, #4e9d76);
+}
+
+/* ── Navigation ────────────────────────────────────────────────────────── */
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.admin-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.admin-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.admin-nav-link i {
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+.admin-nav-link:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+
+/* Where you are, stated rather than left to be guessed. */
+.admin-nav-link.is-active {
+    background: color-mix(in srgb, var(--brand-400, #4e9d76) 16%, transparent);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.admin-nav-link.is-active i {
+    opacity: 1;
+    color: var(--brand-400, #4e9d76);
+}
+
+.admin-nav-foot {
+    display: none;
+}
+
+.admin-header-end {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+    font-size: 14px;
+}
+
+.admin-who {
+    color: var(--text-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.admin-view-site,
+.admin-signout {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.admin-view-site:hover,
+.admin-signout:hover {
+    border-color: var(--border-strong, var(--border-default));
+    color: var(--text-primary);
+}
+
+.admin-burger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.admin-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: default;
+}
+
+/* ── Below 900px ───────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .admin-header-inner {
+        gap: 12px;
+        padding: 10px 16px;
+    }
+
+    .admin-burger {
+        display: inline-flex;
+        order: -1;
+    }
+
+    /* A drawer rather than a squeezed row: seven sections cannot share a
+       phone's width, and a horizontally scrolling nav hides the items nobody
+       thinks to swipe for. */
+    .admin-nav {
+        position: fixed;
+        z-index: 50;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(280px, 82vw);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        padding: 76px 14px 20px;
+        overflow-y: auto;
+        background: var(--surface-1);
+        border-right: 1px solid var(--border-subtle);
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+
+    .admin-nav.is-open {
+        transform: none;
+    }
+
+    .admin-nav-link {
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+
+    .admin-nav-link i {
+        width: 18px;
+        text-align: center;
+    }
+
+    .admin-nav-foot {
+        display: block;
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .admin-nav-foot .admin-who {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .admin-who--wide {
+        display: none;
+    }
+
+    .admin-view-site span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-signout {
+        padding: 7px 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-nav {
+        transition: none;
+    }
+}
+
+/* ── Tables and forms on a phone ───────────────────────────────────────── */
+@media (max-width: 700px) {
+    /* Admin tables are wide by nature. Let them scroll inside their own box
+       rather than pushing the whole page sideways. */
+    .admin-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

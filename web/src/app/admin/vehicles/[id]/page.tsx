@@ -10,6 +10,7 @@ import {
   deleteVehiclePhotoAction,
 } from "@/lib/actions/vehicles";
 import { VehicleForm } from "@/components/admin/VehicleForm";
+import { DeleteVehicle } from "@/components/admin/DeleteVehicle";
 import { PhotoManager } from "@/components/admin/PhotoManager";
 import { TariffForm } from "@/components/admin/TariffForm";
 import { AdminChrome } from "../../layout";
@@ -154,6 +155,11 @@ export default async function EditVehiclePage({
               }}
             />
           </section>
+
+          <DeleteVehicle
+            id={vehicle.id}
+            name={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+          />
 
           {history.length > 0 && (
             <section>

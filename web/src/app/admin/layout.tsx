@@ -1,5 +1,9 @@
 import Link from "next/link";
+import "@/styles/admin.css";
 import { signOut } from "@/lib/actions/auth";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { navFor } from "@/lib/adminNav";
+import type { Staff } from "@/lib/auth";
 
 export const metadata = { title: "Admin — Adedayo Aremu Autos" };
 
@@ -26,54 +30,28 @@ export function AdminChrome({
   role: string;
   children: React.ReactNode;
 }) {
+  const items = navFor(role as Staff["role"]);
+
   return (
     <>
-      <header className="border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-          <Link href="/admin/vehicles" className="text-sm font-semibold">
-            AAA <span className="text-[var(--brand-400)]">Admin</span>
+      <header className="admin-header">
+        <div className="admin-header-inner">
+          <Link href="/admin" className="admin-brand">
+            AAA <span>Admin</span>
           </Link>
 
-          <nav className="flex gap-4 text-sm text-[var(--text-secondary)]">
-            <Link href="/admin/vehicles" className="hover:text-[var(--text-primary)]">
-              Inventory
-            </Link>
-            <Link href="/admin/leads" className="hover:text-[var(--text-primary)]">
-              Leads
-            </Link>
-            <Link href="/admin/deals" className="hover:text-[var(--text-primary)]">
-              Deals
-            </Link>
-            <Link href="/admin/finance" className="hover:text-[var(--text-primary)]">
-              Finance
-            </Link>
-            <Link href="/admin/rentals" className="hover:text-[var(--text-primary)]">
-              Rentals
-            </Link>
-            <Link href="/admin/tiers" className="hover:text-[var(--text-primary)]">
-              Rent to Own
-            </Link>
-            <Link href="/admin/comments" className="hover:text-[var(--text-primary)]">
-              Comments
-            </Link>
-          </nav>
+          <AdminNav items={items} email={email} role={role} />
 
-          <div className="ml-auto flex items-center gap-4 text-sm">
-            <span className="text-[var(--text-muted)]">
+          <div className="admin-header-end">
+            <span className="admin-who admin-who--wide">
               {email} · {role}
             </span>
-            <Link
-              href="/us"
-              className="text-[var(--link)] hover:underline"
-              target="_blank"
-            >
-              View site
+            <Link href="/us" className="admin-view-site" target="_blank">
+              <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
+              <span>View site</span>
             </Link>
             <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 hover:bg-[var(--surface-2)]"
-              >
+              <button type="submit" className="admin-signout">
                 Sign out
               </button>
             </form>

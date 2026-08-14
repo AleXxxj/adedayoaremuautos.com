@@ -2,6 +2,7 @@ import Link from "next/link";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { financeAgreements, instalments } from "@/db/schema";
+import { assertSection } from "@/lib/adminNav";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { MARKETS } from "@/lib/market";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function FinancePage() {
   const user = await requireStaff();
+  assertSection(user.role, "/admin/finance");
   const markets = allowedMarkets(user);
 
   const agreements = await db

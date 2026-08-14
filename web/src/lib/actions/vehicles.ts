@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { and, eq, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { vehicles, vehicleMedia, auditLog } from "@/db/schema";
+import { vehicles, vehicleMedia, auditLog, deals, rentalBookings } from "@/db/schema";
 import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
 import { supabaseAdmin, VEHICLE_BUCKET } from "@/lib/supabase/admin";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
@@ -423,4 +423,95 @@ export async function deleteVehiclePhotoAction(
   formData: FormData,
 ): Promise<ActionResult> {
   return deleteVehiclePhoto(formData);
+}
+
+/**
+ * Permanently removes a vehicle, but only when nothing depends on it.
+ *
+ * A vehicle that has been sold, part-exchanged or hired is part of the
+ * business's history: a deal references it, and so may a rental booking. The
+ * database refuses those deletes outright — both foreign keys are NO ACTION,
+ * deliberately — so this checks first and explains, rather than letting a
+ * constraint violation surface as an unreadable error.
+ *
+ * Where a record exists, the honest operation is to unlist rather than delete.
+ * The listing disappears from the public site and the paperwork still points
+ * at something real.
+ *
+ * Photographs are removed from storage before the row goes. Doing it the other
+ * way round loses the storage keys and leaves files nobody can find or bill
+ * for.
+ */
+export async function deleteVehicle(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const user = await requireStaff();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { ok: false, error: "Nothing to delete." };
+
+  const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
+  if (!vehicle) return { ok: false, error: "Vehicle not found." };
+  assertMarketAccess(user, vehicle.marketCode);
+
+  const [[dealCount], [bookingCount]] = await Promise.all([
+    db.select({ n: count() }).from(deals).where(eq(deals.vehicleId, id)),
+    db.select({ n: count() }).from(rentalBookings).where(eq(rentalBookings.vehicleId, id)),
+  ]);
+
+  const blockers: string[] = [];
+  if (Number(dealCount.n) > 0) {
+    blockers.push(`${dealCount.n} deal${Number(dealCount.n) === 1 ? "" : "s"}`);
+  }
+  if (Number(bookingCount.n) > 0) {
+    blockers.push(
+      `${bookingCount.n} rental booking${Number(bookingCount.n) === 1 ? "" : "s"}`,
+    );
+  }
+
+  if (blockers.length > 0) {
+    return {
+      ok: false,
+      error:
+        `This vehicle is attached to ${blockers.join(" and ")}, so deleting it ` +
+        `would break that record. Set its status to Unlisted instead — it ` +
+        `disappears from the website and the paperwork still makes sense.`,
+    };
+  }
+
+  const media = await db
+    .select()
+    .from(vehicleMedia)
+    .where(eq(vehicleMedia.vehicleId, id));
+
+  if (media.length > 0) {
+    await supabaseAdmin.storage
+      .from(VEHICLE_BUCKET)
+      .remove(media.map((m) => m.storageKey));
+  }
+
+  // Written before the row goes, so the record of what was removed survives
+  // the removal.
+  await db.insert(auditLog).values({
+    actorId: user.id,
+    actorEmail: user.email,
+    entity: "vehicle",
+    entityId: id,
+    action: "delete",
+    diff: {
+      vehicle: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
+      vin: vehicle.vin,
+      stockNumber: vehicle.stockNumber,
+      photosRemoved: media.length,
+    } as never,
+  });
+
+  // vehicle_media and rental_rates cascade; leads, appointments and finance
+  // applications null their reference and survive.
+  await db.delete(vehicles).where(eq(vehicles.id, id));
+
+  revalidatePath("/admin/vehicles");
+  revalidatePath(`/${vehicle.marketCode}/inventory`);
+  revalidatePath(`/${vehicle.marketCode}`);
+  return { ok: true };
 }
