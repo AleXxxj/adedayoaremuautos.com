@@ -121,9 +121,13 @@ export default async function MarketLayout({
                   ADEDAYO AREMU <span>AUTOS</span>
                 </h3>
               </div>
+              {/* Rent to own is named for the United States only. Nigeria has
+                  no categories priced yet, and its own page says the programme
+                  is opening in the States first — the footer must not promise
+                  what that market cannot yet deliver. */}
               <p>
                 {code === "us"
-                  ? "Your trusted partner for premium car sales, rentals, and financing in Greensboro and across the Triad. We deliver excellence with every vehicle."
+                  ? "Your trusted partner for premium car sales, rent to own, rentals, and financing in Greensboro and across the Triad. We deliver excellence with every vehicle."
                   : "Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle."}
               </p>
               {/* The original linked every icon to `#`. A dead social icon on
