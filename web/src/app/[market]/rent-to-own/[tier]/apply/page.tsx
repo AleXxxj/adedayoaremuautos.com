@@ -64,7 +64,7 @@ export default async function ApplyPage({
     : null;
 
   return (
-    <div className="rto-section">
+    <div className="rto-section page-top">
       <div className="rto-container rto-apply">
         <nav className="rto-crumbs">
           <Link href={`/${code}/rent-to-own/${tier.slug}`}>

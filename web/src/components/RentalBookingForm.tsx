@@ -8,6 +8,26 @@ import type { MarketConfig } from "@/lib/market";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+/**
+ * "daily" -> "day" / "days".
+ *
+ * This was `tier.replace("ly", "")` plus an "s", which is right for weekly and
+ * monthly and wrong for the rate most people book on: it printed "3 × dais".
+ * Spelled out rather than patched, because there are only three of them and a
+ * fourth would break the trick again.
+ */
+const UNITS: Record<string, [one: string, many: string]> = {
+  daily: ["day", "days"],
+  weekly: ["week", "weeks"],
+  monthly: ["month", "months"],
+};
+
+function unitLabel(tier: string, quantity: number): string {
+  const unit = UNITS[tier];
+  if (!unit) return tier;
+  return quantity === 1 ? unit[0] : unit[1];
+}
+
 export function RentalBookingForm({
   market,
   vehicleSlug,
@@ -49,12 +69,13 @@ export function RentalBookingForm({
 
   if (state?.ok && state.reference && state.reference !== "—") {
     return (
-      <div className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 p-5 text-center">
-        <p className="font-semibold text-[var(--success)]">Request received</p>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+      <div className="booking-done">
+        <i className="fas fa-circle-check" aria-hidden="true" />
+        <p className="booking-done-title">Request received</p>
+        <p className="booking-done-body">
           Your reference is{" "}
-          <span className="font-mono font-semibold">{state.reference}</span>. We
-          will confirm availability and the deposit shortly.
+          <strong className="booking-ref">{state.reference}</strong>. We will
+          confirm availability and the deposit shortly.
         </p>
       </div>
     );
@@ -63,13 +84,16 @@ export function RentalBookingForm({
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="booking-form">
       <input type="hidden" name="marketCode" value={market.code} />
       <input type="hidden" name="vehicleSlug" value={vehicleSlug} />
       <input type="hidden" name="renderedAt" value={renderedAt} />
       {withDriver && <input type="hidden" name="withDriver" value="true" />}
 
-      <div aria-hidden className="absolute left-[-9999px] h-px w-px overflow-hidden">
+      <div
+        aria-hidden
+        style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
+      >
         <label>
           Website
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
@@ -77,14 +101,14 @@ export function RentalBookingForm({
       </div>
 
       {state?.error && (
-        <p className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+        <p className="booking-alert" role="alert">
           {state.error}
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium">Pick-up</span>
+      <div className="booking-dates">
+        <label className="booking-field">
+          <span>Pick-up</span>
           <input
             name="from"
             type="date"
@@ -92,12 +116,12 @@ export function RentalBookingForm({
             min={today()}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className={inp}
+            
           />
           {err("from") && <Err>{err("from")}</Err>}
         </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium">Return</span>
+        <label className="booking-field">
+          <span>Return</span>
           <input
             name="to"
             type="date"
@@ -105,118 +129,113 @@ export function RentalBookingForm({
             min={from || today()}
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className={inp}
+            
           />
           {err("to") && <Err>{err("to")}</Err>}
         </label>
       </div>
 
       {tariff.withDriverAvailable && (
-        <label className="flex items-center gap-2 text-sm">
+        <label className="booking-driver">
           <input
             type="checkbox"
             checked={withDriver}
             onChange={(e) => setWithDriver(e.target.checked)}
-            className="size-4"
+            
           />
           With a driver
           {tariff.driverDailyMinor != null && (
-            <span className="text-[var(--text-muted)]">
-              (+{fmt(tariff.driverDailyMinor)}/day)
-            </span>
+            <span className="booking-driver-rate">+{fmt(tariff.driverDailyMinor)}/day</span>
           )}
         </label>
       )}
 
       {/* Live quote */}
       {preview?.error && (
-        <p className="rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-3 py-2 text-sm text-[var(--warning)]">
+        <p className="booking-warn">
           {preview.error}
         </p>
       )}
       {preview?.quote && (
-        <div className="rounded-lg border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
-          <dl className="space-y-1.5 text-sm">
+        <div className="booking-quote">
+          <dl>
             {preview.quote.lines.map((l) => (
-              <div key={l.tier} className="flex justify-between gap-3">
-                <dt className="capitalize text-[var(--text-secondary)]">
-                  {l.quantity} × {l.tier.replace("ly", "")}
-                  {l.quantity > 1 ? "s" : ""} @ {fmt(l.unitMinor)}
+              <div key={l.tier}>
+                <dt className="booking-quote-line">
+                  {l.quantity} × {unitLabel(l.tier, l.quantity)} @ {fmt(l.unitMinor)}
                 </dt>
-                <dd className="tabular-nums">{fmt(l.subtotalMinor)}</dd>
+                <dd>{fmt(l.subtotalMinor)}</dd>
               </div>
             ))}
             {preview.quote.driverMinor > 0 && (
-              <div className="flex justify-between gap-3">
-                <dt className="text-[var(--text-secondary)]">
-                  Driver × {preview.quote.days} days
-                </dt>
-                <dd className="tabular-nums">{fmt(preview.quote.driverMinor)}</dd>
+              <div>
+                <dt className="booking-quote-line">Driver × {preview.quote.days} days</dt>
+                <dd>{fmt(preview.quote.driverMinor)}</dd>
               </div>
             )}
-            <div className="flex justify-between gap-3 border-t border-[var(--border-default)] pt-1.5">
-              <dt className="font-semibold">
+            <div className="booking-quote-total">
+              <dt>
                 Total for {preview.quote.days} day{preview.quote.days === 1 ? "" : "s"}
               </dt>
-              <dd className="font-bold tabular-nums">{fmt(preview.quote.totalMinor)}</dd>
+              <dd>{fmt(preview.quote.totalMinor)}</dd>
             </div>
             {preview.quote.depositMinor > 0 && (
-              <div className="flex justify-between gap-3 text-[var(--text-muted)]">
+              <div className="booking-quote-deposit">
                 <dt>Refundable deposit</dt>
-                <dd className="tabular-nums">{fmt(preview.quote.depositMinor)}</dd>
+                <dd>{fmt(preview.quote.depositMinor)}</dd>
               </div>
             )}
           </dl>
           {preview.quote.savingNote && (
-            <p className="mt-2 text-xs text-[var(--success)]">{preview.quote.savingNote}</p>
+            <p className="booking-saving">{preview.quote.savingNote}</p>
           )}
         </div>
       )}
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Your name</span>
-        <input name="name" required autoComplete="name" className={inp} />
+      <label className="booking-field">
+        <span>Your name</span>
+        <input name="name" required autoComplete="name"  />
         {err("name") && <Err>{err("name")}</Err>}
       </label>
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">Phone</span>
-        <input name="phone" type="tel" required autoComplete="tel" className={inp} />
+      <label className="booking-field">
+        <span>Phone</span>
+        <input name="phone" type="tel" required autoComplete="tel"  />
         {err("phone") && <Err>{err("phone")}</Err>}
       </label>
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">
-          Email <span className="text-[var(--text-muted)]">(optional)</span>
+      <label className="booking-field">
+        <span>
+          Email <em>optional</em>
         </span>
-        <input name="email" type="email" autoComplete="email" className={inp} />
+        <input name="email" type="email" autoComplete="email"  />
         {err("email") && <Err>{err("email")}</Err>}
       </label>
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">
+      <label className="booking-field">
+        <span>
           Driving licence number{" "}
-          <span className="text-[var(--text-muted)]">(optional)</span>
+          <em>optional</em>
         </span>
-        <input name="licenceNo" className={inp} />
+        <input name="licenceNo"  />
       </label>
 
-      <label className="block">
-        <span className="mb-1.5 block text-sm font-medium">
-          Anything else? <span className="text-[var(--text-muted)]">(optional)</span>
+      <label className="booking-field">
+        <span>
+          Anything else? <em>optional</em>
         </span>
-        <textarea name="note" rows={3} className={inp} />
+        <textarea name="note" rows={3}  />
       </label>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-[var(--cta-bg)] py-3 font-semibold text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)] disabled:opacity-60"
+        className="btn btn-primary booking-submit"
       >
-        {pending ? "Sending…" : "Request booking"}
+        {pending ? "Sending…" : "Request booking"} <i className="fas fa-calendar-check" />
       </button>
 
-      <p className="text-xs text-[var(--text-muted)]">
+      <p className="booking-fineprint">
         Sending a request does not hold the vehicle. We confirm availability and
         take the deposit first.
       </p>
@@ -224,9 +243,6 @@ export function RentalBookingForm({
   );
 }
 
-const inp =
-  "w-full rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-3 py-2.5 outline-none focus:border-[var(--focus)]";
-
 function Err({ children }: { children: React.ReactNode }) {
-  return <span className="mt-1 block text-sm text-[var(--danger)]">{children}</span>;
+  return <span className="field-error">{children}</span>;
 }

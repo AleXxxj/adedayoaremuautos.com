@@ -2244,3 +2244,486 @@
         order: -1;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   23. Booking one rental vehicle
+
+   This page was written entirely in Tailwind utilities, which do not survive
+   inside the legacy theme: the reset at the top of legacy.css matches
+   `.legacy-theme :where(…)`, carries the same 0,1,0 specificity as a utility
+   class, and loads afterwards — so every px-, mt- and mx-auto on it was
+   stripped and the content sat flush against the window edge with no
+   container. Written here in the same vocabulary as the rest of the site, so
+   it cannot fall out of the theme again.
+   ------------------------------------------------------------------------ */
+
+/* The site header is position:fixed, so a page that does not open with a
+   .page-header — which carries margin-top:90px for exactly this reason — has
+   to clear it itself. Without this the first thing on the page, usually the
+   breadcrumb back to the listing, sits underneath the header and cannot be
+   seen or clicked. */
+.legacy-theme .page-top {
+    padding-top: calc(90px + clamp(16px, 2.5vw, 32px));
+}
+
+/* Longhand deliberately: the `padding` shorthand would reset padding-top and
+   silently cancel .page-top, which sits at the same specificity. */
+.legacy-theme .rental-detail {
+    padding-right: 20px;
+    padding-bottom: clamp(56px, 7vw, 90px);
+    padding-left: 20px;
+}
+
+.legacy-theme .rental-detail-container {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.legacy-theme .rental-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+}
+
+/* ── The vehicle ───────────────────────────────────────────────────────── */
+.legacy-theme .rental-gallery {
+    overflow: hidden;
+    border: 1px solid var(--border, #262626);
+    border-radius: 16px;
+    background: #101010;
+}
+
+.legacy-theme .rental-gallery img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.legacy-theme .rental-gallery-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    aspect-ratio: 4 / 3;
+    color: var(--text-muted, #8f8f8f);
+    font-size: 14px;
+}
+
+.legacy-theme .rental-gallery-empty i {
+    font-size: 26px;
+    opacity: 0.5;
+}
+
+.legacy-theme .rental-title {
+    margin: 26px 0 20px;
+    font-size: clamp(26px, 3.4vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: #fff;
+}
+
+/* Separate tiles rather than one bordered table with hairline gaps. The gap
+   trick paints the container's border colour through any cell a wrapped row
+   does not fill, so three specs in a two-column grid showed a solid grey box
+   where the fourth would have been — which reads as data that failed to load. */
+.legacy-theme .rental-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.legacy-theme .rental-spec {
+    padding: 14px 16px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .rental-spec dt {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rental-spec dt i {
+    margin-right: 6px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.legacy-theme .rental-spec dd {
+    margin: 5px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+/* ── Rates and availability ────────────────────────────────────────────── */
+.legacy-theme .rental-block {
+    margin-top: 38px;
+}
+
+.legacy-theme .rental-block h2 {
+    margin: 0 0 14px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rental-block-lead {
+    margin: -6px 0 12px;
+    font-size: 14px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .rental-rates {
+    margin: 0;
+    max-width: 460px;
+}
+
+.legacy-theme .rental-rate {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border, #262626);
+}
+
+.legacy-theme .rental-rate dt {
+    font-size: 14.5px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .rental-rate dd {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+.legacy-theme .rental-rate--muted dt,
+.legacy-theme .rental-rate--muted dd {
+    color: var(--text-muted, #8f8f8f);
+    font-weight: 500;
+}
+
+.legacy-theme .rental-note {
+    display: flex;
+    gap: 9px;
+    max-width: 520px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rental-note i {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.legacy-theme .rental-taken {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .rental-taken li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .rental-taken i {
+    font-size: 12px;
+    color: var(--danger, #d9534f);
+    opacity: 0.8;
+}
+
+/* ── The booking card ──────────────────────────────────────────────────── */
+.legacy-theme .rental-book {
+    position: sticky;
+    /* Clears the fixed site header rather than sitting under it. */
+    top: 104px;
+}
+
+.legacy-theme .rental-book-card {
+    padding: 26px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 16px;
+    background:
+        radial-gradient(120% 80% at 50% 0%, rgba(42, 92, 66, 0.14) 0%, transparent 65%),
+        #101010;
+}
+
+.legacy-theme .rental-book-card h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+}
+
+.legacy-theme .rental-book-card h2 span {
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .rental-book-lead {
+    margin: 0 0 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-form {
+    display: grid;
+    gap: 16px;
+}
+
+.legacy-theme .booking-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.legacy-theme .booking-field {
+    display: block;
+}
+
+.legacy-theme .booking-field > span {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-field em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-field input,
+.legacy-theme .booking-field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+    background: #0a0a0a;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    transition: border-color 0.15s ease;
+}
+
+.legacy-theme .booking-field textarea {
+    min-height: 84px;
+    resize: vertical;
+}
+
+.legacy-theme .booking-field input:focus,
+.legacy-theme .booking-field textarea:focus {
+    outline: none;
+    border-color: var(--brand-400, #4e9d76);
+}
+
+/* The native date picker indicator is black on black by default. */
+.legacy-theme .booking-field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.55;
+    cursor: pointer;
+}
+
+.legacy-theme .booking-driver {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+    font-size: 14.5px;
+    color: var(--text-secondary, #b9b9b9);
+    cursor: pointer;
+}
+
+.legacy-theme .booking-driver input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--brand-400, #4e9d76);
+    cursor: pointer;
+}
+
+.legacy-theme .booking-driver-rate {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* ── The live quote ────────────────────────────────────────────────────── */
+.legacy-theme .booking-quote {
+    padding: 16px 18px;
+    border: 1px solid rgba(78, 157, 118, 0.35);
+    border-radius: 12px;
+    background: rgba(42, 92, 66, 0.1);
+}
+
+.legacy-theme .booking-quote dl {
+    margin: 0;
+    display: grid;
+    gap: 7px;
+}
+
+.legacy-theme .booking-quote dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    font-size: 14px;
+}
+
+.legacy-theme .booking-quote dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+.legacy-theme .booking-quote-line {
+    text-transform: capitalize;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-quote-total {
+    margin-top: 3px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(78, 157, 118, 0.3);
+}
+
+.legacy-theme .booking-quote-total dt {
+    font-weight: 600;
+    color: #fff;
+}
+
+.legacy-theme .booking-quote-total dd {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.legacy-theme .booking-quote-deposit dt,
+.legacy-theme .booking-quote-deposit dd {
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-saving {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: var(--brand-400, #4e9d76);
+}
+
+/* ── Messages ──────────────────────────────────────────────────────────── */
+.legacy-theme .booking-alert,
+.legacy-theme .booking-warn {
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.legacy-theme .booking-alert {
+    border: 1px solid rgba(217, 83, 79, 0.4);
+    background: rgba(217, 83, 79, 0.1);
+    color: #f3a6a3;
+}
+
+.legacy-theme .booking-warn {
+    border: 1px solid rgba(201, 162, 39, 0.4);
+    background: rgba(201, 162, 39, 0.1);
+    color: #e2c463;
+}
+
+.legacy-theme .booking-submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.legacy-theme .booking-fineprint {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-done {
+    padding: 30px 24px;
+    border: 1px solid rgba(78, 157, 118, 0.4);
+    border-radius: 14px;
+    background: rgba(42, 92, 66, 0.12);
+    text-align: center;
+}
+
+.legacy-theme .booking-done i {
+    font-size: 34px;
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .booking-done-title {
+    margin: 14px 0 8px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.legacy-theme .booking-done-body {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-ref {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--gold, #c9a227);
+}
+
+@media (max-width: 1000px) {
+    .legacy-theme .rental-detail-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+
+    /* Stops being sticky when it is no longer beside anything. */
+    .legacy-theme .rental-book {
+        position: static;
+    }
+}
+
+@media (max-width: 420px) {
+    /* Two date fields side by side leave the native picker too narrow to use. */
+    .legacy-theme .booking-dates {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

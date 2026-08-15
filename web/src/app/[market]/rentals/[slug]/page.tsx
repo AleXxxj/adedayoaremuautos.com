@@ -21,10 +21,24 @@ export async function generateMetadata({
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   return {
     title: `Rent a ${title} — Adedayo Aremu Autos`,
+    description: `Hire a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,
     alternates: { canonical: `/${market}/rentals/${slug}` },
+    openGraph: v.image ? { images: [v.image] } : undefined,
   };
 }
 
+/**
+ * One vehicle, and the form that books it.
+ *
+ * Rebuilt out of Tailwind utilities. The legacy reset — `.legacy-theme
+ * :where(…)` setting margin and padding to zero — carries the same 0,1,0
+ * specificity as a utility class and loads after them, so every `px-`, `mt-`
+ * and `mx-auto` on this page was being silently stripped: the content sat
+ * flush against the left edge of the window with no container at all. It was
+ * not that the page needed decorating; it had no layout. Written in the same
+ * vocabulary as every other public page, it cannot drift out of the theme
+ * again.
+ */
 export default async function RentalDetailPage({
   params,
 }: {
@@ -41,108 +55,137 @@ export default async function RentalDetailPage({
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
 
-  return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <nav className="mb-6 text-sm text-[var(--text-muted)]">
-        <Link href={`/${code}/rentals`} className="hover:text-[var(--link)]">
-          ← All rentals
-        </Link>
-      </nav>
+  // Only what this vehicle actually has. A spec grid padded with "—" reads as
+  // missing data rather than a car that simply has no third row of seats.
+  const specs = [
+    v.seats && { icon: "fas fa-user-group", label: "Seats", value: String(v.seats) },
+    v.transmission && { icon: "fas fa-cog", label: "Transmission", value: v.transmission },
+    v.fuelType && { icon: "fas fa-gas-pump", label: "Fuel", value: v.fuelType },
+    v.bodyStyle && { icon: "fas fa-car-side", label: "Body", value: v.bodyStyle },
+    {
+      icon: "fas fa-calendar-day",
+      label: "Minimum hire",
+      value: `${v.tariff.minDays} day${v.tariff.minDays === 1 ? "" : "s"}`,
+    },
+    v.tariff.maxDays && {
+      icon: "fas fa-calendar-week",
+      label: "Maximum hire",
+      value: `${v.tariff.maxDays} days`,
+    },
+  ].filter(Boolean) as { icon: string; label: string; value: string }[];
 
-      <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr]">
-        <div>
-          <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]">
-            {v.image ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={v.image} alt={title} className="aspect-[4/3] w-full object-cover" />
-            ) : (
-              <div className="flex aspect-[4/3] items-center justify-center text-[var(--text-muted)]">
-                Photography coming soon
-              </div>
+  const rates = [
+    { label: "Daily", value: fmt(v.tariff.dailyMinor) },
+    v.tariff.weeklyMinor != null && { label: "Weekly", value: fmt(v.tariff.weeklyMinor) },
+    v.tariff.monthlyMinor != null && { label: "Monthly", value: fmt(v.tariff.monthlyMinor) },
+    v.tariff.withDriverAvailable &&
+      v.tariff.driverDailyMinor != null && {
+        label: "Driver, per day",
+        value: fmt(v.tariff.driverDailyMinor),
+      },
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  return (
+    <div className="rental-detail page-top">
+      <div className="rental-detail-container">
+        <nav className="rto-crumbs">
+          <Link href={`/${code}/rentals`}>← All rentals</Link>
+        </nav>
+
+        <div className="rental-detail-grid">
+          <div className="rental-detail-main">
+            <div className="rental-gallery">
+              {v.image ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={v.image}
+                  alt={title}
+                  /* The largest element above the fold, so it is fetched at
+                     high priority rather than queued behind the icon font. */
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              ) : (
+                <div className="rental-gallery-empty">
+                  <i className="fas fa-camera" aria-hidden="true" />
+                  <span>Photography coming soon</span>
+                </div>
+              )}
+            </div>
+
+            <h1 className="rental-title">{title}</h1>
+
+            <dl className="rental-specs">
+              {specs.map((s) => (
+                <div className="rental-spec" key={s.label}>
+                  <dt>
+                    <i className={s.icon} aria-hidden="true" /> {s.label}
+                  </dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <section className="rental-block">
+              <h2>Rates</h2>
+              <dl className="rental-rates">
+                {rates.map((r) => (
+                  <div className="rental-rate" key={r.label}>
+                    <dt>{r.label}</dt>
+                    <dd>{r.value}</dd>
+                  </div>
+                ))}
+                {v.tariff.depositMinor > 0 && (
+                  <div className="rental-rate rental-rate--muted">
+                    <dt>Deposit (refundable)</dt>
+                    <dd>{fmt(v.tariff.depositMinor)}</dd>
+                  </div>
+                )}
+              </dl>
+              <p className="rental-note">
+                <i className="fas fa-circle-info" aria-hidden="true" /> Longer
+                hires are priced on the best combination of these rates
+                automatically. You are never charged more than the daily rate
+                multiplied by the number of days.
+              </p>
+            </section>
+
+            {taken.length > 0 && (
+              <section className="rental-block">
+                <h2>Already booked</h2>
+                <p className="rental-block-lead">
+                  These dates are taken. Anything else is open.
+                </p>
+                <ul className="rental-taken">
+                  {taken.map((t, i) => (
+                    <li key={i}>
+                      <i className="fas fa-calendar-xmark" aria-hidden="true" />
+                      {formatRange(t.period, market.locale)}
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
           </div>
 
-          <h1 className="mt-6 text-2xl font-bold tracking-tight">{title}</h1>
-
-          <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
-            {v.seats && <Spec label="Seats" value={String(v.seats)} />}
-            {v.transmission && <Spec label="Transmission" value={v.transmission} />}
-            {v.fuelType && <Spec label="Fuel" value={v.fuelType} />}
-            {v.bodyStyle && <Spec label="Body" value={v.bodyStyle} />}
-            <Spec
-              label="Minimum hire"
-              value={`${v.tariff.minDays} day${v.tariff.minDays === 1 ? "" : "s"}`}
-            />
-            {v.tariff.maxDays && <Spec label="Maximum hire" value={`${v.tariff.maxDays} days`} />}
-          </dl>
-
-          <section className="mt-8">
-            <h2 className="mb-3 text-lg font-semibold">Rates</h2>
-            <dl className="max-w-sm space-y-2 text-sm">
-              <Row label="Daily" value={fmt(v.tariff.dailyMinor)} />
-              {v.tariff.weeklyMinor != null && <Row label="Weekly" value={fmt(v.tariff.weeklyMinor)} />}
-              {v.tariff.monthlyMinor != null && <Row label="Monthly" value={fmt(v.tariff.monthlyMinor)} />}
-              {v.tariff.withDriverAvailable && v.tariff.driverDailyMinor != null && (
-                <Row label="Driver, per day" value={fmt(v.tariff.driverDailyMinor)} />
-              )}
-              {v.tariff.depositMinor > 0 && (
-                <Row label="Deposit (refundable)" value={fmt(v.tariff.depositMinor)} muted />
-              )}
-            </dl>
-            <p className="mt-3 max-w-md text-xs text-[var(--text-muted)]">
-              Longer hires are priced on the best combination of rates
-              automatically — you are never charged more than the daily rate
-              multiplied by the number of days.
-            </p>
-          </section>
-
-          {taken.length > 0 && (
-            <section className="mt-8">
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                Already booked
+          <aside className="rental-book">
+            <div className="rental-book-card">
+              <h2>
+                Request this <span>vehicle</span>
               </h2>
-              <ul className="space-y-1 text-sm text-[var(--text-secondary)]">
-                {taken.map((t, i) => (
-                  <li key={i} className="tabular-nums">{formatRange(t.period, market.locale)}</li>
-                ))}
-              </ul>
-            </section>
-          )}
+              <p className="rental-book-lead">
+                Pick your dates and the price appears as you type. We confirm
+                availability and take a deposit before the booking holds.
+              </p>
+              <RentalBookingForm
+                market={market}
+                vehicleSlug={v.slug}
+                tariff={v.tariff}
+              />
+            </div>
+          </aside>
         </div>
-
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-6">
-            <h2 className="mb-1 text-lg font-semibold">Request this vehicle</h2>
-            <p className="mb-5 text-sm text-[var(--text-muted)]">
-              We confirm availability and take a deposit before the booking holds.
-            </p>
-            <RentalBookingForm
-              market={market}
-              vehicleSlug={v.slug}
-              tariff={v.tariff}
-            />
-          </div>
-        </aside>
       </div>
-    </div>
-  );
-}
-
-
-function Spec({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-[var(--text-muted)]">{label}</dt>
-      <dd className="font-medium">{value}</dd>
-    </div>
-  );
-}
-
-function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return (
-    <div className="flex justify-between gap-3 border-b border-[var(--border-subtle)] pb-1.5">
-      <dt className={muted ? "text-[var(--text-muted)]" : "text-[var(--text-secondary)]"}>{label}</dt>
-      <dd className={`tabular-nums ${muted ? "text-[var(--text-muted)]" : "font-semibold"}`}>{value}</dd>
     </div>
   );
 }
