@@ -17,13 +17,27 @@
     backdrop-filter: blur(12px);
 }
 
+/* Wraps so the navigation can take a line of its own. Eight sections sharing
+   one row with the brand and the account controls left no room, and the row
+   was set to scroll sideways — which hides sections behind a gesture nobody
+   thinks to make. A section you cannot see is a section you do not know
+   exists. */
 .admin-header-inner {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 16px;
     max-width: 1280px;
     margin: 0 auto;
     padding: 10px 20px;
+}
+
+.admin-brand {
+    order: 1;
+}
+
+.admin-header-end {
+    order: 2;
 }
 
 .admin-brand {
@@ -40,17 +54,19 @@
 }
 
 /* ── Navigation ────────────────────────────────────────────────────────── */
+/* Its own full-width line under the brand, wrapping rather than scrolling, so
+   every section is on screen at once with nothing behind a swipe. */
 .admin-nav {
+    order: 3;
+    flex: 1 0 100%;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 4px;
     min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.admin-nav::-webkit-scrollbar {
-    display: none;
+    margin-top: 2px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-subtle);
 }
 
 .admin-nav-link {
@@ -90,7 +106,8 @@
     color: var(--brand-400, #4e9d76);
 }
 
-.admin-nav-head,
+/* Only the phone panel has room for the signed-in address; the header states
+   it on a wide screen. */
 .admin-nav-foot {
     display: none;
 }
@@ -168,37 +185,57 @@
         order: -1;
     }
 
-    /* A drawer rather than a squeezed row: seven sections cannot share a
-       phone's width, and a horizontally scrolling nav hides the items nobody
-       thinks to swipe for. */
+    /* A panel that drops from the header, not a side drawer.
+       The drawer listed the sections vertically, which ran past the bottom of
+       a phone screen — Staff was the last of eight and had to be scrolled to,
+       so it may as well not have existed. Two columns fit all eight in four
+       rows, on screen together, with no scrolling and nothing below the fold.
+
+       Anchored to .admin-header with top:100% rather than a hardcoded offset,
+       so it sits directly under the button that opened it however tall the
+       header happens to be. */
     .admin-nav {
-        position: fixed;
+        position: absolute;
         z-index: 50;
-        top: 0;
+        top: 100%;
         left: 0;
-        bottom: 0;
-        width: min(280px, 82vw);
-        flex-direction: column;
-        align-items: stretch;
-        gap: 2px;
-        /* No guessed offset for the header. The drawer owns the full height and
-           carries its own title row, so the first link is visible the moment it
-           opens rather than sitting below the fold. */
-        padding: 14px 14px 20px;
-        overflow-y: auto;
+        right: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin: 0;
+        padding: 14px;
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
         background: var(--surface-1);
-        border-right: 1px solid var(--border-subtle);
-        transform: translateX(-100%);
-        transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+        box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+        /* A safety net for a very short screen; with eight sections in two
+           columns it does not engage. */
+        max-height: calc(100dvh - 100%);
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition:
+            opacity 0.18s ease,
+            transform 0.18s ease,
+            visibility 0.18s;
     }
 
     .admin-nav.is-open {
+        opacity: 1;
+        visibility: visible;
         transform: none;
     }
 
+    /* Tiles rather than list rows: a bigger tap target, and the border makes
+       each one read as a separate destination. */
     .admin-nav-link {
-        padding: 12px 14px;
-        font-size: 15px;
+        padding: 13px 12px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        background: var(--surface-2);
+        font-size: 14px;
     }
 
     .admin-nav-link i {
@@ -206,35 +243,38 @@
         text-align: center;
     }
 
-    .admin-nav-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 6px 14px;
-        margin-bottom: 6px;
-        border-bottom: 1px solid var(--border-subtle);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-    }
-
-    .admin-nav-close {
-        width: 34px;
-        height: 34px;
-        border: 1px solid var(--border-default);
-        border-radius: 8px;
-        background: transparent;
-        color: var(--text-primary);
-        cursor: pointer;
+    .admin-nav-link.is-active {
+        border-color: color-mix(in srgb, var(--brand-400, #4e9d76) 55%, transparent);
     }
 
     .admin-nav-foot {
+        grid-column: 1 / -1;
         display: block;
-        margin-top: auto;
-        padding-top: 16px;
+        padding-top: 14px;
         border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Dims the page but not the header, so the button you just pressed stays
+       lit and tappable. Absolute inside the sticky header and starting at its
+       bottom edge, rather than fixed over the whole viewport — a full-viewport
+       scrim sits inside the header's stacking context and would grey out the
+       brand and the menu button along with everything else. */
+    .admin-scrim {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        bottom: auto;
+        height: 100dvh;
+        z-index: 45;
+        background: rgba(0, 0, 0, 0.45);
+    }
+
+    .admin-brand,
+    .admin-burger,
+    .admin-header-end {
+        position: relative;
+        z-index: 46;
     }
 
     .admin-nav-foot .admin-who {

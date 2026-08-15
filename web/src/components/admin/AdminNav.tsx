@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface AdminNavItem {
   href: string;
@@ -41,6 +41,17 @@ export function AdminNav({
     .filter((i) => pathname === i.href || pathname.startsWith(`${i.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
+  // Escape closes it. Registered only while open, so nothing listens on the
+  // vast majority of renders.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <>
       {/* Labelled, not a bare glyph. An icon-only square in a header reads as
@@ -62,20 +73,6 @@ export function AdminNav({
         className={`admin-nav${open ? " is-open" : ""}`}
         aria-label="Admin sections"
       >
-        {/* The drawer names itself and offers a way out. Opening onto bare
-            links with the page dimmed behind reads as a glitch. */}
-        <div className="admin-nav-head">
-          <span>Sections</span>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Close menu"
-            className="admin-nav-close"
-          >
-            <i className="fas fa-times" aria-hidden="true" />
-          </button>
-        </div>
-
         {items.map((i) => (
           <Link
             key={i.href}
