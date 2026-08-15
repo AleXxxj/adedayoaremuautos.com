@@ -1856,3 +1856,391 @@
 .legacy-theme .car-card .car-image {
     max-height: 320px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   22. Rent-to-own categories, applications, and the referral programme
+
+   Every one of these call to action buttons used to land on the same general
+   contact form. "Start with Economy" promised a category and delivered a blank
+   message box; the referral panels promised 1.5% and delivered the same box,
+   which did not even offer "referral" as a reason for writing. These are the
+   pages those buttons should always have led to.
+   ------------------------------------------------------------------------ */
+
+.legacy-theme .page-header--rent-to-own {
+    background: linear-gradient(180deg, #12180f 0%, #0a0a0a 100%);
+}
+
+.legacy-theme .page-header--referral {
+    background: linear-gradient(180deg, #141008 0%, #0a0a0a 100%);
+}
+
+.legacy-theme .rto-container {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.legacy-theme .rto-crumbs {
+    margin-bottom: 26px;
+    font-size: 14px;
+}
+
+.legacy-theme .rto-crumbs a {
+    color: var(--text-secondary, #b9b9b9);
+    text-decoration: none;
+}
+
+.legacy-theme .rto-crumbs a:hover {
+    color: var(--gold, #c9a227);
+}
+
+/* ── The terms, restated where the choice is made ──────────────────────── */
+.legacy-theme .tier-terms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 34px;
+}
+
+.legacy-theme .tier-term {
+    flex: 1 1 190px;
+    padding: 18px 20px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .tier-term--own {
+    border-color: rgba(201, 162, 39, 0.4);
+    background: rgba(201, 162, 39, 0.07);
+}
+
+.legacy-theme .tier-term-value {
+    display: block;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+.legacy-theme .tier-term-label {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .tier-count {
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* The three features a buyer actually chooses a car on. */
+.legacy-theme .car-features {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 5px;
+}
+
+.legacy-theme .car-features li {
+    font-size: 13px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .car-features i {
+    margin-right: 7px;
+    font-size: 11px;
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .car-price--rto small {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* ── Applying for one specific car ─────────────────────────────────────── */
+.legacy-theme .rto-apply-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: start;
+}
+
+.legacy-theme .rto-apply-summary {
+    padding: 26px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .rto-apply-summary h2 {
+    margin: 0 0 18px;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rto-apply-car {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.legacy-theme .rto-apply-car img {
+    width: 108px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.legacy-theme .rto-apply-car strong {
+    display: block;
+    font-size: 16px;
+    color: #fff;
+}
+
+.legacy-theme .rto-apply-specs {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rto-apply-nocar {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .rto-apply-terms {
+    margin: 0;
+    display: grid;
+    gap: 1px;
+    background: var(--border, #262626);
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.legacy-theme .rto-apply-terms > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #101010;
+}
+
+.legacy-theme .rto-apply-terms dt {
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .rto-apply-terms dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+    color: #fff;
+}
+
+.legacy-theme .rto-apply-note {
+    margin: 18px 0 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .form-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* ── Referral programme ────────────────────────────────────────────────── */
+.legacy-theme .referral-page {
+    padding: clamp(48px, 6vw, 84px) 20px;
+}
+
+.legacy-theme .referral-page-container {
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.legacy-theme .referral-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 40px;
+    align-items: start;
+}
+
+.legacy-theme .referral-headline {
+    font-size: clamp(44px, 7vw, 68px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--gold, #c9a227);
+}
+
+.legacy-theme .referral-headline small {
+    display: block;
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .referral-example {
+    margin: 16px 0 34px;
+    font-size: 15px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .referral-steps {
+    margin: 0 0 34px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 18px;
+}
+
+.legacy-theme .referral-steps li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.legacy-theme .referral-step-index {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(201, 162, 39, 0.55);
+    padding-top: 2px;
+}
+
+.legacy-theme .referral-steps h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: #fff;
+}
+
+.legacy-theme .referral-steps h3 i {
+    margin-right: 8px;
+    font-size: 13px;
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .referral-steps p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+/* The rules stated before signing up, not after a dispute. */
+.legacy-theme .referral-terms {
+    padding: 22px 24px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .referral-terms h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .referral-terms ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .referral-terms li {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .referral-code-box,
+.legacy-theme .referral-link-box {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border: 1px solid rgba(201, 162, 39, 0.35);
+    border-radius: 12px;
+    background: rgba(201, 162, 39, 0.07);
+}
+
+.legacy-theme .referral-code-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .referral-code {
+    display: block;
+    margin-top: 6px;
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--gold, #c9a227);
+}
+
+.legacy-theme .referral-link {
+    display: block;
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-all;
+    color: #fff;
+    /* Selectable: on a phone the share sheet is reached by long-pressing the
+       text, which a copy button alone does not offer. */
+    user-select: all;
+}
+
+.legacy-theme .referral-next {
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 12px;
+}
+
+.legacy-theme .referral-next li {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .referral-next i {
+    margin-right: 9px;
+    color: var(--brand-400, #4e9d76);
+}
+
+@media (max-width: 900px) {
+    .legacy-theme .rto-apply-grid,
+    .legacy-theme .referral-page-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    /* The summary states what is being applied for, so it belongs above the
+       questions rather than below them on a phone. */
+    .legacy-theme .rto-apply-summary {
+        order: -1;
+    }
+}

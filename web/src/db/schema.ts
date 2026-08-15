@@ -328,6 +328,16 @@ export const leads = pgTable(
     utmMedium: text("utm_medium"),
     utmCampaign: text("utm_campaign"),
     referrerUrl: text("referrer_url"),
+
+    /** Who introduced this enquiry, if they arrived through a partner link. */
+    referralPartnerId: uuid("referral_partner_id"),
+
+    /**
+     * Which rent-to-own category was applied for. Recorded rather than derived
+     * from the vehicle later: the tier's rates are what the applicant was
+     * actually shown, and a vehicle can be re-tiered or sold afterwards.
+     */
+    rentalTierId: uuid("rental_tier_id"),
     landingPath: text("landing_path"),
     ipCountry: text("ip_country"),
 
@@ -529,6 +539,19 @@ export const deals = pgTable(
     leadId: uuid("lead_id").references(() => leads.id, { onDelete: "set null" }),
     vehicleId: uuid("vehicle_id").references(() => vehicles.id),
     salespersonId: uuid("salesperson_id").references(() => staff.id),
+
+    /**
+     * Who gets paid for this sale, and how much.
+     *
+     * Held on the deal as well as on the lead because this is the row that
+     * says money changed hands: a rate can be renegotiated and a lead can be
+     * reassigned, but what was owed on a completed sale must not move
+     * afterwards.
+     */
+    referralPartnerId: uuid("referral_partner_id"),
+    referralCommissionMinor: bigint("referral_commission_minor", { mode: "number" })
+      .notNull()
+      .default(0),
 
     status: dealStatus("status").notNull().default("draft"),
     dealNumber: text("deal_number").notNull(),
@@ -834,6 +857,56 @@ export type ArticleComment = typeof articleComments.$inferSelect;
  * Market-scoped and currency-bearing: $5,000 is not a threshold anyone has
  * agreed to in naira, so Nigeria has no tiers until the business sets them.
  */
+export const referralPartnerStatus = pgEnum("referral_partner_status", [
+  "active",
+  "suspended",
+]);
+
+/**
+ * Someone who sends buyers and is paid for it.
+ *
+ * The site has advertised 1.5% commission and "track your referrals easily"
+ * since the original build, with nothing behind either: no codes, no
+ * attribution, so a commission could only be settled from memory and an
+ * argument. A partner's code is what turns a claim into a record.
+ *
+ * There are deliberately no bank or payout details here. A public form that
+ * collects account numbers makes this table worth stealing, and the business
+ * speaks to a partner before paying them anyway — the same reasoning that
+ * keeps SSN and BVN off the finance form.
+ */
+export const referralPartners = pgTable(
+  "referral_partners",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    /** Short and speakable: it is read down a phone and written on receipts. */
+    code: text("code").notNull(),
+
+    fullName: text("full_name").notNull(),
+    email: text("email"),
+    phone: text("phone").notNull(),
+    whatsapp: text("whatsapp"),
+
+    status: referralPartnerStatus("status").notNull().default("active"),
+
+    /** Basis points; 150 = the 1.5% the site advertises. Per partner, because
+     *  volume earns a better rate and changing it must not rewrite history. */
+    commissionBps: integer("commission_bps").notNull().default(150),
+
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [uniqueIndex("referral_partners_code_unique").on(t.code)],
+);
+
+export type ReferralPartner = typeof referralPartners.$inferSelect;
+
 export const rentalTiers = pgTable(
   "rental_tiers",
   {

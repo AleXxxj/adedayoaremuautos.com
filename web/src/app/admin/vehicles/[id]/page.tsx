@@ -10,6 +10,7 @@ import {
   deleteVehiclePhotoAction,
 } from "@/lib/actions/vehicles";
 import { VehicleForm } from "@/components/admin/VehicleForm";
+import { listTierOptions } from "@/lib/repositories/tiers";
 import { DeleteVehicle } from "@/components/admin/DeleteVehicle";
 import { PhotoManager } from "@/components/admin/PhotoManager";
 import { TariffForm } from "@/components/admin/TariffForm";
@@ -33,6 +34,8 @@ export default async function EditVehiclePage({
   const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
   if (!vehicle) notFound();
   if (!canAccessMarket(user, vehicle.marketCode)) notFound();
+
+  const tiers = await listTierOptions(allowedMarkets(user));
 
   const [photos, history, tariffRows] = await Promise.all([
     db
@@ -87,9 +90,11 @@ export default async function EditVehiclePage({
           <VehicleForm
             action={updateVehicle}
             markets={allowedMarkets(user)}
+            tiers={tiers}
             submitLabel="Save changes"
             defaults={{
               id: vehicle.id,
+              rentalTierId: vehicle.rentalTierId,
               marketCode: vehicle.marketCode,
               make: vehicle.make,
               model: vehicle.model,

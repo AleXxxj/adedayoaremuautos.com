@@ -222,11 +222,13 @@ export default async function RentToOwnPage({
                       </div>
                     )}
 
+                    {/* Leads to the cars in this category, not to a blank
+                        message box. The choice of vehicle is the decision. */}
                     <Link
-                      href={`/${code}/contact?type=rent_to_own`}
+                      href={`/${code}/rent-to-own/${t.slug}`}
                       className="btn btn-primary"
                     >
-                      <i className="fas fa-key" /> Start with {t.name}
+                      <i className="fas fa-key" /> See {t.name} vehicles
                     </Link>
                   </div>
                 );

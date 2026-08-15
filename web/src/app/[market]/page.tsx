@@ -439,7 +439,7 @@ export default async function MarketHome({
                 <li><i className="fas fa-check-circle" /> Fast payout after transaction completion</li>
                 <li><i className="fas fa-check-circle" /> Track your referrals easily</li>
               </ul>
-              <Link href={`/${code}/contact?type=referral`} className="btn btn-primary">
+              <Link href={`/${code}/referral`} className="btn btn-primary">
                 Become a Partner
               </Link>
             </div>
@@ -455,7 +455,7 @@ export default async function MarketHome({
                   ? "Example: Refer a $30,000 car = $450"
                   : "Example: Refer a ₦10M car = ₦150,000"}
               </p>
-              <Link href={`/${code}/contact?type=referral`} className="btn btn-primary">
+              <Link href={`/${code}/referral`} className="btn btn-primary">
                 Start Referring
               </Link>
             </div>

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { vehicles, vehicleMedia, auditLog, deals, rentalBookings } from "@/db/schema";
+import { vehicles, vehicleMedia, auditLog, deals, rentalBookings, rentalTiers } from "@/db/schema";
 import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
 import { supabaseAdmin, VEHICLE_BUCKET } from "@/lib/supabase/admin";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
@@ -54,7 +54,33 @@ const baseSchema = z.object({
   isFeatured: z.coerce.boolean().optional(),
   /** One feature per line in the admin; stored as a jsonb array. */
   featuresText: z.string().optional(),
+  /** Empty means the vehicle is not offered on rent to own. */
+  rentalTierId: z.string().uuid().optional().or(z.literal("")),
 });
+
+
+/**
+ * Resolves the chosen rent-to-own category, refusing one from another market.
+ *
+ * The form only offers categories for the selected market, but a form is not a
+ * boundary — the field is a plain uuid in a POST body, and a Nigerian tier on a
+ * US car would publish naira rates on a dollar listing.
+ */
+async function resolveTier(
+  tierId: string | undefined,
+  market: "us" | "ng",
+): Promise<{ id: string | null } | { error: string }> {
+  if (!tierId) return { id: null };
+  const [tier] = await db
+    .select({ id: rentalTiers.id, marketCode: rentalTiers.marketCode })
+    .from(rentalTiers)
+    .where(eq(rentalTiers.id, tierId));
+  if (!tier) return { error: "That rent-to-own category no longer exists." };
+  if (tier.marketCode !== market) {
+    return { error: "That category belongs to the other market." };
+  }
+  return { id: tier.id };
+}
 
 const vehicleSchema = baseSchema
   .refine(
@@ -168,11 +194,17 @@ export async function createVehicle(
     slugify([v.year, v.make, v.model, v.trim]),
   );
 
+  const tier = await resolveTier(v.rentalTierId || undefined, v.marketCode);
+  if ("error" in tier) {
+    return { ok: false, fieldErrors: { rentalTierId: [tier.error] } };
+  }
+
   let id: string;
   try {
     const [row] = await db
       .insert(vehicles)
       .values({
+        rentalTierId: tier.id,
         marketCode: v.marketCode,
         make: v.make,
         model: v.model,
@@ -245,10 +277,16 @@ export async function updateVehicle(
     id,
   );
 
+  const tier = await resolveTier(v.rentalTierId || undefined, v.marketCode);
+  if ("error" in tier) {
+    return { ok: false, fieldErrors: { rentalTierId: [tier.error] } };
+  }
+
   try {
     await db
       .update(vehicles)
       .set({
+        rentalTierId: tier.id,
         make: v.make,
         model: v.model,
         trim: v.trim,

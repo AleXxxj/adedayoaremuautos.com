@@ -1,13 +1,14 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { leads, vehicles } from "@/db/schema";
+import { leads, vehicles, rentalTiers, referralPartners } from "@/db/schema";
 import { isMarketCode } from "@/lib/market";
 import { notifyStaffOfLead } from "@/lib/notify";
+import { REF_COOKIE, normaliseCode } from "@/lib/referral";
 
 export interface LeadResult {
   ok: boolean;
@@ -35,6 +36,8 @@ const schema = z
     message: z.string().trim().max(4000).optional(),
     preferredContact: z.enum(["phone", "whatsapp", "email"]).optional(),
     vehicleSlug: z.string().trim().max(120).optional(),
+    /** Which rent-to-own category is being applied for. */
+    tierSlug: z.string().trim().max(80).optional(),
     // Anti-spam. Not user-facing.
     website: z.string().max(0, "Rejected").optional(),
     renderedAt: z.coerce.number().optional(),
@@ -49,6 +52,37 @@ const MIN_FILL_MS = 1500;
 /** Per-phone submission cap inside the window below. */
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
+
+
+/**
+ * The partner whose link brought this visitor, if any.
+ *
+ * The cookie carries a code, not an id, and the code is looked up rather than
+ * trusted: only an active partner in the right market earns the attribution.
+ * An unknown, suspended or cross-market code attributes to nobody rather than
+ * failing the submission — a broken referral link must never cost the
+ * dealership the enquiry.
+ */
+async function resolveReferralPartner(
+  market: "us" | "ng",
+): Promise<string | null> {
+  const raw = (await cookies()).get(REF_COOKIE)?.value;
+  if (!raw) return null;
+
+  const [partner] = await db
+    .select({ id: referralPartners.id })
+    .from(referralPartners)
+    .where(
+      and(
+        eq(referralPartners.code, normaliseCode(raw)),
+        eq(referralPartners.marketCode, market),
+        eq(referralPartners.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  return partner?.id ?? null;
+}
 
 export async function submitLead(
   _prev: LeadResult | null,
@@ -117,6 +151,35 @@ export async function submitLead(
     }
   }
 
+  // ── Resolve the rent-to-own category, if any ────────────────────────────
+  // Recorded alongside the vehicle rather than inferred from it later: these
+  // are the rates the applicant was actually shown, and a car can be moved to
+  // another category or sold after the application is made.
+  let rentalTierId: string | null = null;
+  let tierName: string | null = null;
+  if (v.tierSlug && isMarketCode(v.marketCode)) {
+    const [tier] = await db
+      .select({ id: rentalTiers.id, name: rentalTiers.name })
+      .from(rentalTiers)
+      .where(
+        and(
+          eq(rentalTiers.marketCode, v.marketCode),
+          eq(rentalTiers.slug, v.tierSlug),
+        ),
+      )
+      .limit(1);
+    if (tier) {
+      rentalTierId = tier.id;
+      tierName = tier.name;
+    }
+  }
+
+  // ── Who introduced them ─────────────────────────────────────────────────
+  // Set by /r/<code> when a partner's link was followed. Looked up rather than
+  // trusted: the cookie holds a code, and only an active partner earns the
+  // attribution. An unknown or suspended code simply attributes to nobody.
+  const referralPartnerId = await resolveReferralPartner(v.marketCode);
+
   // ── Persist FIRST, notify after ─────────────────────────────────────────
   // The database write is the commitment to the customer. Notification is best
   // effort on top of it and can never cost us the lead.
@@ -129,6 +192,8 @@ export async function submitLead(
         type: v.type,
         status: "new",
         vehicleId,
+        rentalTierId,
+        referralPartnerId,
         name: v.name,
         email: v.email || null,
         phone: v.phone,
@@ -163,7 +228,7 @@ export async function submitLead(
       email: v.email,
       phone: v.phone,
       message: v.message,
-      vehicle: vehicleLabel,
+      vehicle: tierName ? `${vehicleLabel ?? 'No vehicle chosen'} — ${tierName} rent to own` : vehicleLabel,
       adminUrl: `${site}/admin/leads`,
     });
   } catch (e) {

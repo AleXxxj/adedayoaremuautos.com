@@ -2,12 +2,14 @@ import Link from "next/link";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { createVehicle } from "@/lib/actions/vehicles";
 import { VehicleForm } from "@/components/admin/VehicleForm";
+import { listTierOptions } from "@/lib/repositories/tiers";
 import { AdminChrome } from "../../layout";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewVehiclePage() {
   const user = await requireStaff();
+  const tiers = await listTierOptions(allowedMarkets(user));
 
   return (
     <AdminChrome email={user.email} role={user.role}>
@@ -22,6 +24,7 @@ export default async function NewVehiclePage() {
         <VehicleForm
           action={createVehicle}
           markets={allowedMarkets(user)}
+          tiers={tiers}
           submitLabel="Create vehicle"
         />
 

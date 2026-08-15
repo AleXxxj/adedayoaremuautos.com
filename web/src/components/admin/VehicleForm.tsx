@@ -35,17 +35,27 @@ export interface VehicleDefaults {
   status?: string;
   isFeatured?: boolean;
   featuresText?: string;
+  rentalTierId?: string | null;
+}
+
+export interface TierOption {
+  id: string;
+  marketCode: MarketCode;
+  name: string;
+  ownsAfter: string | null;
 }
 
 export function VehicleForm({
   action,
   defaults = {},
   markets,
+  tiers = [],
   submitLabel,
 }: {
   action: Action;
   defaults?: VehicleDefaults;
   markets: MarketCode[];
+  tiers?: TierOption[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
@@ -54,6 +64,9 @@ export function VehicleForm({
   );
 
   const cfg = MARKETS[market];
+  // Categories belong to a market, so the list follows the market selector
+  // above rather than offering Nigerian tiers for a US car.
+  const marketTiers = tiers.filter((t) => t.marketCode === market);
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
   return (
@@ -212,6 +225,31 @@ export function VehicleForm({
             <option value="unlisted">Unlisted — hidden, kept on record</option>
           </select>
         </Field>
+
+        {/* Rent to own is a per-vehicle promise, so the category has to be set
+            on the vehicle. Until this existed the tier pages could only ever be
+            empty: the rates were published but no car was in any of them. */}
+        {marketTiers.length > 0 && (
+          <Field label="Rent to Own category" error={err("rentalTierId")} full>
+            <select
+              name="rentalTierId"
+              defaultValue={defaults.rentalTierId ?? ""}
+              className={input}
+            >
+              <option value="">Not available for rent to own</option>
+              {marketTiers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                  {t.ownsAfter ? ` — owned after ${t.ownsAfter}` : ""}
+                </option>
+              ))}
+            </select>
+            <Hint>
+              Putting a vehicle in a category lists it on that category&rsquo;s
+              page, where a customer can apply for this exact car.
+            </Hint>
+          </Field>
+        )}
 
         {cfg.expectsHistoryReport && (
           <Field label="History report URL" error={err("historyReportUrl")}>
