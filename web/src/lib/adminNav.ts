@@ -22,6 +22,7 @@ const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
   { href: "/admin/finance", label: "Finance", icon: "fas fa-file-invoice-dollar", roles: ["owner", "manager"] },
   { href: "/admin/tiers", label: "Rent to Own", icon: "fas fa-key", roles: ["owner", "manager"] },
   { href: "/admin/comments", label: "Comments", icon: "fas fa-comments", roles: ["owner", "manager"] },
+  { href: "/admin/staff", label: "Staff", icon: "fas fa-user-shield", roles: ["owner"] },
 ];
 
 export function navFor(role: Staff["role"]): AdminNavItem[] {
