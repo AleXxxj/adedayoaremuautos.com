@@ -223,7 +223,7 @@ export default async function RentToOwnPage({
                     )}
 
                     <Link
-                      href={`/${code}/contact?type=rental`}
+                      href={`/${code}/contact?type=rent_to_own`}
                       className="btn btn-primary"
                     >
                       <i className="fas fa-key" /> Start with {t.name}
@@ -310,7 +310,7 @@ export default async function RentToOwnPage({
               and the paperwork.
             </p>
             <div className="rto-cta-actions">
-              <Link href={`/${code}/contact?type=rental`} className="btn btn-primary">
+              <Link href={`/${code}/contact?type=rent_to_own`} className="btn btn-primary">
                 <i className="fas fa-paper-plane" /> Enquire about Rent to Own
               </Link>
               {tel && (

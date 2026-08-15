@@ -12,6 +12,11 @@ const INTERESTS: { value: string; label: string }[] = [
   { value: "finance", label: "Car Financing" },
   { value: "trade_in", label: "Value my Trade-In" },
   { value: "test_drive", label: "Booking a Test Drive" },
+  // The referral panels on the homepage have always linked here with
+  // ?type=referral, but there was no matching option — so the browser fell
+  // back to the first entry and every would-be partner was filed as "Buying a
+  // Car". The programme has therefore recorded no referral leads at all.
+  { value: "referral", label: "Joining the referral programme" },
 ];
 
 /**

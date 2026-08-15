@@ -22,6 +22,7 @@ const LEAD_TYPES = [
   "trade_in",
   "rental",
   "rent_to_own",
+  "referral",
 ] as const;
 
 const schema = z
