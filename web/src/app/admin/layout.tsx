@@ -1,4 +1,8 @@
 import Link from "next/link";
+// The admin uses the same icon set as the public site but never loaded it, so
+// every icon rendered as an empty box — the menu button looked like a blank
+// logo tile and "View site" like an empty pill.
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/styles/admin.css";
 import { signOut } from "@/lib/actions/auth";
 import { AdminNav } from "@/components/admin/AdminNav";

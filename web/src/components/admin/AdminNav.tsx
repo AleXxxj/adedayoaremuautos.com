@@ -43,15 +43,18 @@ export function AdminNav({
 
   return (
     <>
+      {/* Labelled, not a bare glyph. An icon-only square in a header reads as
+          a logo until you happen to tap it — and it read as nothing at all
+          while the icon font was missing. */}
       <button
         type="button"
         className="admin-burger"
         aria-expanded={open}
         aria-controls="admin-nav"
-        aria-label={open ? "Close menu" : "Open menu"}
         onClick={() => setOpen((o) => !o)}
       >
         <i className={open ? "fas fa-times" : "fas fa-bars"} aria-hidden="true" />
+        <span>Menu</span>
       </button>
 
       <nav
@@ -59,6 +62,20 @@ export function AdminNav({
         className={`admin-nav${open ? " is-open" : ""}`}
         aria-label="Admin sections"
       >
+        {/* The drawer names itself and offers a way out. Opening onto bare
+            links with the page dimmed behind reads as a glitch. */}
+        <div className="admin-nav-head">
+          <span>Sections</span>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="admin-nav-close"
+          >
+            <i className="fas fa-times" aria-hidden="true" />
+          </button>
+        </div>
+
         {items.map((i) => (
           <Link
             key={i.href}

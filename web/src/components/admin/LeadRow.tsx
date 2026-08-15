@@ -1,6 +1,8 @@
 "use client";
 
+
 import Link from "next/link";
+import { LeadReply } from "./LeadReply";
 import { useActionState } from "react";
 import { updateLeadStatus } from "@/lib/actions/leads";
 
@@ -93,6 +95,17 @@ export function LeadRow({
               </span>
             )}
           </div>
+
+          {/* The channel they asked for is highlighted, so the right one is the
+              obvious one to reach for under time pressure. */}
+          <LeadReply
+            name={lead.name}
+            phone={lead.phone}
+            email={lead.email}
+            marketCode={lead.marketCode}
+            vehicle={vehicle?.label}
+            preferred={lead.preferredContact}
+          />
 
           {vehicle && (
             <p className="mt-2 text-sm text-[var(--text-secondary)]">

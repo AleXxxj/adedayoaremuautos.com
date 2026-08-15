@@ -90,6 +90,7 @@
     color: var(--brand-400, #4e9d76);
 }
 
+.admin-nav-head,
 .admin-nav-foot {
     display: none;
 }
@@ -134,7 +135,8 @@
     display: none;
     align-items: center;
     justify-content: center;
-    width: 40px;
+    gap: 8px;
+    padding: 0 14px;
     height: 40px;
     border: 1px solid var(--border-default);
     border-radius: 10px;
@@ -179,7 +181,10 @@
         flex-direction: column;
         align-items: stretch;
         gap: 2px;
-        padding: 76px 14px 20px;
+        /* No guessed offset for the header. The drawer owns the full height and
+           carries its own title row, so the first link is visible the moment it
+           opens rather than sitting below the fold. */
+        padding: 14px 14px 20px;
         overflow-y: auto;
         background: var(--surface-1);
         border-right: 1px solid var(--border-subtle);
@@ -199,6 +204,30 @@
     .admin-nav-link i {
         width: 18px;
         text-align: center;
+    }
+
+    .admin-nav-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 6px 14px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .admin-nav-close {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border-default);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-primary);
+        cursor: pointer;
     }
 
     .admin-nav-foot {
@@ -241,5 +270,74 @@
     .admin-scroll {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ── Replying to an enquiry ────────────────────────────────────────────────
+   A phone number printed on screen is not a reply. Answering someone who asked
+   for WhatsApp meant copying the number, saving a contact, opening the app and
+   searching for them — enough friction to lose enquiries to. These open the
+   conversation directly, and wa.me works on a number that was never saved. */
+.lead-reply {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.lead-reply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        border-color 0.15s ease,
+        color 0.15s ease,
+        background-color 0.15s ease;
+}
+
+.lead-reply-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface-2);
+}
+
+.lead-reply-btn i {
+    font-size: 13px;
+}
+
+.lead-reply--wa i {
+    color: #25d366;
+}
+
+/* The channel the customer actually asked for, so the right button is the
+   obvious one under time pressure. */
+.lead-reply-btn.lead-reply--preferred {
+    border-color: color-mix(in srgb, var(--brand-400, #4e9d76) 60%, transparent);
+    background: color-mix(in srgb, var(--brand-400, #4e9d76) 12%, transparent);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Phones can text and call; a desktop mostly cannot, and a dead link is worse
+   than an absent one. */
+@media (min-width: 900px) {
+    .lead-reply--sms {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .lead-reply-btn {
+        flex: 1 1 calc(50% - 4px);
+        justify-content: center;
     }
 }
