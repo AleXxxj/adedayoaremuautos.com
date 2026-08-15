@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { updateBookingStatus } from "@/lib/actions/rentals";
+import { formatRange } from "@/lib/pgRange";
 
 interface Booking {
   id: string;
@@ -36,13 +37,6 @@ const TONE: Record<string, string> = {
   cancelled: "text-[var(--text-muted)] border-[var(--border-default)]",
 };
 
-function formatPeriod(period: string, locale: string): string {
-  const m = /^[\[(]([^,]+),([^)\]]+)[)\]]$/.exec(period);
-  if (!m) return period;
-  const f = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" });
-  return `${f.format(new Date(m[1]))} → ${f.format(new Date(m[2]))}`;
-}
-
 export function BookingRow({
   booking,
   vehicle,
@@ -73,7 +67,7 @@ export function BookingRow({
           </div>
 
           <p className="mt-1.5 text-sm font-medium tabular-nums">
-            {formatPeriod(booking.period, locale)}
+            {formatRange(booking.period, locale, "→")}
           </p>
 
           {vehicle && (

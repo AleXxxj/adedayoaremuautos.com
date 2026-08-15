@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatRange } from "@/lib/pgRange";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
@@ -102,7 +103,7 @@ export default async function RentalDetailPage({
               </h2>
               <ul className="space-y-1 text-sm text-[var(--text-secondary)]">
                 {taken.map((t, i) => (
-                  <li key={i} className="tabular-nums">{formatPeriod(t.period, market.locale)}</li>
+                  <li key={i} className="tabular-nums">{formatRange(t.period, market.locale)}</li>
                 ))}
               </ul>
             </section>
@@ -127,13 +128,6 @@ export default async function RentalDetailPage({
   );
 }
 
-/** "[2026-09-01 00:00+00,2026-09-08 00:00+00)" -> "1 Sep – 8 Sep 2026" */
-function formatPeriod(period: string, locale: string): string {
-  const m = /^[\[(]([^,]+),([^)\]]+)[)\]]$/.exec(period);
-  if (!m) return period;
-  const f = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" });
-  return `${f.format(new Date(m[1]))} – ${f.format(new Date(m[2]))}`;
-}
 
 function Spec({ label, value }: { label: string; value: string }) {
   return (

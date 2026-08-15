@@ -9,6 +9,13 @@ function LoginForm() {
   const search = useSearchParams();
   const [state, action, pending] = useActionState(signIn, null);
   const notStaff = search.get("error") === "not_staff";
+  // Set by /auth/invite when a one-time link cannot be redeemed. Saying which
+  // of the two it was saves the person guessing whether to retry the link or
+  // ask for a new one.
+  const linkProblem = {
+    link_expired: "That invitation link has expired or has already been used. Ask for a fresh one.",
+    bad_link: "That link is not valid. Ask for a fresh invitation.",
+  }[search.get("error") ?? ""];
 
   return (
     <form
@@ -27,6 +34,12 @@ function LoginForm() {
       {notStaff && (
         <p className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">
           That account exists but is not authorised for admin access.
+        </p>
+      )}
+
+      {linkProblem && (
+        <p className="rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-3 py-2 text-sm">
+          {linkProblem}
         </p>
       )}
 

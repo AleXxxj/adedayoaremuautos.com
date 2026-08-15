@@ -27,6 +27,49 @@ export async function signIn(
   redirect(next.startsWith("/admin") ? next : "/admin/vehicles");
 }
 
+/**
+ * Sets the password on an account that arrived through an invitation.
+ *
+ * Requires an existing session — the invite route establishes one by verifying
+ * the token — so this cannot be used to change a stranger's password: without
+ * the token there is no session, and Supabase applies the change to whoever
+ * the session belongs to rather than to an email named in the form.
+ *
+ * Ten characters rather than Supabase's default six. Every one of these
+ * accounts can see customer names, phone numbers and finance applications, so
+ * the floor should not be four letters and a digit.
+ */
+export async function setPassword(
+  _prev: { error?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (password.length < 10) {
+    return { error: "Use at least 10 characters." };
+  }
+  if (password !== confirm) {
+    return { error: "Those two passwords do not match." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    // The likeliest cause is a session that expired while the form sat open,
+    // which needs a fresh link rather than another attempt.
+    return {
+      error:
+        error.message ||
+        "Could not set the password. Ask for a fresh invitation link.",
+    };
+  }
+
+  revalidatePath("/admin", "layout");
+  redirect("/admin");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

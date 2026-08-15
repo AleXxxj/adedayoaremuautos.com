@@ -7,6 +7,26 @@ import { db } from "@/db";
 import { staff, auditLog } from "@/db/schema";
 import { requireStaff } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { siteUrl } from "@/lib/feeds/inventory";
+
+/**
+ * Builds the link an owner actually hands over.
+ *
+ * Not the `action_link` Supabase returns. That one points at Supabase's own
+ * verify endpoint, which redirects to the project's Site URL — a dashboard
+ * field that said `http://localhost:3000`, so invitations arrived at the
+ * public homepage with no way to choose a password. The token is the useful
+ * part; where it is redeemed is this application's decision.
+ */
+function inviteLinkFor(
+  hashedToken: string,
+  type: "invite" | "recovery",
+): string {
+  const url = new URL("/auth/invite", siteUrl());
+  url.searchParams.set("token_hash", hashedToken);
+  url.searchParams.set("type", type);
+  return url.toString();
+}
 
 export interface StaffResult {
   ok: boolean;
@@ -126,7 +146,11 @@ export async function inviteStaff(
   });
 
   revalidatePath("/admin/staff");
-  return { ok: true, inviteLink: data.properties?.action_link };
+  const hashed = data.properties?.hashed_token;
+  return {
+    ok: true,
+    inviteLink: hashed ? inviteLinkFor(hashed, "invite") : undefined,
+  };
 }
 
 const updateSchema = z.object({
@@ -237,10 +261,10 @@ export async function resendInvite(
     email,
   });
 
-  if (error || !data?.properties?.action_link) {
+  if (error || !data?.properties?.hashed_token) {
     console.error("[staff] link failed", error);
     return { ok: false, error: "Could not create a new link." };
   }
 
-  return { ok: true, inviteLink: data.properties.action_link };
+  return { ok: true, inviteLink: inviteLinkFor(data.properties.hashed_token, "recovery") };
 }
