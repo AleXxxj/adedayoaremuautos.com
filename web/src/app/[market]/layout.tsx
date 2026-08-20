@@ -19,6 +19,7 @@ import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
+import { Assistant } from "@/components/Assistant";
 import { suggestMarket } from "@/lib/geo";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
@@ -51,6 +52,7 @@ export default async function MarketLayout({
   const socials = socialLinks(code);
   const suggested = await suggestMarket(code);
   const site = sites[0];
+  const assistantEnabled = Boolean(process.env.ANTHROPIC_API_KEY);
 
   const nav = [
     { href: `/${code}`, label: "Home" },
@@ -67,6 +69,9 @@ export default async function MarketLayout({
     <div className="legacy-theme">
       <ScrollReveal />
       <CountryNotice currentMarket={code} suggested={suggested} />
+      {/* Rendered only when the API key exists. An assistant button that
+          apologises for being unavailable is worse than no button. */}
+      {assistantEnabled && <Assistant market={code} />}
 
       <div className="header">
         <div className="header-container">

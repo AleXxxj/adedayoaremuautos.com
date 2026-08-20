@@ -23,6 +23,7 @@
     "verify:rto": "tsx scripts/verify-rent-to-own.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",

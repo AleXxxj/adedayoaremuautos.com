@@ -872,6 +872,70 @@ export type ArticleComment = typeof articleComments.$inferSelect;
  * Market-scoped and currency-bearing: $5,000 is not a threshold anyone has
  * agreed to in naira, so Nigeria has no tiers until the business sets them.
  */
+
+/* ── Website assistant ─────────────────────────────────────────────────── */
+
+/**
+ * A conversation with the site assistant.
+ *
+ * Every one is kept, not just the ones that become an enquiry. What people ask
+ * at 2am when nobody is on the phone is the most honest market research this
+ * business will get, and a chat that ended without a lead is often the most
+ * informative — it usually means the answer was no, or the car they wanted was
+ * not in stock.
+ */
+export const assistantConversations = pgTable(
+  "assistant_conversations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    /** Where the conversation started, so context is not lost. */
+    landingPath: text("landing_path"),
+
+    /** Written by the model, so staff read a paragraph not a transcript. */
+    summary: text("summary"),
+    intent: text("intent"),
+
+    leadId: uuid("lead_id"),
+
+    /** The visitor asked for a person, or the assistant hit its limits. */
+    needsHuman: boolean("needs_human").notNull().default(false),
+
+    /** Counted, not derived — a long chat cannot be extended by deletion. */
+    messageCount: integer("message_count").notNull().default(0),
+
+    ipHash: text("ip_hash"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("assistant_conversations_recent_idx").on(t.lastMessageAt)],
+);
+
+export type AssistantConversation = typeof assistantConversations.$inferSelect;
+
+export const assistantMessages = pgTable(
+  "assistant_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => assistantConversations.id, { onDelete: "cascade" }),
+    role: text("role").notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("assistant_messages_conversation_idx").on(t.conversationId, t.createdAt)],
+);
+
 export const referralPartnerStatus = pgEnum("referral_partner_status", [
   "active",
   "suspended",

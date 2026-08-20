@@ -17,6 +17,7 @@ import type { AdminNavItem } from "@/components/admin/AdminNav";
 const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
   { href: "/admin/vehicles", label: "Inventory", icon: "fas fa-car", roles: ["owner", "manager", "sales"] },
   { href: "/admin/leads", label: "Leads", icon: "fas fa-inbox", roles: ["owner", "manager", "sales"] },
+  { href: "/admin/conversations", label: "Chats", icon: "fas fa-comment-dots", roles: ["owner", "manager", "sales"] },
   { href: "/admin/deals", label: "Deals", icon: "fas fa-handshake", roles: ["owner", "manager", "sales"] },
   { href: "/admin/rentals", label: "Rentals", icon: "fas fa-calendar-check", roles: ["owner", "manager", "sales"] },
   { href: "/admin/finance", label: "Finance", icon: "fas fa-file-invoice-dollar", roles: ["owner", "manager"] },

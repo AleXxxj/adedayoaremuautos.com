@@ -2822,3 +2822,263 @@
         grid-column: 1 / -1;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   24. The website assistant
+
+   Answers from the live database — stock, rental rates, rent-to-own terms —
+   so someone looking at a car at 2am is not left with a contact form and a
+   wait until morning. It never negotiates, never promises a vehicle on
+   specific dates and never touches finance approval; those go to a person.
+   ------------------------------------------------------------------------ */
+
+.legacy-theme .assistant-launcher {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 20px;
+    border: 1px solid rgba(78, 157, 118, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1d4535 0%, #0f2a20 100%);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.legacy-theme .assistant-launcher:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+.legacy-theme .assistant-launcher.is-open {
+    width: 52px;
+    padding: 0;
+    justify-content: center;
+}
+
+.legacy-theme .assistant-panel {
+    position: fixed;
+    right: 20px;
+    bottom: 84px;
+    z-index: 901;
+    display: flex;
+    flex-direction: column;
+    width: min(400px, calc(100vw - 40px));
+    height: min(560px, calc(100dvh - 140px));
+    border: 1px solid var(--border, #262626);
+    border-radius: 18px;
+    background: #0d0d0d;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.98);
+    transform-origin: bottom right;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s;
+}
+
+.legacy-theme .assistant-panel.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.legacy-theme .assistant-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border, #262626);
+    background: rgba(42, 92, 66, 0.16);
+}
+
+.legacy-theme .assistant-head strong {
+    display: block;
+    font-size: 15px;
+    color: #fff;
+}
+
+.legacy-theme .assistant-head span {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .assistant-head button {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary, #b9b9b9);
+    cursor: pointer;
+}
+
+.legacy-theme .assistant-log {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+}
+
+.legacy-theme .assistant-msg {
+    max-width: 86%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .assistant-msg--bot {
+    align-self: flex-start;
+    border: 1px solid var(--border, #262626);
+    border-bottom-left-radius: 4px;
+    background: #141414;
+    color: var(--text-secondary, #d0d0d0);
+}
+
+.legacy-theme .assistant-msg--you {
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    background: linear-gradient(135deg, #23503c 0%, #16382a 100%);
+    color: #fff;
+}
+
+/* Three dots while the first token is still on its way. */
+.legacy-theme .assistant-typing {
+    display: inline-block;
+    width: 34px;
+    height: 8px;
+    background:
+        radial-gradient(circle 3px at 5px 4px, var(--text-muted, #8f8f8f) 99%, transparent 0),
+        radial-gradient(circle 3px at 17px 4px, var(--text-muted, #8f8f8f) 99%, transparent 0),
+        radial-gradient(circle 3px at 29px 4px, var(--text-muted, #8f8f8f) 99%, transparent 0);
+    animation: assistant-blink 1.2s infinite ease-in-out;
+}
+
+@keyframes assistant-blink {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
+
+.legacy-theme .assistant-error {
+    margin: 4px 0 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(217, 83, 79, 0.4);
+    border-radius: 10px;
+    background: rgba(217, 83, 79, 0.1);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #f3a6a3;
+}
+
+.legacy-theme .assistant-input {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px 0;
+    border-top: 1px solid var(--border, #262626);
+}
+
+.legacy-theme .assistant-input textarea {
+    flex: 1;
+    min-height: 42px;
+    max-height: 120px;
+    padding: 11px 13px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    background: #0a0a0a;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    resize: none;
+}
+
+.legacy-theme .assistant-input textarea:focus {
+    outline: none;
+    border-color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .assistant-input button {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--brand-400, #4e9d76);
+    color: #07130d;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.legacy-theme .assistant-input button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.legacy-theme .assistant-foot {
+    margin: 0;
+    padding: 9px 14px 13px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--text-muted, #8f8f8f);
+}
+
+@media (max-width: 520px) {
+    /* Full width on a phone. A 400px panel inset from both edges leaves a
+       message column too narrow to read. */
+    .legacy-theme .assistant-panel {
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: min(88dvh, 640px);
+        border-radius: 18px 18px 0 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+    }
+
+    .legacy-theme .assistant-launcher {
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .legacy-theme .assistant-launcher.is-open {
+        /* Above the sheet, so the same button still closes it. */
+        z-index: 902;
+        bottom: calc(min(88dvh, 640px) + 12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .assistant-panel,
+    .legacy-theme .assistant-launcher {
+        transition: none;
+    }
+
+    .legacy-theme .assistant-typing {
+        animation: none;
+    }
+}
