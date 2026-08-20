@@ -195,6 +195,15 @@ export default async function RentToOwnPage({
                           <span className="rto-per">per week</span>
                         </div>
                       )}
+                      {/* The monthly rate was enterable in the admin and used
+                          by the ownership maths, but never shown — so the
+                          cheapest way to rent was the one nobody could see. */}
+                      {t.monthlyMinor != null && (
+                        <div>
+                          <span className="rto-rate">{fmt(t.monthlyMinor)}</span>
+                          <span className="rto-per">per month</span>
+                        </div>
+                      )}
                     </div>
 
                     {t.ownershipThresholdMinor != null && path ? (

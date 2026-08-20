@@ -108,14 +108,25 @@ export default async function ApplyPage({
                 <dt>Plan</dt>
                 <dd>{tier.name}</dd>
               </div>
+              {/* Every rate, not just the headline one. An applicant
+                  committing for months should see the monthly figure here
+                  rather than discover it on the phone. */}
               <div>
-                <dt>Rate</dt>
-                <dd>
-                  {tier.weeklyMinor != null
-                    ? `${fmt(tier.weeklyMinor)} per week`
-                    : `${fmt(tier.dailyMinor)} per day`}
-                </dd>
+                <dt>Daily</dt>
+                <dd>{fmt(tier.dailyMinor)}</dd>
               </div>
+              {tier.weeklyMinor != null && (
+                <div>
+                  <dt>Weekly</dt>
+                  <dd>{fmt(tier.weeklyMinor)}</dd>
+                </div>
+              )}
+              {tier.monthlyMinor != null && (
+                <div>
+                  <dt>Monthly</dt>
+                  <dd>{fmt(tier.monthlyMinor)}</dd>
+                </div>
+              )}
               {tier.depositMinor > 0 && (
                 <div>
                   <dt>Deposit</dt>

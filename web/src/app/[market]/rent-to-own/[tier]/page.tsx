@@ -84,6 +84,12 @@ export default async function TierPage({
                 <span className="tier-term-label">per week</span>
               </div>
             )}
+            {tier.monthlyMinor != null && (
+              <div className="tier-term">
+                <span className="tier-term-value">{fmt(tier.monthlyMinor)}</span>
+                <span className="tier-term-label">per month</span>
+              </div>
+            )}
             {tier.ownershipThresholdMinor != null && (
               <div className="tier-term tier-term--own">
                 <span className="tier-term-value">{fmt(tier.ownershipThresholdMinor)}</span>
