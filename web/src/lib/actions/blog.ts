@@ -23,8 +23,24 @@ const subscribeSchema = z.object({
   email: z.string().trim().toLowerCase().email("That email does not look right"),
   marketCode: z.enum(["us", "ng"]),
   source: z.string().trim().max(200).optional(),
+  firstName: z.string().trim().max(80).optional(),
+  /* Day and month only — see the column comment. Both or neither. */
+  birthDay: z.coerce.number().int().min(1).max(31).optional(),
+  birthMonth: z.coerce.number().int().min(1).max(12).optional(),
   website: z.string().max(0, "Rejected").optional(),
-});
+}).refine((v) => (v.birthDay == null) === (v.birthMonth == null), {
+  message: "Choose both a day and a month, or leave the birthday blank.",
+  path: ["birthDay"],
+}).refine(
+  (v) =>
+    v.birthDay == null ||
+    v.birthMonth == null ||
+    !(
+      (v.birthMonth === 2 && v.birthDay > 29) ||
+      ([4, 6, 9, 11].includes(v.birthMonth) && v.birthDay > 30)
+    ),
+  { message: "That day does not exist in that month.", path: ["birthDay"] },
+);
 
 /**
  * Records a newsletter subscription.
@@ -62,12 +78,25 @@ export async function subscribeToNewsletter(
         email: v.email,
         marketCode: v.marketCode,
         source: v.source ?? null,
+        firstName: v.firstName || null,
+        birthDay: v.birthDay ?? null,
+        birthMonth: v.birthMonth ?? null,
         unsubscribeToken: randomBytes(24).toString("base64url"),
         consentIp: ip,
       })
       .onConflictDoUpdate({
         target: newsletterSubscribers.email,
-        set: { unsubscribedAt: null, marketCode: v.marketCode },
+        set: {
+          unsubscribedAt: null,
+          marketCode: v.marketCode,
+          // Only overwrite when something was actually supplied, so
+          // re-subscribing with the email box alone does not wipe a birthday
+          // the person gave the first time.
+          ...(v.firstName ? { firstName: v.firstName } : {}),
+          ...(v.birthDay != null && v.birthMonth != null
+            ? { birthDay: v.birthDay, birthMonth: v.birthMonth }
+            : {}),
+        },
       })
       .returning({ createdAt: newsletterSubscribers.createdAt });
 

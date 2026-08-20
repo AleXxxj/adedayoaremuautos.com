@@ -17,6 +17,11 @@ import type { MarketCode } from "@/lib/market";
  * so the browser discarded every address on submit. Nobody who ever typed
  * their email into that box is on a list.
  */
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export function LegacyNewsletter({
   market,
   source,
@@ -49,7 +54,7 @@ export function LegacyNewsletter({
               delivered to your inbox.
             </p>
 
-            <form className="newsletter-form" action={action}>
+            <form className="newsletter-form" id="newsletter-form" action={action}>
               <input type="hidden" name="marketCode" value={market} />
               <input type="hidden" name="source" value={source} />
               <div
@@ -74,6 +79,61 @@ export function LegacyNewsletter({
                 {pending ? "Subscribing…" : "Subscribe"}
               </button>
             </form>
+
+            {/* Optional, and the reason is stated where it is asked. A form
+                that wants your birthday without saying why reads as data
+                harvesting; one that says what it is for reads as a gift.
+                Day and month only — the year is never requested. */}
+            <details className="newsletter-extra">
+              <summary>
+                <i className="fas fa-gift" aria-hidden="true" /> Add your
+                birthday for a gift <span>optional</span>
+              </summary>
+              <p className="newsletter-extra-why">
+                We use it once a year — to wish you a happy birthday and send
+                you an offer. We never ask for the year, and you can
+                unsubscribe at any time.
+              </p>
+              <div className="newsletter-extra-fields">
+                <label>
+                  <span>First name</span>
+                  <input
+                    type="text"
+                    name="firstName"
+                    form="newsletter-form"
+                    autoComplete="given-name"
+                    placeholder="Optional"
+                  />
+                </label>
+                <label>
+                  <span>Day</span>
+                  <input
+                    type="number"
+                    name="birthDay"
+                    form="newsletter-form"
+                    min={1}
+                    max={31}
+                    placeholder="DD"
+                  />
+                </label>
+                <label>
+                  <span>Month</span>
+                  <select name="birthMonth" form="newsletter-form" defaultValue="">
+                    <option value="">—</option>
+                    {MONTHS.map((m, i) => (
+                      <option key={m} value={i + 1}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {state?.fieldErrors?.birthDay && (
+                <p className="newsletter-error" role="alert">
+                  {state.fieldErrors.birthDay[0]}
+                </p>
+              )}
+            </details>
 
             {(state?.error || state?.fieldErrors?.email) && (
               <p className="newsletter-error" role="alert">

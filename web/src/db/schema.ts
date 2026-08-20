@@ -790,6 +790,21 @@ export const newsletterSubscribers = pgTable(
     unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
     /** Random token so an unsubscribe link needs no login and leaks no id. */
     unsubscribeToken: text("unsubscribe_token").notNull(),
+
+    /** So a greeting opens with a name rather than "Hi there". Optional. */
+    firstName: text("first_name"),
+
+    /**
+     * Birthday, day and month only — never the year.
+     *
+     * The request was for date of birth. The year adds nothing to a birthday
+     * greeting and changes what this table is: name plus email plus full date
+     * of birth is a standard building block of identity theft, and knowing a
+     * subscriber is under 13 creates COPPA obligations. Day and month is the
+     * whole benefit at a fraction of the risk.
+     */
+    birthDay: integer("birth_day"),
+    birthMonth: integer("birth_month"),
     consentIp: text("consent_ip"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

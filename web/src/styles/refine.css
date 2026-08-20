@@ -2727,3 +2727,98 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* ── Optional birthday on the newsletter box ───────────────────────────────
+   Folded behind a disclosure so the newsletter stays a one-field form for
+   anyone who just wants the emails. Opening it states what the birthday is
+   for before asking for it — a form that wants your date of birth without
+   saying why reads as harvesting. */
+.legacy-theme .newsletter-extra {
+    max-width: 620px;
+    margin: 18px auto 0;
+    text-align: left;
+}
+
+.legacy-theme .newsletter-extra summary {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .newsletter-extra summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-theme .newsletter-extra summary i {
+    color: var(--gold, #c9a227);
+}
+
+.legacy-theme .newsletter-extra summary span {
+    padding: 2px 8px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .newsletter-extra summary:hover {
+    color: #fff;
+}
+
+.legacy-theme .newsletter-extra-why {
+    margin: 12px 0 14px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .newsletter-extra-fields {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr;
+    gap: 10px;
+}
+
+.legacy-theme .newsletter-extra-fields label {
+    display: block;
+}
+
+.legacy-theme .newsletter-extra-fields span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .newsletter-extra-fields input,
+.legacy-theme .newsletter-extra-fields select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 9px;
+    background: #0a0a0a;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.legacy-theme .newsletter-extra-fields input:focus,
+.legacy-theme .newsletter-extra-fields select:focus {
+    outline: none;
+    border-color: var(--brand-400, #4e9d76);
+}
+
+@media (max-width: 520px) {
+    .legacy-theme .newsletter-extra-fields {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .legacy-theme .newsletter-extra-fields label:first-child {
+        grid-column: 1 / -1;
+    }
+}
