@@ -1,4 +1,5 @@
 import "server-only";
+import { mailFrom } from "@/lib/mail";
 
 /**
  * Staff notification for new leads.
@@ -62,7 +63,7 @@ export async function notifyStaffOfLead(
 async function sendEmail(lead: LeadNotification, out: NotifyOutcome) {
   const key = process.env.RESEND_API_KEY;
   const to = process.env.LEAD_ALERT_EMAIL;
-  const from = process.env.LEAD_ALERT_FROM ?? "leads@adedayoaremuautos.com";
+  const from = mailFrom();
 
   if (!key || !to) {
     out.skipped.push({ channel: "email", reason: "RESEND_API_KEY or LEAD_ALERT_EMAIL not set" });

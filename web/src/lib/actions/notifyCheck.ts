@@ -1,6 +1,7 @@
 "use server";
 
 import { requireStaff } from "@/lib/auth";
+import { mailFrom } from "@/lib/mail";
 import { notifyStaffOfLead, type NotifyOutcome } from "@/lib/notify";
 import { siteUrl } from "@/lib/feeds/inventory";
 
@@ -42,7 +43,7 @@ export async function sendTestNotification(): Promise<NotifyCheckResult> {
         process.env.TWILIO_AUTH_TOKEN &&
         process.env.LEAD_ALERT_SMS_TO,
     ),
-    from: process.env.LEAD_ALERT_FROM ?? "leads@adedayoaremuautos.com",
+    from: mailFrom(),
   };
 
   const outcome = await notifyStaffOfLead({

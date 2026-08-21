@@ -3,6 +3,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { campaigns, campaignRecipients, newsletterSubscribers } from "@/db/schema";
 import { siteUrl } from "@/lib/feeds/inventory";
+import { mailFrom } from "@/lib/mail";
 import { vehicles, vehicleMedia } from "@/db/schema";
 import { renderHtml, renderText, type CampaignVehicle } from "./render";
 import { mediaUrl } from "@/lib/media";
@@ -139,7 +140,7 @@ export async function snapshotAudience(campaignId: string, market: string): Prom
  */
 export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.LEAD_ALERT_FROM ?? "leads@adedayoaremuautos.com";
+  const from = mailFrom();
   const address =
     process.env.MAILING_ADDRESS ??
     "Adedayo Aremu Autos, 507 Gillespie St, Greensboro, NC 27401, USA";
@@ -341,7 +342,7 @@ export async function sendPreview(
   vehicleIds: string[] = [],
 ): Promise<{ ok: boolean; error?: string }> {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.LEAD_ALERT_FROM ?? "leads@adedayoaremuautos.com";
+  const from = mailFrom();
   const address =
     process.env.MAILING_ADDRESS ??
     "Adedayo Aremu Autos, 507 Gillespie St, Greensboro, NC 27401, USA";
