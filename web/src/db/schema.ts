@@ -936,6 +936,76 @@ export const assistantMessages = pgTable(
   (t) => [index("assistant_messages_conversation_idx").on(t.conversationId, t.createdAt)],
 );
 
+
+/* ── Mailing-list broadcasts ───────────────────────────────────────────── */
+
+export const campaignStatus = pgEnum("campaign_status", [
+  "draft",
+  "sending",
+  "sent",
+  "failed",
+]);
+
+/**
+ * A message sent to the mailing list.
+ *
+ * The least reversible thing this admin can do, so it is recorded per
+ * recipient rather than fired and forgotten. That record makes sending
+ * resumable when a serverless function runs out of time part-way through a
+ * list, and stops anyone being emailed twice when it resumes.
+ */
+export const campaigns = pgTable(
+  "campaigns",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    subject: text("subject").notNull(),
+    body: text("body").notNull(),
+
+    status: campaignStatus("status").notNull().default("draft"),
+
+    /** Kept as an email too: staff leave, and "who sent that?" outlives them. */
+    createdBy: uuid("created_by"),
+    createdByEmail: text("created_by_email"),
+
+    recipientCount: integer("recipient_count").notNull().default(0),
+    sentCount: integer("sent_count").notNull().default(0),
+    failedCount: integer("failed_count").notNull().default(0),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [index("campaigns_recent_idx").on(t.createdAt)],
+);
+
+export type Campaign = typeof campaigns.$inferSelect;
+
+export const campaignRecipients = pgTable(
+  "campaign_recipients",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+
+    subscriberId: uuid("subscriber_id"),
+    /** Denormalised: the record of having been emailed outlives the row. */
+    email: text("email").notNull(),
+
+    status: text("status").notNull().default("pending"),
+    error: text("error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("campaign_recipients_pending_idx").on(t.campaignId, t.status),
+    uniqueIndex("campaign_recipient_once").on(t.campaignId, t.email),
+  ],
+);
+
 export const referralPartnerStatus = pgEnum("referral_partner_status", [
   "active",
   "suspended",

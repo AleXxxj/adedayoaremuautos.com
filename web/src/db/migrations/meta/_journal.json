@@ -92,6 +92,20 @@
       "when": 1787265126267,
       "tag": "0012_assistant",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787350843501,
+      "tag": "0013_campaigns",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1787352124311,
+      "tag": "0014_campaign_skipped",
+      "breakpoints": true
     }
   ]
 }

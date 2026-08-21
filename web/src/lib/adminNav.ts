@@ -24,6 +24,7 @@ const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
   { href: "/admin/tiers", label: "Rent to Own", icon: "fas fa-key", roles: ["owner", "manager"] },
   { href: "/admin/referrals", label: "Referrals", icon: "fas fa-hand-holding-usd", roles: ["owner", "manager"] },
   { href: "/admin/subscribers", label: "Mailing list", icon: "fas fa-envelope-open-text", roles: ["owner", "manager"] },
+  { href: "/admin/campaigns", label: "Broadcasts", icon: "fas fa-bullhorn", roles: ["owner", "manager"] },
   { href: "/admin/comments", label: "Comments", icon: "fas fa-comments", roles: ["owner", "manager"] },
   { href: "/admin/staff", label: "Staff", icon: "fas fa-user-shield", roles: ["owner"] },
 ];
