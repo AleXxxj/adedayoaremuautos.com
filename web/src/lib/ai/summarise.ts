@@ -7,8 +7,13 @@ import { SUMMARY_PROMPT } from "./prompt";
 import { notifyStaffOfLead } from "@/lib/notify";
 import { siteUrl } from "@/lib/feeds/inventory";
 
-/** Cheap model: this is extraction from a transcript, not conversation. */
-const SUMMARY_MODEL = process.env.ASSISTANT_SUMMARY_MODEL ?? "claude-haiku-4-5-20251001";
+/**
+ * Cheap model: this is extraction from a transcript, not conversation.
+ *
+ * The id carries no date suffix. Current model ids are complete as written —
+ * appending a date produces an id the API does not recognise.
+ */
+const SUMMARY_MODEL = process.env.ASSISTANT_SUMMARY_MODEL ?? "claude-haiku-4-5";
 
 interface Extracted {
   intent?: string | null;
