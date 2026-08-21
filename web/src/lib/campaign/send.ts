@@ -3,6 +3,12 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { campaigns, campaignRecipients, newsletterSubscribers } from "@/db/schema";
 import { siteUrl } from "@/lib/feeds/inventory";
+import { vehicles, vehicleMedia } from "@/db/schema";
+import { renderHtml, renderText, type CampaignVehicle } from "./render";
+import { mediaUrl } from "@/lib/media";
+import { formatMoney, money } from "@/lib/money";
+import { MARKETS, formatDistance, type MarketCode } from "@/lib/market";
+import { listLocations } from "@/lib/repositories/locations";
 
 /**
  * Resend accepts up to 100 messages per batch call. Each recipient gets their
@@ -31,46 +37,58 @@ export interface SendProgress {
   error?: string;
 }
 
-/** Plain text into simple, well-behaved email HTML. Exported so the
- *  legally required footer can be asserted on without sending mail. */
-export function renderHtml(body: string, unsubscribeUrl: string, address: string): string {
-  const paragraphs = body
-    .split(/\n{2,}/)
-    .map((p) => escapeHtml(p.trim()).replace(/\n/g, "<br>"))
-    .filter(Boolean)
-    .map((p) => `<p style="margin:0 0 16px;line-height:1.6">${p}</p>`)
-    .join("");
 
-  // Inline styles and a table-free single column: every quirk of Outlook and
-  // Gmail punishes anything cleverer, and a newsletter that renders as a wall
-  // of unstyled text reads as spam.
-  return `<!doctype html><html><body style="margin:0;padding:0;background:#f5f5f5">
-<div style="max-width:600px;margin:0 auto;padding:32px 24px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:16px;color:#1a1a1a;background:#ffffff">
-  <div style="font-weight:700;font-size:18px;letter-spacing:.02em;margin-bottom:24px">
-    ADEDAYO AREMU <span style="color:#2a5c42">AUTOS</span>
-  </div>
-  ${paragraphs}
-  <hr style="border:0;border-top:1px solid #e3e3e3;margin:32px 0 16px">
-  <p style="margin:0 0 8px;font-size:12px;color:#767676;line-height:1.5">
-    ${escapeHtml(address)}
-  </p>
-  <p style="margin:0;font-size:12px;color:#767676;line-height:1.5">
-    You are receiving this because you subscribed on our website.
-    <a href="${unsubscribeUrl}" style="color:#767676">Unsubscribe</a>.
-  </p>
-</div></body></html>`;
-}
+/**
+ * Resolves featured vehicles at send time.
+ *
+ * Deliberately not snapshotted with the draft: a price edited between writing
+ * and sending must reach the customer as the current price, and a car sold in
+ * between should not be advertised at all — hence the status filter.
+ */
+async function resolveVehicles(
+  ids: string[],
+  market: MarketCode,
+): Promise<CampaignVehicle[]> {
+  if (ids.length === 0) return [];
+  const cfg = MARKETS[market];
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+  const rows = await db
+    .select({ v: vehicles, image: vehicleMedia.storageKey })
+    .from(vehicles)
+    .leftJoin(
+      vehicleMedia,
+      and(eq(vehicleMedia.vehicleId, vehicles.id), eq(vehicleMedia.isPrimary, true)),
+    )
+    .where(and(inArray(vehicles.id, ids), eq(vehicles.status, "available")));
 
-export function renderText(body: string, unsubscribeUrl: string, address: string): string {
-  return `${body}\n\n---\n${address}\nUnsubscribe: ${unsubscribeUrl}`;
+  const base = siteUrl();
+  const byId = new Map(rows.map((r) => [r.v.id, r]));
+
+  // Rebuilt in the order the sender chose rather than the order the database
+  // returned them.
+  return ids.flatMap((id) => {
+    const row = byId.get(id);
+    if (!row) return [];
+    const v = row.v;
+    return [
+      {
+        title: [v.year, v.make, v.model, v.trim].filter(Boolean).join(" "),
+        meta: [
+          v.mileage != null ? formatDistance(v.mileage, cfg) : null,
+          v.transmission,
+          v.fuelType,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        price:
+          v.priceMinor != null
+            ? formatMoney(money(v.priceMinor, cfg.currency), cfg.locale)
+            : "Price on request",
+        imageUrl: row.image ? mediaUrl(row.image) : null,
+        url: `${base}/${market}/inventory/${v.slug}`,
+      },
+    ];
+  });
 }
 
 /**
@@ -166,6 +184,15 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
   );
 
   const base = siteUrl();
+  // Resolved once per invocation, not per recipient: the same cards go to
+  // everyone, and this is a database round trip.
+  const featured = await resolveVehicles(
+    (campaign.vehicleIds as string[]) ?? [],
+    campaign.marketCode,
+  );
+  const sites = await listLocations(campaign.marketCode);
+  const phone = sites[0]?.phone ?? null;
+
   let sent = 0;
   let failed = 0;
 
@@ -211,8 +238,22 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
         from,
         to: [r.email],
         subject: campaign.subject,
-        html: renderHtml(campaign.body, url, address),
-        text: renderText(campaign.body, url, address),
+        html: renderHtml({
+          body: campaign.body,
+          unsubscribeUrl: url,
+          address,
+          siteBase: base,
+          vehicles: featured,
+          phone,
+        }),
+        text: renderText({
+          body: campaign.body,
+          unsubscribeUrl: url,
+          address,
+          siteBase: base,
+          vehicles: featured,
+          phone,
+        }),
         headers: {
           // Required by Gmail and Yahoo for bulk senders since 2024. Without
           // both of these, mail to those providers is rejected or junked.
@@ -296,6 +337,8 @@ export async function sendPreview(
   subject: string,
   body: string,
   to: string,
+  market: MarketCode = "us",
+  vehicleIds: string[] = [],
 ): Promise<{ ok: boolean; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.LEAD_ALERT_FROM ?? "leads@adedayoaremuautos.com";
@@ -307,6 +350,16 @@ export async function sendPreview(
   // A deliberately dead token: a test must render the footer exactly as a real
   // send would, without giving the tester a link that unsubscribes anyone.
   const url = `${siteUrl()}/unsubscribe?token=preview`;
+  const featured = await resolveVehicles(vehicleIds, market);
+  const sites = await listLocations(market);
+  const opts = {
+    body,
+    unsubscribeUrl: url,
+    address,
+    siteBase: siteUrl(),
+    vehicles: featured,
+    phone: sites[0]?.phone ?? null,
+  };
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -316,8 +369,8 @@ export async function sendPreview(
         from,
         to: [to],
         subject: `[TEST] ${subject}`,
-        html: renderHtml(body, url, address),
-        text: renderText(body, url, address),
+        html: renderHtml(opts),
+        text: renderText(opts),
       }),
       signal: AbortSignal.timeout(15000),
     });

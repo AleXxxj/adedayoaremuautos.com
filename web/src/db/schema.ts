@@ -965,6 +965,15 @@ export const campaigns = pgTable(
     subject: text("subject").notNull(),
     body: text("body").notNull(),
 
+    /**
+     * Vehicles featured in the message, in the order chosen.
+     *
+     * Ids, not a copy of the listing: the price, photo and specification are
+     * resolved as the mail goes out, so a broadcast can never quote a figure
+     * that was edited after the draft was written.
+     */
+    vehicleIds: jsonb("vehicle_ids").$type<string[]>().notNull().default([]),
+
     status: campaignStatus("status").notNull().default("draft"),
 
     /** Kept as an email too: staff leave, and "who sent that?" outlives them. */

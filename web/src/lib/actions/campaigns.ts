@@ -21,7 +21,16 @@ const composeSchema = z.object({
   marketCode: z.enum(["us", "ng"]),
   subject: z.string().trim().min(3, "Give it a subject").max(200),
   body: z.string().trim().min(20, "Write a little more than that").max(20000),
+  /** Comma-separated ids from the picker. Capped to match the CHECK. */
+  vehicleIds: z.string().optional(),
 });
+
+/** "a,b,c" -> ["a","b","c"], de-duplicated, uuid-shaped only, max 12. */
+function parseVehicleIds(raw: string | undefined): string[] {
+  if (!raw) return [];
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return [...new Set(raw.split(",").map((s) => s.trim()).filter((s) => uuid.test(s)))].slice(0, 12);
+}
 
 /**
  * Sending to the whole list is restricted to owners and managers.
@@ -66,7 +75,13 @@ export async function sendTestCampaign(
     };
   }
 
-  const result = await sendPreview(parsed.data.subject, parsed.data.body, user.email);
+  const result = await sendPreview(
+    parsed.data.subject,
+    parsed.data.body,
+    user.email,
+    parsed.data.marketCode,
+    parseVehicleIds(parsed.data.vehicleIds),
+  );
   return result.ok
     ? { ok: true, message: `Test sent to ${user.email}. Check it before sending for real.` }
     : { ok: false, error: result.error };
@@ -110,6 +125,7 @@ export async function startCampaign(
       marketCode: v.marketCode,
       subject: v.subject,
       body: v.body,
+      vehicleIds: parseVehicleIds(v.vehicleIds),
       status: "sending",
       createdBy: user.id,
       createdByEmail: user.email,

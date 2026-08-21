@@ -1,6 +1,9 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { campaigns, newsletterSubscribers } from "@/db/schema";
+import { campaigns, newsletterSubscribers, vehicles, vehicleMedia } from "@/db/schema";
+import { mediaUrl } from "@/lib/media";
+import { formatMoney, money } from "@/lib/money";
+import { MARKETS } from "@/lib/market";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { assertSection } from "@/lib/adminNav";
 import { AdminChrome } from "../layout";
@@ -35,6 +38,32 @@ export default async function AdminCampaignsPage() {
   for (const m of markets) audience[m] = 0;
   for (const c of counts) if (m_in(markets, c.market)) audience[c.market] = c.total;
 
+  // Available stock only: a broadcast must never advertise a car that is sold.
+  const stockRows = await db
+    .select({ v: vehicles, image: vehicleMedia.storageKey })
+    .from(vehicles)
+    .leftJoin(
+      vehicleMedia,
+      and(eq(vehicleMedia.vehicleId, vehicles.id), eq(vehicleMedia.isPrimary, true)),
+    )
+    .where(and(inArray(vehicles.marketCode, markets), eq(vehicles.status, "available")))
+    .orderBy(desc(vehicles.createdAt))
+    .limit(60);
+
+  const stock = stockRows.map(({ v, image }) => {
+    const cfg = MARKETS[v.marketCode];
+    return {
+      id: v.id,
+      marketCode: v.marketCode,
+      title: [v.year, v.make, v.model].filter(Boolean).join(" "),
+      price:
+        v.priceMinor != null
+          ? formatMoney(money(v.priceMinor, cfg.currency), cfg.locale)
+          : "Price on request",
+      imageUrl: image ? mediaUrl(image) : null,
+    };
+  });
+
   const history = await db
     .select()
     .from(campaigns)
@@ -54,7 +83,7 @@ export default async function AdminCampaignsPage() {
           </p>
         </div>
 
-        <CampaignComposer markets={markets} audience={audience} />
+        <CampaignComposer markets={markets} audience={audience} stock={stock} />
 
         <section className="mt-10">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">

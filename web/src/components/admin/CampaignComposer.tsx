@@ -16,16 +16,27 @@ import type { MarketCode } from "@/lib/market";
  * to type a word, because the difference between them is a message to one
  * person and a message to every customer the business has.
  */
+export interface PickableVehicle {
+  id: string;
+  marketCode: string;
+  title: string;
+  price: string;
+  imageUrl: string | null;
+}
+
 export function CampaignComposer({
   markets,
   audience,
+  stock,
 }: {
   markets: MarketCode[];
   audience: Record<string, number>;
+  stock: PickableVehicle[];
 }) {
   const [market, setMarket] = useState<MarketCode>(markets[0]);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
 
   const [testState, testAction, testing] = useActionState<CampaignResult | null, FormData>(
     sendTestCampaign,
@@ -48,8 +59,19 @@ export function CampaignComposer({
       <input type="hidden" name="marketCode" value={market} />
       <input type="hidden" name="subject" value={subject} />
       <input type="hidden" name="body" value={body} />
+      <input type="hidden" name="vehicleIds" value={picked.join(",")} />
     </>
   );
+
+  // Only cars from the market being sent to. A US broadcast carrying a naira
+  // price would be nonsense, and dollar prices are what these subscribers see
+  // everywhere else on the site.
+  const available = stock.filter((v) => v.marketCode === market);
+
+  const toggle = (id: string) =>
+    setPicked((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : p.length >= 12 ? p : [...p, id],
+    );
 
   if (sendState?.ok && sendState.progress?.finished) {
     return (
@@ -122,6 +144,60 @@ export function CampaignComposer({
             Plain writing. A blank line starts a new paragraph.
           </span>
         </label>
+      </div>
+
+      {/* Vehicles carry their own photo, price and link, and are resolved as
+          the mail goes out — so a price edited after the draft was written
+          still reaches the customer correctly. */}
+      <div className="mt-6 border-t border-[var(--border-subtle)] pt-5">
+        <p className="text-sm font-medium">
+          Feature vehicles{" "}
+          <span className="font-normal text-[var(--text-muted)]">
+            optional · {picked.length}/12 chosen
+          </span>
+        </p>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Each one appears as a card with its photo, current price and a button
+          through to the listing. Only vehicles marked Available are offered.
+        </p>
+
+        {available.length === 0 ? (
+          <p className="mt-3 text-sm text-[var(--text-muted)]">
+            No available vehicles in {market.toUpperCase()} to feature.
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {available.map((v) => {
+              const on = picked.includes(v.id);
+              return (
+                <button
+                  type="button"
+                  key={v.id}
+                  onClick={() => toggle(v.id)}
+                  aria-pressed={on}
+                  className={`overflow-hidden rounded-lg border text-left transition ${
+                    on
+                      ? "border-[var(--accent)] ring-1 ring-[var(--accent)]"
+                      : "border-[var(--border-subtle)]"
+                  }`}
+                >
+                  {v.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={v.imageUrl} alt="" className="h-20 w-full object-cover" />
+                  ) : (
+                    <div className="flex h-20 items-center justify-center bg-[var(--surface-2)] text-xs text-[var(--text-muted)]">
+                      No photo
+                    </div>
+                  )}
+                  <div className="p-2">
+                    <div className="truncate text-xs font-medium">{v.title}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{v.price}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Step one: to yourself. */}
