@@ -5,6 +5,7 @@ import { leads, vehicles } from "@/db/schema";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { LeadRow } from "@/components/admin/LeadRow";
+import { NotificationCheck } from "@/components/admin/NotificationCheck";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,9 @@ export default async function AdminLeadsPage() {
   return (
     <AdminChrome email={user.email} role={user.role}>
       <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Where you look when you think enquiries are not reaching you. */}
+        {user.role !== "sales" && <NotificationCheck />}
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">

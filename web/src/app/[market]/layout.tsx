@@ -20,6 +20,7 @@ import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
 import { Assistant } from "@/components/Assistant";
+import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { suggestMarket } from "@/lib/geo";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
@@ -112,6 +113,12 @@ export default async function MarketLayout({
       </div>
 
       {children}
+
+      {/* Sitewide, directly above the footer. It used to live only on the blog,
+          which most visitors never reach — a mailing list nobody can find
+          collects nobody, and the birthday field it carries is the whole point
+          of asking. */}
+      <LegacyNewsletter market={code} source="footer" variant="compact" />
 
       <div className="footer">
         <div className="footer-container">

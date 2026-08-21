@@ -3082,3 +3082,38 @@
         animation: none;
     }
 }
+
+/* ── Newsletter as a sitewide band ─────────────────────────────────────────
+   The signup lived only on the blog, which most visitors never reach. A
+   mailing list nobody can find collects nobody — and the birthday field it
+   carries is the entire reason the business asked for it. Compact here so it
+   reads as a footer strip rather than competing with the page above it. */
+.legacy-theme .newsletter-section--compact {
+    padding: clamp(36px, 5vw, 56px) 20px;
+    border-top: 1px solid var(--border, #262626);
+    background:
+        radial-gradient(70% 120% at 50% 0%, rgba(42, 92, 66, 0.14) 0%, transparent 70%),
+        #0b0b0b;
+}
+
+.legacy-theme .newsletter-section--compact .newsletter-content {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.legacy-theme .newsletter-section--compact h2 {
+    font-size: clamp(22px, 3vw, 30px);
+    margin-bottom: 8px;
+}
+
+.legacy-theme .newsletter-section--compact > .newsletter-content > p {
+    font-size: 14.5px;
+    margin-bottom: 18px;
+}
+
+/* The blog keeps its own full-size section; this one must not repeat its
+   larger vertical rhythm directly above the footer. */
+.legacy-theme .newsletter-section--compact .newsletter-form {
+    margin: 0 auto;
+}

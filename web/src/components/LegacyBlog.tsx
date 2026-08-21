@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import {
   subscribeToNewsletter,
   submitComment,
@@ -25,17 +25,26 @@ const MONTHS = [
 export function LegacyNewsletter({
   market,
   source,
+  variant = "full",
 }: {
   market: MarketCode;
   source: string;
+  /** "compact" is the sitewide band above the footer. */
+  variant?: "full" | "compact";
 }) {
   const [state, action, pending] = useActionState<BlogResult | null, FormData>(
     subscribeToNewsletter,
     null,
   );
 
+  // Two of these render on a blog page — the article's own section and the
+  // sitewide band. A hardcoded id would appear twice, and the birthday fields
+  // use form="<id>" to submit from outside the <form>, so both copies would
+  // post into whichever one the browser matched first.
+  const formId = useId();
+
   return (
-    <div className="newsletter-section">
+    <div className={`newsletter-section${variant === "compact" ? " newsletter-section--compact" : ""}`}>
       <div className="newsletter-content">
         <h2>
           Subscribe to Our <span>Newsletter</span>
@@ -54,7 +63,7 @@ export function LegacyNewsletter({
               delivered to your inbox.
             </p>
 
-            <form className="newsletter-form" id="newsletter-form" action={action}>
+            <form className="newsletter-form" id={formId} action={action}>
               <input type="hidden" name="marketCode" value={market} />
               <input type="hidden" name="source" value={source} />
               <div
@@ -100,7 +109,7 @@ export function LegacyNewsletter({
                   <input
                     type="text"
                     name="firstName"
-                    form="newsletter-form"
+                    form={formId}
                     autoComplete="given-name"
                     placeholder="Optional"
                   />
@@ -110,7 +119,7 @@ export function LegacyNewsletter({
                   <input
                     type="number"
                     name="birthDay"
-                    form="newsletter-form"
+                    form={formId}
                     min={1}
                     max={31}
                     placeholder="DD"
@@ -118,7 +127,7 @@ export function LegacyNewsletter({
                 </label>
                 <label>
                   <span>Month</span>
-                  <select name="birthMonth" form="newsletter-form" defaultValue="">
+                  <select name="birthMonth" form={formId} defaultValue="">
                     <option value="">—</option>
                     {MONTHS.map((m, i) => (
                       <option key={m} value={i + 1}>
