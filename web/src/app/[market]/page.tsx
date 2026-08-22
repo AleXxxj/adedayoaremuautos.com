@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroSlider } from "@/components/HeroSlider";
 import { notFound } from "next/navigation";
@@ -9,6 +10,26 @@ import { articlesFor } from "@/content/articles";
 import { formatMoney, money } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
 import { LegacyContactForm } from "@/components/LegacyContactForm";
+
+/**
+ * The homepage was the only page without a canonical URL, which matters most
+ * here: it is the page that will be linked to, and the one a search engine is
+ * most likely to reach by more than one address.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ market: string }>;
+}): Promise<Metadata> {
+  const { market } = await params;
+  if (!isMarketCode(market)) return {};
+  return {
+    alternates: {
+      canonical: `/${market}`,
+      languages: { "en-US": "/us", "en-NG": "/ng" },
+    },
+  };
+}
 
 export const dynamic = "force-dynamic";
 
