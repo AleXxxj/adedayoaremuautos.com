@@ -19,14 +19,27 @@ export interface BlogResult {
 
 /* ── Newsletter ────────────────────────────────────────────────────────── */
 
+/** An untouched form field arrives as "", which is not the same as absent. */
+function blankToUndefined(v: unknown): unknown {
+  return typeof v === "string" && v.trim() === "" ? undefined : v;
+}
+
 const subscribeSchema = z.object({
   email: z.string().trim().toLowerCase().email("That email does not look right"),
   marketCode: z.enum(["us", "ng"]),
   source: z.string().trim().max(200).optional(),
   firstName: z.string().trim().max(80).optional(),
-  /* Day and month only — see the column comment. Both or neither. */
-  birthDay: z.coerce.number().int().min(1).max(31).optional(),
-  birthMonth: z.coerce.number().int().min(1).max(12).optional(),
+  /*
+   * Day and month only — see the column comment. Both or neither.
+   *
+   * The empty string is mapped to undefined before coercion. `z.coerce.number()`
+   * turns "" into 0, and `.optional()` only forgives undefined — so an untouched
+   * birthday field failed `.min(1)` and took the whole subscription down with
+   * it. Everyone who left the optional field alone, which is almost everyone,
+   * was rejected.
+   */
+  birthDay: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(31).optional()),
+  birthMonth: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(12).optional()),
   website: z.string().max(0, "Rejected").optional(),
 }).refine((v) => (v.birthDay == null) === (v.birthMonth == null), {
   message: "Choose both a day and a month, or leave the birthday blank.",
@@ -58,10 +71,20 @@ export async function subscribeToNewsletter(
 ): Promise<BlogResult> {
   const parsed = subscribeSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {
-    return {
-      ok: false,
-      fieldErrors: z.flattenError(parsed.error).fieldErrors as Record<string, string[]>,
-    };
+    const fieldErrors = z.flattenError(parsed.error).fieldErrors as Record<string, string[]>;
+    // Anything unexpected is reported against the birthday, the only optional
+    // input here. A customer must never be shown a raw validation string like
+    // "Too small: expected number to be >=1" — it tells them nothing about
+    // what to change, and it looks broken.
+    if (fieldErrors.birthDay || fieldErrors.birthMonth) {
+      return {
+        ok: false,
+        fieldErrors: {
+          birthDay: ["Check the birthday day and month, or clear them both."],
+        },
+      };
+    }
+    return { ok: false, fieldErrors };
   }
 
   const v = parsed.data;
