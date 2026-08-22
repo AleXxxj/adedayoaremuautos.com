@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { MarketCode } from "@/lib/market";
+import { linkify } from "./assistantText";
 
 interface Msg {
   role: "user" | "assistant";
@@ -178,7 +179,14 @@ export function Assistant({ market }: { market: MarketCode }) {
               key={i}
               className={`assistant-msg assistant-msg--${m.role === "user" ? "you" : "bot"}`}
             >
-              {m.content || <span className="assistant-typing" aria-label="Typing" />}
+              {m.content ? (
+                // Only the assistant's own words are linkified. Doing it to the
+                // visitor's message would turn whatever they typed into a
+                // clickable link inside our own interface.
+                m.role === "assistant" ? linkify(m.content) : m.content
+              ) : (
+                <span className="assistant-typing" aria-label="Typing" />
+              )}
             </div>
           ))}
 

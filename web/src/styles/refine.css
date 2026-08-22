@@ -3117,3 +3117,22 @@
 .legacy-theme .newsletter-section--compact .newsletter-form {
     margin: 0 auto;
 }
+
+/* Links inside an assistant reply. The model names a vehicle's page, and that
+   used to arrive as bare text the customer had to read and retype — the most
+   useful thing it produced was the one thing they could not act on. */
+.legacy-theme .assistant-link {
+    color: var(--brand-400, #4e9d76);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .assistant-link:hover {
+    color: #6fbf95;
+}
+
+/* On the visitor's own bubble the green would disappear into the background. */
+.legacy-theme .assistant-msg--you .assistant-link {
+    color: #d7f0e2;
+}

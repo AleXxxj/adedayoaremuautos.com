@@ -18,6 +18,19 @@ export default async function AdminRentalsPage() {
   return (
     <AdminChrome email={user.email} role={user.role}>
       <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Said here because this is where people look for it. Rates live on
+            the vehicle, not on this screen, and that was not discoverable —
+            the first person to need it could not find it at all. */}
+        <p className="mb-6 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] px-4 py-3 text-sm text-[var(--text-muted)]">
+          <i className="fas fa-circle-info mr-2" aria-hidden="true" />
+          This screen is bookings. To change <strong>rental prices</strong>, open{" "}
+          <Link href="/admin/vehicles" className="text-[var(--link)] hover:underline">
+            Inventory
+          </Link>
+          , choose the vehicle, and scroll to <strong>Rental tariff</strong> — that
+          is also where you tick whether it appears on the rentals page at all.
+        </p>
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Rentals</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
