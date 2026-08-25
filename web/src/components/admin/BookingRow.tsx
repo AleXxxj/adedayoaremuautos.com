@@ -70,6 +70,17 @@ export function BookingRow({
             {formatRange(booking.period, locale, "→")}
           </p>
 
+          {/* The agreement is per booking, so it lives on the booking. */}
+          <p className="mt-2">
+            <Link
+              href={`/admin/rentals/${booking.id}/agreement`}
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--link)] hover:underline"
+            >
+              <i className="fas fa-file-contract" aria-hidden="true" />
+              Rental agreement
+            </Link>
+          </p>
+
           {vehicle && (
             <p className="mt-1 text-sm text-[var(--text-secondary)]">
               <Link

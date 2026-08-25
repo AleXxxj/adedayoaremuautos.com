@@ -381,3 +381,200 @@
         justify-content: center;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   The rental agreement.
+
+   Printed from the browser rather than generated server-side: the output is
+   identical, every machine already has "Save as PDF" in its print dialog, and
+   it keeps a PDF toolchain out of the deployment for a document produced a few
+   times a week.
+
+   Deliberately black on white regardless of the admin's dark theme — this is a
+   contract that gets printed, and a dark sheet would empty a toner cartridge.
+   ------------------------------------------------------------------------ */
+
+.agreement-sheet {
+    background: #f2f2f2;
+    padding: 24px 16px 64px;
+}
+
+.agreement {
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 18mm 16mm;
+    background: #fff;
+    color: #111;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 11.5pt;
+    line-height: 1.5;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.agreement .ag-head {
+    text-align: center;
+    border-bottom: 2px solid #111;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+
+.agreement .ag-brand {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.agreement h1 {
+    margin: 4px 0 2px;
+    font-size: 16pt;
+    letter-spacing: 0.02em;
+}
+
+.agreement .ag-dates {
+    margin: 0;
+    font-size: 10.5pt;
+}
+
+.agreement .ag-intro {
+    margin: 0 0 14px;
+    text-align: justify;
+}
+
+.agreement .ag-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+    font-size: 10.5pt;
+}
+
+.agreement .ag-table th,
+.agreement .ag-table td {
+    border: 1px solid #999;
+    padding: 5px 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.agreement .ag-table th {
+    width: 34%;
+    font-weight: 700;
+    background: #f0f0f0;
+}
+
+/* A line to write on where the value genuinely is not known yet. */
+.agreement .ag-blank {
+    display: inline-block;
+    min-width: 220px;
+    border-bottom: 1px solid #333;
+    height: 1em;
+    vertical-align: baseline;
+}
+
+.agreement .ag-filled {
+    font-weight: 600;
+}
+
+.agreement .ag-clauses h2 {
+    margin: 14px 0 4px;
+    font-size: 11.5pt;
+}
+
+.agreement .ag-clauses p {
+    margin: 0;
+    text-align: justify;
+}
+
+.agreement .ag-inspection h2 {
+    margin: 18px 0 6px;
+    font-size: 11.5pt;
+}
+
+.agreement .ag-notes-box {
+    height: 26mm;
+    border: 1px solid #999;
+}
+
+.agreement .ag-sign {
+    margin-top: 18px;
+    /* A signature block split over a page break is a signature block nobody
+       trusts. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.agreement .ag-sign-lead {
+    margin: 0 0 12px;
+}
+
+.agreement .ag-sign-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.agreement .ag-sign-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.agreement .ag-sign-label {
+    flex-shrink: 0;
+    width: 78px;
+    font-size: 9.5pt;
+    color: #444;
+}
+
+.agreement .ag-sign-row .ag-blank {
+    flex: 1;
+    min-width: 0;
+}
+
+.agreement .ag-footnote {
+    margin: 10px 0 0;
+    font-size: 9.5pt;
+    font-style: italic;
+}
+
+.agreement .ag-foot {
+    margin-top: 16px;
+    padding-top: 8px;
+    border-top: 1px solid #ccc;
+    font-size: 9pt;
+    color: #555;
+    text-align: center;
+}
+
+@media print {
+    /* The admin chrome, the editing panel and the page background all go. */
+    .no-print,
+    .admin-header,
+    .assistant-launcher,
+    .assistant-panel {
+        display: none !important;
+    }
+
+    .agreement-sheet {
+        background: #fff;
+        padding: 0;
+    }
+
+    .agreement {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    @page {
+        size: A4;
+        margin: 16mm;
+    }
+
+    .agreement .ag-clauses h2 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+}

@@ -21,7 +21,9 @@ export interface FleetVehicle {
   tariff: RentalTariff;
 }
 
-function toTariff(r: typeof rentalRates.$inferSelect): RentalTariff {
+/** Exported so the rental agreement can reprice a booking from the same
+ *  tariff shape the booking engine used, rather than defining a second one. */
+export function toTariff(r: typeof rentalRates.$inferSelect): RentalTariff {
   return {
     dailyMinor: r.dailyMinor,
     weeklyMinor: r.weeklyMinor,

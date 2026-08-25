@@ -285,6 +285,23 @@ export const rentalBookings = pgTable(
     currency: currencyCode("currency").notNull(),
 
     agreementSignedAt: timestamp("agreement_signed_at", { withTimezone: true }),
+
+    /* ── Terms that vary per agreement ──────────────────────────────────
+       The hand-made agreement left the rate, total and deposit as blank
+       lines while the booking already knew all three. These are the rest of
+       what the document states but the record did not yet hold. */
+
+    /** The name on the licence — not always the name someone books under. */
+    renterLegalName: text("renter_legal_name"),
+    /** What clause 4 hangs on: personal policies often exclude delivery work. */
+    authorizedUse: text("authorized_use"),
+    mileageAllowancePerDay: integer("mileage_allowance_per_day"),
+    excessMileRateMinor: bigint("excess_mile_rate_minor", { mode: "number" }),
+    pickupLocation: text("pickup_location"),
+    /** Read off the dashboard at handover and return; excess mileage bills
+     *  from the difference. */
+    startOdometer: integer("start_odometer"),
+    endOdometer: integer("end_odometer"),
     notes: text("notes"),
 
     createdAt: timestamp("created_at", { withTimezone: true })
