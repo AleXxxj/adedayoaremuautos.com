@@ -291,6 +291,16 @@ export const rentalBookings = pgTable(
        lines while the booking already knew all three. These are the rest of
        what the document states but the record did not yet hold. */
 
+    /**
+     * What the renter accepted at booking, and when.
+     *
+     * The version matters as much as the timestamp: terms change, and the
+     * question later is never "what do the terms say" but "what did this
+     * person agree to".
+     */
+    termsVersion: text("terms_version"),
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+
     /** The name on the licence — not always the name someone books under. */
     renterLegalName: text("renter_legal_name"),
     /** What clause 4 hangs on: personal policies often exclude delivery work. */

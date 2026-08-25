@@ -118,6 +118,10 @@ export default async function AgreementPage({
     governingLaw: b.marketCode === "us" ? "North Carolina" : "Nigerian",
     todayLabel: dateFmt.format(new Date()),
     signedAt: b.agreementSignedAt ? dateFmt.format(b.agreementSignedAt) : null,
+    termsAccepted:
+      b.termsVersion && b.termsAcceptedAt
+        ? { version: b.termsVersion, at: dateFmt.format(b.termsAcceptedAt) }
+        : null,
   };
 
   return (

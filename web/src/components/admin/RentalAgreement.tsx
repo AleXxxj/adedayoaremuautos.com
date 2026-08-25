@@ -13,6 +13,8 @@
  * purpose of the line.
  */
 
+import { numberedClauses } from "@/content/rentalTerms";
+
 export interface AgreementData {
   renterName: string;
   phone: string | null;
@@ -40,6 +42,8 @@ export interface AgreementData {
   governingLaw: string;
   todayLabel: string;
   signedAt: string | null;
+  /** Which wording the renter accepted online, and when. */
+  termsAccepted: { version: string; at: string } | null;
 }
 
 function Blank({ value, width = "220px" }: { value?: string | null; width?: string }) {
@@ -117,104 +121,22 @@ export function RentalAgreement({ d }: { d: AgreementData }) {
       </table>
 
       <section className="ag-clauses">
-        <h2>1. Authorized Use</h2>
-        <p>
-          Renter may operate the {d.vehicle} only for lawful purposes during the
-          rental period. Authorized use: {d.authorizedUse}. If used for DoorDash
-          or other delivery work, Renter is responsible for maintaining all
-          insurance, platform approvals, permits, and coverage required for that
-          activity. No racing, towing, off-road use, illegal activity, or
-          prohibited use.
-        </p>
-
-        <h2>2. Authorized Driver</h2>
-        <p>
-          Only the Renter and any additional driver approved in writing by Owner
-          may operate the vehicle. Renter may not lend, sub-rent, or transfer
-          possession.
-        </p>
-
-        <h2>3. Payment</h2>
-        <p>
-          Rental charges and the security deposit are due as agreed before or at
-          pickup unless Owner gives written approval otherwise. The deposit may
-          be applied to unpaid charges, cleaning, fuel, tolls, tickets, damage,
-          or other amounts for which Renter is responsible.
-        </p>
-
-        <h2>4. Insurance and Licensing</h2>
-        <p>
-          Renter represents that Renter has a valid driver&rsquo;s license and
-          legally required insurance for the vehicle and intended use. Renter
-          understands that personal auto insurance may exclude delivery,
-          rideshare, commercial, rental, or business use and must confirm
-          coverage before operating the vehicle.
-        </p>
-
-        <h2>5. Vehicle Condition</h2>
-        <p>
-          Renter accepts the vehicle in its condition at pickup, subject to the
-          inspection record and photographs. Renter must return it in
-          substantially the same condition, ordinary wear and tear excepted.
-        </p>
-
-        <h2>6. Mileage, Fuel, Tolls and Tickets</h2>
-        <p>
-          Renter receives{" "}
-          {d.mileageAllowancePerDay != null
-            ? `${d.mileageAllowancePerDay} ${d.mileageUnit} per rental day`
-            : "the mileage stated above"}
-          . Additional mileage is charged at{" "}
-          {d.excessMileRate ?? "the rate stated above"} per additional{" "}
-          {d.mileageUnit.replace(/s$/, "")}. Renter is responsible for fuel,
-          parking, tolls, citations, towing, impound fees, and other charges
-          arising from Renter&rsquo;s use.
-        </p>
-
-        <h2>7. Maintenance and Mechanical Problems</h2>
-        <p>
-          Renter must promptly notify Owner of warning lights, mechanical
-          problems, accidents, or unsafe conditions. Major repairs require
-          Owner&rsquo;s prior approval except in an immediate safety emergency.
-        </p>
-
-        <h2>8. Accidents and Damage</h2>
-        <p>
-          Renter must immediately report accidents, theft, vandalism, or
-          significant damage to Owner and law enforcement when required,
-          cooperate with insurance claims, and provide truthful information.
-          Renter is responsible for loss or damage caused by negligence, misuse,
-          unauthorized drivers, prohibited use, or breach of this Agreement,
-          subject to applicable law and insurance.
-        </p>
-
-        <h2>9. Return of Vehicle</h2>
-        <p>
-          The vehicle must be returned by the agreed date and time with the
-          agreed fuel level and all keys, documents, and equipment. Unauthorized
-          late return may result in additional charges.
-        </p>
-
-        <h2>10. No Guarantee of Earnings</h2>
-        <p>
-          Owner makes no guarantee regarding earnings from DoorDash, delivery
-          services, rideshare, or other gig work.
-        </p>
-
-        <h2>11. Termination</h2>
-        <p>
-          Owner may terminate the rental and require return of the vehicle for
-          material breach, nonpayment, loss of required licensing or insurance,
-          false information, unlawful use, or unreasonable risk of loss or
-          damage, subject to applicable law.
-        </p>
-
-        <h2>12. Governing Law</h2>
-        <p>
-          This Agreement is intended to be governed by applicable{" "}
-          {d.governingLaw} law, except where another rule is required by law.
-          Unenforceable provisions will be limited or severed as necessary.
-        </p>
+        {/* Rendered from src/content/rentalTerms.ts — the same list the
+            customer accepted on the booking form. Two copies of a contract in
+            two files is how a business ends up enforcing wording its customer
+            never saw. */}
+        {numberedClauses({
+          vehicle: d.vehicle,
+          use: d.authorizedUse,
+          law: d.governingLaw,
+        }).map((c) => (
+          <div key={c.n}>
+            <h2>
+              {c.n}. {c.heading}
+            </h2>
+            <p>{c.body}</p>
+          </div>
+        ))}
       </section>
 
       <section className="ag-inspection">
@@ -259,6 +181,15 @@ export function RentalAgreement({ d }: { d: AgreementData }) {
             </div>
           </div>
         </div>
+
+        {/* Evidence, printed on the contract itself: the renter ticked these
+            exact terms online before the vehicle was reserved. */}
+        {d.termsAccepted && (
+          <p className="ag-accepted">
+            Renter accepted these terms online on {d.termsAccepted.at} (version{" "}
+            {d.termsAccepted.version}).
+          </p>
+        )}
 
         <p className="ag-footnote">
           This document should be signed by both parties before vehicle handover.

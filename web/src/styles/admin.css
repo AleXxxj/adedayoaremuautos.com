@@ -578,3 +578,13 @@
         page-break-after: avoid;
     }
 }
+
+/* The online acceptance, printed on the contract. It is the evidence that the
+   renter was shown these exact clauses before the vehicle was reserved. */
+.agreement .ag-accepted {
+    margin: 10px 0 0;
+    padding: 6px 10px;
+    border-left: 3px solid #2a5c42;
+    background: #f4f8f5;
+    font-size: 9.5pt;
+}

@@ -3136,3 +3136,91 @@
 .legacy-theme .assistant-msg--you .assistant-link {
     color: #d7f0e2;
 }
+
+/* ── Rental terms on the booking form ──────────────────────────────────────
+   The form asked for dates, a name and a phone number and nothing else — a
+   customer could request a vehicle without ever seeing the terms they would be
+   held to. Folded so the form still reads as a form, but present and readable
+   before the request is sent: a tick-box pointing at terms nobody can see is
+   not consent. */
+.legacy-theme .booking-terms {
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .booking-terms summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-terms summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-theme .booking-terms summary i {
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .booking-terms summary span {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-terms[open] summary {
+    border-bottom: 1px solid var(--border, #262626);
+}
+
+/* Scrolls inside itself: twelve clauses inline would bury the form. */
+.legacy-theme .booking-terms-body {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 14px;
+}
+
+.legacy-theme .booking-terms-body h4 {
+    margin: 0 0 4px;
+    font-size: 13.5px;
+    color: #fff;
+}
+
+.legacy-theme .booking-terms-body section + section {
+    margin-top: 14px;
+}
+
+.legacy-theme .booking-terms-body p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-accept {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+    cursor: pointer;
+}
+
+.legacy-theme .booking-accept input {
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    accent-color: var(--brand-400, #4e9d76);
+    cursor: pointer;
+}

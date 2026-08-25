@@ -5,6 +5,7 @@ import { requestRental, type RentalResult } from "@/lib/actions/rentals";
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "@/lib/rental";
 import { formatMoney, money } from "@/lib/money";
 import type { MarketConfig } from "@/lib/market";
+import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rentalTerms";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -226,6 +227,42 @@ export function RentalBookingForm({
         </span>
         <textarea name="note" rows={3}  />
       </label>
+
+      {/* Read before the request, not handed over at the counter. Folded so
+          the form still reads as a form, and open on demand — a checkbox
+          pointing at terms nobody can see is not consent. */}
+      <details className="booking-terms">
+        <summary>
+          <i className="fas fa-file-contract" aria-hidden="true" /> Rental terms
+          <span>read before you request</span>
+        </summary>
+        <div className="booking-terms-body">
+          {RENTAL_CLAUSES.map((c, i) => (
+            <section key={c.heading}>
+              <h4>
+                {i + 1}. {c.heading}
+              </h4>
+              <p>
+                {fillClause(c.body, {
+                  law: market.code === "us" ? "North Carolina" : "Nigerian",
+                })}
+              </p>
+            </section>
+          ))}
+        </div>
+      </details>
+
+      <input type="hidden" name="termsVersion" value={RENTAL_TERMS_VERSION} />
+
+      <label className="booking-accept">
+        <input type="checkbox" name="acceptTerms" required />
+        <span>
+          I have read and accept the rental terms above. I confirm I hold a
+          valid driving licence and the insurance required for how I intend to
+          use the vehicle.
+        </span>
+      </label>
+      {err("acceptTerms") && <Err>{err("acceptTerms")}</Err>}
 
       <button
         type="submit"

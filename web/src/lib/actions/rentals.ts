@@ -9,6 +9,7 @@ import { rentalBookings, leads, vehicles, rentalRates } from "@/db/schema";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { quoteRental, rentalDays, RentalError } from "@/lib/rental";
 import { notifyStaffOfLead } from "@/lib/notify";
+import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 
 export interface RentalResult {
   ok: boolean;
@@ -31,6 +32,17 @@ const schema = z.object({
   note: z.string().trim().max(2000).optional(),
   website: z.string().max(0).optional(),
   renderedAt: z.coerce.number().optional(),
+  /**
+   * Refused rather than defaulted. A booking that proceeds without this is a
+   * booking nobody can later show the terms were put to — and clause 4, the
+   * renter confirming their own cover for delivery work, is the one that
+   * matters most and the one they are least likely to have thought about.
+   */
+  acceptTerms: z.literal("on", {
+    message: "Please read and accept the rental terms to continue.",
+  }),
+  /** Echoed back from the form so the exact wording shown is what is recorded. */
+  termsVersion: z.string().trim().max(40).optional(),
 });
 
 /**
@@ -134,6 +146,10 @@ export async function requestRental(
         depositMinor: quote.depositMinor,
         currency: market.currency,
         notes: f.note,
+        // What they accepted, and when. The version is stored because terms
+        // change and the question later is what THIS person agreed to.
+        termsVersion: f.termsVersion || RENTAL_TERMS_VERSION,
+        termsAcceptedAt: new Date(),
       })
       .returning({ id: rentalBookings.id });
     bookingId = booking.id;
