@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!tier) return {};
 
   return {
-    title: `${tier.name} Rent to Own — Adedayo Aremu Autos`,
+    title: `${tier.name} Rent to Own`,
     description:
       tier.tagline ??
       `Vehicles available on our ${tier.name} rent-to-own plan. Every payment counts towards owning the car.`,

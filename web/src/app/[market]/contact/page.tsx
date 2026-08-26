@@ -18,6 +18,7 @@ import {
   mapEmbedUrl,
 } from "@/lib/contact";
 import { LegacyMessageForm } from "@/components/LegacyMessageForm";
+import { dealerJsonLd } from "@/lib/seo/dealer";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Contact Us — Adedayo Aremu Autos",
+    title: "Contact Us",
     description:
       "Talk to us about buying, renting or financing a vehicle. Call, message or send the form and we will reply within 24 hours.",
     alternates: {
@@ -79,25 +80,11 @@ export default async function ContactPage({
       ].filter((l): l is string => Boolean(l && l.trim()))
     : [];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "AutoDealer",
-    name: "Adedayo Aremu Autos",
-    email: CONTACT_EMAIL,
-    ...(site
-      ? {
-          telephone: site.phone ?? undefined,
-          address: {
-            "@type": "PostalAddress",
-            streetAddress: site.addressLine1,
-            addressLocality: site.city,
-            addressRegion: site.region ?? undefined,
-            postalCode: site.postalCode ?? undefined,
-            addressCountry: site.country,
-          },
-        }
-      : {}),
-  };
+  // Built from the shared description of the business rather than restated
+  // here. This page used to carry its own shorter copy, which meant the
+  // contact page and the homepage described the same dealership with
+  // different facts.
+  const jsonLd = await dealerJsonLd(code);
 
   return (
     <>

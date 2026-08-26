@@ -24,7 +24,7 @@ export async function generateMetadata({
 
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   return {
-    title: `${title} — Adedayo Aremu Autos`,
+    title: `${title}`,
     description: v.description ?? `${v.condition} ${title} available now.`,
     alternates: {
       canonical: `/${market}/inventory/${slug}`,

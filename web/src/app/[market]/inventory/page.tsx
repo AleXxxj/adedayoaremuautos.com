@@ -18,7 +18,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { market } = await params;
   return {
-    title: "Cars for Sale — Adedayo Aremu Autos",
+    title: "Cars for Sale",
     description:
       market === "us"
         ? "Browse inspected vehicles for sale in Greensboro, North Carolina."

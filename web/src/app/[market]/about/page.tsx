@@ -28,7 +28,7 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "About Adedayo Aremu Autos",
+    title: "About Us",
     description:
       "The founder's story, our mission and vision, and how we work — building a legacy of trust and excellence in automotive service.",
     alternates: {

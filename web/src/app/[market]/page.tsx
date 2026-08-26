@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HeroSlider } from "@/components/HeroSlider";
 import { notFound } from "next/navigation";
-import { MARKETS, isMarketCode, formatDistance } from "@/lib/market";
+import { MARKETS, isMarketCode, formatDistance, type MarketCode } from "@/lib/market";
+import { dealerJsonLd, websiteJsonLd } from "@/lib/seo/dealer";
 import { listInventory } from "@/lib/repositories/vehicles";
 import { listLocations, formatPhone, summariseHours, type OpeningHour } from "@/lib/repositories/locations";
 import { getSiteStats, formatMilestone } from "@/lib/stats";
@@ -15,7 +16,30 @@ import { LegacyContactForm } from "@/components/LegacyContactForm";
  * The homepage was the only page without a canonical URL, which matters most
  * here: it is the page that will be linked to, and the one a search engine is
  * most likely to reach by more than one address.
+ *
+ * The title is written out in full rather than left to the site-wide template.
+ * This is the result a person sees when they search the business by name, and
+ * "Adedayo Aremu Autos" alone tells them nothing they did not already type —
+ * what the business does, and where, is the part that earns the click.
  */
+const HOME_SEO: Record<
+  MarketCode,
+  { title: string; description: string }
+> = {
+  us: {
+    title:
+      "Adedayo Aremu Autos | Cars for Sale, Rental & Rent-to-Own in Greensboro, NC",
+    description:
+      "Adedayo Aremu Autos is a vehicle dealership in Greensboro, North Carolina. Buy from our stock, rent by the day, week or month, apply for rent-to-own, or finance with clear figures and no hidden fees.",
+  },
+  ng: {
+    title:
+      "Adedayo Aremu Autos | Cars for Sale, Rental & Rent-to-Own in Nigeria",
+    description:
+      "Adedayo Aremu Autos sells, rents and finances quality vehicles in Nigeria. Browse available cars, book a rental with or without a driver, or apply for rent-to-own.",
+  },
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,10 +47,22 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { market } = await params;
   if (!isMarketCode(market)) return {};
+  const seo = HOME_SEO[market];
   return {
+    // `absolute` opts out of the "%s | Adedayo Aremu Autos" template, which
+    // would otherwise print the business name twice in one title.
+    title: { absolute: seo.title },
+    description: seo.description,
     alternates: {
       canonical: `/${market}`,
       languages: { "en-US": "/us", "en-NG": "/ng" },
+    },
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      url: `/${market}`,
+      siteName: "Adedayo Aremu Autos",
+      type: "website",
     },
   };
 }
@@ -55,10 +91,11 @@ export default async function MarketHome({
   if (!isMarketCode(code)) notFound();
 
   const market = MARKETS[code];
-  const [{ vehicles, total }, stats, sites] = await Promise.all([
+  const [{ vehicles, total }, stats, sites, dealer] = await Promise.all([
     listInventory(code, { limit: 4 }),
     getSiteStats(code),
     listLocations(code),
+    dealerJsonLd(code),
   ]);
 
   const site = sites[0];
@@ -68,6 +105,18 @@ export default async function MarketHome({
 
   return (
     <>
+      {/* Who this business is, in machine-readable form. The visible page says
+          it in prose, which a person reads and a search engine only guesses
+          at; this is the same claim stated unambiguously. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(dealer) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd(code)) }}
+      />
+
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       {/* The hero leads with rent to own, because that is what the business
           now leads with. The first slide is server-rendered, so the marketing

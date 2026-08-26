@@ -9,7 +9,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { navFor } from "@/lib/adminNav";
 import type { Staff } from "@/lib/auth";
 
-export const metadata = { title: "Admin — Adedayo Aremu Autos" };
+export const metadata = { title: "Admin" };
 
 /**
  * The login page renders inside this layout too, so the guard cannot live here

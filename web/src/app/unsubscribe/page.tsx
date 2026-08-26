@@ -7,7 +7,7 @@ import { newsletterSubscribers } from "@/db/schema";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Unsubscribe — Adedayo Aremu Autos",
+  title: "Unsubscribe",
   robots: { index: false, follow: false },
 };
 

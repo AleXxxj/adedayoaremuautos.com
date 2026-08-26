@@ -14,7 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { market } = await params;
   return {
-    title: "Automotive Insights — Adedayo Aremu Autos",
+    title: "Automotive Insights",
     description:
       "Expert advice, tips, and guides for car enthusiasts and buyers — buying, financing, hiring and looking after a vehicle.",
     alternates: {

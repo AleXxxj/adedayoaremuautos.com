@@ -19,7 +19,7 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Rent to Own — Adedayo Aremu Autos",
+    title: "Rent to Own",
     description:
       "Hire a vehicle by the day or the week. Every payment counts towards owning it. When your rent reaches the agreed total, the car is yours.",
     alternates: {

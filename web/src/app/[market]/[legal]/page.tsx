@@ -31,7 +31,7 @@ export async function generateMetadata({
   const page = LEGAL_PAGES[legal];
   if (!isMarketCode(market) || !page) return {};
   return {
-    title: `${plain(page.title)} — Adedayo Aremu Autos`,
+    title: `${plain(page.title)}`,
     description: page.subtitle,
     alternates: {
       canonical: `/${market}/${legal}`,

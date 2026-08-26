@@ -13,7 +13,7 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Referral Programme — Adedayo Aremu Autos",
+    title: "Referral Programme",
     description:
       "Refer a buyer and earn 1.5% commission on every completed sale. Get your own link and track what you have sent.",
     alternates: {

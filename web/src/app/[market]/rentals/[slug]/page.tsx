@@ -20,7 +20,7 @@ export async function generateMetadata({
   if (!v) return {};
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   return {
-    title: `Rent a ${title} — Adedayo Aremu Autos`,
+    title: `Rent a ${title}`,
     description: `Hire a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,
     alternates: { canonical: `/${market}/rentals/${slug}` },
     openGraph: v.image ? { images: [v.image] } : undefined,

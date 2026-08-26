@@ -25,7 +25,7 @@ export async function generateMetadata({
   const a = articleBySlug(market, slug);
   if (!a) return {};
   return {
-    title: `${a.title} — Adedayo Aremu Autos`,
+    title: `${a.title}`,
     description: a.excerpt,
     alternates: { canonical: `/${market}/blog/${slug}` },
     openGraph: {
