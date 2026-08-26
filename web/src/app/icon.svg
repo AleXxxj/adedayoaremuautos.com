@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Adedayo Aremu Autos">
+  <!--
+    One A, not three.
+
+    The wordmark is three overlapping letters, which is right on a header and
+    unreadable at 16px — the size a favicon is actually seen at. A browser tab
+    is the smallest piece of brand real estate there is, so it gets the single
+    strongest element of the mark rendered as large as the square allows.
+
+    The letter is built from three stroked lines rather than a filled glyph
+    outline. It needs no font, stays crisp at every size, and keeps the counter
+    open at 16px where a filled A closes up into a blob.
+
+    Silver falling to green, the same gradient as the logo, on the near-black
+    the site uses — so the tab reads as this business and not as a default.
+  -->
+  <defs>
+    <linearGradient id="aaa" x1="32" y1="8" x2="32" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f4f6f5"/>
+      <stop offset="0.38" stop-color="#c8d2cc"/>
+      <stop offset="0.72" stop-color="#5aa87d"/>
+      <stop offset="1" stop-color="#2f7350"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="13" fill="#0a0a0a"/>
+  <rect x="1.25" y="1.25" width="61.5" height="61.5" rx="11.75" fill="none"
+        stroke="#2a5c42" stroke-width="2.5"/>
+
+  <!--
+    The two diagonals are one path, not two. Drawn separately, each stroke adds
+    its own square cap at the apex and the point comes out as a notched crown;
+    as a single path the apex is a mitred join and reads as a proper letter.
+  -->
+  <g fill="none" stroke="url(#aaa)" stroke-width="8.5"
+     stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10">
+    <path d="M13 52 L32 14 L51 52"/>
+    <path d="M21.5 39.5 H42.5"/>
+  </g>
+</svg>
