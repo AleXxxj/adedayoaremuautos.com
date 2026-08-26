@@ -127,6 +127,13 @@
       "when": 1787700658745,
       "tag": "0017_rental_terms_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1787704580959,
+      "tag": "0018_licence_upload",
+      "breakpoints": true
     }
   ]
 }

@@ -3224,3 +3224,58 @@
     accent-color: var(--brand-400, #4e9d76);
     cursor: pointer;
 }
+
+/* ── Licence upload on the booking form ────────────────────────────────────
+   Asking somebody to photograph their identity document is a bigger request
+   than anything else on this form, so it is grouped and explained rather than
+   dropped in as another input. Every claim in the note is one the code keeps:
+   the bucket is private, the file is never rendered on the public site, and
+   staff open it through a link that expires in three minutes. */
+.legacy-theme .booking-licence {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .booking-licence input[type="file"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px dashed var(--border, #262626);
+    border-radius: 10px;
+    background: #0a0a0a;
+    color: var(--text-secondary, #b9b9b9);
+    font-family: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.legacy-theme .booking-licence input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--brand-400, #4e9d76);
+    color: #07130d;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.legacy-theme .booking-licence-note {
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .booking-licence-note i {
+    margin-top: 3px;
+    flex-shrink: 0;
+    color: var(--brand-400, #4e9d76);
+}

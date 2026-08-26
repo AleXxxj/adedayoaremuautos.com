@@ -213,13 +213,39 @@ export function RentalBookingForm({
         {err("email") && <Err>{err("email")}</Err>}
       </label>
 
-      <label className="booking-field">
-        <span>
-          Driving licence number{" "}
-          <em>optional</em>
-        </span>
-        <input name="licenceNo"  />
-      </label>
+      <div className="booking-licence">
+        <label className="booking-field">
+          <span>
+            Photo of your driving licence <em>optional</em>
+          </span>
+          <input
+            type="file"
+            name="licenceFile"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,image/*"
+            capture="environment"
+          />
+          {err("licenceFile") && <Err>{err("licenceFile")}</Err>}
+        </label>
+
+        {/* Every sentence here describes something the code actually does.
+            Reassurance a system does not deliver is worse than none. */}
+        <p className="booking-licence-note">
+          <i className="fas fa-lock" aria-hidden="true" />
+          <span>
+            Sending it now saves time at pickup. It is stored privately, never
+            shown on this website, and can only be opened by our staff through a
+            link that expires within minutes. We will not ask for your bank
+            details, card number, SSN or BVN — not here, and not by email.
+          </span>
+        </p>
+
+        <label className="booking-field">
+          <span>
+            Or just type the licence number <em>optional</em>
+          </span>
+          <input name="licenceNo" />
+        </label>
+      </div>
 
       <label className="booking-field">
         <span>

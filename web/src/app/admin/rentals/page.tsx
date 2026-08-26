@@ -101,6 +101,7 @@ export default async function AdminRentalsPage() {
                     withDriver: booking.withDriver,
                     licence: booking.driverLicenseNo,
                     notes: booking.notes,
+                    hasLicenceFile: Boolean(booking.licenceStorageKey),
                     total: formatMoney(money(booking.totalMinor, m.currency), m.locale),
                     deposit: booking.depositMinor
                       ? formatMoney(money(booking.depositMinor, m.currency), m.locale)

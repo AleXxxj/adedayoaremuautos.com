@@ -275,6 +275,17 @@ export const rentalBookings = pgTable(
     customerPhone: text("customer_phone").notNull(),
     driverLicenseNo: text("driver_license_no"),
 
+    /**
+     * The licence image, as a storage key in the PRIVATE bucket.
+     *
+     * Never a URL. Viewing it requires a short-lived signed link minted for a
+     * signed-in member of staff; a stored URL would be either permanently
+     * public or permanently broken, and the first is a photograph of someone's
+     * identity document on an address anyone could guess.
+     */
+    licenceStorageKey: text("licence_storage_key"),
+    licenceUploadedAt: timestamp("licence_uploaded_at", { withTimezone: true }),
+
     withDriver: boolean("with_driver").notNull().default(false),
     status: bookingStatus("status").notNull().default("quote"),
 

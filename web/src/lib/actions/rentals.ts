@@ -10,6 +10,7 @@ import { MARKETS, isMarketCode } from "@/lib/market";
 import { quoteRental, rentalDays, RentalError } from "@/lib/rental";
 import { notifyStaffOfLead } from "@/lib/notify";
 import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
+import { storeLicence } from "@/lib/licence";
 
 export interface RentalResult {
   ok: boolean;
@@ -57,7 +58,11 @@ export async function requestRental(
   _prev: RentalResult | null,
   formData: FormData,
 ): Promise<RentalResult> {
+  const licenceFile = formData.get("licenceFile");
   const raw = Object.fromEntries(formData.entries());
+  // A File would otherwise be handed to zod as an object and fail the string
+  // schema; it is validated separately by its own bytes.
+  delete (raw as Record<string, unknown>).licenceFile;
   const cleaned = Object.fromEntries(
     Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
   );
@@ -128,6 +133,21 @@ export async function requestRental(
   const h = await headers();
   const period = `[${from.toISOString()},${to.toISOString()})`;
 
+  // Stored before the booking row so a rejected file stops the request with a
+  // message the visitor can act on, rather than leaving a booking that claims a
+  // licence it does not have.
+  let licenceKey: string | null = null;
+  if (licenceFile instanceof File && licenceFile.size > 0) {
+    const stored = await storeLicence(licenceFile);
+    if (!stored.ok) {
+      return {
+        ok: false,
+        fieldErrors: { licenceFile: [stored.error ?? "Could not read that file."] },
+      };
+    }
+    licenceKey = stored.key ?? null;
+  }
+
   let bookingId = "";
   try {
     const [booking] = await db
@@ -150,6 +170,8 @@ export async function requestRental(
         // change and the question later is what THIS person agreed to.
         termsVersion: f.termsVersion || RENTAL_TERMS_VERSION,
         termsAcceptedAt: new Date(),
+        licenceStorageKey: licenceKey,
+        licenceUploadedAt: licenceKey ? new Date() : null,
       })
       .returning({ id: rentalBookings.id });
     bookingId = booking.id;

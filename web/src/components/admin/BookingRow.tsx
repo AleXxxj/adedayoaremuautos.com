@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { updateBookingStatus } from "@/lib/actions/rentals";
 import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
+import { LicenceLink } from "./LicenceLink";
 
 interface Booking {
   id: string;
@@ -17,6 +18,7 @@ interface Booking {
   withDriver: boolean;
   licence: string | null;
   notes: string | null;
+  hasLicenceFile: boolean;
   total: string;
   deposit: string | null;
   createdAt: string;
@@ -136,6 +138,7 @@ export function BookingRow({
             {booking.licence && (
               <span className="text-[var(--text-muted)]">Licence {booking.licence}</span>
             )}
+            {booking.hasLicenceFile && <LicenceLink bookingId={booking.id} />}
           </div>
 
           {booking.notes && (

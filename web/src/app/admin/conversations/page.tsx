@@ -6,6 +6,7 @@ import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { assertSection } from "@/lib/adminNav";
 import { AdminChrome } from "../layout";
 import { ConversationRow } from "@/components/admin/ConversationRow";
+import { AssistantCheck } from "@/components/admin/AssistantCheck";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,9 @@ export default async function AdminConversationsPage() {
   return (
     <AdminChrome email={user.email} role={user.role}>
       <div className="mx-auto max-w-4xl px-6 py-8">
+        {/* Where you look when the chat bubble seems dead. */}
+        {user.role !== "sales" && <AssistantCheck />}
+
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Assistant conversations</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">

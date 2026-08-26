@@ -162,18 +162,28 @@ export const VALUES: { title: string; body: string }[] = [
 
 /* ── Financing ─────────────────────────────────────────────────────────── */
 
+/**
+ * Rewritten at the founder's request to read more professionally.
+ *
+ * Each step now answers the question a buyer actually has at that moment —
+ * what will this cost me, how long will I wait, what happens next — because
+ * uncertainty is what stops people starting a finance application, not a
+ * shortage of adjectives. Deliberately no promise about approval, rates or
+ * amounts: what a lender will offer is a credit representation, and this page
+ * is read in North Carolina.
+ */
 export const FINANCE_STEPS: Step[] = [
   {
     title: "Apply",
-    body: "Send us your details and the vehicle you have in mind. It takes a couple of minutes and costs nothing.",
+    body: "Tell us which vehicle you have in mind and how you would like to structure the payments. The application takes a few minutes, costs nothing, and places you under no obligation.",
   },
   {
     title: "Get a decision",
-    body: "We review your application and come back to you — usually within one working day — with what we can offer.",
+    body: "A member of our finance team reviews your application personally and contacts you, normally within one working day, to talk through the options available to you and answer any questions.",
   },
   {
     title: "Drive",
-    body: "Agree the figures, complete the paperwork, and collect the vehicle.",
+    body: "Once the figures are agreed and the paperwork is complete, we prepare the vehicle and hand over the keys. You leave knowing exactly what you owe, and when.",
   },
 ];
 
