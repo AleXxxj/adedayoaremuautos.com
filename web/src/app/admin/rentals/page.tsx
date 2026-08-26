@@ -5,6 +5,7 @@ import { listBookings } from "@/lib/repositories/rentals";
 import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
+import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,21 @@ export default async function AdminRentalsPage() {
 
   const quotes = rows.filter((r) => r.booking.status === "quote").length;
   const active = rows.filter((r) => r.booking.status === "active").length;
+
+  // Sorted by what needs attention rather than by date. An overdue vehicle is
+  // the most expensive thing on this screen and should never be below the fold.
+  const sorted = [...rows].sort(
+    (a, b) =>
+      urgencyOf(a.booking.period as unknown as string, a.booking.status) -
+      urgencyOf(b.booking.period as unknown as string, b.booking.status),
+  );
+
+  const needsAttention = rows.filter((r) => {
+    const l = timingLabel(
+      bookingTiming(r.booking.period as unknown as string, r.booking.status),
+    );
+    return l != null && l.urgency === 0;
+  }).length;
 
   return (
     <AdminChrome email={user.email} role={user.role}>
@@ -44,6 +60,14 @@ export default async function AdminRentalsPage() {
               </>
             )}
             {active > 0 && ` · ${active} out now`}
+            {needsAttention > 0 && (
+              <>
+                {" · "}
+                <span className="font-medium text-[var(--danger)]">
+                  {needsAttention} need{needsAttention === 1 ? "s" : ""} chasing
+                </span>
+              </>
+            )}
           </p>
         </div>
 
@@ -61,7 +85,7 @@ export default async function AdminRentalsPage() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {rows.map(({ booking, make, model, year, slug }) => {
+            {sorted.map(({ booking, make, model, year, slug }) => {
               const m = MARKETS[booking.marketCode];
               return (
                 <BookingRow

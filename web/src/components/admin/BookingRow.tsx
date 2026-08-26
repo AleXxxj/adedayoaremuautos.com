@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateBookingStatus } from "@/lib/actions/rentals";
 import { formatRange } from "@/lib/pgRange";
+import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 
 interface Booking {
   id: string;
@@ -21,12 +22,31 @@ interface Booking {
   createdAt: string;
 }
 
+/**
+ * The ordinary next step, offered as a prominent button.
+ *
+ * Returned used to be a dead end and cancelled nearly so, which meant a single
+ * mis-click was permanent: marking a week-long rental "returned" on its second
+ * day left no way back to active, and the record then said a car was in the
+ * yard while it was still on the road. Forward moves stay here; every other
+ * state is reachable through Correct status below, which is deliberately one
+ * extra click so it is never hit by accident.
+ */
 const NEXT: Record<string, string[]> = {
   quote: ["confirmed", "cancelled"],
   confirmed: ["active", "cancelled"],
   active: ["returned"],
   returned: [],
   cancelled: ["quote"],
+};
+
+const ALL_STATUSES = ["quote", "confirmed", "active", "returned", "cancelled"];
+
+const TIMING_TONE: Record<number, string> = {
+  0: "border-[var(--danger)]/50 text-[var(--danger)] bg-[var(--danger)]/10",
+  1: "border-[var(--warning)]/50 text-[var(--warning)] bg-[var(--warning)]/10",
+  2: "border-[var(--border-default)] text-[var(--text-secondary)]",
+  3: "border-[var(--border-default)] text-[var(--text-muted)]",
 };
 
 const TONE: Record<string, string> = {
@@ -47,7 +67,13 @@ export function BookingRow({
   locale: string;
 }) {
   const [state, action, pending] = useActionState(updateBookingStatus, null);
+  const [correcting, setCorrecting] = useState(false);
   const options = NEXT[booking.status] ?? [];
+
+  // Derived from the dates, never stored. The status says what staff
+  // recorded; this says what the calendar thinks, and the gap between them
+  // is the part worth seeing.
+  const timing = timingLabel(bookingTiming(booking.period, booking.status));
 
   return (
     <li className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">
@@ -59,6 +85,11 @@ export function BookingRow({
               {booking.status}
             </span>
             <span className="text-xs uppercase text-[var(--text-muted)]">{booking.marketCode}</span>
+            {timing && (
+              <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${TIMING_TONE[timing.urgency]}`}>
+                {timing.text}
+              </span>
+            )}
             {booking.withDriver && (
               <span className="rounded bg-[var(--surface-3)] px-1.5 py-0.5 text-[11px] text-[var(--text-secondary)]">
                 with driver
@@ -151,6 +182,42 @@ export function BookingRow({
           )}
         </form>
       )}
+
+      {/* Any state, reachable. Behind a toggle so it is a decision rather than
+          a stray click, but present — the forward-only flow made a wrong
+          button press permanent. */}
+      <div className={options.length > 0 ? "mt-2" : "mt-4 border-t border-[var(--border-subtle)] pt-3"}>
+        <button
+          type="button"
+          onClick={() => setCorrecting((c) => !c)}
+          className="text-xs text-[var(--text-muted)] underline underline-offset-2"
+        >
+          {correcting ? "Close" : "Correct status"}
+        </button>
+
+        {correcting && (
+          <form action={action} className="mt-2 flex flex-wrap items-center gap-2">
+            <input type="hidden" name="id" value={booking.id} />
+            <span className="text-xs text-[var(--text-muted)]">Set to</span>
+            {ALL_STATUSES.filter((s) => s !== booking.status).map((s) => (
+              <button
+                key={s}
+                type="submit"
+                name="status"
+                value={s}
+                disabled={pending}
+                className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs capitalize hover:bg-[var(--surface-2)] disabled:opacity-50"
+              >
+                {s}
+              </button>
+            ))}
+            <span className="w-full text-xs text-[var(--text-muted)]">
+              For fixing a mistake. Confirming or activating still checks for
+              clashing dates.
+            </span>
+          </form>
+        )}
+      </div>
     </li>
   );
 }
