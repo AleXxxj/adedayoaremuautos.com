@@ -87,7 +87,7 @@ export function VehicleForm({
       <Section title="Market & identity">
         <Field label="Market" error={err("marketCode")}>
           <select
-            name="marketCode"
+            name={defaults.id ? undefined : "marketCode"}
             value={market}
             onChange={(e) => setMarket(e.target.value as MarketCode)}
             disabled={Boolean(defaults.id)}
@@ -99,6 +99,23 @@ export function VehicleForm({
               </option>
             ))}
           </select>
+
+          {/*
+            A disabled control is not submitted. That is the HTML rule, and it
+            silently broke every edit of an existing vehicle: the market never
+            reached the server, the enum that requires it rejected the whole
+            form, and the page answered `Invalid option: expected one of
+            "us"|"ng"` beside a field the person was not allowed to touch.
+            Changing a status was impossible, with an error that pointed
+            nowhere near the cause.
+
+            The select stays disabled — the market genuinely must not change,
+            because prices and distance units are bound to it — and the value
+            travels in a hidden input instead. The name moves across with it so
+            the two can never both submit.
+          */}
+          {defaults.id && <input type="hidden" name="marketCode" value={market} />}
+
           {defaults.id && (
             <Hint>
               A vehicle cannot change market — prices and units are market-bound.

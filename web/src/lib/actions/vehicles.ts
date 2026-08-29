@@ -24,7 +24,13 @@ export interface ActionResult {
 const VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/;
 
 const baseSchema = z.object({
-  marketCode: z.enum(["us", "ng"]),
+  // The default message for a missing enum is `Invalid option: expected one of
+  // "us"|"ng"`, which is addressed to whoever wrote the form rather than to
+  // the salesperson reading it. It appeared beside a field they were not
+  // allowed to change and could not act on.
+  marketCode: z.enum(["us", "ng"], {
+    message: "Choose United States or Nigeria.",
+  }),
   make: z.string().trim().min(1, "Make is required"),
   model: z.string().trim().min(1, "Model is required"),
   trim: z.string().trim().optional(),
@@ -279,6 +285,19 @@ export async function updateVehicle(
   const [before] = await db.select().from(vehicles).where(eq(vehicles.id, id));
   if (!before) return { ok: false, error: "Vehicle not found." };
   assertMarketAccess(user, before.marketCode);
+
+  // The form disables this field, but a disabled field is a suggestion to a
+  // browser and nothing at all to a POST body. Moving a vehicle between
+  // markets would leave its price in the wrong currency and its mileage in the
+  // wrong unit, so it is refused here rather than assumed impossible.
+  if (v.marketCode !== before.marketCode) {
+    return {
+      ok: false,
+      fieldErrors: {
+        marketCode: ["A vehicle cannot be moved to another market."],
+      },
+    };
+  }
 
   const market = MARKETS[v.marketCode];
   const slug = await uniqueSlug(
