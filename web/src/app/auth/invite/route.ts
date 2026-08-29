@@ -44,6 +44,21 @@ export async function GET(request: NextRequest) {
     return problem("bad_link");
   }
 
+  /*
+   * A token badly short of full length was cut in transit, not expired.
+   *
+   * Supabase reports both with the same sentence, so without this the owner is
+   * told a fresh link is needed when the link was fine and the copy of it was
+   * not — and the fresh one then fails the same way. The threshold is
+   * deliberately far below the real length (56 at the time of writing) so this
+   * only ever catches obvious damage and never rejects a token that might
+   * actually work; a paste that stops a few characters short still has to go
+   * to Supabase to be judged.
+   */
+  if (tokenHash.length < 20 || /[^A-Za-z0-9_-]/.test(tokenHash)) {
+    return problem("bad_link");
+  }
+
   // Built up front so the Supabase client can attach the new session to it.
   let response = NextResponse.redirect(new URL("/admin/set-password", origin));
 

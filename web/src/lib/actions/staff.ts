@@ -7,7 +7,8 @@ import { db } from "@/db";
 import { staff, auditLog } from "@/db/schema";
 import { requireStaff } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { siteUrl } from "@/lib/feeds/inventory";
+import { siteUrl } from "@/lib/siteUrl";
+import { sendInviteEmail } from "@/lib/staffMail";
 
 /**
  * Builds the link an owner actually hands over.
@@ -34,6 +35,12 @@ export interface StaffResult {
   fieldErrors?: Record<string, string[]>;
   /** The one-time link to hand to the new colleague. Never stored. */
   inviteLink?: string;
+  /** Whether the link was also emailed to them, so the admin can say so. */
+  emailed?: boolean;
+  /** Why the email did not go, shown to the owner rather than the recipient. */
+  emailError?: string;
+  /** The address it went to, so the confirmation can name it. */
+  emailedTo?: string;
 }
 
 const inviteSchema = z.object({
@@ -67,10 +74,15 @@ async function requireOwner() {
  *
  * No password is chosen for them and none is ever displayed. Supabase returns
  * a one-time link, the new person sets their own password through it, and
- * nobody else ever knows it. The link is handed back to the owner to pass on
- * rather than emailed, so this works whether or not the project has SMTP
- * configured — and the owner can send it by whatever channel they already
- * trust.
+ * nobody else ever knows it.
+ *
+ * The link is emailed to them directly and also returned to the owner. It was
+ * originally only returned, on the reasoning that the owner could then use
+ * whatever channel they already trusted. In practice that made a hand-made
+ * copy of a 120-character URL part of the critical path, and on a phone it
+ * failed: a selection that stops short yields a token Supabase rejects as
+ * "invalid or has expired", which reads as a link that timed out and sends
+ * everyone into a loop of generating fresh links that fail identically.
  */
 export async function inviteStaff(
   _prev: StaffResult | null,
@@ -147,10 +159,17 @@ export async function inviteStaff(
 
   revalidatePath("/admin/staff");
   const hashed = data.properties?.hashed_token;
-  return {
-    ok: true,
-    inviteLink: hashed ? inviteLinkFor(hashed, "invite") : undefined,
-  };
+  if (!hashed) return { ok: true };
+
+  const link = inviteLinkFor(hashed, "invite");
+  const mail = await sendInviteEmail({
+    to: v.email,
+    name: v.fullName,
+    link,
+    kind: "invite",
+  });
+
+  return { ok: true, inviteLink: link, emailed: mail.sent, emailError: mail.error, emailedTo: v.email };
 }
 
 const updateSchema = z.object({
@@ -266,5 +285,8 @@ export async function resendInvite(
     return { ok: false, error: "Could not create a new link." };
   }
 
-  return { ok: true, inviteLink: inviteLinkFor(data.properties.hashed_token, "recovery") };
+  const link = inviteLinkFor(data.properties.hashed_token, "recovery");
+  const mail = await sendInviteEmail({ to: email, link, kind: "recovery" });
+
+  return { ok: true, inviteLink: link, emailed: mail.sent, emailError: mail.error, emailedTo: email };
 }

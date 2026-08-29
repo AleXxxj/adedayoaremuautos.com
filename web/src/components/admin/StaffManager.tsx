@@ -24,20 +24,50 @@ const ROLE_NOTE: Record<string, string> = {
   sales: "Inventory, enquiries, deals and rentals",
 };
 
-/** The link is shown once and never stored, so copying it is the whole job. */
-function InviteLink({ link }: { link: string }) {
-  const [copied, setCopied] = useState(false);
+/**
+ * The invitation, after it has been created.
+ *
+ * The link is emailed to the person automatically now, so this panel reports
+ * what happened rather than handing the owner a job. The copyable link stays
+ * as a fallback for when the mail does not arrive — but it is no longer the
+ * only route, because copying it by hand is what failed: a selection of this
+ * box that stops a few characters short produces a token Supabase rejects with
+ * the words "invalid or has expired", which sends everybody looking for an
+ * expiry problem that does not exist.
+ */
+function InviteLink({
+  link,
+  email,
+  emailed,
+  emailError,
+}: {
+  link: string;
+  email?: string;
+  emailed?: boolean;
+  emailError?: string;
+}) {
+  const [copied, setCopied] = useState<"idle" | "ok" | "failed">("idle");
 
   return (
     <div className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 p-4">
       <p className="text-sm font-semibold text-[var(--success)]">
-        Invitation ready — send this link to them
+        {emailed
+          ? `Invitation sent${email ? ` to ${email}` : ""}`
+          : "Invitation ready — you will need to send this one yourself"}
       </p>
+
       <p className="mt-1 text-xs text-[var(--text-secondary)]">
-        It lets them set their own password. Nobody else ever sees it, so send
-        it by WhatsApp or email and do not post it anywhere shared. It works
-        once.
+        {emailed
+          ? "They have the link in their inbox. Ask them to check spam if it is not there within a few minutes. It works once."
+          : "The email could not be sent, so send the link below instead. It works once, and anyone holding it can set the password — do not post it anywhere shared."}
       </p>
+
+      {!emailed && emailError && (
+        <p className="mt-2 rounded bg-[var(--surface-2)] px-2 py-1 font-mono text-[11px] break-words text-[var(--text-muted)]">
+          {emailError}
+        </p>
+      )}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <code className="min-w-0 flex-1 overflow-x-auto rounded border border-[var(--border-default)] bg-[var(--surface-0)] px-3 py-2 text-xs">
           {link}
@@ -47,17 +77,27 @@ function InviteLink({ link }: { link: string }) {
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(link);
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 2000);
+              setCopied("ok");
+              window.setTimeout(() => setCopied("idle"), 2000);
             } catch {
-              /* Shown on screen either way. */
+              // Previously swallowed. A copy that silently does nothing sends
+              // the owner back to selecting the box by hand, which is exactly
+              // the failure this whole panel exists to prevent.
+              setCopied("failed");
             }
           }}
           className="rounded-lg bg-[var(--cta-bg)] px-4 py-2 text-sm font-semibold text-[var(--cta-fg)]"
         >
-          {copied ? "Copied" : "Copy link"}
+          {copied === "ok" ? "Copied" : copied === "failed" ? "Press and hold to copy" : "Copy link"}
         </button>
       </div>
+
+      {copied === "failed" && (
+        <p className="mt-2 text-xs text-[var(--warning)]">
+          This browser blocked the copy. Select the whole link — every character
+          to the end — or send the invitation again to email it instead.
+        </p>
+      )}
     </div>
   );
 }
@@ -82,7 +122,14 @@ function InviteForm() {
         </p>
       )}
 
-      {state?.ok && state.inviteLink && <InviteLink link={state.inviteLink} />}
+      {state?.ok && state.inviteLink && (
+        <InviteLink
+          link={state.inviteLink}
+          email={state.emailedTo}
+          emailed={state.emailed}
+          emailError={state.emailError}
+        />
+      )}
 
       <form action={action} className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block">
@@ -175,7 +222,12 @@ function StaffCard({ person, isSelf }: { person: StaffRow; isSelf: boolean }) {
 
       {linkState?.ok && linkState.inviteLink && (
         <div className="mt-3">
-          <InviteLink link={linkState.inviteLink} />
+          <InviteLink
+            link={linkState.inviteLink}
+            email={linkState.emailedTo}
+            emailed={linkState.emailed}
+            emailError={linkState.emailError}
+          />
         </div>
       )}
 
