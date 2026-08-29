@@ -9,7 +9,17 @@ import { approvedComments } from "@/lib/actions/blog";
 import { socialLinks } from "@/lib/contact";
 import { LegacyCommentForm, LegacyShare } from "@/components/LegacyBlog";
 
-export const dynamic = "force-dynamic";
+/**
+ * Cached and revalidated, not rebuilt per visitor.
+ *
+ * Every public page was `force-dynamic`, so each view needed a live database
+ * round trip and a brief backend problem produced a dead site rather than a
+ * slightly stale one. The admin calls `revalidatePath` when the underlying
+ * records change, so edits still appear immediately; this window only governs
+ * how long a cached copy keeps serving when nothing has changed — and what
+ * the page falls back on when the database cannot be reached at all.
+ */
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ market: a.market, slug: a.slug }));

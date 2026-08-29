@@ -243,6 +243,9 @@ export async function createVehicle(
 
   await audit(user, id, "create", { slug, status: v.status });
   revalidatePath("/admin/vehicles");
+  // The homepage carries featured stock and the live sold count, and is now
+  // cached, so it has to be told when either changes.
+  revalidatePath(`/${v.marketCode}`);
   revalidatePath(`/${v.marketCode}/inventory`);
   redirect(`/admin/vehicles/${id}?created=1`);
 }
@@ -333,6 +336,9 @@ export async function updateVehicle(
 
   await audit(user, id, "update", changes);
   revalidatePath("/admin/vehicles");
+  // The homepage carries featured stock and the live sold count, and is now
+  // cached, so it has to be told when either changes.
+  revalidatePath(`/${v.marketCode}`);
   revalidatePath(`/${v.marketCode}/inventory`);
   revalidatePath(`/${v.marketCode}/inventory/${slug}`);
 

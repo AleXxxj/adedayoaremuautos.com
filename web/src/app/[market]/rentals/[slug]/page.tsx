@@ -7,7 +7,17 @@ import { getFleetVehicle, bookedWindows } from "@/lib/repositories/rentals";
 import { RentalBookingForm } from "@/components/RentalBookingForm";
 import { formatMoney, money } from "@/lib/money";
 
-export const dynamic = "force-dynamic";
+/**
+ * Cached and revalidated, not rebuilt per visitor.
+ *
+ * Every public page was `force-dynamic`, so each view needed a live database
+ * round trip and a brief backend problem produced a dead site rather than a
+ * slightly stale one. The admin calls `revalidatePath` when the underlying
+ * records change, so edits still appear immediately; this window only governs
+ * how long a cached copy keeps serving when nothing has changed — and what
+ * the page falls back on when the database cannot be reached at all.
+ */
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 const DISMISSED_KEY = "aaa.market-notice.dismissed";
+
+interface Suggestion { code: string; country: string; currency: string }
 
 /** Nothing else writes this key, so there is no external change to subscribe to. */
 const subscribeToNothing = () => () => {};
@@ -39,16 +41,10 @@ function readDismissed(): boolean {
  * The dismissal is remembered, because being asked the same question on every
  * page is worse than not being asked at all.
  */
-export function CountryNotice({
-  currentMarket,
-  suggested,
-}: {
-  currentMarket: string;
-  /** Resolved on the server from the edge geo header. Null when it matches. */
-  suggested: { code: string; country: string; currency: string } | null;
-}) {
+export function CountryNotice({ currentMarket }: { currentMarket: string }) {
   const router = useRouter();
   const [dismissedNow, setDismissedNow] = useState(false);
+  const [suggested, setSuggested] = useState<Suggestion | null>(null);
 
   // localStorage is an external store, so it is read through the hook built
   // for that rather than copied into state from an effect — which would cost a
@@ -63,7 +59,34 @@ export function CountryNotice({
     () => true,
   );
 
-  if (!suggested || previouslyDismissed || dismissedNow) return null;
+  /*
+   * The country is asked for after mount rather than handed down as a prop.
+   *
+   * It used to be resolved in the market layout, which meant that layout read
+   * the request headers — and a layout that reads headers makes every page
+   * below it uncacheable. That single call was why all twenty public pages
+   * needed a live database round trip per visitor, and why a brief backend
+   * problem produced a completely dead site instead of a slightly stale one.
+   *
+   * Nothing is lost by moving it: this component already rendered nothing
+   * during server rendering, so the banner was never in the HTML anyway.
+   */
+  const settled = previouslyDismissed || dismissedNow;
+  useEffect(() => {
+    if (settled) return;
+    const cancel = new AbortController();
+    fetch(`/api/market-hint?market=${encodeURIComponent(currentMarket)}`, {
+      signal: cancel.signal,
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setSuggested(d?.suggested ?? null))
+      .catch(() => {
+        /* A banner that fails to load is not worth reporting to anyone. */
+      });
+    return () => cancel.abort();
+  }, [currentMarket, settled]);
+
+  if (!suggested || settled) return null;
 
   const remember = () => {
     try {

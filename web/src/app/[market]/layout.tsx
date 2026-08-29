@@ -21,7 +21,6 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
-import { suggestMarket } from "@/lib/geo";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
 
@@ -51,7 +50,6 @@ export default async function MarketLayout({
   const other = MARKET_CODES.filter((c) => c !== code);
   const sites = await listLocations(code);
   const socials = socialLinks(code);
-  const suggested = await suggestMarket(code);
   const site = sites[0];
   const assistantEnabled = Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -69,7 +67,7 @@ export default async function MarketLayout({
   return (
     <div className="legacy-theme">
       <ScrollReveal />
-      <CountryNotice currentMarket={code} suggested={suggested} />
+      <CountryNotice currentMarket={code} />
       {/* Rendered only when the API key exists. An assistant button that
           apologises for being unavailable is worse than no button. */}
       {assistantEnabled && <Assistant market={code} />}

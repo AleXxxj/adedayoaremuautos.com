@@ -67,7 +67,23 @@ export async function generateMetadata({
   };
 }
 
-export const dynamic = "force-dynamic";
+/**
+ * Rendered once and reused for a minute, rather than rebuilt per visitor.
+ *
+ * This was `force-dynamic`, which meant every single view of the homepage —
+ * including every crawler hit — required a live round trip to the database
+ * before a single pixel could be sent. When the backend was briefly
+ * unreachable the homepage had nothing to fall back on and simply died, and a
+ * search engine crawling during that window sees a broken site rather than a
+ * slow one.
+ *
+ * A minute is well inside what a dealership needs: the admin already calls
+ * `revalidatePath` on this route when stock changes, so an edit still appears
+ * immediately. The window only governs how long a cached copy keeps serving
+ * when nothing has been edited — and, more to the point, it is what the site
+ * falls back on when the database cannot be reached at all.
+ */
+export const revalidate = 60;
 
 /**
  * The original homepage, reproduced.

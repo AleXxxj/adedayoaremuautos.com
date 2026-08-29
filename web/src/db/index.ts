@@ -23,6 +23,20 @@ const client = postgres(url, {
   max: 1,
   prepare: false,
   idle_timeout: 20,
+  /*
+   * Fail fast when the database cannot be reached.
+   *
+   * Without a limit here a connection attempt to an unreachable backend hangs
+   * until the serverless function itself is killed. Every request in flight
+   * holds its slot for that whole time, new requests pile up behind them, and
+   * a backend that is briefly unwell produces an outage far longer than the
+   * problem that started it — which is how a short blip became fifteen minutes
+   * of a completely dead site.
+   *
+   * Ten seconds is longer than a healthy connection ever takes and short
+   * enough that the error boundary gets to render something useful.
+   */
+  connect_timeout: 10,
 });
 
 export const db = drizzle(client, { schema });
