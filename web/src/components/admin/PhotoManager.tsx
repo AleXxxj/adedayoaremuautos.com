@@ -26,7 +26,9 @@ export function PhotoManager({
   const [removeState, removeAction] = useActionState(remove, null);
 
   return (
-    <section className="space-y-4">
+    // `scroll-mt` keeps the heading clear of the sticky admin header when the
+    // "Add photos now" link jumps here.
+    <section id="photos" className="scroll-mt-24 space-y-4">
       <div>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
           Photos

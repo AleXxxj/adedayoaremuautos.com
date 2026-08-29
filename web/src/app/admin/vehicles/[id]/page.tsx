@@ -65,10 +65,21 @@ export default async function EditVehiclePage({
           </Link>
         </nav>
 
+        {/* "Add photos below" was true and useless: the uploader is under the
+            whole edit form, several screens down, so the instruction pointed
+            somewhere the reader could not see. It is a link now. */}
         {created && (
-          <p className="mb-6 rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
-            Vehicle created. Add photos below.
-          </p>
+          <div className="mb-6 rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
+            <p className="font-semibold">Vehicle created.</p>
+            <p className="mt-1">
+              It has no pictures yet, and a listing without them gets very
+              little attention.{" "}
+              <a href="#photos" className="font-semibold underline underline-offset-2">
+                Add photos now
+              </a>
+              .
+            </p>
+          </div>
         )}
 
         <div className="mb-8 flex items-start justify-between gap-4">

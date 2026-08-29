@@ -109,7 +109,7 @@ export function VehicleForm({
         {/* The identifier field follows the market, because a VIN and a chassis
             number are genuinely different things, not a relabelled input. */}
         {cfg.usesVin ? (
-          <Field label="VIN (17 characters)" error={err("vin")}>
+          <Field label="VIN (optional)" error={err("vin")}>
             <input
               name="vin"
               defaultValue={defaults.vin ?? ""}
@@ -117,10 +117,14 @@ export function VehicleForm({
               placeholder="1HGBH41JXMN109186"
               className={`${input} font-mono uppercase`}
             />
-            <Hint>Letters I, O and Q are never used in a VIN.</Hint>
+            <Hint>
+              17 characters, never using I, O or Q. Leave it blank if you do not
+              have it yet — but add it before the car goes live, as buyers use it
+              to check the vehicle&rsquo;s history.
+            </Hint>
           </Field>
         ) : (
-          <Field label="Chassis number" error={err("chassisNo")}>
+          <Field label="Chassis number (optional)" error={err("chassisNo")}>
             <input
               name="chassisNo"
               defaultValue={defaults.chassisNo ?? ""}
@@ -303,7 +307,7 @@ export function VehicleForm({
         </label>
       </Section>
 
-      <div className="flex gap-3 border-t border-[var(--border-subtle)] pt-6">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[var(--border-subtle)] pt-6">
         <button
           type="submit"
           disabled={pending}
@@ -311,6 +315,19 @@ export function VehicleForm({
         >
           {pending ? "Saving…" : submitLabel}
         </button>
+
+        {/* Photos cannot be attached until the vehicle has an id to attach
+            them to, so they belong to the step after this one. Saying so here
+            is the difference between a considered order of operations and an
+            apparently missing feature — a new member of staff filled this in,
+            found nowhere to add pictures, and reasonably concluded there was
+            no such thing. */}
+        {!defaults.id && (
+          <p className="text-sm text-[var(--text-muted)]">
+            <i className="fas fa-camera mr-1.5" aria-hidden="true" />
+            Photos are added on the next screen, as soon as this is saved.
+          </p>
+        )}
       </div>
     </form>
   );

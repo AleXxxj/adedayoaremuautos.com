@@ -83,17 +83,24 @@ async function resolveTier(
 }
 
 const vehicleSchema = baseSchema
-  .refine(
-    (v) => v.marketCode !== "us" || (v.vin && VIN_RE.test(v.vin)),
-    {
-      message:
-        "US listings need a valid 17-character VIN (letters I, O and Q are not used).",
-      path: ["vin"],
-    },
-  )
-  .refine((v) => v.marketCode !== "ng" || v.chassisNo || v.vin, {
-    message: "Nigerian listings need a chassis number.",
-    path: ["chassisNo"],
+  /*
+   * The VIN is optional in both markets, but must be well formed if given.
+   *
+   * It used to be required for a US listing and, together with the chassis
+   * number, for a Nigerian one. That blocked the people the admin exists for:
+   * a car is usually on the forecourt and being photographed well before
+   * anyone has read the plate, and a rule that refuses the entire record until
+   * then does not produce better data — it produces no record.
+   *
+   * Refusing a malformed one still matters. A VIN is used to look up a
+   * vehicle's history, so a mistyped one is worse than a blank: it silently
+   * describes a different car. Seventeen characters, and no I, O or Q, which
+   * the standard omits precisely because they are misread as 1 and 0.
+   */
+  .refine((v) => !v.vin || VIN_RE.test(v.vin), {
+    message:
+      "A VIN is 17 characters and does not use the letters I, O or Q. Leave it blank if you do not have it yet.",
+    path: ["vin"],
   })
   .refine((v) => v.status !== "available" || v.price != null, {
     message: "A vehicle cannot be published without a price.",
@@ -439,8 +446,8 @@ function friendlyDbError(e: unknown): string {
 
   if (msg.includes("vehicles_vin_unique_idx"))
     return "That VIN is already on another listing.";
-  if (msg.includes("vehicles_identity_matches_market"))
-    return "US listings require a valid 17-character VIN; Nigerian listings require a chassis number.";
+  if (msg.includes("vehicles_vin_well_formed"))
+    return "A VIN is 17 characters and does not use the letters I, O or Q. Leave it blank if you do not have it yet.";
   if (msg.includes("vehicles_currency_matches_market"))
     return "Currency does not match the market. This is a bug — please report it.";
   if (msg.includes("vehicles_available_requires_price"))

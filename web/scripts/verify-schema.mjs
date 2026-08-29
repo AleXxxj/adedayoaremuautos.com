@@ -130,22 +130,31 @@ await rejects(
 
 await rejects(
   db,
-  "rejects a US vehicle with a malformed VIN (contains letter I)",
+  "rejects a malformed VIN (contains letter I)",
   `INSERT INTO vehicles (market_code, vin, make, model, year, mileage_unit,
      condition, price_minor, currency, status, slug)
    VALUES ('us','1HGBH41JXMN10918I','Honda','Accord',2018,'mi','Used',
      1800000,'USD','available','bad-vin');`,
-  "vehicles_identity_matches_market",
+  "vehicles_vin_well_formed",
 );
 
-await rejects(
+/*
+ * A missing VIN is allowed; a wrong one is not.
+ *
+ * The VIN used to be mandatory on a US listing, which stopped sales staff
+ * entering a car at all before someone had walked round and read the plate —
+ * so the car went unlisted rather than listed imperfectly. A blank VIN is an
+ * absence anyone can see and fill in later. A mistyped one is worse than
+ * blank, because it silently describes a different vehicle to anyone running
+ * a history check, which is why the format is still enforced above.
+ */
+await allows(
   db,
-  "rejects a US vehicle with no VIN at all",
+  "accepts a vehicle with no VIN yet",
   `INSERT INTO vehicles (market_code, make, model, year, mileage_unit,
      condition, price_minor, currency, status, slug)
    VALUES ('us','Ford','Escape',2020,'mi','Used',
      1900000,'USD','available','no-vin');`,
-  "vehicles_identity_matches_market",
 );
 
 await rejects(
