@@ -361,6 +361,12 @@ export async function updateVehicle(
   if (before.slug !== slug) changes.slug = { from: before.slug, to: slug };
 
   await audit(user, id, "update", changes);
+  // The page that was just submitted, so what it shows afterwards is what was
+  // saved. Without this it re-renders from the pre-edit data and the fields
+  // appear to snap back to their old values — which, to someone who has been
+  // fighting a form that genuinely was not saving, looks exactly like another
+  // failure.
+  revalidatePath(`/admin/vehicles/${id}`);
   revalidatePath("/admin/vehicles");
   // The homepage carries featured stock and the live sold count, and is now
   // cached, so it has to be told when either changes.
