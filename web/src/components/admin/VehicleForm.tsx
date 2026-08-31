@@ -73,14 +73,13 @@ export function VehicleForm({
     <form action={formAction} className="space-y-8">
       {defaults.id && <input type="hidden" name="id" value={defaults.id} />}
 
+      {/* An error stays at the top because the field it refers to is usually
+          up here too, and it names something the person has to go and change.
+          The success message does not: it answers a button at the very bottom
+          of a long form, so it belongs next to that button. */}
       {state?.error && (
         <p className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
           {state.error}
-        </p>
-      )}
-      {state?.ok && (
-        <p className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
-          Saved.
         </p>
       )}
 
@@ -332,6 +331,15 @@ export function VehicleForm({
         >
           {pending ? "Saving…" : submitLabel}
         </button>
+
+        {state?.ok && (
+          <p
+            className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-2.5 text-sm font-medium text-[var(--success)]"
+            aria-live="polite"
+          >
+            Saved.
+          </p>
+        )}
 
         {/* Photos cannot be attached until the vehicle has an id to attach
             them to, so they belong to the step after this one. Saying so here
