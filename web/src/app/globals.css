@@ -14,6 +14,25 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /*
+   * The colour behind the page, for when a phone scrolls past the end of it.
+   *
+   * iOS rubber-bands past the last pixel of content and paints the exposed
+   * strip with the canvas background, which the browser takes from the body.
+   * The body is --surface-0 (#070C0A) and the public footer is pure black, so
+   * flicking to the bottom of any page revealed a large panel in a slightly
+   * lighter, greener shade below the footer — indistinguishable, on a phone,
+   * from the site having run out of content and left a hole.
+   *
+   * Setting it on the root element wins for the canvas while the body keeps
+   * painting its own box, so nothing inside the page changes. Scoped by
+   * :has() to the public pages: their footer is black in either theme, while
+   * the admin has its own surfaces and a light mode that black would spoil.
+   */
+  html:has(.legacy-theme) {
+    background-color: #000;
+  }
+
   /* One focus style, applied once, using the dedicated focus token.
      Validated at 3:1 against every surface it can land on. */
   :focus-visible {
