@@ -36,6 +36,22 @@
 .legacy-theme {
             background-color: #0A0A0A;
             color: #F0F0F0;
+            /*
+             * Keeps the hero's top margin inside the page.
+             *
+             * .hero clears the fixed header with `margin-top: 74px`. With no
+             * formatting context here that margin collapses straight out
+             * through this element and the body, so the body box started 74px
+             * down the page and its height stopped 74px short of the footer —
+             * the document was taller than the element supposedly filling it.
+             *
+             * Chromium reconciles that and reports a document ending exactly
+             * at the footer. WebKit does not have to, and on iPhones the page
+             * scrolled past the footer into empty space. `flow-root` contains
+             * the margin instead of letting it escape: identical rendering,
+             * a body box that actually reaches the bottom of its content.
+             */
+            display: flow-root;
         }
 /* Ultra-Premium Color Palette */
         :root {
@@ -226,7 +242,20 @@
         }
 /* Hero Section - FIXED with visible car */
         .hero {
+            /*
+             * `svh` is the viewport at its smallest — with the phone's address
+             * bar and toolbar showing. `vh` on iOS means the viewport with
+             * those hidden, which is taller than anything the reader can
+             * actually see, so the hero alone made the page overflow the
+             * screen by the height of the browser's own chrome. `svh` also
+             * does not change as the toolbars slide away, so the page does not
+             * reflow under the reader's thumb mid-scroll.
+             *
+             * The `vh` line stays first as the fallback for browsers that do
+             * not know the newer unit; they simply keep today's behaviour.
+             */
             min-height: 100vh;
+            min-height: 100svh;
             height: auto;
             background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%), 
                         url('/img/hero-benz.png');
