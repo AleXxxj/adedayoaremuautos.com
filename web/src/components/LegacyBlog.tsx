@@ -96,7 +96,7 @@ export function LegacyNewsletter({
             <details className="newsletter-extra">
               <summary>
                 <i className="fas fa-gift" aria-hidden="true" /> Add your
-                birthday for a gift <span>optional</span>
+                birthday to get a promo offer <span>optional</span>
               </summary>
               <p className="newsletter-extra-why">
                 We use it once a year — to wish you a happy birthday and send
