@@ -52,6 +52,33 @@ export async function sendDigestNow(
   };
 }
 
+export interface DigestReadiness {
+  /** Whether Vercel can prove a scheduled run is really Vercel. */
+  cronSecretSet: boolean;
+  /** Whether mail can be sent at all. */
+  mailConfigured: boolean;
+}
+
+/**
+ * Whether Saturday will actually happen.
+ *
+ * The endpoint refuses everything when CRON_SECRET is unset — failing closed
+ * is right, because an open URL there mails the whole list — but it means a
+ * missing secret produces perfect silence rather than an error. Nobody would
+ * find that out until somebody noticed no digest had ever arrived, which
+ * could be months. So it is reported here, where the digest is.
+ *
+ * Only whether each value exists. The values themselves never leave the
+ * server, and a screen does not need them to say what is wrong.
+ */
+export async function digestReadiness(): Promise<DigestReadiness> {
+  await requireStaff();
+  return {
+    cronSecretSet: Boolean(process.env.CRON_SECRET?.trim()),
+    mailConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
+  };
+}
+
 export interface DigestPreviewRow {
   id: string;
   label: string;

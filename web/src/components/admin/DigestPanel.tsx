@@ -4,8 +4,10 @@ import { useActionState, useEffect, useState } from "react";
 import {
   sendDigestNow,
   previewDigest,
+  digestReadiness,
   type DigestActionResult,
   type DigestPreviewRow,
+  type DigestReadiness,
 } from "@/lib/actions/digest";
 
 /**
@@ -23,6 +25,18 @@ export function DigestPanel({ markets }: { markets: string[] }) {
   );
   const [market, setMarket] = useState(markets[0] ?? "us");
   const [rows, setRows] = useState<DigestPreviewRow[] | null>(null);
+  const [ready, setReady] = useState<DigestReadiness | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const r = await digestReadiness();
+      if (!cancelled) setReady(r);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     // Wrapped rather than calling setRows straight away, because React does
@@ -48,6 +62,20 @@ export function DigestPanel({ markets }: { markets: string[] }) {
         email listing the vehicles that went live that week. A week with no new
         stock sends nothing at all.
       </p>
+
+      {ready && !ready.cronSecretSet && (
+        <p className="mt-4 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+          <strong>Saturday will not run.</strong> CRON_SECRET is not set on the
+          server, so the scheduled job is refused. Add it in Vercel under
+          Settings → Environment Variables and redeploy. Until then the digest
+          only goes out if somebody presses the button below.
+        </p>
+      )}
+      {ready && !ready.mailConfigured && (
+        <p className="mt-4 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+          Email is not configured on the server, so nothing can be sent.
+        </p>
+      )}
 
       {state?.error && (
         <p className="mt-4 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]">
