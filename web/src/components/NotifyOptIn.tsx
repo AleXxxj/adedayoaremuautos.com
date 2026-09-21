@@ -25,11 +25,47 @@ type State =
   | "blocked"
   | "working";
 
-function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
+/**
+ * Cleans a VAPID key that has been through a hosting provider's settings form.
+ *
+ * A key copied into a dashboard picks things up: a trailing newline from the
+ * shell, quotes from a .env line, the `NAME=` prefix when the whole line was
+ * selected rather than the value. Any of those reaches atob() and it throws
+ * "The string contains invalid characters", which tells the reader nothing
+ * about which of the three happened.
+ *
+ * None of this is lenience about a wrong key — a truncated one still fails
+ * below, and loudly. It is only refusing to be defeated by whitespace.
+ */
+function cleanKey(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^[A-Z0-9_]+=/, "")   // the variable name, pasted along with it
+    .replace(/^["']|["']$/g, "")   // quotes carried over from a .env file
+    .replace(/\s+/g, "");          // newlines or spaces anywhere inside
+}
+
+function urlBase64ToUint8Array(input: string): Uint8Array<ArrayBuffer> {
   // The VAPID key travels as URL-safe base64; PushManager wants raw bytes.
   // Backed by an explicit ArrayBuffer: PushManager's applicationServerKey is
   // typed as BufferSource, which a Uint8Array over a SharedArrayBuffer does
   // not satisfy.
+  const base64 = cleanKey(input);
+
+  // Said plainly and before decoding, because atob's own message names no
+  // cause and this is the one failure an owner has to fix in a dashboard.
+  if (!/^[A-Za-z0-9_-]+$/.test(base64)) {
+    throw new Error(
+      "The notification key on the server is not valid — it has stray characters in it.",
+    );
+  }
+  // An uncompressed P-256 public key is 65 bytes, which is 87 base64 chars.
+  if (base64.length < 80) {
+    throw new Error(
+      "The notification key on the server looks cut short. It should be 87 characters.",
+    );
+  }
+
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const normal = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = window.atob(normal);

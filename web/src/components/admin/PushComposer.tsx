@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { sendPushBroadcast, type PushFormResult } from "@/lib/actions/push";
+import { PushKeyCheck } from "@/components/admin/PushKeyCheck";
 
 /**
  * Sending a notification by hand — an offer, an announcement, a new article.
@@ -166,6 +167,8 @@ export function PushComposer({
           </span>
         </div>
       </form>
+
+      <PushKeyCheck />
     </section>
   );
 }
