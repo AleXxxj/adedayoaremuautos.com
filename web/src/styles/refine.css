@@ -3336,3 +3336,84 @@
         transition: none;
     }
 }
+
+/* ── Notification opt-in ──────────────────────────────────────────────────
+   Lives inside the newsletter band, under the privacy line. */
+
+.legacy-theme .notify-optin {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legacy-theme .notify-optin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 20px;
+    border: 1px solid rgba(78, 157, 118, 0.5);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--silver-classic, #d8dcda);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.legacy-theme .notify-optin-btn:hover:not(:disabled) {
+    background: rgba(78, 157, 118, 0.14);
+    border-color: rgba(78, 157, 118, 0.8);
+    color: #fff;
+}
+
+.legacy-theme .notify-optin-btn:disabled { opacity: 0.6; cursor: default; }
+
+.legacy-theme .notify-optin-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-muted, #9aa39e);
+    text-align: left;
+}
+
+.legacy-theme .notify-optin-note i { margin-top: 3px; flex: none; }
+
+.legacy-theme .notify-optin-on {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 14px;
+}
+
+.legacy-theme .notify-optin-on p {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--green-accent, #4e9d76);
+}
+
+.legacy-theme .notify-optin-on button {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--text-muted, #9aa39e);
+    font-family: inherit;
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.legacy-theme .notify-optin-error {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--danger, #e0605f);
+}

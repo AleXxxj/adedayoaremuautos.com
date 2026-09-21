@@ -7,6 +7,7 @@ import {
   type BlogResult,
 } from "@/lib/actions/blog";
 import type { MarketCode } from "@/lib/market";
+import { NotifyOptIn } from "@/components/NotifyOptIn";
 
 /* ── Newsletter ────────────────────────────────────────────────────────── */
 
@@ -153,6 +154,12 @@ export function LegacyNewsletter({
             <p className="newsletter-privacy">
               One email at a time, and an unsubscribe link in every one.
             </p>
+
+            {/* Offered beside the mailing list rather than as a prompt on
+                arrival. Somebody reading this box has already decided they
+                want to hear from the business, which is the only moment worth
+                spending a permission request on. */}
+            <NotifyOptIn market={market} />
           </>
         )}
       </div>

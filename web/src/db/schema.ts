@@ -1135,3 +1135,59 @@ export const rentalTiers = pgTable(
 );
 
 export type RentalTier = typeof rentalTiers.$inferSelect;
+
+/* ── Browser notifications ─────────────────────────────────────────────── */
+
+/**
+ * One row per browser that has granted permission.
+ *
+ * Deliberately not tied to `newsletter_subscribers`. A push subscription
+ * belongs to a browser on a device, not to a person: the same customer may
+ * grant it on a phone and a laptop and appear twice, and most who grant it
+ * have never given an email address at all. Joining the two would quietly
+ * lose every anonymous visitor, who are the majority.
+ *
+ * The three fields the push service needs — endpoint, p256dh and auth — are
+ * exactly what `PushSubscription.toJSON()` hands back, stored as given. The
+ * endpoint is the identity: it is unique per browser per site, and it is what
+ * the push service returns a 404 or 410 against once it goes stale.
+ */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** The push service URL for this browser. Unique, and the natural key. */
+    endpoint: text("endpoint").notNull(),
+    /** Public key of the browser's keypair; the payload is encrypted to it. */
+    p256dh: text("p256dh").notNull(),
+    /** Shared auth secret, also from the browser. */
+    auth: text("auth").notNull(),
+
+    /** Which market's news they get. A Lagos buyer does not want US stock. */
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    /** For working out later how much of the audience is iOS, and so on. */
+    userAgent: text("user_agent"),
+
+    /**
+     * Consecutive delivery failures.
+     *
+     * A 404 or 410 means gone for good and the row is deleted outright. This
+     * counts the other kind — a timeout, a 500 from the push service — so a
+     * browser is not discarded over one bad afternoon, but does not sit in the
+     * audience count forever either.
+     */
+    failureCount: integer("failure_count").notNull().default(0),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("push_subscriptions_endpoint_unique").on(t.endpoint),
+    index("push_subscriptions_market_idx").on(t.marketCode),
+  ],
+);
+
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
