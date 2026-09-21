@@ -79,7 +79,24 @@ export function NotifyPrompt({ market }: { market: string }) {
 
     void (async () => {
       const views = bumpViews();
-      if (views < 2 || recentlyDismissed()) return;
+
+      /*
+       * Somebody who has installed the site to their Home Screen is asked at
+       * once, on the very first screen they see.
+       *
+       * The two-page wait exists to avoid interrupting a stranger who might be
+       * passing through. It makes no sense here: adding a site to the Home
+       * Screen is several deliberate taps, and on an iPhone it is the only
+       * thing that makes notifications possible at all — so this reader has
+       * very likely just done it *in order to* be notified. Making them find a
+       * button four screens down was the wrong answer to the right rule.
+       *
+       * An installed app also has its own storage, separate from Safari, so
+       * this is a fresh context: a dismissal in the browser does not silence
+       * the app, and a dismissal here does not follow them back.
+       */
+      const installed = isStandalone();
+      if (views < (installed ? 1 : 2) || recentlyDismissed()) return;
 
       const current = await detectPushState();
       if (cancelled) return;
@@ -88,8 +105,8 @@ export function NotifyPrompt({ market }: { market: string }) {
       // in every case there is nothing worth asking.
       if (current === "on" || current === "blocked" || current === "unsupported") return;
 
-      // An iPhone that has not been installed can be told how, but it is a
-      // longer ask, so it waits until somebody is clearly engaged.
+      // An iPhone still in Safari can be told how to install, but that is a
+      // longer ask than "allow alerts", so it waits for clearer engagement.
       if (current === "needs-install" && views < 3) return;
 
       // Let the country notice finish its business first. Both are fixed cards
@@ -97,12 +114,17 @@ export function NotifyPrompt({ market }: { market: string }) {
       if (document.querySelector(".country-notification")) return;
 
       // A breath after the page settles, so it does not arrive mid-paint.
-      const timer = window.setTimeout(() => {
-        if (!cancelled) {
-          setState(current);
-          setShow(true);
-        }
-      }, 2500);
+      // Shorter in an installed app, where it is the expected next step rather
+      // than an interruption.
+      const timer = window.setTimeout(
+        () => {
+          if (!cancelled) {
+            setState(current);
+            setShow(true);
+          }
+        },
+        installed ? 900 : 2500,
+      );
       return () => window.clearTimeout(timer);
     })();
 
