@@ -63,6 +63,14 @@ export function NotifyOptIn({ market }: { market: string }) {
     };
 
     void (async () => {
+      // Nothing can work without the server's public key, so show nothing at
+      // all rather than a button that fails. This is what makes it safe to
+      // deploy the feature before the keys are set in the host.
+      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+        settle("unsupported");
+        return;
+      }
+
       const supported =
         "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 

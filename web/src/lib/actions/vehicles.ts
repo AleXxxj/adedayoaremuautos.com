@@ -10,6 +10,7 @@ import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
 import { supabaseAdmin, VEHICLE_BUCKET } from "@/lib/supabase/admin";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
 import { fromMajor } from "@/lib/money";
+import { announceVehicle } from "@/lib/push/announce";
 
 export interface ActionResult {
   ok: boolean;
@@ -255,6 +256,20 @@ export async function createVehicle(
   }
 
   await audit(user, id, "create", { slug, status: v.status });
+
+  // Only a vehicle that is actually on the public site is worth telling
+  // anyone about. A draft is staff working, not news.
+  if (v.status === "available") {
+    announceVehicle({
+      marketCode: v.marketCode,
+      slug,
+      year: v.year,
+      make: v.make,
+      model: v.model,
+      trim: v.trim ?? null,
+      priceMinor: v.price != null ? fromMajor(v.price, market.currency).minor : null,
+    });
+  }
   revalidatePath("/admin/vehicles");
   // The homepage carries featured stock and the live sold count, and is now
   // cached, so it has to be told when either changes.
@@ -359,6 +374,21 @@ export async function updateVehicle(
   if (before.priceMinor !== (v.price != null ? fromMajor(v.price, market.currency).minor : null))
     changes.price = { from: before.priceMinor, to: v.price };
   if (before.slug !== slug) changes.slug = { from: before.slug, to: slug };
+
+  // The moment it becomes public, and only that moment. Editing the price of
+  // an already-listed car is not an arrival, and announcing every save would
+  // train people to turn notifications off.
+  if (before.status !== "available" && v.status === "available") {
+    announceVehicle({
+      marketCode: before.marketCode,
+      slug,
+      year: v.year,
+      make: v.make,
+      model: v.model,
+      trim: v.trim ?? null,
+      priceMinor: v.price != null ? fromMajor(v.price, market.currency).minor : null,
+    });
+  }
 
   await audit(user, id, "update", changes);
   // The page that was just submitted, so what it shows afterwards is what was

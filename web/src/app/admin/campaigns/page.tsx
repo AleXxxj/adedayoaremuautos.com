@@ -9,6 +9,8 @@ import { assertSection } from "@/lib/adminNav";
 import { AdminChrome } from "../layout";
 import { CampaignComposer } from "@/components/admin/CampaignComposer";
 import { ContinueCampaign } from "@/components/admin/ContinueCampaign";
+import { PushComposer } from "@/components/admin/PushComposer";
+import { pushAudience } from "@/lib/push/send";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,11 @@ export default async function AdminCampaignsPage() {
     };
   });
 
+  // Browsers that have allowed alerts, per market. A different audience
+  // from the mailing list above: most of these people never gave an email.
+  const pushReach: Record<string, number> = {};
+  for (const m of markets) pushReach[m] = await pushAudience(m);
+
   const history = await db
     .select()
     .from(campaigns)
@@ -84,6 +91,8 @@ export default async function AdminCampaignsPage() {
         </div>
 
         <CampaignComposer markets={markets} audience={audience} stock={stock} />
+
+        <PushComposer markets={markets} audience={pushReach} />
 
         <section className="mt-10">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
