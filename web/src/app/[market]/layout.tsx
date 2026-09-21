@@ -19,6 +19,7 @@ import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
+import { NotifyPrompt } from "@/components/NotifyPrompt";
 import { BackToTop } from "@/components/BackToTop";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
@@ -70,6 +71,9 @@ export default async function MarketLayout({
       <ScrollReveal />
       <CountryNotice currentMarket={code} />
       <BackToTop />
+      {/* Asks in our own words first; only a yes opens the browser's
+          permission box, which can effectively be raised once per visitor. */}
+      <NotifyPrompt market={code} />
       {/* Rendered only when the API key exists. An assistant button that
           apologises for being unavailable is worse than no button. */}
       {assistantEnabled && <Assistant market={code} />}
