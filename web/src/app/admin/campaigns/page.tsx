@@ -10,6 +10,7 @@ import { AdminChrome } from "../layout";
 import { CampaignComposer } from "@/components/admin/CampaignComposer";
 import { ContinueCampaign } from "@/components/admin/ContinueCampaign";
 import { PushComposer } from "@/components/admin/PushComposer";
+import { DigestPanel } from "@/components/admin/DigestPanel";
 import { pushAudience } from "@/lib/push/send";
 
 export const dynamic = "force-dynamic";
@@ -94,6 +95,8 @@ export default async function AdminCampaignsPage() {
 
         <PushComposer markets={markets} audience={pushReach} />
 
+        <DigestPanel markets={markets} />
+
         <section className="mt-10">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             Everything sent so far
@@ -117,6 +120,11 @@ export default async function AdminCampaignsPage() {
                         <span className="text-xs uppercase text-[var(--text-muted)]">
                           {c.marketCode}
                         </span>
+                        {c.kind === "weekly_digest" && (
+                          <span className="rounded-full border border-[var(--border-default)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+                            weekly digest
+                          </span>
+                        )}
                         {c.status === "sending" && (
                           <span className="rounded-full border border-[var(--warning)]/40 px-2 py-0.5 text-xs text-[var(--warning)]">
                             part-sent

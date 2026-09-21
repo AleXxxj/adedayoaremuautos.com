@@ -977,6 +977,9 @@ export const assistantMessages = pgTable(
 
 /* ── Mailing-list broadcasts ───────────────────────────────────────────── */
 
+/** Whether a person wrote it or the weekly digest did. */
+export const campaignKind = pgEnum("campaign_kind", ["manual", "weekly_digest"]);
+
 export const campaignStatus = pgEnum("campaign_status", [
   "draft",
   "sending",
@@ -1013,6 +1016,13 @@ export const campaigns = pgTable(
     vehicleIds: jsonb("vehicle_ids").$type<string[]>().notNull().default([]),
 
     status: campaignStatus("status").notNull().default("draft"),
+
+    /**
+     * Who wrote it. The digest needs to ask whether one has already gone out
+     * this week, and matching on the subject line would break the moment
+     * somebody reworded it.
+     */
+    kind: campaignKind("kind").notNull().default("manual"),
 
     /** Kept as an email too: staff leave, and "who sent that?" outlives them. */
     createdBy: uuid("created_by"),

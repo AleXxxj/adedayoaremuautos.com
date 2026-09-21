@@ -148,6 +148,13 @@
       "when": 1789951171334,
       "tag": "0020_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789999486781,
+      "tag": "0021_campaign_kind",
+      "breakpoints": true
     }
   ]
 }
