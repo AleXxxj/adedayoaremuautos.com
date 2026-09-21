@@ -3279,3 +3279,60 @@
     flex-shrink: 0;
     color: var(--brand-400, #4e9d76);
 }
+
+/* ── Back to top ──────────────────────────────────────────────────────────
+   Phones only. On a wide screen the page is a third of the height and the
+   scrollbar already offers the same thing; the control would be noise. */
+
+.legacy-theme .back-to-top {
+    position: fixed;
+    left: 20px;
+    /* Level with the assistant launcher on the opposite side. */
+    bottom: 20px;
+    z-index: 900;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid rgba(78, 157, 118, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1d4535 0%, #0f2a20 100%);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    /* Faded out rather than removed, so it does not pop in and out of the
+       layout while the reader is mid-scroll. */
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+@media (max-width: 900px) {
+    .legacy-theme .back-to-top {
+        display: inline-flex;
+    }
+}
+
+.legacy-theme .back-to-top.is-shown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Below the phone's own safe area on an iPhone, where the home indicator
+   sits over the bottom 34px of the viewport. */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .legacy-theme .back-to-top {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .back-to-top {
+        transition: none;
+    }
+}

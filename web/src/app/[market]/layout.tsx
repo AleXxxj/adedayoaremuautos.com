@@ -19,6 +19,7 @@ import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
+import { BackToTop } from "@/components/BackToTop";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { socialLinks } from "@/lib/contact";
@@ -68,6 +69,7 @@ export default async function MarketLayout({
     <div className="legacy-theme">
       <ScrollReveal />
       <CountryNotice currentMarket={code} />
+      <BackToTop />
       {/* Rendered only when the API key exists. An assistant button that
           apologises for being unavailable is worse than no button. */}
       {assistantEnabled && <Assistant market={code} />}
