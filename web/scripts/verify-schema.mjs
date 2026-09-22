@@ -236,6 +236,61 @@ await allows(
   booking("aaaaaaaa-0000-0000-0000-000000000006", "2026-09-02", "2026-09-06", "cancelled"),
 );
 
+/*
+ * Holding the dates while a customer is paying.
+ *
+ * A quote is speculative and must not block anyone — proved above. But once
+ * someone is at a payment page, those dates have to be held, or a second
+ * customer can confirm the same week while the first is still typing their
+ * card number and the business ends up having taken money for a car it cannot
+ * supply. The hold is the difference, and these three assertions are the whole
+ * of it: a held quote blocks, an unheld one does not, and releasing the hold
+ * gives the week back.
+ */
+console.log("\nPayment holds");
+
+const heldBooking = (id, from, to, hold) => `
+  INSERT INTO rental_bookings
+    (id, vehicle_id, market_code, period, customer_name, customer_phone,
+     status, total_minor, currency, payment_hold_until)
+  VALUES
+    ('${id}','11111111-1111-1111-1111-111111111111','us',
+     tstzrange('${from}','${to}','[)'),
+     'Paying Customer','+13365550111','quote',50000,'USD',${hold});`;
+
+await allows(
+  db,
+  "a quote with a live payment hold is accepted, Oct 1-5",
+  heldBooking("bbbbbbbb-0000-0000-0000-000000000001", "2026-10-01", "2026-10-05", "now() + interval '30 minutes'"),
+);
+
+await rejects(
+  db,
+  "REJECTS a confirmed booking overlapping a held quote, Oct 3-8",
+  `INSERT INTO rental_bookings
+     (id, vehicle_id, market_code, period, customer_name, customer_phone,
+      status, total_minor, currency)
+   VALUES ('bbbbbbbb-0000-0000-0000-000000000002',
+     '11111111-1111-1111-1111-111111111111','us',
+     tstzrange('2026-10-03','2026-10-08','[)'),
+     'Second Customer','+13365550112','confirmed',50000,'USD');`,
+  "rental_bookings_no_overlap",
+);
+
+await allows(
+  db,
+  "releasing the hold frees the week again",
+  `UPDATE rental_bookings SET payment_hold_until = NULL
+     WHERE id = 'bbbbbbbb-0000-0000-0000-000000000001';
+   INSERT INTO rental_bookings
+     (id, vehicle_id, market_code, period, customer_name, customer_phone,
+      status, total_minor, currency)
+   VALUES ('bbbbbbbb-0000-0000-0000-000000000003',
+     '11111111-1111-1111-1111-111111111111','us',
+     tstzrange('2026-10-03','2026-10-08','[)'),
+     'Second Customer','+13365550112','confirmed',50000,'USD');`,
+);
+
 // Postgres rejects a backwards range in the tstzrange() constructor itself,
 // before any CHECK constraint is evaluated — stricter than our own rule.
 await rejects(

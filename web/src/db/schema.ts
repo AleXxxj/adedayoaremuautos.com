@@ -295,6 +295,17 @@ export const rentalBookings = pgTable(
       .default(0),
     currency: currencyCode("currency").notNull(),
 
+    /**
+     * While set, this quote holds its dates against everyone else.
+     *
+     * A quote is normally speculative and blocks nobody. That is wrong the
+     * moment money is involved: a customer is away at a payment page for
+     * minutes, and without a hold a second customer can confirm the same week
+     * meanwhile — leaving the business paid for a car it cannot supply.
+     * Cleared when payment completes, fails, or the hold runs out.
+     */
+    paymentHoldUntil: timestamp("payment_hold_until", { withTimezone: true }),
+
     agreementSignedAt: timestamp("agreement_signed_at", { withTimezone: true }),
 
     /* ── Terms that vary per agreement ──────────────────────────────────
@@ -1201,3 +1212,57 @@ export const pushSubscriptions = pgTable(
 );
 
 export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+
+/* ── Rental payments ───────────────────────────────────────────────────── */
+
+export const paymentProvider = pgEnum("payment_provider", ["stripe", "paystack"]);
+export const paymentStatus = pgEnum("payment_status", [
+  "pending",
+  "paid",
+  "failed",
+  "expired",
+  "refunded",
+]);
+
+/**
+ * Every payment attempt against a booking, successful or not.
+ *
+ * Separate from the booking because a booking can be paid for more than once:
+ * an attempt abandoned at the checkout, a second that succeeds, a refund
+ * later. Collapsing that into columns on the booking loses the history at
+ * exactly the moment somebody asks what happened to their money.
+ */
+export const rentalPayments = pgTable(
+  "rental_payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => rentalBookings.id, { onDelete: "cascade" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    provider: paymentProvider("provider").notNull(),
+    /**
+     * The provider's own id for this attempt — a Stripe session or a Paystack
+     * reference. Unique, because it is what a webhook arrives carrying, and a
+     * webhook is delivered more than once by design.
+     */
+    providerRef: text("provider_ref").notNull(),
+
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+    status: paymentStatus("status").notNull().default("pending"),
+
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("rental_payments_provider_ref_unique").on(t.provider, t.providerRef),
+    index("rental_payments_booking_idx").on(t.bookingId, t.createdAt),
+  ],
+);
+
+export type RentalPayment = typeof rentalPayments.$inferSelect;
