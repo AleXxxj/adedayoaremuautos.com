@@ -1,5 +1,6 @@
 import "server-only";
 import { mailFrom } from "@/lib/mail";
+import { renderLeadAlert, leadSubject } from "@/lib/mail/leadAlert";
 
 /**
  * Staff notification for new leads.
@@ -71,17 +72,8 @@ async function sendEmail(lead: LeadNotification, out: NotifyOutcome) {
   }
   out.attempted.push("email");
 
-  const subject = `New ${lead.type.replace(/_/g, " ")} lead — ${lead.name}`;
-  const lines = [
-    `Type: ${lead.type}`,
-    `Market: ${lead.market.toUpperCase()}`,
-    `Name: ${lead.name}`,
-    lead.phone ? `Phone: ${lead.phone}` : null,
-    lead.email ? `Email: ${lead.email}` : null,
-    lead.vehicle ? `Vehicle: ${lead.vehicle}` : null,
-    lead.message ? `\nMessage:\n${lead.message}` : null,
-    `\nOpen in admin: ${lead.adminUrl}`,
-  ].filter(Boolean);
+  const subject = leadSubject(lead);
+  const { html, text } = renderLeadAlert(lead);
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -94,7 +86,10 @@ async function sendEmail(lead: LeadNotification, out: NotifyOutcome) {
         from,
         to: to.split(",").map((s) => s.trim()),
         subject,
-        text: lines.join("\n"),
+        html,
+        text,
+        // Replying to the alert reaches the customer, not the sending
+        // address — the fastest path from "a lead arrived" to answering it.
         reply_to: lead.email ?? undefined,
       }),
       signal: AbortSignal.timeout(8000),
