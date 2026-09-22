@@ -6,6 +6,7 @@ import { quoteRental, rentalDays, RentalError, type RentalTariff } from "@/lib/r
 import { formatMoney, money } from "@/lib/money";
 import type { MarketConfig } from "@/lib/market";
 import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rentalTerms";
+import { RentalPayButton } from "@/components/RentalPayButton";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -69,15 +70,24 @@ export function RentalBookingForm({
     formatMoney(money(minor, market.currency), market.locale, { showDecimals: true });
 
   if (state?.ok && state.reference && state.reference !== "—") {
+    const payable = state.canPay && state.bookingId && state.amount;
     return (
       <div className="booking-done">
         <i className="fas fa-circle-check" aria-hidden="true" />
         <p className="booking-done-title">Request received</p>
         <p className="booking-done-body">
           Your reference is{" "}
-          <strong className="booking-ref">{state.reference}</strong>. We will
-          confirm availability and the deposit shortly.
+          <strong className="booking-ref">{state.reference}</strong>.{" "}
+          {payable
+            ? "Pay now and the dates are yours immediately — or leave it and we will call you to confirm."
+            : "We will confirm availability and the deposit shortly."}
         </p>
+
+        {/* Offered after the request is safely recorded, never instead of it:
+            somebody who abandons the checkout has still made an enquiry. */}
+        {payable && (
+          <RentalPayButton bookingId={state.bookingId!} amount={state.amount!} />
+        )}
       </div>
     );
   }

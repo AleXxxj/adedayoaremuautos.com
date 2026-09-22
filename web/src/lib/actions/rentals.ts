@@ -11,6 +11,8 @@ import { quoteRental, rentalDays, RentalError } from "@/lib/rental";
 import { notifyStaffOfLead } from "@/lib/notify";
 import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 import { storeLicence } from "@/lib/licence";
+import { formatMoney, money } from "@/lib/money";
+import { providerFor, providerConfigured } from "@/lib/payments/provider";
 
 export interface RentalResult {
   ok: boolean;
@@ -18,6 +20,12 @@ export interface RentalResult {
   fieldErrors?: Record<string, string[]>;
   /** Set when the booking succeeded, for the confirmation panel. */
   reference?: string;
+  /** The booking itself, so the panel can offer to take payment for it. */
+  bookingId?: string;
+  /** The hire charge, formatted. Not the deposit — that is taken at pickup. */
+  amount?: string;
+  /** False when this market has no payment provider configured yet. */
+  canPay?: boolean;
 }
 
 const schema = z.object({
@@ -235,7 +243,17 @@ export async function requestRental(
   revalidatePath("/admin/rentals");
   revalidatePath("/admin/leads");
 
-  return { ok: true, reference: bookingId.slice(0, 8).toUpperCase() };
+  // Offered only where a provider is actually configured, so a customer is
+  // never shown a payment button that cannot work.
+  const canPay = providerConfigured(providerFor(f.marketCode));
+
+  return {
+    ok: true,
+    reference: bookingId.slice(0, 8).toUpperCase(),
+    bookingId,
+    amount: formatMoney(money(quote.totalMinor, market.currency), market.locale),
+    canPay,
+  };
 }
 
 /* ── Admin ─────────────────────────────────────────────────────────────── */

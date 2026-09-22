@@ -3537,3 +3537,61 @@
         bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
 }
+
+/* ── Rental payment ───────────────────────────────────────────────────────
+   The pay button on the booking confirmation, and the page the provider
+   returns the customer to. */
+
+.legacy-theme .booking-pay {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legacy-theme .booking-pay-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.legacy-theme .booking-pay-note {
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted, #9aa39e);
+}
+
+.legacy-theme .booking-pay-error {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border: 1px solid rgba(224, 96, 95, 0.4);
+    border-radius: 8px;
+    background: rgba(224, 96, 95, 0.1);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--danger, #e0605f);
+}
+
+.legacy-theme .booking-result {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 24px 40px;
+    text-align: center;
+}
+
+.legacy-theme .booking-result-body {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--pearl, #f0f0f0);
+}
+
+.legacy-theme .booking-result-note {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted, #9aa39e);
+}
+
+.legacy-theme .booking-result .btn { margin-top: 22px; }
