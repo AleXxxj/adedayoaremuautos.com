@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { rentalBookings, rentalPayments } from "@/db/schema";
 import { verifyStripeWebhook } from "@/lib/payments/stripe";
+import { sendBookingReceipt } from "@/lib/payments/receipt";
 
 export const dynamic = "force-dynamic";
 
@@ -110,7 +111,6 @@ async function markPaid(sessionId: string, bookingId: string | null) {
       .update(rentalBookings)
       .set({ status: "confirmed", paymentHoldUntil: null })
       .where(eq(rentalBookings.id, target));
-    console.log(`[payments] booking ${target} paid and confirmed`);
   } catch (e) {
     /*
      * The hold should have made this impossible, so if it happens the business
@@ -122,7 +122,25 @@ async function markPaid(sessionId: string, bookingId: string | null) {
       `[payments] PAID BUT COULD NOT CONFIRM booking ${target} — needs a refund or new dates`,
       e,
     );
+    return;
   }
+
+  console.log(`[payments] booking ${target} paid and confirmed`);
+
+  /*
+   * The receipt, outside the try above so a mail problem is never mistaken for
+   * a booking that could not be confirmed.
+   *
+   * Sent from this branch specifically — the one that actually made the
+   * transition. Stripe delivers the same event more than once by design, and
+   * the early return further up means a repeat finds the booking already
+   * confirmed and stops, so the receipt goes exactly once without needing a
+   * flag to remember whether it has been sent. It swallows its own failures:
+   * throwing here would make Stripe retry the delivery, and that retry would
+   * take the already-confirmed path and drop the receipt for good over a
+   * momentary mail outage.
+   */
+  await sendBookingReceipt(target);
 }
 
 /** A checkout that expired or failed. The dates go back on the market. */
