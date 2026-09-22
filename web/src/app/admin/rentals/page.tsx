@@ -6,6 +6,7 @@ import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
+import { PaymentCheck } from "@/components/admin/PaymentCheck";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,8 @@ export default async function AdminRentalsPage() {
             )}
           </p>
         </div>
+
+        <PaymentCheck />
 
         {rows.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-1)] px-6 py-16 text-center">
