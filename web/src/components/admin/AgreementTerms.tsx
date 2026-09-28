@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import {
   saveAgreementTerms,
@@ -35,6 +37,7 @@ export function AgreementTerms({ booking }: { booking: Booking }) {
     saveAgreementTerms,
     null,
   );
+  useActionToast(state);
   const [signState, signAction, signing] = useActionState<AgreementResult | null, FormData>(
     markAgreementSigned,
     null,

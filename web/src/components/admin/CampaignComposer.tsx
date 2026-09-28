@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import {
   sendTestCampaign,
@@ -42,6 +44,8 @@ export function CampaignComposer({
     sendTestCampaign,
     null,
   );
+
+  useActionToast(testState);
   const [sendState, sendAction, sending] = useActionState<CampaignResult | null, FormData>(
     startCampaign,
     null,

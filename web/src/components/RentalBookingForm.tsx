@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { requestRental, type RentalResult } from "@/lib/actions/rentals";
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "@/lib/rental";
@@ -43,6 +45,7 @@ export function RentalBookingForm({
     requestRental,
     null,
   );
+  useActionToast(state);
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");

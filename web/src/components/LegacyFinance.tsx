@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import {
   submitFinanceApplication,
@@ -220,6 +222,7 @@ export function LegacyFinanceApplication({
     submitFinanceApplication,
     null,
   );
+  useActionToast(state);
 
   const mountedAt = useRef(0);
   useEffect(() => {

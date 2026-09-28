@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { mediaUrl } from "@/lib/media";
@@ -46,6 +48,7 @@ export function PhotoManager({
   remove: (prev: ActionResult | null, fd: FormData) => Promise<ActionResult>;
 }) {
   const [removeState, removeAction] = useActionState(remove, null);
+  useActionToast(removeState);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 

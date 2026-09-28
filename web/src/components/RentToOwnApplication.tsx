@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
@@ -49,6 +51,7 @@ export function RentToOwnApplication({
     submitLead,
     null,
   );
+  useActionToast(state);
 
   // Measures how long the form was actually open, not when the page was
   // rendered on the server or served from cache.

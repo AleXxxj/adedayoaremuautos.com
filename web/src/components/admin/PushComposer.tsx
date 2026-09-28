@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { sendPushBroadcast, type PushFormResult } from "@/lib/actions/push";
 import { PushKeyCheck } from "@/components/admin/PushKeyCheck";
@@ -24,6 +26,7 @@ export function PushComposer({
     sendPushBroadcast,
     null,
   );
+  useActionToast(state);
   const [market, setMarket] = useState(markets[0] ?? "us");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");

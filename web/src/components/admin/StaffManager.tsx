@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import {
   inviteStaff,
@@ -107,6 +109,7 @@ function InviteForm() {
     inviteStaff,
     null,
   );
+  useActionToast(state);
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
   return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 
 import Link from "next/link";
 import { LeadReply } from "./LeadReply";
@@ -49,6 +51,7 @@ export function LeadRow({
   vehicle: { label: string; slug: string } | null;
 }) {
   const [state, action, pending] = useActionState(updateLeadStatus, null);
+  useActionToast(state);
 
   const waiting = lead.status === "new" && !lead.firstResponseAt;
   const age = elapsed(lead.createdAt, lead.firstResponseAt);

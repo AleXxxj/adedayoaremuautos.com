@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { deleteVehicle, type ActionResult } from "@/lib/actions/vehicles";
 
@@ -19,6 +21,7 @@ export function DeleteVehicle({ id, name }: { id: string; name: string }) {
     deleteVehicle,
     null,
   );
+  useActionToast(state);
   const [confirming, setConfirming] = useState(false);
 
   return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { MARKETS, type MarketCode } from "@/lib/market";
 import type { ActionResult } from "@/lib/actions/vehicles";
@@ -59,6 +61,7 @@ export function VehicleForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
+  useActionToast(state);
   const [market, setMarket] = useState<MarketCode>(
     defaults.marketCode ?? markets[0],
   );

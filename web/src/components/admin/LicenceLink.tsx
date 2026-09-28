@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { viewLicence, type LicenceViewResult } from "@/lib/actions/licenceView";
 
@@ -15,6 +17,7 @@ export function LicenceLink({ bookingId }: { bookingId: string }) {
     viewLicence,
     null,
   );
+  useActionToast(state);
 
   return (
     <span className="inline-flex flex-wrap items-center gap-2">

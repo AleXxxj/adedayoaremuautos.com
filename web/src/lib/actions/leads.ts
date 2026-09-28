@@ -29,12 +29,14 @@ const LEAD_TYPES = [
 const schema = z
   .object({
     marketCode: z.enum(["us", "ng"]),
-    type: z.enum(LEAD_TYPES),
+    type: z.enum(LEAD_TYPES, { message: "Choose what you are interested in" }),
     name: z.string().trim().min(2, "Please enter your name").max(120),
     email: z.string().trim().email("That email does not look right").optional().or(z.literal("")),
     phone: z.string().trim().min(7, "Please enter a reachable phone number").max(40),
     message: z.string().trim().max(4000).optional(),
-    preferredContact: z.enum(["phone", "whatsapp", "email"]).optional(),
+    preferredContact: z
+      .enum(["phone", "whatsapp", "email"], { message: "Choose how we should reply" })
+      .optional(),
     vehicleSlug: z.string().trim().max(120).optional(),
     /** Which rent-to-own category is being applied for. */
     tierSlug: z.string().trim().max(80).optional(),

@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect } from "react";
 import { startRentalPayment, type StartPaymentResult } from "@/lib/actions/rentalPayment";
 
@@ -26,6 +28,7 @@ export function RentalPayButton({
     startRentalPayment,
     null,
   );
+  useActionToast(state);
 
   useEffect(() => {
     // The provider's page is not ours, so this is a full navigation rather

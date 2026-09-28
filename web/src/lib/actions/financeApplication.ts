@@ -50,7 +50,10 @@ const schema = z.object({
     .number({ message: "Enter a down payment amount" })
     .min(0, "Down payment cannot be negative")
     .max(1_000_000_000, "That figure looks wrong"),
-  termMonths: z.coerce.number().int().positive(),
+  termMonths: z.coerce
+    .number({ message: "Choose a repayment term" })
+    .int()
+    .positive("Choose a repayment term"),
   vehicleSlug: z.string().trim().max(120).optional(),
   preferredCar: z.string().trim().max(200).optional(),
   // Explicit, unticked by default. Nothing is submitted without it.

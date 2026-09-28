@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { joinReferralProgramme, type PartnerResult } from "@/lib/actions/referral";
 import type { MarketConfig } from "@/lib/market";
@@ -17,6 +19,7 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
     joinReferralProgramme,
     null,
   );
+  useActionToast(state);
 
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 

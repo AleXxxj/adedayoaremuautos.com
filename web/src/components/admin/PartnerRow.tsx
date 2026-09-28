@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { updatePartner } from "@/lib/actions/referral";
 import { formatBps } from "@/lib/referral";
@@ -24,6 +26,7 @@ interface Partner {
 
 export function PartnerRow({ partner }: { partner: Partner }) {
   const [state, action, pending] = useActionState(updatePartner, null);
+  useActionToast(state);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 

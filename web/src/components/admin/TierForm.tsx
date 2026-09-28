@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { saveTier, type TierResult } from "@/lib/actions/tiers";
 import { MARKETS, type MarketCode } from "@/lib/market";
@@ -41,6 +43,7 @@ export function TierForm({
     saveTier,
     null,
   );
+  useActionToast(state);
 
   const [daily, setDaily] = useState(String(defaults.daily ?? ""));
   const [weekly, setWeekly] = useState(String(defaults.weekly ?? ""));

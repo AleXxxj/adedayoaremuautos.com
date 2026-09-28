@@ -20,6 +20,7 @@ import { LegacyNav } from "@/components/LegacyNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
 import { NotifyPrompt } from "@/components/NotifyPrompt";
+import { Toaster } from "@/components/Toast";
 import { BackToTop } from "@/components/BackToTop";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
@@ -71,6 +72,10 @@ export default async function MarketLayout({
       <ScrollReveal />
       <CountryNotice currentMarket={code} />
       <BackToTop />
+      {/* Form results, pinned to the viewport: every form put its
+          answer at its own top, which on a long form is off-screen
+          from the button that caused it. */}
+      <Toaster />
       {/* Asks in our own words first; only a yes opens the browser's
           permission box, which can effectively be raised once per visitor. */}
       <NotifyPrompt market={code} />

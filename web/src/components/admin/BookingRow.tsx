@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { updateBookingStatus } from "@/lib/actions/rentals";
@@ -69,6 +71,7 @@ export function BookingRow({
   locale: string;
 }) {
   const [state, action, pending] = useActionState(updateBookingStatus, null);
+  useActionToast(state);
   const [correcting, setCorrecting] = useState(false);
   const options = NEXT[booking.status] ?? [];
 

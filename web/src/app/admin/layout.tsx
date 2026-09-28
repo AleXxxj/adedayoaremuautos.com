@@ -6,6 +6,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/styles/admin.css";
 import { signOut } from "@/lib/actions/auth";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { Toaster } from "@/components/Toast";
 import { navFor } from "@/lib/adminNav";
 import type { Staff } from "@/lib/auth";
 
@@ -38,6 +39,11 @@ export function AdminChrome({
 
   return (
     <>
+      {/* Form results, pinned to the viewport. The admin forms are long
+          and their submit buttons are at the bottom, so a message at the
+          top of the form is off-screen from the press that caused it. */}
+      <Toaster />
+
       <header className="admin-header">
         <div className="admin-header-inner">
           <Link href="/admin" className="admin-brand">

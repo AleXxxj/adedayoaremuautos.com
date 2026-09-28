@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
@@ -29,6 +31,7 @@ export function LeadForm({
     submitLead,
     null,
   );
+  useActionToast(state);
   const [renderedAt, setRenderedAt] = useState<number>(0);
   const landingPath = useRef<string>("");
 

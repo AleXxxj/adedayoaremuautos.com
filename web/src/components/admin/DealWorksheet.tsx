@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useMemo, useState } from "react";
 import { saveDealWorksheet, type DealResult } from "@/lib/actions/deals";
 import { computeDeal, type Fee } from "@/lib/deal";
@@ -32,6 +34,7 @@ export function DealWorksheet({ dealId, market, readOnly, initial }: Props) {
     saveDealWorksheet,
     null,
   );
+  useActionToast(state);
 
   const [v, setV] = useState(initial);
   const [fees, setFees] = useState(initial.fees);

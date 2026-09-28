@@ -3595,3 +3595,78 @@
 }
 
 .legacy-theme .booking-result .btn { margin-top: 22px; }
+
+/* ── Toasts ───────────────────────────────────────────────────────────────
+   A floating copy of a form's result, so it is never off-screen. Top-centre
+   and below the fixed header: the bottom corners already hold the assistant
+   launcher and the back-to-top button. */
+
+.toast-stack {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 950;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(440px, calc(100vw - 24px));
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px 14px 13px 16px;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 14.5px;
+    line-height: 1.5;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+    animation: toast-in 0.24s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast { animation: none; }
+}
+
+.toast > i:first-child { margin-top: 2px; flex: none; }
+.toast > span { flex: 1; min-width: 0; }
+
+.toast > button {
+    flex: none;
+    margin: -4px -4px 0 0;
+    padding: 4px 6px;
+    border: 0;
+    background: none;
+    color: inherit;
+    opacity: 0.65;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.toast > button:hover { opacity: 1; }
+
+.toast--success {
+    background: #10291f;
+    border-color: rgba(78, 157, 118, 0.55);
+    color: #cfe8db;
+}
+
+.toast--error {
+    background: #2a1414;
+    border-color: rgba(224, 96, 95, 0.55);
+    color: #f2cfcf;
+}
+
+/* The public header is shorter on a phone, and the admin has its own bar. */
+@media (max-width: 600px) {
+    .toast-stack { top: 76px; }
+}

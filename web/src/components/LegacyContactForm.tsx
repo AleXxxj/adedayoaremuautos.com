@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useState } from "react";
 import { submitLead } from "@/lib/actions/leads";
 import type { MarketCode } from "@/lib/market";
@@ -13,6 +15,7 @@ import type { MarketCode } from "@/lib/market";
  */
 export function LegacyContactForm({ market }: { market: MarketCode }) {
   const [state, action, pending] = useActionState(submitLead, null);
+  useActionToast(state);
   const [renderedAt, setRenderedAt] = useState(0);
 
   useEffect(() => setRenderedAt(Date.now()), []);

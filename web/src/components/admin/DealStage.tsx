@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { transitionDeal } from "@/lib/actions/deals";
 
@@ -31,6 +33,7 @@ const NEXT: Record<string, { to: string; label: string; tone?: "go" | "stop" }[]
 
 export function DealStage({ dealId, status }: { dealId: string; status: string }) {
   const [state, action, pending] = useActionState(transitionDeal, null);
+  useActionToast(state);
   const [pendingTo, setPendingTo] = useState<string | null>(null);
 
   const options = NEXT[status] ?? [];

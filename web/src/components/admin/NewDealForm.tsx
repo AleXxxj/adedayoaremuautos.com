@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import type { DealResult } from "@/lib/actions/deals";
 
@@ -17,6 +19,7 @@ export function NewDealForm({
   defaults: { customerName: string; customerPhone: string; customerEmail: string };
 }) {
   const [state, formAction, pending] = useActionState(action, null);
+  useActionToast(state);
 
   return (
     <form action={formAction} className="space-y-5">

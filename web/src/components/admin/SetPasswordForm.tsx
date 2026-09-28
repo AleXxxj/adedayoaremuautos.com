@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { setPassword } from "@/lib/actions/auth";
 
@@ -10,6 +12,7 @@ import { setPassword } from "@/lib/actions/auth";
  */
 export function SetPasswordForm() {
   const [state, action, pending] = useActionState(setPassword, null);
+  useActionToast(state);
 
   return (
     <form

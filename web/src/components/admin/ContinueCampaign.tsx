@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { continueCampaign, type CampaignResult } from "@/lib/actions/campaigns";
 
@@ -16,6 +18,7 @@ export function ContinueCampaign({ id }: { id: string }) {
     continueCampaign,
     null,
   );
+  useActionToast(state);
 
   return (
     <form action={action} className="mt-4 border-t border-[var(--border-subtle)] pt-3">

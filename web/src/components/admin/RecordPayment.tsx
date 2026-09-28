@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { recordPayment } from "@/lib/actions/finance";
 
@@ -11,6 +13,7 @@ export function RecordPayment({
   currency: string;
 }) {
   const [state, action, pending] = useActionState(recordPayment, null);
+  useActionToast(state);
 
   return (
     <form action={action} className="space-y-4">

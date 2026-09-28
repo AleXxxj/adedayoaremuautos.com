@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { saveTariff } from "@/lib/actions/tariff";
 
@@ -25,6 +27,7 @@ export function TariffForm({
   defaults: TariffDefaults;
 }) {
   const [state, action, pending] = useActionState(saveTariff, null);
+  useActionToast(state);
   const [inFleet, setInFleet] = useState(defaults.inFleet);
   const [withDriver, setWithDriver] = useState(defaults.withDriver);
 

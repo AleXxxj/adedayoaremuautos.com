@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useState } from "react";
 import {
   sendDigestNow,
@@ -23,6 +25,7 @@ export function DigestPanel({ markets }: { markets: string[] }) {
     sendDigestNow,
     null,
   );
+  useActionToast(state);
   const [market, setMarket] = useState(markets[0] ?? "us");
   const [rows, setRows] = useState<DigestPreviewRow[] | null>(null);
   const [ready, setReady] = useState<DigestReadiness | null>(null);

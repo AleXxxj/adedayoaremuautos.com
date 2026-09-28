@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useId, useRef } from "react";
 import {
   subscribeToNewsletter,
@@ -37,6 +39,7 @@ export function LegacyNewsletter({
     subscribeToNewsletter,
     null,
   );
+  useActionToast(state);
 
   // Two of these render on a blog page — the article's own section and the
   // sitewide band. A hardcoded id would appear twice, and the birthday fields

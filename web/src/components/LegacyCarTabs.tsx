@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useEffect, useState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import { LegacyCalculator } from "@/components/LegacyCarDetail";
@@ -128,6 +130,7 @@ export function LegacyTestDriveForm({
     submitLead,
     null,
   );
+  useActionToast(state);
   const [renderedAt, setRenderedAt] = useState(0);
   useEffect(() => setRenderedAt(Date.now()), []);
 

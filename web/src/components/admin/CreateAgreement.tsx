@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { createAgreementFromDeal } from "@/lib/actions/finance";
 
@@ -12,6 +14,7 @@ function defaultFirstDue(): string {
 
 export function CreateAgreement({ dealId }: { dealId: string }) {
   const [state, action, pending] = useActionState(createAgreementFromDeal, null);
+  useActionToast(state);
 
   return (
     <form action={action} className="space-y-4">
