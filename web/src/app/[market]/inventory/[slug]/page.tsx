@@ -6,6 +6,7 @@ import { getVehicleBySlug, listInventory } from "@/lib/repositories/vehicles";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { formatMoney, money, toMajor, monthlyPayment } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
+import { siteUrl } from "@/lib/siteUrl";
 import { requiresBuyersGuide } from "@/lib/compliance/disclosures";
 import { LegacyGallery } from "@/components/LegacyCarDetail";
 import { LegacyCarTabs, LegacyTestDriveForm, type SpecRow } from "@/components/LegacyCarTabs";
@@ -80,13 +81,52 @@ export default async function CarDetailPage({
       ? monthlyPayment(price, 0, market.financing.termMonths.at(-1)!)
       : null;
 
+  /*
+   * The listing, in the vocabulary Google reads.
+   *
+   * Typed Car rather than Vehicle. Car is a subtype of both Vehicle and
+   * Product, and the moment an `offers` block is present Google applies its
+   * product rules — so the more specific type is what makes those rules fit
+   * rather than merely apply.
+   *
+   * Search Console reported a critical "missing field image", which is the
+   * whole reason a listing never earned a rich result: no photograph, no card.
+   * Absolute URLs, because a site-relative path in structured data resolves
+   * against whatever host the crawler happens to be on.
+   *
+   * Two fields Google also asks for are deliberately absent. `review` and
+   * `aggregateRating` would have to be invented — this business has no
+   * collected reviews — and publishing ratings nobody gave is both a
+   * misrepresentation and against Google's own policy. A non-critical warning
+   * is the correct price for not making them up.
+   */
+  const base = siteUrl();
+  const absolute = (u: string) =>
+    /^https?:\/\//.test(u) ? u : `${base}${u.startsWith("/") ? "" : "/"}${u}`;
+
+  const condition = /new/i.test(v.condition)
+    ? "https://schema.org/NewCondition"
+    : "https://schema.org/UsedCondition";
+
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Vehicle",
+    "@type": "Car",
     name: title,
+    ...(v.images.length > 0
+      ? { image: v.images.map((i) => absolute(mediaUrl(i.storageKey))) }
+      : {}),
+    description:
+      v.description?.trim() ||
+      `${v.condition} ${title} for sale at Adedayo Aremu Autos, ${market.name}.`,
+    url: `${base}/${code}/inventory/${v.slug}`,
     vehicleModelDate: String(v.year),
     brand: { "@type": "Brand", name: v.make },
     model: v.model,
+    itemCondition: condition,
+    ...(v.bodyStyle ? { bodyType: v.bodyStyle } : {}),
+    ...(v.exteriorColor ? { color: v.exteriorColor } : {}),
+    ...(v.fuelType ? { fuelType: v.fuelType } : {}),
+    ...(v.transmission ? { vehicleTransmission: v.transmission } : {}),
     ...(v.vin ? { vehicleIdentificationNumber: v.vin } : {}),
     ...(v.mileage != null
       ? {
@@ -103,10 +143,16 @@ export default async function CarDetailPage({
             "@type": "Offer",
             price: (price.minor / 100).toFixed(2),
             priceCurrency: market.currency,
+            itemCondition: condition,
+            url: `${base}/${code}/inventory/${v.slug}`,
             availability:
               v.status === "available"
                 ? "https://schema.org/InStock"
                 : "https://schema.org/LimitedAvailability",
+            // Ties the listing to the dealership described on the homepage,
+            // so the two are one entity to a search engine rather than a
+            // business and an unrelated car that happens to share a site.
+            seller: { "@id": `${base}/${code}#dealer` },
           },
         }
       : {}),
