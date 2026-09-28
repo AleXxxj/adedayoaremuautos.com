@@ -5,7 +5,7 @@ import { SERVICES, reasons, REFERRAL } from "@/lib/content";
 import { PaymentCalculator } from "@/components/PaymentCalculator";
 import { VehicleCard } from "@/components/VehicleCard";
 import { formatMilestone, type SiteStats } from "@/lib/stats";
-import { formatPhone } from "@/lib/repositories/locations";
+import { } from "@/lib/repositories/locations";
 import type { MarketConfig } from "@/lib/market";
 import type { Vehicle } from "@/db/schema";
 
@@ -66,7 +66,7 @@ export function Showroom({
               href={`/${m}/inventory`}
               className="rounded-full bg-[var(--cta-bg)] px-8 py-3.5 font-semibold text-[var(--cta-fg)] transition-transform hover:scale-[1.02]"
             >
-              See what's available
+              See what&rsquo;s available
             </Link>
             {phone && (
               <a

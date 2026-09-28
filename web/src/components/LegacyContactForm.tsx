@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { submitLead } from "@/lib/actions/leads";
 import type { MarketCode } from "@/lib/market";
 
@@ -16,9 +16,23 @@ import type { MarketCode } from "@/lib/market";
 export function LegacyContactForm({ market }: { market: MarketCode }) {
   const [state, action, pending] = useActionState(submitLead, null);
   useActionToast(state);
-  const [renderedAt, setRenderedAt] = useState(0);
+  /*
+   * Mount time, kept in a ref and attached at submit.
+   *
+   * It was state set inside an effect, which React now rejects: a state update
+   * in an effect body causes a second render for a value that is never
+   * displayed. A ref holds it without re-rendering, and the form action stamps
+   * it on the way out — the same shape the comment form already used.
+   */
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
 
-  useEffect(() => setRenderedAt(Date.now()), []);
+  const submit = (formData: FormData) => {
+    formData.set("renderedAt", String(mountedAt.current));
+    return action(formData);
+  };
 
   if (state?.ok) {
     return (
@@ -33,12 +47,11 @@ export function LegacyContactForm({ market }: { market: MarketCode }) {
   }
 
   return (
-    <form className="contact-form" action={action}>
+    <form className="contact-form" action={submit}>
       <h3>Send us a Message</h3>
 
       <input type="hidden" name="marketCode" value={market} />
       <input type="hidden" name="type" value="contact" />
-      <input type="hidden" name="renderedAt" value={renderedAt} />
 
       {/* Honeypot — hidden from people, irresistible to bots. */}
       <div aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>

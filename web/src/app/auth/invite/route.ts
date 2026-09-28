@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Built up front so the Supabase client can attach the new session to it.
-  let response = NextResponse.redirect(new URL("/admin/set-password", origin));
+  // Never reassigned — the Supabase client writes cookies onto this object.
+  const response = NextResponse.redirect(new URL("/admin/set-password", origin));
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

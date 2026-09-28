@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import { LegacyCalculator } from "@/components/LegacyCarDetail";
 import type { MarketConfig } from "@/lib/market";
@@ -131,8 +131,22 @@ export function LegacyTestDriveForm({
     null,
   );
   useActionToast(state);
-  const [renderedAt, setRenderedAt] = useState(0);
-  useEffect(() => setRenderedAt(Date.now()), []);
+  /*
+   * Mount time, kept in a ref and stamped on at submit.
+   *
+   * It was state written inside an effect, which React now rejects: that
+   * causes a second render for a value nothing displays. A ref carries it
+   * without re-rendering, and the action attaches it on the way out.
+   */
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
+
+  const submit = (formData: FormData) => {
+    formData.set("renderedAt", String(mountedAt.current));
+    return action(formData);
+  };
 
   if (state?.ok) {
     return (
@@ -149,11 +163,10 @@ export function LegacyTestDriveForm({
   return (
     <div className="inspection-request">
       <h3>Request Test Drive</h3>
-      <form className="inspection-form" action={action}>
+      <form className="inspection-form" action={submit}>
         <input type="hidden" name="marketCode" value={market} />
         <input type="hidden" name="type" value="test_drive" />
         <input type="hidden" name="vehicleSlug" value={vehicleSlug} />
-        <input type="hidden" name="renderedAt" value={renderedAt} />
         <div aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </div>

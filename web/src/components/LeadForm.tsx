@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
 
@@ -32,15 +32,25 @@ export function LeadForm({
     null,
   );
   useActionToast(state);
-  const [renderedAt, setRenderedAt] = useState<number>(0);
-  const landingPath = useRef<string>("");
-
-  // Set on the client only, so the timestamp reflects when the visitor actually
-  // saw the form rather than when the page was rendered or cached.
+  /*
+   * Mount time, kept in a ref and stamped on at submit.
+   *
+   * It was state written inside an effect, which React now rejects: that
+   * causes a second render for a value nothing displays. A ref carries it
+   * without re-rendering, and the action attaches it on the way out.
+   */
+  const mountedAt = useRef(0);
+  const landingPath = useRef("");
   useEffect(() => {
-    setRenderedAt(Date.now());
+    mountedAt.current = Date.now();
     landingPath.current = window.location.pathname + window.location.search;
   }, []);
+
+  const submit = (formData: FormData) => {
+    formData.set("renderedAt", String(mountedAt.current));
+    formData.set("landingPath", landingPath.current);
+    return action(formData);
+  };
 
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
@@ -68,10 +78,8 @@ export function LeadForm({
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={submit} className="space-y-5">
       <input type="hidden" name="marketCode" value={market.code} />
-      <input type="hidden" name="renderedAt" value={renderedAt} />
-      <input type="hidden" name="landingPath" value={landingPath.current} />
       {vehicleSlug && <input type="hidden" name="vehicleSlug" value={vehicleSlug} />}
 
       {/* Honeypot. Hidden from people, irresistible to bots. Not display:none —

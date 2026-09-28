@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState, useRef } from "react";
 import { requestRental, type RentalResult } from "@/lib/actions/rentals";
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "@/lib/rental";
 import { formatMoney, money } from "@/lib/money";
@@ -50,9 +50,22 @@ export function RentalBookingForm({
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [withDriver, setWithDriver] = useState(false);
-  const [renderedAt, setRenderedAt] = useState(0);
+  /*
+   * Mount time, kept in a ref and stamped on at submit.
+   *
+   * It was state written inside an effect, which React now rejects: that
+   * causes a second render for a value nothing displays. A ref carries it
+   * without re-rendering, and the action attaches it on the way out.
+   */
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
 
-  useEffect(() => setRenderedAt(Date.now()), []);
+  const submit = (formData: FormData) => {
+    formData.set("renderedAt", String(mountedAt.current));
+    return action(formData);
+  };
 
   /**
    * Preview only — the server prices the booking again from the same tariff
@@ -98,10 +111,9 @@ export function RentalBookingForm({
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
   return (
-    <form action={action} className="booking-form">
+    <form action={submit} className="booking-form">
       <input type="hidden" name="marketCode" value={market.code} />
       <input type="hidden" name="vehicleSlug" value={vehicleSlug} />
-      <input type="hidden" name="renderedAt" value={renderedAt} />
       {withDriver && <input type="hidden" name="withDriver" value="true" />}
 
       <div
