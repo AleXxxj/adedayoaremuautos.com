@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionToast } from "@/components/Toast";
+import { useActionToast, pushToast } from "@/components/Toast";
 
 import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -99,6 +99,17 @@ export function PhotoManager({
       }
     } finally {
       setBusy(null);
+
+      // Announced as well as shown. The photo section sits below the whole
+      // edit form, so a batch that finishes while the reader is further up
+      // would otherwise report to an empty screen.
+      const ok = results.filter((r) => r.ok).length;
+      const bad = results.length - ok;
+      if (ok > 0) pushToast("success", `${ok} photo${ok === 1 ? "" : "s"} added.`);
+      if (bad > 0) {
+        pushToast("error", `${bad} photo${bad === 1 ? "" : "s"} could not be added.`);
+      }
+
       // Whatever did land is now in the grid, and the picker is cleared only
       // for the files that were dealt with.
       setChosen([]);

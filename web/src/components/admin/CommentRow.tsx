@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState } from "react";
 import { moderateComment, type BlogResult } from "@/lib/actions/blog";
 import type { ArticleComment } from "@/db/schema";
@@ -11,10 +13,11 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export function CommentRow({ comment }: { comment: ArticleComment }) {
-  const [, action, pending] = useActionState<BlogResult | null, FormData>(
+  const [state, action, pending] = useActionState<BlogResult | null, FormData>(
     moderateComment,
     null,
   );
+  useActionToast(state, "Comment updated.");
 
   return (
     <article className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-4">

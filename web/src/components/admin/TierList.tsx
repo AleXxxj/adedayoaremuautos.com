@@ -1,5 +1,7 @@
 "use client";
 
+import { useActionToast } from "@/components/Toast";
+
 import { useActionState, useState } from "react";
 import { retireTier, type TierResult } from "@/lib/actions/tiers";
 import { TierForm, type TierDefaults } from "./TierForm";
@@ -100,10 +102,11 @@ export function TierList({
 }
 
 function TierCard({ tier, onEdit }: { tier: TierRow; onEdit: () => void }) {
-  const [, retire, retiring] = useActionState<TierResult | null, FormData>(
+  const [retireState, retire, retiring] = useActionState<TierResult | null, FormData>(
     retireTier,
     null,
   );
+  useActionToast(retireState, "Category retired.");
   const cfg = MARKETS[tier.marketCode];
   const fmt = (m: number) => formatMoney(money(m, tier.currency), cfg.locale);
 
