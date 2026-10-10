@@ -520,9 +520,14 @@ export default async function MarketHome({
                 1.5% <small>commission</small>
               </div>
               <ul className="referral-features">
-                <li><i className="fas fa-check-circle" /> Earn on every successful vehicle purchase</li>
-                <li><i className="fas fa-check-circle" /> No limits - refer as many buyers as you want</li>
-                <li><i className="fas fa-check-circle" /> Fast payout after transaction completion</li>
+                {/* "Track your referrals easily" was on this list for years
+                    with nothing behind it. It is now a partner account with
+                    live stock, every referral and what is owed — so the claim
+                    stays, and hire is added because a referred booking earns
+                    the same way a referred sale does. */}
+                <li><i className="fas fa-check-circle" /> Earn on vehicle purchases and on car hire</li>
+                <li><i className="fas fa-check-circle" /> No limits - refer as many customers as you want</li>
+                <li><i className="fas fa-check-circle" /> Payout requested from your own dashboard</li>
                 <li><i className="fas fa-check-circle" /> Track your referrals easily</li>
               </ul>
               <Link href={`/${code}/referral`} className="btn btn-primary">

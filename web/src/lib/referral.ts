@@ -56,6 +56,30 @@ export function referralLink(base: string, code: string): string {
   return `${base.replace(/\/+$/, "")}/r/${code}`;
 }
 
+/** Where a partner reads and accepts their agreement. */
+export function agreementLink(base: string, token: string): string {
+  return `${base.replace(/\/+$/, "")}/partner/agreement/${token}`;
+}
+
+/** Where they turn an accepted agreement into an account they can log into. */
+export function accountSetupLink(base: string, token: string): string {
+  return `${base.replace(/\/+$/, "")}/partner/start/${token}`;
+}
+
+/**
+ * Whose law the partner agreement is read under.
+ *
+ * Named rather than left to "the applicable jurisdiction", because a finder's
+ * fee argument between Greensboro and Lagos with no governing law in the
+ * agreement is an argument about which court before it is an argument about
+ * the money.
+ */
+export function governingLaw(market: "us" | "ng"): string {
+  return market === "us"
+    ? "the State of North Carolina, United States of America"
+    : "the Federal Republic of Nigeria";
+}
+
 /** 150 bps -> "1.5%" */
 export function formatBps(bps: number): string {
   return `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`;

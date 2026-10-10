@@ -9,6 +9,10 @@ import { formatMoney, money } from "@/lib/money";
 import { commissionOn } from "@/lib/referral";
 import { siteUrl } from "@/lib/feeds/inventory";
 import { PartnerRow } from "@/components/admin/PartnerRow";
+import {
+  PartnerApplication,
+  type Application,
+} from "@/components/admin/PartnerApplication";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +30,55 @@ export default async function AdminReferralsPage() {
   assertSection(user.role, "/admin/referrals");
   const markets = allowedMarkets(user);
 
-  const partners = await db
+  const everyone = await db
     .select()
     .from(referralPartners)
     .where(inArray(referralPartners.marketCode, markets))
     .orderBy(desc(referralPartners.createdAt));
+
+  /*
+   * Three queues, not one list.
+   *
+   * An application waiting on a decision and a partner owed £400 need
+   * completely different things done to them, and a single list sorted by date
+   * buries the first among the second. Pending comes first and in the order it
+   * arrived — oldest at the top, because everyone who applies has been told to
+   * expect an answer within one working day and the one who has waited longest
+   * is the one closest to being let down.
+   */
+  const pending = everyone
+    .filter((p) => p.status === "pending")
+    .sort(
+      (a, b) =>
+        (a.appliedAt?.getTime() ?? 0) - (b.appliedAt?.getTime() ?? 0),
+    );
+  const awaitingSignature = everyone.filter((p) => p.status === "approved");
+  const settled = everyone.filter((p) =>
+    ["active", "suspended", "declined"].includes(p.status),
+  );
+  const partners = settled.filter((p) => p.status !== "declined");
+  const declined = settled.filter((p) => p.status === "declined");
+
+  const toApplication = (p: (typeof everyone)[number]): Application => ({
+    id: p.id,
+    code: p.code,
+    fullName: p.fullName,
+    businessName: p.businessName,
+    city: p.city,
+    marketCode: p.marketCode,
+    phone: p.phone,
+    email: p.email,
+    whatsapp: p.whatsapp,
+    website: p.website,
+    proposal: p.proposal,
+    status: p.status,
+    commissionBps: p.commissionBps,
+    appliedAt: p.appliedAt?.toISOString() ?? null,
+    reviewedAt: p.reviewedAt?.toISOString() ?? null,
+    reviewedByEmail: p.reviewedByEmail,
+    declineReason: p.declineReason,
+    agreementSentAt: p.agreementSentAt?.toISOString() ?? null,
+  });
 
   const ids = partners.map((p) => p.id);
 
@@ -74,18 +122,63 @@ export default async function AdminReferralsPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">Referral partners</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            {partners.length} registered
-            {partners.length > 0 && ` · ${active} active`}
+            {active} active
+            {pending.length > 0 && ` · ${pending.length} awaiting a decision`}
+            {awaitingSignature.length > 0 &&
+              ` · ${awaitingSignature.length} not yet signed`}
           </p>
         </div>
 
-        {partners.length === 0 ? (
+        {pending.length > 0 && (
+          <section className="mb-8">
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              Awaiting a decision
+            </h2>
+            <p className="mb-3 text-sm text-[var(--text-muted)]">
+              Each of these people was told to expect an answer within one
+              working day. Approving sends them the agreement to read and
+              accept; their code does nothing until they have.
+            </p>
+            <ul className="space-y-3">
+              {pending.map((p) => (
+                <PartnerApplication key={p.id} app={toApplication(p)} />
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {awaitingSignature.length > 0 && (
+          <section className="mb-8">
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              Approved, waiting on their signature
+            </h2>
+            <p className="mb-3 text-sm text-[var(--text-muted)]">
+              The agreement has been emailed and not yet accepted. Re-sending
+              issues a fresh link — worth doing if the first one was never
+              opened.
+            </p>
+            <ul className="space-y-3">
+              {awaitingSignature.map((p) => (
+                <PartnerApplication key={p.id} app={toApplication(p)} />
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {partners.length > 0 && (
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            Partners
+          </h2>
+        )}
+
+        {partners.length === 0 && pending.length === 0 && awaitingSignature.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-1)] px-6 py-16 text-center">
-            <p className="font-medium">Nobody has signed up yet</p>
+            <p className="font-medium">Nobody has applied yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
-              The referral panels on the homepage now lead to a real signup
-              form. Anyone who joins gets a link, and enquiries that arrive
-              through it appear here against their name.
+              The referral panels on the homepage lead to an application form.
+              Applications arrive here for a decision, and once a partner has
+              accepted the agreement their enquiries and bookings appear against
+              their name.
             </p>
           </div>
         ) : (
@@ -121,6 +214,22 @@ export default async function AdminReferralsPage() {
               );
             })}
           </ul>
+        )}
+
+        {/* Kept rather than hidden. A decline is reversible — "we are only
+            taking on partners in Greensboro at the moment" stops being true —
+            and Approve on one of these re-opens it with a fresh agreement. */}
+        {declined.length > 0 && (
+          <details className="mt-8">
+            <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              Declined ({declined.length})
+            </summary>
+            <ul className="mt-3 space-y-3">
+              {declined.map((p) => (
+                <PartnerApplication key={p.id} app={toApplication(p)} />
+              ))}
+            </ul>
+          </details>
         )}
       </div>
     </AdminChrome>

@@ -25,7 +25,7 @@ export async function generateMetadata({
   return {
     title: "Referral Programme",
     description:
-      "Refer a buyer and earn 1.5% commission on every completed sale. Get your own link and track what you have sent.",
+      "Refer buyers and hire customers to Adedayo Aremu Autos and earn commission on every completed deal. Apply in a couple of minutes and track your referrals from your own partner account.",
     alternates: {
       canonical: `/${market}/referral`,
       languages: { "en-US": "/us/referral", "en-NG": "/ng/referral" },
@@ -33,26 +33,41 @@ export async function generateMetadata({
   };
 }
 
+/*
+ * The steps as they now actually are.
+ *
+ * This list used to open with "Sign up and you are given a code and a link
+ * immediately. Nothing to wait for." That was true of the old programme, where
+ * a code only tagged an enquiry and anyone could mint one. It stopped being
+ * true the moment partners started being owed commission under an agreement,
+ * and a page promising an instant link in front of a form that opens a
+ * one-working-day review is how an applicant decides the site is broken.
+ */
 const STEPS = [
   {
-    icon: "fas fa-link",
-    title: "Get your link",
-    body: "Sign up and you are given a code and a link immediately. Nothing to wait for.",
+    icon: "fas fa-file-pen",
+    title: "Apply",
+    body: "Tell us who you are and how you plan to refer people. It takes a couple of minutes.",
+  },
+  {
+    icon: "fas fa-phone",
+    title: "We come back to you",
+    body: "Within one working day, by email or phone. We read every application properly.",
+  },
+  {
+    icon: "fas fa-handshake",
+    title: "Agree the terms",
+    body: "We email you a short agreement in plain English. Your code goes live the moment you accept it.",
   },
   {
     icon: "fas fa-share-nodes",
-    title: "Share it",
+    title: "Share your link",
     body: "Send the link, or just tell someone your code — we can enter it by hand when they call.",
-  },
-  {
-    icon: "fas fa-car",
-    title: "They buy",
-    body: "Anyone who opens your link is recorded against your name for 90 days, whichever page they enquire from.",
   },
   {
     icon: "fas fa-hand-holding-usd",
     title: "You get paid",
-    body: "1.5% of the sale price, once the sale completes and we have confirmed it.",
+    body: "Commission on every hire and sale you introduce, once it completes and the money has cleared.",
   },
 ];
 
@@ -133,8 +148,13 @@ export default async function ReferralPage({
                     credited to whoever introduced them first.
                   </li>
                   <li>
-                    Commission is paid on <strong>completed</strong> sales only —
-                    not on enquiries, and not on cancelled deals.
+                    Commission is paid on <strong>completed</strong> hires and
+                    sales only — not on enquiries, and not on anything cancelled
+                    or refunded.
+                  </li>
+                  <li>
+                    Car hire counts too, not just sales. A customer who books a
+                    vehicle for a week is credited to you the same way.
                   </li>
                   <li>
                     You cannot refer yourself, and staff are not eligible.

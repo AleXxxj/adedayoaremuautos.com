@@ -2,26 +2,75 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { joinReferralProgramme, type PartnerResult } from "@/lib/actions/referral";
 import type { MarketConfig } from "@/lib/market";
 
 /**
- * Becoming a referral partner.
+ * Applying to become a referral partner.
  *
- * The code and link are shown immediately on success, because the moment
- * someone signs up is the moment they are most likely to share it. Making them
- * wait for an email — on a project with no outbound mail configured — would
- * have meant the link never arrived at all.
+ * This used to hand over a live code on the spot, which was right while the
+ * code only tagged an enquiry. Now that it leads to commission, a person
+ * reviews the application first — so what the applicant gets is an
+ * acknowledgement and a clear promise about when they will hear back, not a
+ * link that would not work yet.
+ *
+ * The promise is one working day, and it is made in three places: here, in
+ * the acknowledgement email, and in the alert to staff. A programme that goes
+ * quiet after an application is worse than no programme.
  */
 export function ReferralSignup({ market }: { market: MarketConfig }) {
   const [state, action, pending] = useActionState<PartnerResult | null, FormData>(
     joinReferralProgramme,
     null,
   );
-  useActionToast(state);
+  // Named rather than left to the default "Saved." — this is a member of the
+  // public who has just applied for something, not a staff member who pressed
+  // Save, and the announcement is what a screen reader reads out.
+  useActionToast(state, "Application sent — check your email.");
+
+  // Mount time in a ref, stamped on at submit — the same shape the other
+  // public forms use, so a script that posts instantly is recognised.
+  const mountedAt = useRef(0);
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
+
+  const submit = (formData: FormData) => {
+    formData.set("renderedAt", String(mountedAt.current));
+    return action(formData);
+  };
 
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
+
+  if (state?.ok && state.pending) {
+    return (
+      <div className="contact-form referral-form">
+        <h2>
+          Application <span>received</span>
+        </h2>
+        <p>
+          Thank you. We have your application and someone will read it
+          properly.
+        </p>
+        <ul className="referral-next">
+          <li>
+            <i className="fas fa-envelope" /> Check your inbox — we have sent a
+            confirmation, and the decision follows{" "}
+            <strong>within one working day</strong>.
+          </li>
+          <li>
+            <i className="fas fa-file-signature" /> If we go ahead, the next
+            step is a short agreement to read and accept.
+          </li>
+          <li>
+            <i className="fas fa-shield-halved" /> Nothing is owed by you at any
+            point, and we never ask for bank details on this website.
+          </li>
+        </ul>
+      </div>
+    );
+  }
 
   if (state?.ok && state.code && state.link) {
     return (
@@ -70,11 +119,11 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
         Become a <span>Partner</span>
       </h2>
       <p>
-        Takes a minute. You get a link and a code straight away — no waiting for
-        approval.
+        Takes a couple of minutes. We read every application and reply within
+        one working day.
       </p>
 
-      <form action={action}>
+      <form action={submit}>
         <input type="hidden" name="marketCode" value={market.code} />
 
         <div
@@ -124,14 +173,19 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="rp-email">Email</label>
+          <label htmlFor="rp-email">Email *</label>
           <input
             id="rp-email"
             type="email"
             name="email"
             autoComplete="email"
             placeholder="john@example.com"
+            required
           />
+          <span className="form-hint">
+            Every step after this one — the decision, the agreement, your
+            account — arrives by email, so we need one that reaches you.
+          </span>
           {err("email") && <span className="field-error">{err("email")}</span>}
         </div>
 
@@ -140,14 +194,48 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
           <input id="rp-wa" type="tel" name="whatsapp" placeholder="Optional" />
         </div>
 
+        <div className="form-group">
+          <label htmlFor="rp-business">Business name (if you have one)</label>
+          <input id="rp-business" type="text" name="businessName" placeholder="Optional" />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="rp-city">Town or city</label>
+          <input
+            id="rp-city"
+            type="text"
+            name="city"
+            placeholder={market.code === "us" ? "Greensboro" : "Lagos"}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="rp-site">Website or social page</label>
+          <input id="rp-site" type="url" name="applicantSite" placeholder="Optional" />
+        </div>
+
+        {/* The part a human actually reads when deciding. */}
+        <div className="form-group">
+          <label htmlFor="rp-proposal">How do you plan to refer customers? *</label>
+          <textarea
+            id="rp-proposal"
+            name="proposal"
+            rows={5}
+            required
+            placeholder="Tell us who you know, how you would reach them, and anything you already do that puts you in front of car buyers or renters."
+          />
+          {err("proposal") && <span className="field-error">{err("proposal")}</span>}
+        </div>
+
         <button type="submit" className="btn btn-primary" disabled={pending}>
-          {pending ? "Setting you up…" : "Get my referral link"}{" "}
+          {pending ? "Sending…" : "Send my application"}{" "}
           <i className="fas fa-hand-holding-usd" />
         </button>
 
         <p className="form-privacy">
-          We use your details only to record referrals and pay you. No bank
-          details are ever collected on this website.
+          We use your details only to assess your application, record
+          referrals and pay you. No bank details are ever collected on this
+          website.
         </p>
       </form>
     </div>

@@ -162,6 +162,20 @@
       "when": 1790071456675,
       "tag": "0022_rental_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791668105204,
+      "tag": "0023_referral_applications",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791671400000,
+      "tag": "0024_partner_agreement",
+      "breakpoints": true
     }
   ]
 }

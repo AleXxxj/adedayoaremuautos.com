@@ -306,6 +306,17 @@ export const rentalBookings = pgTable(
      */
     paymentHoldUntil: timestamp("payment_hold_until", { withTimezone: true }),
 
+    /**
+     * The partner who sent this customer, if any.
+     *
+     * Commission was only ever recorded against a sale, so a partner whose
+     * customer hired a car earned nothing the system could see. Rentals are
+     * where the programme starts: a finder's fee on a US vehicle sale is
+     * restricted in several states and needs legal advice first, while hire
+     * carries no such problem.
+     */
+    referralPartnerId: uuid("referral_partner_id"),
+
     agreementSignedAt: timestamp("agreement_signed_at", { withTimezone: true }),
 
     /* ── Terms that vary per agreement ──────────────────────────────────
@@ -1074,9 +1085,24 @@ export const campaignRecipients = pgTable(
   ],
 );
 
+/**
+ * Where a partner is in the process.
+ *
+ * pending   — applied, nobody has looked yet
+ * approved  — accepted, but the agreement is not signed and the code is dead
+ * active    — agreement signed; the code attributes and commission accrues
+ * declined  — not accepted, with a reason they were told
+ * suspended — was active, stopped by the business
+ *
+ * Only `active` attributes anything. An approved partner whose agreement is
+ * unsigned must not be able to earn, or the agreement would be decorative.
+ */
 export const referralPartnerStatus = pgEnum("referral_partner_status", [
   "active",
   "suspended",
+  "pending",
+  "approved",
+  "declined",
 ]);
 
 /**
@@ -1114,12 +1140,46 @@ export const referralPartners = pgTable(
      *  volume earns a better rate and changing it must not rewrite history. */
     commissionBps: integer("commission_bps").notNull().default(150),
 
+    /* ── The application ──────────────────────────────────────────────
+       None of this is a government identifier. The rule that keeps SSN and
+       BVN off this site applies here too: a dealership does not need
+       somebody's ID number in order to pay them a finder's fee. */
+    businessName: text("business_name"),
+    city: text("city"),
+    /** Their case for the partnership. The part a human actually reads. */
+    proposal: text("proposal"),
+    website: text("website"),
+
+    appliedAt: timestamp("applied_at", { withTimezone: true }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedByEmail: text("reviewed_by_email"),
+    /** Told to the applicant, so a decline is a reason rather than silence. */
+    declineReason: text("decline_reason"),
+
+    /* ── The agreement ────────────────────────────────────────────────
+       The step between approved and active. Recorded rather than assumed:
+       if a commission is ever disputed, the question is which wording the
+       partner agreed to and when. */
+    agreementToken: text("agreement_token"),
+    agreementSentAt: timestamp("agreement_sent_at", { withTimezone: true }),
+    /** Terms change; what they accepted does not. */
+    agreementVersion: text("agreement_version"),
+    agreedAt: timestamp("agreed_at", { withTimezone: true }),
+    agreementIp: text("agreement_ip"),
+    agreementDeclinedAt: timestamp("agreement_declined_at", {
+      withTimezone: true,
+    }),
+
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (t) => [uniqueIndex("referral_partners_code_unique").on(t.code)],
+  (t) => [
+    uniqueIndex("referral_partners_code_unique").on(t.code),
+    index("referral_partners_status_idx").on(t.status, t.appliedAt),
+    uniqueIndex("referral_partners_agreement_token_idx").on(t.agreementToken),
+  ],
 );
 
 export type ReferralPartner = typeof referralPartners.$inferSelect;

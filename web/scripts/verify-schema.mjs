@@ -604,6 +604,53 @@ await rejects(
   "agreements_settled_has_date",
 );
 
+/* ── Referral partners ──────────────────────────────────────────────────
+   The agreement token is a bearer credential: whoever holds it can accept a
+   contract in the partner's name. Two rows sharing one is therefore not a
+   tidiness problem, it is one person signing for another, and the uniqueness
+   has to come from the database rather than from the code that generates it.
+   The partial index is what makes that compatible with the ordinary case of
+   many partners having no token at all. */
+
+await allows(
+  db,
+  "registers two referral partners",
+  `INSERT INTO referral_partners (market_code, code, full_name, phone, status, agreement_token)
+   VALUES ('us', 'TESTONE-AAAA', 'Test One', '+13365550100', 'approved', 'tok-one'),
+          ('us', 'TESTTWO-BBBB', 'Test Two', '+13365550101', 'approved', 'tok-two')`,
+);
+
+await rejects(
+  db,
+  "REJECTS two partners sharing one agreement token",
+  `UPDATE referral_partners SET agreement_token = 'tok-one' WHERE code = 'TESTTWO-BBBB'`,
+  "referral_partners_agreement_token_idx",
+);
+
+await allows(
+  db,
+  "allows any number of partners with no token",
+  `UPDATE referral_partners SET agreement_token = NULL
+   WHERE code IN ('TESTONE-AAAA', 'TESTTWO-BBBB')`,
+);
+
+await allows(
+  db,
+  "a partner moves pending -> approved -> active",
+  `UPDATE referral_partners SET status = 'pending' WHERE code = 'TESTONE-AAAA';
+   UPDATE referral_partners SET status = 'approved' WHERE code = 'TESTONE-AAAA';
+   UPDATE referral_partners SET status = 'active', agreed_at = now() WHERE code = 'TESTONE-AAAA'`,
+);
+
+await rejects(
+  db,
+  "rejects a rental credited to a partner who does not exist",
+  `UPDATE rental_bookings
+   SET referral_partner_id = '00000000-0000-0000-0000-000000000000'
+   WHERE id IS NOT NULL`,
+  "referral_partner",
+);
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mSCHEMA NOT VERIFIED\x1b[0m\n" : "  \x1b[32mSchema verified.\x1b[0m\n"),
