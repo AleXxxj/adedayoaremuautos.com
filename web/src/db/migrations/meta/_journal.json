@@ -176,6 +176,13 @@
       "when": 1791671400000,
       "tag": "0024_partner_agreement",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791673800000,
+      "tag": "0025_partner_earnings",
+      "breakpoints": true
     }
   ]
 }

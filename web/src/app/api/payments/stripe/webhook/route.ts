@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { rentalBookings, rentalPayments } from "@/db/schema";
 import { verifyStripeWebhook } from "@/lib/payments/stripe";
 import { sendBookingReceipt } from "@/lib/payments/receipt";
+import { recordRentalEarning } from "@/lib/partnerEarnings";
 
 export const dynamic = "force-dynamic";
 
@@ -141,6 +142,18 @@ async function markPaid(sessionId: string, bookingId: string | null) {
    * momentary mail outage.
    */
   await sendBookingReceipt(target);
+
+  /*
+   * And the partner's commission, if this customer came through a referral
+   * link. In the same branch as the receipt and for the same reason: this is
+   * the one delivery of this event that made the transition, so the commission
+   * is written exactly once without needing a flag to remember.
+   *
+   * It swallows its own failures too. A commission the owner has to work out
+   * by hand is recoverable; throwing here would have Stripe retry a payment
+   * that was already recorded and confirmed.
+   */
+  await recordRentalEarning(target);
 }
 
 /** A checkout that expired or failed. The dates go back on the market. */

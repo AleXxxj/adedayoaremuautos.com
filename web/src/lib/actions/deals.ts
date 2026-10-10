@@ -10,6 +10,7 @@ import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
 import { MARKETS, type MarketCode } from "@/lib/market";
 import { fromMajor } from "@/lib/money";
 import { computeDeal, defaultFees, formatDealNumber, type Fee } from "@/lib/deal";
+import { recordSaleEarning, cancelEarningFor } from "@/lib/partnerEarnings";
 
 export interface DealResult {
   ok: boolean;
@@ -369,6 +370,22 @@ export async function transitionDeal(
         closedAt: to === "delivered" || to === "lost" ? now : null,
       })
       .where(eq(leads.id, deal.leadId));
+  }
+
+  /*
+   * The referring partner's commission.
+   *
+   * Confirmed straight away where a hire's is not: `delivered` means the keys
+   * are handed over, and unlike a hire there is no later moment at which the
+   * thing completes. Lost puts the car back on the market and writes off the
+   * commission with it.
+   */
+  if (to === "delivered") {
+    await recordSaleEarning(id);
+    revalidatePath("/partner");
+  } else if (to === "lost") {
+    await cancelEarningFor({ dealId: id }, "The sale did not complete.");
+    revalidatePath("/partner");
   }
 
   revalidatePath("/admin/deals");

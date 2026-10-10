@@ -23,6 +23,9 @@ const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
   { href: "/admin/finance", label: "Finance", icon: "fas fa-file-invoice-dollar", roles: ["owner", "manager"] },
   { href: "/admin/tiers", label: "Rent to Own", icon: "fas fa-key", roles: ["owner", "manager"] },
   { href: "/admin/referrals", label: "Referrals", icon: "fas fa-hand-holding-usd", roles: ["owner", "manager"] },
+  // Owner only. Paying money out is not a decision a manager should be able
+  // to take alone, and the queue is short enough not to need delegating.
+  { href: "/admin/payouts", label: "Payouts", icon: "fas fa-money-bill-transfer", roles: ["owner"] },
   { href: "/admin/subscribers", label: "Mailing list", icon: "fas fa-envelope-open-text", roles: ["owner", "manager"] },
   { href: "/admin/campaigns", label: "Broadcasts", icon: "fas fa-bullhorn", roles: ["owner", "manager"] },
   { href: "/admin/comments", label: "Comments", icon: "fas fa-comments", roles: ["owner", "manager"] },

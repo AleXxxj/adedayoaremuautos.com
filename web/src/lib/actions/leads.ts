@@ -1,14 +1,14 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { leads, vehicles, rentalTiers, referralPartners } from "@/db/schema";
+import { leads, vehicles, rentalTiers } from "@/db/schema";
 import { isMarketCode } from "@/lib/market";
 import { notifyStaffOfLead } from "@/lib/notify";
-import { REF_COOKIE, normaliseCode } from "@/lib/referral";
+import { resolveReferralPartner } from "@/lib/partner";
 
 export interface LeadResult {
   ok: boolean;
@@ -55,36 +55,6 @@ const MIN_FILL_MS = 1500;
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 
-
-/**
- * The partner whose link brought this visitor, if any.
- *
- * The cookie carries a code, not an id, and the code is looked up rather than
- * trusted: only an active partner in the right market earns the attribution.
- * An unknown, suspended or cross-market code attributes to nobody rather than
- * failing the submission — a broken referral link must never cost the
- * dealership the enquiry.
- */
-async function resolveReferralPartner(
-  market: "us" | "ng",
-): Promise<string | null> {
-  const raw = (await cookies()).get(REF_COOKIE)?.value;
-  if (!raw) return null;
-
-  const [partner] = await db
-    .select({ id: referralPartners.id })
-    .from(referralPartners)
-    .where(
-      and(
-        eq(referralPartners.code, normaliseCode(raw)),
-        eq(referralPartners.marketCode, market),
-        eq(referralPartners.status, "active"),
-      ),
-    )
-    .limit(1);
-
-  return partner?.id ?? null;
-}
 
 export async function submitLead(
   _prev: LeadResult | null,

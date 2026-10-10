@@ -1170,6 +1170,17 @@ export const referralPartners = pgTable(
       withTimezone: true,
     }),
 
+    /**
+     * The partner's own login — a Supabase auth user.
+     *
+     * Staff membership is a row in `staff` and partnership is this column, so
+     * being one has never implied being the other. A partner who finds
+     * /admin is not staff and gets nowhere.
+     */
+    userId: uuid("user_id"),
+    accountCreatedAt: timestamp("account_created_at", { withTimezone: true }),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -1179,10 +1190,149 @@ export const referralPartners = pgTable(
     uniqueIndex("referral_partners_code_unique").on(t.code),
     index("referral_partners_status_idx").on(t.status, t.appliedAt),
     uniqueIndex("referral_partners_agreement_token_idx").on(t.agreementToken),
+    uniqueIndex("referral_partners_user_idx").on(t.userId),
   ],
 );
 
 export type ReferralPartner = typeof referralPartners.$inferSelect;
+
+export const partnerPayoutState = pgEnum("partner_payout_state", [
+  "requested",
+  "approved",
+  "paid",
+  "rejected",
+]);
+
+/**
+ * A partner asking for what they are owed.
+ *
+ * Deliberately a request, not a withdrawal. Holding money on somebody's
+ * behalf so they can take it out is money transmission, and in the United
+ * States that is a licensing question nobody wants answered for them. What
+ * this records is a debt the business owes and has agreed to settle — an
+ * ordinary trade payable.
+ *
+ * No bank details, here or anywhere. How a payout is actually paid is
+ * arranged with the partner directly.
+ */
+export const partnerPayouts = pgTable(
+  "partner_payouts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id")
+      .notNull()
+      .references(() => referralPartners.id, { onDelete: "cascade" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+    state: partnerPayoutState("state").notNull().default("requested"),
+
+    /** The partner's own words. Explicitly not a field for account details. */
+    note: text("note"),
+
+    requestedAt: timestamp("requested_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedByEmail: text("decided_by_email"),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    /** The business's own transfer reference — what makes "we paid you" checkable. */
+    reference: text("reference"),
+    rejectReason: text("reject_reason"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("partner_payouts_partner_idx").on(t.partnerId, t.requestedAt)],
+);
+
+export type PartnerPayout = typeof partnerPayouts.$inferSelect;
+
+export const partnerEarningSource = pgEnum("partner_earning_source", [
+  "rental",
+  "sale",
+]);
+
+export const partnerEarningState = pgEnum("partner_earning_state", [
+  "pending",
+  "confirmed",
+  "cancelled",
+  "paid",
+]);
+
+/**
+ * One commission, against one booking or one sale.
+ *
+ * Commission used to be computed on the fly — delivered deal values times the
+ * partner's current rate. Fine for a figure on a screen and useless as a
+ * record: it rewrites history whenever a rate changes, it cannot express a
+ * commission that was paid and then charged back, and it cannot say what has
+ * actually been handed over.
+ *
+ * The rate is stored on the row for that reason. Raising a partner's rate must
+ * not retrospectively increase what they were owed last month.
+ *
+ * The uniqueness of `rental_booking_id` and `deal_id` is the constraint that
+ * matters most: the payment webhook is delivered more than once by design, and
+ * a deal can be marked delivered, undone and marked again. Without it, each of
+ * those pays the partner twice.
+ */
+export const partnerEarnings = pgTable(
+  "partner_earnings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    partnerId: uuid("partner_id")
+      .notNull()
+      .references(() => referralPartners.id, { onDelete: "cascade" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+
+    source: partnerEarningSource("source").notNull(),
+    rentalBookingId: uuid("rental_booking_id").references(
+      () => rentalBookings.id,
+      { onDelete: "set null" },
+    ),
+    dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
+
+    /** What the customer paid — the figure the commission was taken from. */
+    basisMinor: bigint("basis_minor", { mode: "number" }).notNull(),
+    commissionBps: integer("commission_bps").notNull(),
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+
+    state: partnerEarningState("state").notNull().default("pending"),
+    payoutId: uuid("payout_id").references(() => partnerPayouts.id, {
+      onDelete: "set null",
+    }),
+
+    /** Shown to the partner, so a cancelled commission has a reason. */
+    note: text("note"),
+
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("partner_earnings_booking_unique").on(t.rentalBookingId),
+    uniqueIndex("partner_earnings_deal_unique").on(t.dealId),
+    index("partner_earnings_partner_idx").on(t.partnerId, t.state, t.createdAt),
+  ],
+);
+
+export type PartnerEarning = typeof partnerEarnings.$inferSelect;
 
 export const rentalTiers = pgTable(
   "rental_tiers",

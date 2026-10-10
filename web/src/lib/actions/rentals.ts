@@ -13,6 +13,8 @@ import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 import { storeLicence } from "@/lib/licence";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
+import { resolveReferralPartner } from "@/lib/partner";
+import { confirmRentalEarning, cancelEarningFor } from "@/lib/partnerEarnings";
 
 export interface RentalResult {
   ok: boolean;
@@ -156,6 +158,17 @@ export async function requestRental(
     licenceKey = stored.key ?? null;
   }
 
+  /*
+   * Who sent them, if anybody.
+   *
+   * Looked up before the insert and never allowed to fail it: an unknown,
+   * suspended or cross-market code credits nobody rather than costing the
+   * dealership the booking. Until now this happened for enquiries only, so a
+   * partner whose customer hired a car for a week earned nothing the system
+   * could see — on the one path that actually takes money.
+   */
+  const referralPartnerId = await resolveReferralPartner(f.marketCode);
+
   let bookingId = "";
   try {
     const [booking] = await db
@@ -163,6 +176,7 @@ export async function requestRental(
       .values({
         vehicleId: row.v.id,
         marketCode: f.marketCode,
+        referralPartnerId,
         period,
         customerName: f.name,
         customerEmail: f.email || null,
@@ -298,6 +312,27 @@ export async function updateBookingStatus(
     return { ok: false, error: `Could not update: ${msg}` };
   }
 
+  /*
+   * A referred booking's commission follows its status.
+   *
+   * The agreement says a commission is earned when the money has cleared and
+   * the hire has completed, so "returned" is the moment it becomes genuinely
+   * owed — not the moment the card cleared, because a customer who pays on
+   * Monday and cancels on Tuesday is a refund rather than a payout.
+   *
+   * Cancelling writes it off with a reason the partner reads on their own
+   * dashboard. A commission that silently disappears from somebody's earnings
+   * is how a partner concludes they are being short-changed.
+   */
+  if (booking.referralPartnerId) {
+    if (status === "returned") {
+      await confirmRentalEarning(id);
+    } else if (status === "cancelled") {
+      await cancelEarningFor({ bookingId: id }, "The hire was cancelled.");
+    }
+  }
+
   revalidatePath("/admin/rentals");
+  revalidatePath("/partner");
   return { ok: true };
 }

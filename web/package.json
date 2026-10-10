@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run tokens && npm run check:contrast && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && next build",
+    "build": "npm run tokens && npm run check:contrast && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && next build",
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
@@ -20,7 +20,8 @@
     "test:amort": "tsx scripts/verify-amortization.ts",
     "test:ledger": "tsx scripts/verify-ledger.ts",
     "test:rental": "tsx scripts/verify-rental.ts",
-    "verify:rto": "tsx scripts/verify-rent-to-own.ts"
+    "verify:rto": "tsx scripts/verify-rent-to-own.ts",
+    "test:payout": "tsx scripts/verify-payout-allocation.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

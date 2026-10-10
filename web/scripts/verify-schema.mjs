@@ -651,6 +651,145 @@ await rejects(
   "referral_partner",
 );
 
+/* ── Partner earnings ───────────────────────────────────────────────────
+   The double-payment assertions are the point of this section. The rental
+   payment webhook is delivered more than once by design, and a deal can be
+   marked delivered, undone and marked again — so "write the commission when
+   the money clears" pays the partner twice unless the database refuses the
+   second row. */
+
+const PARTNER = `(SELECT id FROM referral_partners WHERE code = 'TESTONE-AAAA')`;
+const BOOKING = "'aaaaaaaa-0000-0000-0000-000000000001'";
+const DEAL = "'cccccccc-0000-0000-0000-000000000001'";
+
+await allows(
+  db,
+  "records a rental commission",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, rental_booking_id, basis_minor,
+      commission_bps, amount_minor, currency, state, confirmed_at)
+   VALUES (${PARTNER},'us','rental',${BOOKING},50000,200,1000,'USD','confirmed',now())`,
+);
+
+await rejects(
+  db,
+  "REJECTS a second commission on the same booking",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, rental_booking_id, basis_minor,
+      commission_bps, amount_minor, currency, state, confirmed_at)
+   VALUES (${PARTNER},'us','rental',${BOOKING},50000,200,1000,'USD','confirmed',now())`,
+  "partner_earnings_booking_unique",
+);
+
+await allows(
+  db,
+  "records a sale commission",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, deal_id, basis_minor,
+      commission_bps, amount_minor, currency, state, confirmed_at)
+   VALUES (${PARTNER},'us','sale',${DEAL},2850000,150,42750,'USD','confirmed',now())`,
+);
+
+await rejects(
+  db,
+  "REJECTS a second commission on the same deal",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, deal_id, basis_minor,
+      commission_bps, amount_minor, currency, state, confirmed_at)
+   VALUES (${PARTNER},'us','sale',${DEAL},2850000,150,42750,'USD','confirmed',now())`,
+  "partner_earnings_deal_unique",
+);
+
+await rejects(
+  db,
+  "rejects a commission pointing at both a booking and a deal",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, rental_booking_id, deal_id, basis_minor,
+      commission_bps, amount_minor, currency)
+   VALUES (${PARTNER},'us','rental','aaaaaaaa-0000-0000-0000-000000000002',
+           'cccccccc-0000-0000-0000-000000000002',50000,200,1000,'USD')`,
+  "partner_earnings_one_source",
+);
+
+await rejects(
+  db,
+  "rejects a commission pointing at nothing",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, basis_minor, commission_bps,
+      amount_minor, currency)
+   VALUES (${PARTNER},'us','rental',50000,200,1000,'USD')`,
+  "partner_earnings_one_source",
+);
+
+await rejects(
+  db,
+  "rejects a rental commission filed as a sale",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, rental_booking_id, basis_minor,
+      commission_bps, amount_minor, currency)
+   VALUES (${PARTNER},'us','sale','aaaaaaaa-0000-0000-0000-000000000002',
+           50000,200,1000,'USD')`,
+  "partner_earnings_source_matches",
+);
+
+await rejects(
+  db,
+  "REJECTS 'confirmed' with no confirmation date",
+  `INSERT INTO partner_earnings
+     (partner_id, market_code, source, rental_booking_id, basis_minor,
+      commission_bps, amount_minor, currency, state)
+   VALUES (${PARTNER},'us','rental','aaaaaaaa-0000-0000-0000-000000000002',
+           50000,200,1000,'USD','confirmed')`,
+  "partner_earnings_confirmed_has_date",
+);
+
+await allows(
+  db,
+  "a partner requests a payout",
+  `INSERT INTO partner_payouts (id, partner_id, market_code, amount_minor, currency)
+   VALUES ('dddddddd-0000-0000-0000-00000000000a',${PARTNER},'us',43750,'USD')`,
+);
+
+await rejects(
+  db,
+  "REJECTS attaching a pending commission to a payout",
+  `UPDATE partner_earnings
+   SET payout_id = 'dddddddd-0000-0000-0000-00000000000a'
+   WHERE rental_booking_id = ${BOOKING}`,
+  "partner_earnings_payout_only_when_paid",
+);
+
+await allows(
+  db,
+  "attaches a settled commission to a payout",
+  `UPDATE partner_earnings
+   SET state = 'paid', payout_id = 'dddddddd-0000-0000-0000-00000000000a'
+   WHERE rental_booking_id = ${BOOKING}`,
+);
+
+await rejects(
+  db,
+  "REJECTS a payout marked paid with no payment date",
+  `UPDATE partner_payouts SET state = 'paid'
+   WHERE id = 'dddddddd-0000-0000-0000-00000000000a'`,
+  "partner_payouts_paid_has_date",
+);
+
+await rejects(
+  db,
+  "rejects rejecting a payout with no reason",
+  `UPDATE partner_payouts SET state = 'rejected'
+   WHERE id = 'dddddddd-0000-0000-0000-00000000000a'`,
+  "partner_payouts_rejected_has_reason",
+);
+
+await allows(
+  db,
+  "pays a payout out",
+  `UPDATE partner_payouts SET state = 'paid', paid_at = now(), reference = 'FT26101000991'
+   WHERE id = 'dddddddd-0000-0000-0000-00000000000a'`,
+);
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mSCHEMA NOT VERIFIED\x1b[0m\n" : "  \x1b[32mSchema verified.\x1b[0m\n"),

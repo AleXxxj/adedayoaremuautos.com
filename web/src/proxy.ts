@@ -61,10 +61,18 @@ export async function proxy(request: NextRequest) {
   const redirected = canonicalRedirect(request);
   if (redirected) return redirected;
 
-  // The matcher now covers the whole site so the host check can run on every
-  // request, but the session lookup is a round trip to Supabase and has no
-  // business happening on a public page.
-  if (!pathname.startsWith("/admin")) return NextResponse.next({ request });
+  /*
+   * The matcher covers the whole site so the host check can run on every
+   * request, but the session lookup is a round trip to Supabase and has no
+   * business happening on a public page.
+   *
+   * /partner is the dashboard and needs a session. Everything below it does
+   * not: the agreement and the account-setup pages are reached by a token,
+   * precisely because the partner has no account yet, and the login page
+   * obviously cannot require one.
+   */
+  const guarded = pathname === "/partner" || pathname.startsWith("/admin");
+  if (!guarded) return NextResponse.next({ request });
 
   let response = NextResponse.next({ request });
 
@@ -100,6 +108,16 @@ export async function proxy(request: NextRequest) {
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
+  }
+
+  // Whether that session actually belongs to an active partner is decided by
+  // requirePartner() on the page itself. This only spares an unauthenticated
+  // visitor a render they cannot see.
+  if (pathname === "/partner" && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/partner/login";
+    url.search = "";
+    return NextResponse.redirect(url);
   }
 
   if (pathname === "/admin/login" && user) {
