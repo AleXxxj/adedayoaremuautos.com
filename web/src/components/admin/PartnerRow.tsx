@@ -16,6 +16,7 @@ interface Partner {
   whatsapp: string | null;
   status: string;
   commissionBps: number;
+  rentalCommissionBps: number;
   createdAt: string;
   link: string;
   enquiries: number;
@@ -89,7 +90,7 @@ export function PartnerRow({ partner }: { partner: Partner }) {
         <div className="text-right text-sm">
           <div className="font-bold tabular-nums">{partner.owed}</div>
           <div className="text-xs text-[var(--text-muted)]">
-            owed at {formatBps(partner.commissionBps)}
+            owed at {formatBps(partner.commissionBps)} on sales
           </div>
           <div className="mt-2 text-xs text-[var(--text-muted)]">
             {partner.enquiries} enquir{partner.enquiries === 1 ? "y" : "ies"} ·{" "}
@@ -155,7 +156,21 @@ export function PartnerRow({ partner }: { partner: Partner }) {
 
           <label className="text-xs">
             <span className="mb-1 block text-[var(--text-muted)]">
-              Commission (basis points — 500 = 5%)
+              Hire commission (bps — 500 = 5%)
+            </span>
+            <input
+              name="rentalCommissionBps"
+              type="number"
+              min={0}
+              max={2000}
+              defaultValue={partner.rentalCommissionBps}
+              className="w-36 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
+            />
+          </label>
+
+          <label className="text-xs">
+            <span className="mb-1 block text-[var(--text-muted)]">
+              Sale commission (bps — 150 = 1.5%)
             </span>
             <input
               name="commissionBps"
@@ -163,7 +178,7 @@ export function PartnerRow({ partner }: { partner: Partner }) {
               min={0}
               max={2000}
               defaultValue={partner.commissionBps}
-              className="w-40 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
+              className="w-36 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
             />
           </label>
 

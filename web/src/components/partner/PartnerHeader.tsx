@@ -3,12 +3,14 @@ import { partnerSignOut } from "@/lib/actions/partnerAuth";
 export function PartnerHeader({
   name,
   code,
-  commission,
+  hireRate,
+  saleRate,
   market,
 }: {
   name: string;
   code: string;
-  commission: string;
+  hireRate: string;
+  saleRate: string;
   market: string;
 }) {
   return (
@@ -24,7 +26,15 @@ export function PartnerHeader({
           <code className="rounded bg-[#1a1a1a] px-1.5 py-0.5 text-[#d4d4d4]">
             {code}
           </code>{" "}
-          · {commission} commission · {market}
+          · {market}
+        </p>
+        {/* Both rates, spelled out. One figure labelled "commission" is how a
+            partner works out their earnings on the wrong one and then asks why
+            the number on the screen disagrees with theirs. */}
+        <p className="mt-1 text-sm text-[#9b9b9b]">
+          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car hire ·{" "}
+          <strong className="text-[#d4d4d4]">{saleRate}</strong> on vehicle
+          sales
         </p>
       </div>
 

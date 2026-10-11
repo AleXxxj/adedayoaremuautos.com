@@ -122,7 +122,12 @@ export default async function PartnerAgreementPage({
           {partner.fullName}
           {partner.businessName ? ` (${partner.businessName})` : ""}
         </Field>
-        <Field label="Your commission">{formatBps(partner.commissionBps)}</Field>
+        <Field label="Commission on hire">
+          {formatBps(partner.rentalCommissionBps)}
+        </Field>
+        <Field label="Commission on a sale">
+          {formatBps(partner.commissionBps)}
+        </Field>
         <Field label="Your referral code">
           <code className="text-[#e8e8e8]">{partner.code}</code>
         </Field>

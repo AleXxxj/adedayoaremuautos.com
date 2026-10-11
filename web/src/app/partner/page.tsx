@@ -146,7 +146,8 @@ export default async function PartnerDashboard() {
       <PartnerHeader
         name={partner.fullName}
         code={partner.code}
-        commission={formatBps(partner.commissionBps)}
+        hireRate={formatBps(partner.rentalCommissionBps)}
+        saleRate={formatBps(partner.commissionBps)}
         market={market.name}
       />
 

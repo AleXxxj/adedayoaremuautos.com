@@ -76,7 +76,10 @@ export interface PartnerSession {
   fullName: string;
   email: string | null;
   marketCode: MarketCode;
+  /** The sale rate. */
   commissionBps: number;
+  /** The hire rate, which is the higher of the two. */
+  rentalCommissionBps: number;
 }
 
 /**
@@ -128,6 +131,7 @@ export async function requirePartner(): Promise<PartnerSession> {
     email: record.email,
     marketCode: record.marketCode,
     commissionBps: record.commissionBps,
+    rentalCommissionBps: record.rentalCommissionBps,
   };
 }
 

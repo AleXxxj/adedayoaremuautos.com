@@ -35,7 +35,7 @@ export const PARTNER_CLAUSES: PartnerClause[] = [
   },
   {
     heading: "What you are paid",
-    body: "Commission is the percentage shown on your partner account, calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the hire or sale has completed.",
+    body: "There are two rates and both are shown on your partner account: one for vehicle hire and a lower one for vehicle sales. Commission is calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the hire or sale has completed.",
   },
   {
     heading: "When you are paid",

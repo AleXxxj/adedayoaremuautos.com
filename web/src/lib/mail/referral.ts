@@ -112,7 +112,8 @@ export async function sendAgreementToSign(o: {
   to: string;
   name: string;
   link: string;
-  commission: string;
+  hireRate: string;
+  saleRate: string;
 }): Promise<void> {
   const first = o.name.trim().split(/\s+/)[0] || "there";
   const html = shell(
@@ -124,8 +125,10 @@ export async function sendAgreementToSign(o: {
        you should read it before you accept it.
      </p>
      <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#333">
-       Your commission rate is <strong>${escapeHtml(o.commission)}</strong> of
-       what the customer pays us, on completed hires and sales you introduce.
+       Your commission is <strong>${escapeHtml(o.hireRate)}</strong> on car
+       hire and <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale,
+       calculated on what the customer actually pays us, on completed deals you
+       introduce.
      </p>
      <p style="margin:0 0 18px">
        <a href="${escapeHtml(o.link)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:8px">Read and accept the agreement</a>
@@ -144,7 +147,7 @@ export async function sendAgreementToSign(o: {
     "",
     "Good news — we would like to take your application forward. The last step is the partner agreement. It is short, it is in plain English, and you should read it before you accept it.",
     "",
-    `Your commission rate is ${o.commission} of what the customer pays us, on completed hires and sales you introduce.`,
+    `Your commission is ${o.hireRate} on car hire and ${o.saleRate} on a vehicle sale, calculated on what the customer actually pays us, on completed deals you introduce.`,
     "",
     "Read and accept the agreement:",
     o.link,
@@ -217,7 +220,8 @@ export async function sendPartnerWelcome(o: {
   code: string;
   link: string;
   accountLink: string;
-  commission: string;
+  hireRate: string;
+  saleRate: string;
 }): Promise<void> {
   const first = o.name.trim().split(/\s+/)[0] || "there";
   const html = shell(
@@ -226,7 +230,8 @@ export async function sendPartnerWelcome(o: {
      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#333">
        Your agreement is accepted and your referral code is live from now.
        Anyone who books or buys through your link is recorded against your
-       name, and you earn ${escapeHtml(o.commission)} of what they pay.
+       name, and you earn <strong>${escapeHtml(o.hireRate)}</strong> on car
+       hire or <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale.
      </p>
 
      <div style="margin:0 0 20px;border:1px solid ${RULE};border-radius:10px;padding:18px;text-align:center">
@@ -251,7 +256,7 @@ export async function sendPartnerWelcome(o: {
   const text = [
     `Congratulations ${first},`,
     "",
-    `Your agreement is accepted and your referral code is live from now. Anyone who books or buys through your link is recorded against your name, and you earn ${o.commission} of what they pay.`,
+    `Your agreement is accepted and your referral code is live from now. Anyone who books or buys through your link is recorded against your name, and you earn ${o.hireRate} on car hire or ${o.saleRate} on a vehicle sale.`,
     "",
     `Your code: ${o.code}`,
     `Your link: ${o.link}`,

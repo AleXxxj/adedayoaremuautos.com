@@ -19,6 +19,7 @@ export interface Application {
   proposal: string | null;
   status: string;
   commissionBps: number;
+  rentalCommissionBps: number;
   appliedAt: string | null;
   reviewedAt: string | null;
   reviewedByEmail: string | null;
@@ -190,9 +191,26 @@ export function PartnerApplication({ app }: { app: Application }) {
           <form action={approveAction} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="id" value={app.id} />
 
+            {/* Both rates, here, because the figures are quoted in the
+                agreement email this button sends — changing one afterwards
+                means a second email correcting the first. */}
             <label className="text-xs">
               <span className="mb-1 block text-[var(--text-muted)]">
-                Commission — basis points ({formatBps(app.commissionBps)})
+                Hire — bps ({formatBps(app.rentalCommissionBps)})
+              </span>
+              <input
+                name="rentalCommissionBps"
+                type="number"
+                min={0}
+                max={2000}
+                defaultValue={app.rentalCommissionBps}
+                className="w-24 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
+              />
+            </label>
+
+            <label className="text-xs">
+              <span className="mb-1 block text-[var(--text-muted)]">
+                Sales — bps ({formatBps(app.commissionBps)})
               </span>
               <input
                 name="commissionBps"
@@ -200,7 +218,7 @@ export function PartnerApplication({ app }: { app: Application }) {
                 min={0}
                 max={2000}
                 defaultValue={app.commissionBps}
-                className="w-28 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
+                className="w-24 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-2 py-1.5 text-sm"
               />
             </label>
 

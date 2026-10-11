@@ -612,18 +612,30 @@ await rejects(
    The partial index is what makes that compatible with the ordinary case of
    many partners having no token at all. */
 
-// The advertised rate is 5%, and a new partner must start on it without
-// anybody remembering to type it. A default left at the old 1.5% is the kind
-// of mistake nobody notices until a partner asks why their figure is wrong.
+// Two rates, and a new partner must start on both without anybody
+// remembering to type them. A hire silently priced at the sale rate underpays
+// a partner by more than three to one, with nothing on screen to show it.
 await allows(
   db,
-  "a new partner starts on the advertised 5%",
+  "a new partner starts on 1.5% sales and 5% hire",
   `INSERT INTO referral_partners (market_code, code, full_name, phone)
    VALUES ('us','RATEDFLT-AAAA','Default Rate','+13365550199');
-   DO $$ BEGIN
-     IF (SELECT commission_bps FROM referral_partners WHERE code = 'RATEDFLT-AAAA') <> 500
-     THEN RAISE EXCEPTION 'default commission is not 500 bps'; END IF;
+   DO $$
+   DECLARE s int; h int;
+   BEGIN
+     SELECT commission_bps, rental_commission_bps INTO s, h
+       FROM referral_partners WHERE code = 'RATEDFLT-AAAA';
+     IF s <> 150 THEN RAISE EXCEPTION 'sale default is % bps, expected 150', s; END IF;
+     IF h <> 500 THEN RAISE EXCEPTION 'hire default is % bps, expected 500', h; END IF;
    END $$;`,
+);
+
+await rejects(
+  db,
+  "rejects a hire commission above 20%",
+  `UPDATE referral_partners SET rental_commission_bps = 5000
+   WHERE code = 'RATEDFLT-AAAA'`,
+  "referral_partners_rental_bps_sane",
 );
 
 await allows(

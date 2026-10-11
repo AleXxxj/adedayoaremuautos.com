@@ -80,12 +80,37 @@ export function governingLaw(market: "us" | "ng"): string {
     : "the Federal Republic of Nigeria";
 }
 
-/** 500 bps -> "5%" */
+/** 150 bps -> "1.5%", 500 -> "5%" */
 export function formatBps(bps: number): string {
   return `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`;
 }
 
-/** What a partner earns on a sale, in minor units, rounded to the currency. */
-export function commissionOn(saleMinor: number, bps: number): number {
-  return Math.round((saleMinor * bps) / 10000);
+/** A partner's two rates. Satisfied by a `referralPartners` row. */
+export interface PartnerRates {
+  /** The sale rate. The column has no prefix for historical reasons. */
+  commissionBps: number;
+  rentalCommissionBps: number;
+}
+
+/**
+ * Which of a partner's two rates applies.
+ *
+ * Exists so that every call site has to say what it is pricing. The sale rate
+ * lives in a column called `commission_bps` with no prefix, which makes it the
+ * obvious thing to reach for when writing a hire commission — and a hire
+ * quietly paid at the sale rate is a partner underpaid by more than three to
+ * one, with nothing on screen to show it happened.
+ */
+export function rateFor(p: PartnerRates, source: "sale" | "rental"): number {
+  return source === "rental" ? p.rentalCommissionBps : p.commissionBps;
+}
+
+/**
+ * What a partner earns, in minor units, rounded to the currency.
+ *
+ * Takes the rate rather than the partner, so the caller has already had to
+ * decide which one applies.
+ */
+export function commissionOn(basisMinor: number, bps: number): number {
+  return Math.round((basisMinor * bps) / 10000);
 }

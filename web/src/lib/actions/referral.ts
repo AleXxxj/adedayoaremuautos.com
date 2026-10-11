@@ -206,7 +206,10 @@ export async function joinReferralProgramme(
 
 const reviewSchema = z.object({
   id: z.string().uuid(),
+  /** The sale rate. */
   commissionBps: z.coerce.number().int().min(0).max(2000).optional(),
+  /** The hire rate, which is normally the higher of the two. */
+  rentalCommissionBps: z.coerce.number().int().min(0).max(2000).optional(),
 });
 
 /**
@@ -249,13 +252,16 @@ export async function approvePartner(
   }
 
   const token = randomBytes(24).toString("base64url");
-  const bps = parsed.data.commissionBps ?? partner.commissionBps;
+  const saleBps = parsed.data.commissionBps ?? partner.commissionBps;
+  const hireBps =
+    parsed.data.rentalCommissionBps ?? partner.rentalCommissionBps;
 
   await db
     .update(referralPartners)
     .set({
       status: "approved",
-      commissionBps: bps,
+      commissionBps: saleBps,
+      rentalCommissionBps: hireBps,
       reviewedAt: new Date(),
       reviewedByEmail: user.email,
       declineReason: null,
@@ -272,7 +278,8 @@ export async function approvePartner(
     to: partner.email,
     name: partner.fullName,
     link: agreementLink(siteUrl(), token),
-    commission: formatBps(bps),
+    hireRate: formatBps(hireBps),
+    saleRate: formatBps(saleBps),
   });
 
   revalidatePath("/admin/referrals");
@@ -406,7 +413,8 @@ export async function acceptAgreement(
       code: partner.code,
       link: referralLink(base, partner.code),
       accountLink,
-      commission: formatBps(partner.commissionBps),
+      hireRate: formatBps(partner.rentalCommissionBps),
+      saleRate: formatBps(partner.commissionBps),
     }).catch((e) => console.error("[referral] welcome email failed", e));
   }
 
@@ -466,6 +474,7 @@ const updateSchema = z.object({
   id: z.string().uuid(),
   status: z.enum(["active", "suspended"]).optional(),
   commissionBps: z.coerce.number().int().min(0).max(2000).optional(),
+  rentalCommissionBps: z.coerce.number().int().min(0).max(2000).optional(),
   code: z.string().trim().toUpperCase().optional(),
 });
 
@@ -500,6 +509,9 @@ export async function updatePartner(
       .set({
         ...(v.status ? { status: v.status } : {}),
         ...(v.commissionBps != null ? { commissionBps: v.commissionBps } : {}),
+        ...(v.rentalCommissionBps != null
+          ? { rentalCommissionBps: v.rentalCommissionBps }
+          : {}),
         ...(v.code ? { code: normaliseCode(v.code) } : {}),
       })
       .where(eq(referralPartners.id, v.id));

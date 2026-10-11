@@ -1136,10 +1136,27 @@ export const referralPartners = pgTable(
 
     status: referralPartnerStatus("status").notNull().default("active"),
 
-    /** Basis points; 500 = the 5% the site advertises. Per partner, because
-     *  volume earns a better rate and changing it must not rewrite history —
-     *  every earning stores the rate that applied when it was earned. */
-    commissionBps: integer("commission_bps").notNull().default(500),
+    /**
+     * The SALE rate, in basis points; 150 = the 1.5% the site advertises on
+     * vehicle purchases. Named without a prefix because the column has meant
+     * exactly this since it was created — the original copy read "1.5% of
+     * every sale you refer".
+     *
+     * Per partner, because volume earns a better rate and changing it must not
+     * rewrite history: every earning stores the rate that applied when it was
+     * earned. Read it through `rateFor()` rather than directly, so the call
+     * site says which of the two rates it means.
+     */
+    commissionBps: integer("commission_bps").notNull().default(150),
+
+    /**
+     * The HIRE rate; 500 = 5%. Higher than the sale rate on purpose — 5% of a
+     * week's hire is a sensible finder's fee, where 5% of a $30,000 car is a
+     * different kind of decision.
+     */
+    rentalCommissionBps: integer("rental_commission_bps")
+      .notNull()
+      .default(500),
 
     /* ── The application ──────────────────────────────────────────────
        None of this is a government identifier. The rule that keeps SSN and

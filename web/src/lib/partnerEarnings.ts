@@ -10,7 +10,7 @@ import {
   deals,
   leads,
 } from "@/db/schema";
-import { commissionOn } from "@/lib/referral";
+import { commissionOn, rateFor } from "@/lib/referral";
 import { chooseSettled } from "@/lib/payoutAllocation";
 
 /**
@@ -72,6 +72,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       id: referralPartners.id,
       status: referralPartners.status,
       commissionBps: referralPartners.commissionBps,
+      rentalCommissionBps: referralPartners.rentalCommissionBps,
     })
     .from(referralPartners)
     .where(eq(referralPartners.id, booking.partnerId))
@@ -97,7 +98,11 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
   const basisMinor = Number(paid?.total ?? 0);
   if (basisMinor <= 0) return;
 
-  const amountMinor = commissionOn(basisMinor, partner.commissionBps);
+  // The hire rate, not the sale rate. Through `rateFor` rather than reading
+  // the column, because `commissionBps` is the one with no prefix and is
+  // therefore the one a hire gets paid at by accident.
+  const bps = rateFor(partner, "rental");
+  const amountMinor = commissionOn(basisMinor, bps);
 
   try {
     await db.insert(partnerEarnings).values({
@@ -106,7 +111,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       source: "rental",
       rentalBookingId: bookingId,
       basisMinor,
-      commissionBps: partner.commissionBps,
+      commissionBps: bps,
       amountMinor,
       currency: booking.currency,
       state: "pending",
@@ -205,6 +210,7 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
       id: referralPartners.id,
       status: referralPartners.status,
       commissionBps: referralPartners.commissionBps,
+      rentalCommissionBps: referralPartners.rentalCommissionBps,
     })
     .from(referralPartners)
     .where(eq(referralPartners.id, partnerId))
@@ -215,6 +221,10 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
   const basisMinor = Number(deal.priceMinor ?? 0);
   if (basisMinor <= 0) return;
 
+  // Named through `rateFor` for the same reason the hire side is: so the row
+  // below cannot be read without knowing which of the two rates priced it.
+  const saleBps = rateFor(partner, "sale");
+
   try {
     await db.insert(partnerEarnings).values({
       partnerId: partner.id,
@@ -222,8 +232,8 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
       source: "sale",
       dealId,
       basisMinor,
-      commissionBps: partner.commissionBps,
-      amountMinor: commissionOn(basisMinor, partner.commissionBps),
+      commissionBps: saleBps,
+      amountMinor: commissionOn(basisMinor, saleBps),
       currency: deal.currency,
       state: "confirmed",
       confirmedAt: new Date(),

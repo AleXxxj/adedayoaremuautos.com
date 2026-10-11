@@ -517,7 +517,7 @@ export default async function MarketHome({
                 earn a commission on every completed purchase or hire.
               </p>
               <div className="highlight">
-                5% <small>commission</small>
+                5% <small>on car hire</small>
               </div>
               <ul className="referral-features">
                 {/* "Track your referrals easily" was on this list for years
@@ -525,7 +525,8 @@ export default async function MarketHome({
                     live stock, every referral and what is owed — so the claim
                     stays, and hire is added because a referred booking earns
                     the same way a referred sale does. */}
-                <li><i className="fas fa-check-circle" /> Earn on vehicle purchases and on car hire</li>
+                <li><i className="fas fa-check-circle" /> 5% on every completed car hire you refer</li>
+                <li><i className="fas fa-check-circle" /> 1.5% on every completed vehicle sale</li>
                 <li><i className="fas fa-check-circle" /> No limits - refer as many customers as you want</li>
                 <li><i className="fas fa-check-circle" /> Payout requested from your own dashboard</li>
                 <li><i className="fas fa-check-circle" /> Track your referrals easily</li>
@@ -538,13 +539,13 @@ export default async function MarketHome({
               <i className="fas fa-hand-holding-usd" />
               <h3>Refer &amp; Earn</h3>
               <div className="percent">
-                5% <small>per deal</small>
+                5% <small>on hire</small>
               </div>
-              <p>On every completed vehicle purchase or hire through your referral</p>
+              <p>Plus 1.5% on every completed vehicle sale through your referral</p>
               <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
                 {code === "us"
-                  ? "Example: Refer a $30,000 car = $1,500"
-                  : "Example: Refer a ₦10M car = ₦500,000"}
+                  ? "Example: a $900 week's hire = $45. A $30,000 car = $450."
+                  : "Example: a ₦300,000 week's hire = ₦15,000. A ₦10M car = ₦150,000."}
               </p>
               <Link href={`/${code}/referral`} className="btn btn-primary">
                 Start Referring
