@@ -12,7 +12,7 @@
  * did this customer agree to", and only a recorded version can answer it. Bump
  * it whenever a clause below changes in substance.
  */
-export const RENTAL_TERMS_VERSION = "2026-08-v1";
+export const RENTAL_TERMS_VERSION = "2026-10-v2";
 
 export interface RentalClause {
   heading: string;
@@ -39,7 +39,12 @@ export const RENTAL_CLAUSES: RentalClause[] = [
   {
     heading: "Insurance and Licensing",
     body:
-      "Renter represents that Renter has a valid driver’s license and legally required insurance for the vehicle and intended use. Renter understands that personal auto insurance may exclude delivery, rideshare, commercial, rental, or business use and must confirm coverage before operating the vehicle.",
+      "Renter must provide, before the vehicle is released, a valid driver’s license and proof of insurance that covers Renter to operate the vehicle for the intended use. Renter understands that personal auto insurance may exclude delivery, rideshare, commercial, rental, or business use and must confirm coverage before operating the vehicle. Owner will verify both documents and may refuse release if they are missing, expired, or do not match the person collecting the vehicle.",
+  },
+  {
+    heading: "Damage Waiver (Not Insurance)",
+    body:
+      "Where Renter has elected and paid for the damage waiver, Owner will not pursue Renter for damage to the vehicle beyond the deposit, except where this Agreement is breached — including prohibited use, operation by an unauthorized driver, driving under the influence, or any damage caused intentionally or concealed. THE DAMAGE WAIVER IS NOT INSURANCE. It is an agreement by Owner not to make a claim against Renter for damage to Owner’s own vehicle. It provides no cover whatsoever for injury to any person or damage to any other vehicle or property, and it does not relieve Renter of the obligation to hold their own insurance. The fee is charged per day of the rental period, is quoted before booking, and is not refundable once the rental has begun.",
   },
   {
     heading: "Vehicle Condition",

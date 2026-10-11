@@ -26,6 +26,8 @@ const schema = z.object({
   maxDays: z.coerce.number().int().min(1).max(365).optional(),
   withDriver: z.coerce.boolean().default(false),
   driverDaily: z.coerce.number().min(0).optional(),
+  /** Blank means the damage waiver is not offered on this vehicle. */
+  waiverDaily: z.coerce.number().min(0).optional(),
 });
 
 /**
@@ -84,6 +86,10 @@ export async function saveTariff(
           maxDays: f.maxDays ?? null,
           withDriverAvailable: f.withDriver,
           driverDailyMinor: f.withDriver ? m(f.driverDaily) : null,
+          // Zero is treated as "not offered" rather than stored, because a
+          // zero fee would offer the waiver and charge nothing for it — and
+          // the column's CHECK refuses zero for exactly that reason.
+          waiverDailyMinor: f.waiverDaily && f.waiverDaily > 0 ? m(f.waiverDaily) : null,
         };
         await tx
           .insert(rentalRates)

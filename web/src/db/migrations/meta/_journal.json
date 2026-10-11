@@ -197,6 +197,13 @@
       "when": 1791763800000,
       "tag": "0027_split_commission_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1791770000000,
+      "tag": "0028_rental_documents_and_waiver",
+      "breakpoints": true
     }
   ]
 }

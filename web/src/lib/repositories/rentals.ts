@@ -34,6 +34,7 @@ export function toTariff(r: typeof rentalRates.$inferSelect): RentalTariff {
     maxDays: r.maxDays,
     withDriverAvailable: r.withDriverAvailable,
     driverDailyMinor: r.driverDailyMinor,
+    waiverDailyMinor: r.waiverDailyMinor,
   };
 }
 

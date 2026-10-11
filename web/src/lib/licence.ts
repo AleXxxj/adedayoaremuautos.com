@@ -58,6 +58,17 @@ export interface LicenceUpload {
 }
 
 /**
+ * Which document this is.
+ *
+ * An insurance certificate gets exactly the same treatment as a licence — same
+ * private bucket, same signature sniffing, same short-lived signed links —
+ * because it is the same class of thing: a document with somebody's name on it
+ * that must never be reachable from the public web. The kind only separates
+ * the keys, so a bucket listing can be reasoned about.
+ */
+export type DocumentKind = "licence" | "insurance";
+
+/**
  * Stores a licence image in the private bucket.
  *
  * The filename the visitor supplied is discarded entirely. It is attacker-
@@ -65,7 +76,10 @@ export interface LicenceUpload {
  * carries the person's own name — which does not belong in a key that appears
  * in logs.
  */
-export async function storeLicence(file: File): Promise<LicenceUpload> {
+export async function storeLicence(
+  file: File,
+  kind: DocumentKind = "licence",
+): Promise<LicenceUpload> {
   if (file.size === 0) return { ok: false, error: "That file appears to be empty." };
   if (file.size > MAX_LICENCE_BYTES) {
     return { ok: false, error: "That file is too large — please keep it under 8MB." };
@@ -85,14 +99,14 @@ export async function storeLicence(file: File): Promise<LicenceUpload> {
   // Random, opaque, and dated only to the month — enough to find things when
   // deleting old files, not enough to enumerate a day's renters.
   const stamp = new Date().toISOString().slice(0, 7);
-  const key = `${stamp}/${randomBytes(16).toString("hex")}.${ext}`;
+  const key = `${kind}/${stamp}/${randomBytes(16).toString("hex")}.${ext}`;
 
   const { error } = await supabaseAdmin.storage
     .from(LICENCE_BUCKET)
     .upload(key, buffer, { contentType: actual, upsert: false });
 
   if (error) {
-    console.error("[licence] upload failed", error.message);
+    console.error(`[${kind}] upload failed`, error.message);
     return { ok: false, error: "We could not save that file. Please try again." };
   }
 

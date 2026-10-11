@@ -33,13 +33,47 @@ export interface RentalResult {
 const schema = z.object({
   marketCode: z.enum(["us", "ng"]),
   vehicleSlug: z.string().trim().min(1),
-  from: z.string().min(1, "Choose a pick-up date"),
-  to: z.string().min(1, "Choose a return date"),
+  from: z.string({ message: "Choose a pick-up date" }).min(1, "Choose a pick-up date"),
+  to: z.string({ message: "Choose a return date" }).min(1, "Choose a return date"),
   withDriver: z.coerce.boolean().default(false),
-  name: z.string().trim().min(2, "Please enter your name").max(120),
-  phone: z.string().trim().min(7, "Please enter a reachable phone number").max(40),
+  name: z
+    .string({ message: "Please enter your name" })
+    .trim()
+    .min(2, "Please enter your name")
+    .max(120),
+  phone: z
+    .string({ message: "Please enter a reachable phone number" })
+    .trim()
+    .min(7, "Please enter a reachable phone number")
+    .max(40),
   email: z.string().trim().email("That email does not look right").optional().or(z.literal("")),
   licenceNo: z.string().trim().max(60).optional(),
+
+  /**
+   * How the vehicle is covered while they have it.
+   *
+   * Required, with no default. Defaulting it either bills somebody for a
+   * waiver they never chose or hands out free cover — and a quietly assumed
+   * answer to "who is insuring this car" is not an answer at all.
+   */
+  insuranceChoice: z.enum(["own", "waiver"], {
+    message: "Please choose how the vehicle will be insured",
+  }),
+  insuranceProvider: z.string().trim().max(120).optional(),
+  insurancePolicyNo: z.string().trim().max(80).optional(),
+
+  /**
+   * Confirmed rather than collected.
+   *
+   * Age eligibility needs the renter's date of birth, and their licence
+   * already carries it — so this is a declaration checked against the document
+   * at verification, not a second copy of their DOB in our database. Collecting
+   * what the document already proves is how a booking form turns into a
+   * liability.
+   */
+  confirmEligible: z.literal("on", {
+    message: "Please confirm you meet the hire requirements",
+  }),
   note: z.string().trim().max(2000).optional(),
   website: z.string().max(0).optional(),
   renderedAt: z.coerce.number().optional(),
@@ -69,10 +103,12 @@ export async function requestRental(
   formData: FormData,
 ): Promise<RentalResult> {
   const licenceFile = formData.get("licenceFile");
+  const insuranceFile = formData.get("insuranceFile");
   const raw = Object.fromEntries(formData.entries());
   // A File would otherwise be handed to zod as an object and fail the string
   // schema; it is validated separately by its own bytes.
   delete (raw as Record<string, unknown>).licenceFile;
+  delete (raw as Record<string, unknown>).insuranceFile;
   const cleaned = Object.fromEntries(
     Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
   );
@@ -129,12 +165,16 @@ export async function requestRental(
     maxDays: row.r.maxDays,
     withDriverAvailable: row.r.withDriverAvailable,
     driverDailyMinor: row.r.driverDailyMinor,
+    waiverDailyMinor: row.r.waiverDailyMinor,
   };
 
   // Price on the server. The figure shown in the browser is a preview.
   let quote;
   try {
-    quote = quoteRental(tariff, days, { withDriver: f.withDriver });
+    quote = quoteRental(tariff, days, {
+      withDriver: f.withDriver,
+      waiver: f.insuranceChoice === "waiver",
+    });
   } catch (e) {
     if (e instanceof RentalError) return { ok: false, error: e.message };
     throw e;
@@ -143,20 +183,66 @@ export async function requestRental(
   const h = await headers();
   const period = `[${from.toISOString()},${to.toISOString()})`;
 
-  // Stored before the booking row so a rejected file stops the request with a
-  // message the visitor can act on, rather than leaving a booking that claims a
-  // licence it does not have.
-  let licenceKey: string | null = null;
-  if (licenceFile instanceof File && licenceFile.size > 0) {
-    const stored = await storeLicence(licenceFile);
-    if (!stored.ok) {
-      return {
-        ok: false,
-        fieldErrors: { licenceFile: [stored.error ?? "Could not read that file."] },
-      };
-    }
-    licenceKey = stored.key ?? null;
+  /*
+   * Documents, stored before the booking row.
+   *
+   * A rejected file stops the request with a message the visitor can act on,
+   * rather than leaving a booking that claims a licence it does not have.
+   *
+   * The licence is now required where it used to be optional. A hire could
+   * previously be booked and paid for with no licence detail of any kind, and
+   * the terms merely had the renter *represent* that they held one — a
+   * sentence nobody ever checked against anything.
+   */
+  if (!(licenceFile instanceof File) || licenceFile.size === 0) {
+    return {
+      ok: false,
+      fieldErrors: {
+        licenceFile: ["Please attach a photo of your driving licence."],
+      },
+    };
   }
+
+  const storedLicence = await storeLicence(licenceFile, "licence");
+  if (!storedLicence.ok) {
+    return {
+      ok: false,
+      fieldErrors: { licenceFile: [storedLicence.error ?? "Could not read that file."] },
+    };
+  }
+  const licenceKey = storedLicence.key ?? null;
+
+  /*
+   * Proof of insurance, required of everybody.
+   *
+   * Required even from renters taking our damage waiver, and that is the whole
+   * point of the distinction: the waiver means we will not pursue them for
+   * damage to OUR vehicle. It is not liability cover and does nothing for a
+   * third party they injure. Letting the fee buy an exemption from being
+   * insured at all would be selling a protection that does not exist.
+   */
+  let insuranceKey: string | null = null;
+  if (!(insuranceFile instanceof File) || insuranceFile.size === 0) {
+    return {
+      ok: false,
+      fieldErrors: {
+        insuranceFile: [
+          "Please attach proof of your insurance. This is required even if you take our damage waiver.",
+        ],
+      },
+    };
+  }
+
+  const storedInsurance = await storeLicence(insuranceFile, "insurance");
+  if (!storedInsurance.ok) {
+    return {
+      ok: false,
+      fieldErrors: {
+        insuranceFile: [storedInsurance.error ?? "Could not read that file."],
+      },
+    };
+  }
+  insuranceKey = storedInsurance.key ?? null;
 
   /*
    * Who sent them, if anybody.
@@ -194,6 +280,18 @@ export async function requestRental(
         termsAcceptedAt: new Date(),
         licenceStorageKey: licenceKey,
         licenceUploadedAt: licenceKey ? new Date() : null,
+
+        // What they chose, and what it cost. The rate is stored alongside the
+        // total so the amount on the invoice can still be explained after the
+        // fee changes — the same reason a commission stores its own rate.
+        insuranceChoice: f.insuranceChoice,
+        waiverDailyMinor:
+          f.insuranceChoice === "waiver" ? (row.r.waiverDailyMinor ?? null) : null,
+        waiverTotalMinor: quote.waiverMinor,
+        insuranceStorageKey: insuranceKey,
+        insuranceUploadedAt: insuranceKey ? new Date() : null,
+        insuranceProvider: f.insuranceProvider || null,
+        insurancePolicyNo: f.insurancePolicyNo || null,
       })
       .returning({ id: rentalBookings.id });
     bookingId = booking.id;
@@ -271,6 +369,84 @@ export async function requestRental(
 }
 
 /* ── Admin ─────────────────────────────────────────────────────────────── */
+
+const documentsSchema = z.object({
+  id: z.string().uuid(),
+  decision: z.enum(["verified", "rejected"]),
+  reason: z.string().trim().max(500).optional(),
+});
+
+/**
+ * A member of staff has looked at the documents.
+ *
+ * This is the step that makes requiring documents mean anything. Payment
+ * confirms the dates — the webhook marks a paid booking `confirmed` so the
+ * exclusion constraint holds the vehicle — but it establishes nothing about
+ * the person. Without a human check, a renter could pay online with an expired
+ * licence and a lapsed policy and the system would show a confirmed booking
+ * ready to collect.
+ *
+ * Deliberately NOT entangled with `status`. The overlap constraint is built on
+ * status, and adding a document condition to it would mean a failed check
+ * silently releasing dates somebody has already paid for. So the dates stay
+ * held, the money stays taken, and this flag decides whether keys change
+ * hands — which is a conversation, not a cancellation.
+ */
+export async function reviewBookingDocuments(
+  _prev: RentalResult | null,
+  formData: FormData,
+): Promise<RentalResult> {
+  const { requireStaff, assertMarketAccess } = await import("@/lib/auth");
+  const user = await requireStaff();
+
+  const parsed = documentsSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { ok: false, error: "Could not read that request." };
+  const v = parsed.data;
+
+  if (v.decision === "rejected" && !v.reason) {
+    return {
+      ok: false,
+      fieldErrors: { reason: ["Say what is wrong — the customer is told."] },
+    };
+  }
+
+  const [booking] = await db
+    .select()
+    .from(rentalBookings)
+    .where(eq(rentalBookings.id, v.id));
+  if (!booking) return { ok: false, error: "Booking not found." };
+  assertMarketAccess(user, booking.marketCode);
+
+  const now = new Date();
+  await db
+    .update(rentalBookings)
+    .set(
+      v.decision === "verified"
+        ? {
+            documentsVerifiedAt: now,
+            documentsVerifiedByEmail: user.email,
+            // Clearing the refusal together with its reason: the constraint
+            // requires the two to travel as a pair.
+            documentsRejectedAt: null,
+            documentsRejectedReason: null,
+          }
+        : {
+            documentsRejectedAt: now,
+            documentsRejectedReason: v.reason ?? null,
+            documentsVerifiedAt: null,
+            documentsVerifiedByEmail: null,
+          },
+    )
+    .where(eq(rentalBookings.id, v.id));
+
+  console.log(
+    `[rental] ${user.email} marked documents ${v.decision} on booking ${v.id}`,
+  );
+
+  revalidatePath("/admin/rentals");
+  revalidatePath(`/admin/rentals/${v.id}/agreement`);
+  return { ok: true };
+}
 
 export async function updateBookingStatus(
   _prev: RentalResult | null,

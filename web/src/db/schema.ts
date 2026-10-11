@@ -234,6 +234,11 @@ export const vehicleMedia = pgTable(
 
 /* ── Rentals ───────────────────────────────────────────────────────────── */
 
+export const rentalInsuranceChoice = pgEnum("rental_insurance_choice", [
+  "own",    // the renter shows their own policy
+  "waiver", // the renter takes our damage waiver and pays for it
+]);
+
 export const rentalRates = pgTable("rental_rates", {
   vehicleId: uuid("vehicle_id")
     .primaryKey()
@@ -250,6 +255,16 @@ export const rentalRates = pgTable("rental_rates", {
     .notNull()
     .default(false),
   driverDailyMinor: bigint("driver_daily_minor", { mode: "number" }),
+
+  /**
+   * The daily damage-waiver fee.
+   *
+   * NULL means the waiver is not offered on this vehicle, and that is the
+   * deliberate default: a vehicle whose fee nobody has set must not quietly
+   * hand out free cover. `quoteRental` refuses the option rather than pricing
+   * it at zero.
+   */
+  waiverDailyMinor: bigint("waiver_daily_minor", { mode: "number" }),
 });
 
 export const rentalBookings = pgTable(
@@ -285,6 +300,43 @@ export const rentalBookings = pgTable(
      */
     licenceStorageKey: text("licence_storage_key"),
     licenceUploadedAt: timestamp("licence_uploaded_at", { withTimezone: true }),
+
+    /* ── Insurance ────────────────────────────────────────────────────
+       Either the renter shows their own policy, or they take our damage
+       waiver and pay a daily fee for it. Proof of their own insurance is
+       required either way: the waiver means we will not pursue them for
+       damage to OUR vehicle, and does nothing for a third party they
+       injure. Deliberately not called insurance — selling that needs a
+       licence, where a waiver is a contract term. */
+    insuranceChoice: rentalInsuranceChoice("insurance_choice"),
+    /** The fee as it stood when booked, so the invoice stays explainable. */
+    waiverDailyMinor: bigint("waiver_daily_minor", { mode: "number" }),
+    waiverTotalMinor: bigint("waiver_total_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+
+    /** A storage key in the PRIVATE bucket, never a URL — as with the licence. */
+    insuranceStorageKey: text("insurance_storage_key"),
+    insuranceUploadedAt: timestamp("insurance_uploaded_at", {
+      withTimezone: true,
+    }),
+    insuranceProvider: text("insurance_provider"),
+    insurancePolicyNo: text("insurance_policy_no"),
+
+    /* ── The verification gate ────────────────────────────────────────
+       Payment confirms the dates; it does not confirm the person. Without
+       this, requiring documents is decorative — money arrives, the webhook
+       marks the booking confirmed, and nobody has established that the
+       licence is real or current. Keys are not handed over until this is
+       set, which the admin states plainly. */
+    documentsVerifiedAt: timestamp("documents_verified_at", {
+      withTimezone: true,
+    }),
+    documentsVerifiedByEmail: text("documents_verified_by_email"),
+    documentsRejectedAt: timestamp("documents_rejected_at", {
+      withTimezone: true,
+    }),
+    documentsRejectedReason: text("documents_rejected_reason"),
 
     withDriver: boolean("with_driver").notNull().default(false),
     status: bookingStatus("status").notNull().default("quote"),

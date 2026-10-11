@@ -34,6 +34,8 @@ export interface BookingPaidData {
   /** Formatted money strings. */
   amountPaid: string;
   depositDue: string | null;
+  /** The damage waiver, where it was taken. Itemised so the total adds up. */
+  waiverCharge: string | null;
   pickupLocation: string | null;
   businessPhone: string | null;
   bookingUrl: string;
@@ -59,6 +61,12 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
     row("Pick-up", escapeHtml(d.startLabel)),
     row("Return", escapeHtml(d.endLabel)),
     row("Duration", escapeHtml(nights)),
+    // Itemised rather than folded into the total. A customer who sees one
+    // figure larger than the daily rate times the days starts wondering what
+    // they were charged for, and a receipt should answer that.
+    d.waiverCharge
+      ? row("Damage waiver", `${escapeHtml(d.waiverCharge)} <span style="color:${MUTED};font-size:13px">(included in the amount paid)</span>`)
+      : "",
     d.pickupLocation ? row("Collect from", escapeHtml(d.pickupLocation)) : "",
   ]
     .filter(Boolean)
@@ -99,7 +107,8 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
   <tr><td style="padding:22px 28px 0">
     <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">WHEN YOU COLLECT</div>
     <ul style="margin:10px 0 0;padding-left:20px;font-size:15px;line-height:1.7;color:#333">
-      <li>Bring the driving licence of whoever will be driving.</li>
+      <li>Bring the driving licence of whoever will be driving, and your insurance certificate.</li>
+      <li>We check both before the vehicle is released, so please make sure the names match your booking.</li>
       ${
         d.depositDue
           ? `<li>A refundable security deposit of <strong>${escapeHtml(d.depositDue)}</strong> is taken at pickup — it was not charged today.</li>`

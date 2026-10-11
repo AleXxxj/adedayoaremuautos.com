@@ -57,6 +57,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       currency: rentalBookings.currency,
       partnerId: rentalBookings.referralPartnerId,
       status: rentalBookings.status,
+      waiverTotalMinor: rentalBookings.waiverTotalMinor,
     })
     .from(rentalBookings)
     .where(eq(rentalBookings.id, bookingId))
@@ -95,7 +96,22 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       ),
     );
 
-  const basisMinor = Number(paid?.total ?? 0);
+  /*
+   * The hire, not the damage waiver.
+   *
+   * The waiver fee is charged in the same payment as the hire, so the cleared
+   * total includes it — but it exists to cover the business's own insurance
+   * cost and the risk it is absorbing, not as margin to share. The agreement
+   * already excludes refundable deposits and third-party charges on the same
+   * reasoning.
+   *
+   * Clamped at zero rather than trusted: a refund recorded oddly could in
+   * principle leave the waiver larger than the cleared total, and a negative
+   * basis would turn a commission into a deduction.
+   */
+  const clearedMinor = Number(paid?.total ?? 0);
+  const waiverMinor = Number(booking.waiverTotalMinor ?? 0);
+  const basisMinor = Math.max(0, clearedMinor - waiverMinor);
   if (basisMinor <= 0) return;
 
   // The hire rate, not the sale rate. Through `rateFor` rather than reading

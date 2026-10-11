@@ -63,6 +63,7 @@ export async function sendBookingReceipt(bookingId: string): Promise<void> {
       days: range ? rentalDays(range.start, range.end) : 0,
       amountPaid: fmt(b.totalMinor),
       depositDue: b.depositMinor > 0 ? fmt(b.depositMinor) : null,
+      waiverCharge: b.waiverTotalMinor > 0 ? fmt(b.waiverTotalMinor) : null,
       pickupLocation: b.pickupLocation || address,
       businessPhone: site?.phone ? formatPhone(site.phone) : null,
       bookingUrl: `${siteUrl()}/${market}/rentals`,

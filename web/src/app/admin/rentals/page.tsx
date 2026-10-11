@@ -105,6 +105,17 @@ export default async function AdminRentalsPage() {
                     licence: booking.driverLicenseNo,
                     notes: booking.notes,
                     hasLicenceFile: Boolean(booking.licenceStorageKey),
+                    hasInsuranceFile: Boolean(booking.insuranceStorageKey),
+                    insuranceChoice: booking.insuranceChoice,
+                    insurer: booking.insuranceProvider,
+                    policyNo: booking.insurancePolicyNo,
+                    waiverCharge: booking.waiverTotalMinor
+                      ? formatMoney(money(booking.waiverTotalMinor, m.currency), m.locale)
+                      : null,
+                    documentsVerifiedAt:
+                      booking.documentsVerifiedAt?.toISOString() ?? null,
+                    documentsVerifiedByEmail: booking.documentsVerifiedByEmail,
+                    documentsRejectedReason: booking.documentsRejectedReason,
                     total: formatMoney(money(booking.totalMinor, m.currency), m.locale),
                     deposit: booking.depositMinor
                       ? formatMoney(money(booking.depositMinor, m.currency), m.locale)

@@ -24,6 +24,12 @@ export interface RentalTariff {
   maxDays: number | null;
   withDriverAvailable: boolean;
   driverDailyMinor: number | null;
+  /**
+   * The daily damage-waiver fee, or null where the waiver is not offered on
+   * this vehicle. Null is the deliberate default: a vehicle whose fee nobody
+   * has set must not quietly hand out free cover.
+   */
+  waiverDailyMinor?: number | null;
 }
 
 export interface RentalQuoteLine {
@@ -41,9 +47,16 @@ export interface RentalQuote {
   lines: RentalQuoteLine[];
   hireMinor: number;
   driverMinor: number;
+  /**
+   * The damage waiver, where the renter took it. Charged on the days they
+   * actually have the car — NOT on `chargedDays`, which can overshoot when a
+   * longer tier undercuts the exact-days price. Billing cover for days the
+   * vehicle is already back is not a saving anybody will thank us for.
+   */
+  waiverMinor: number;
   subtotalMinor: number;
   depositMinor: number;
-  /** Hire + driver. The deposit is refundable and is quoted separately. */
+  /** Hire + driver + waiver. The deposit is refundable and quoted separately. */
   totalMinor: number;
   currency: CurrencyCode;
   /** Days actually charged, which may exceed `days` when a longer tier is cheaper. */
@@ -67,7 +80,7 @@ export function rentalDays(from: Date, to: Date): number {
 export function quoteRental(
   tariff: RentalTariff,
   days: number,
-  opts: { withDriver?: boolean } = {},
+  opts: { withDriver?: boolean; waiver?: boolean } = {},
 ): RentalQuote {
   if (!Number.isInteger(days) || days <= 0) {
     throw new RentalError("Choose at least one day.");
@@ -80,6 +93,13 @@ export function quoteRental(
   }
   if (opts.withDriver && !tariff.withDriverAvailable) {
     throw new RentalError("A driver is not available for this vehicle.");
+  }
+  // Refused rather than priced at zero. A quote that silently includes a free
+  // waiver is a promise of cover the business never agreed to give.
+  if (opts.waiver && !tariff.waiverDailyMinor) {
+    throw new RentalError(
+      "Our damage waiver is not available on this vehicle. Please show proof of your own insurance.",
+    );
   }
 
   // best[i] = cheapest way to cover at least i days.
@@ -154,7 +174,8 @@ export function quoteRental(
   const hireMinor = lines.reduce((s, l) => s + l.subtotalMinor, 0);
   const chargedDays = lines.reduce((s, l) => s + l.days, 0);
   const driverMinor = opts.withDriver ? (tariff.driverDailyMinor ?? 0) * days : 0;
-  const subtotalMinor = hireMinor + driverMinor;
+  const waiverMinor = opts.waiver ? (tariff.waiverDailyMinor ?? 0) * days : 0;
+  const subtotalMinor = hireMinor + driverMinor + waiverMinor;
 
   const atDailyRate = days * tariff.dailyMinor;
   const savingNote =
@@ -167,6 +188,7 @@ export function quoteRental(
     lines,
     hireMinor,
     driverMinor,
+    waiverMinor,
     subtotalMinor,
     depositMinor: tariff.depositMinor,
     totalMinor: subtotalMinor,

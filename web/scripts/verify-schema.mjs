@@ -677,6 +677,119 @@ await rejects(
   "referral_partner",
 );
 
+/* ── Rental documents and the damage waiver ─────────────────────────────
+   The invariant worth proving is that the charge and the choice cannot
+   disagree. A renter using their own insurance who is billed for a waiver,
+   or a waiver handed out at no charge, are both quiet failures: the booking
+   looks ordinary and only the invoice is wrong. */
+
+const DOCBK = "'aaaaaaaa-0000-0000-0000-00000000dd01'";
+const docBooking = (extra) => `
+  INSERT INTO rental_bookings
+    (id, vehicle_id, market_code, period, customer_name, customer_phone,
+     status, total_minor, currency ${extra.cols})
+  VALUES
+    (${DOCBK},'11111111-1111-1111-1111-111111111111','us',
+     tstzrange('2028-01-01','2028-01-08','[)'),
+     'Doc Test','+13365550100','quote',52500,'USD' ${extra.vals});`;
+
+await rejects(
+  db,
+  "REJECTS a waiver booking with no rate recorded",
+  docBooking({
+    cols: ", insurance_choice, waiver_total_minor",
+    vals: ", 'waiver', 10500",
+  }),
+  "rental_bookings_waiver_has_rate",
+);
+
+await rejects(
+  db,
+  "REJECTS charging a waiver to somebody using their own insurance",
+  docBooking({
+    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
+    vals: ", 'own', 1500, 10500",
+  }),
+  "rental_bookings_waiver_charge_matches_choice",
+);
+
+await rejects(
+  db,
+  "REJECTS a waiver given away at no charge",
+  docBooking({
+    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
+    vals: ", 'waiver', 1500, 0",
+  }),
+  "rental_bookings_waiver_charge_matches_choice",
+);
+
+await allows(
+  db,
+  "records a waiver booking priced correctly",
+  docBooking({
+    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
+    vals: ", 'waiver', 1500, 10500",
+  }),
+);
+
+await rejects(
+  db,
+  "rejects refusing documents with no reason",
+  `UPDATE rental_bookings SET documents_rejected_at = now() WHERE id = ${DOCBK}`,
+  "rental_bookings_rejection_has_reason",
+);
+
+await allows(
+  db,
+  "refuses documents with a reason the customer is told",
+  `UPDATE rental_bookings
+   SET documents_rejected_at = now(), documents_rejected_reason = 'Licence expired'
+   WHERE id = ${DOCBK}`,
+);
+
+await rejects(
+  db,
+  "REJECTS documents being both checked and refused",
+  `UPDATE rental_bookings SET documents_verified_at = now() WHERE id = ${DOCBK}`,
+  "rental_bookings_not_verified_and_rejected",
+);
+
+await allows(
+  db,
+  "clears the refusal and marks them checked",
+  `UPDATE rental_bookings
+   SET documents_rejected_at = NULL, documents_rejected_reason = NULL,
+       documents_verified_at = now(), documents_verified_by_email = 'owner@example.com'
+   WHERE id = ${DOCBK}`,
+);
+
+await allows(
+  db,
+  "sets a hire tariff with a daily waiver fee",
+  `INSERT INTO rental_rates
+     (vehicle_id, daily_minor, weekly_minor, deposit_minor, currency, waiver_daily_minor)
+   VALUES ('11111111-1111-1111-1111-111111111111',7500,45000,30000,'USD',1500)`,
+);
+
+// Zero is not a price. A vehicle meant to carry no waiver has the column NULL,
+// which is what makes quoteRental refuse the option rather than offer free
+// cover; 0 would offer it and charge nothing, which no constraint downstream
+// would catch.
+await rejects(
+  db,
+  "REJECTS a zero daily waiver fee",
+  `UPDATE rental_rates SET waiver_daily_minor = 0
+   WHERE vehicle_id = '11111111-1111-1111-1111-111111111111'`,
+  "waiver_daily_minor",
+);
+
+await allows(
+  db,
+  "allows NULL, which means the waiver is not offered",
+  `UPDATE rental_rates SET waiver_daily_minor = NULL
+   WHERE vehicle_id = '11111111-1111-1111-1111-111111111111'`,
+);
+
 /* ── Partner earnings ───────────────────────────────────────────────────
    The double-payment assertions are the point of this section. The rental
    payment webhook is delivered more than once by design, and a deal can be

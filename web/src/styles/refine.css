@@ -2640,6 +2640,138 @@
     color: var(--brand-400, #4e9d76);
 }
 
+/* The waiver line sits with the charges, not with the refundable deposit —
+   it is money the customer is actually spending. */
+.legacy-theme .booking-quote-waiver dt,
+.legacy-theme .booking-quote-waiver dd {
+    color: #e2c463;
+}
+
+/* ── Insurance choice ───────────────────────────────────────────────────────
+   The only decision on this form that changes the price, so it is built to be
+   impossible to miss: two bordered cards, the fee at 17px beside the option
+   itself, and the chosen one lit. A charge discovered at the counter is the
+   thing this is designed to prevent. */
+.legacy-theme .booking-insurance {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legacy-theme .booking-insurance legend {
+    padding: 0;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.legacy-theme .booking-insurance-option {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    border: 1px solid var(--border-default, #333);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.legacy-theme .booking-insurance-option:hover {
+    border-color: #4a4a4a;
+}
+
+.legacy-theme .booking-insurance-option.is-chosen {
+    border-color: rgba(78, 157, 118, 0.65);
+    background: rgba(78, 157, 118, 0.08);
+}
+
+.legacy-theme .booking-insurance-option input[type="radio"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    accent-color: #4e9d76;
+}
+
+.legacy-theme .booking-insurance-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.legacy-theme .booking-insurance-body strong {
+    font-size: 15px;
+    color: #fff;
+}
+
+.legacy-theme .booking-insurance-price {
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* The fee itself. Deliberately the largest thing in the card. */
+.legacy-theme .booking-insurance-fee {
+    font-size: 17px;
+    font-weight: 700;
+    color: #e2c463;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .booking-insurance-fee em {
+    font-style: normal;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-insurance-body small {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-insurance-body small strong {
+    font-size: inherit;
+    color: #e2c463;
+}
+
+/* Confirmation that an attachment survived a failed submit — the whole point
+   of holding the File in state rather than trusting the input. */
+.legacy-theme .booking-attached {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--brand-400, #4e9d76);
+    word-break: break-all;
+}
+
+.legacy-theme .booking-insurance-note {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-muted, #8f8f8f);
+}
+
+/* Two short fields side by side, stacking on a phone. */
+.legacy-theme .booking-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 520px) {
+    .legacy-theme .booking-field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ── Messages ──────────────────────────────────────────────────────────── */
 .legacy-theme .booking-alert,
 .legacy-theme .booking-warn {

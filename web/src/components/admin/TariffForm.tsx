@@ -15,6 +15,7 @@ export interface TariffDefaults {
   maxDays: number | "";
   withDriver: boolean;
   driverDaily: number | "";
+  waiverDaily: number | "";
 }
 
 export function TariffForm({
@@ -105,6 +106,24 @@ export function TariffForm({
               />
             </Field>
           )}
+
+          {/* Blank means the waiver is not offered on this vehicle, and the
+              booking form then requires the renter's own insurance outright.
+              Blank is the safe state: a vehicle with no fee set must not hand
+              out free cover. */}
+          <Field
+            label={`Damage waiver, per day (${currency}) — blank to not offer it`}
+            error={err("waiverDaily")}
+          >
+            <input
+              name="waiverDaily"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={defaults.waiverDaily}
+              className={`${inp} max-w-xs`}
+            />
+          </Field>
 
           <p className="text-xs text-[var(--text-muted)]">
             Leave weekly or monthly blank to omit that tier. Customers are always

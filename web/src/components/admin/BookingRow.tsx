@@ -4,7 +4,7 @@ import { useActionToast } from "@/components/Toast";
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { updateBookingStatus } from "@/lib/actions/rentals";
+import { updateBookingStatus, reviewBookingDocuments } from "@/lib/actions/rentals";
 import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 import { LicenceLink } from "./LicenceLink";
@@ -21,6 +21,14 @@ interface Booking {
   licence: string | null;
   notes: string | null;
   hasLicenceFile: boolean;
+  hasInsuranceFile: boolean;
+  insuranceChoice: string | null;
+  insurer: string | null;
+  policyNo: string | null;
+  waiverCharge: string | null;
+  documentsVerifiedAt: string | null;
+  documentsVerifiedByEmail: string | null;
+  documentsRejectedReason: string | null;
   total: string;
   deposit: string | null;
   createdAt: string;
@@ -142,6 +150,15 @@ export function BookingRow({
               <span className="text-[var(--text-muted)]">Licence {booking.licence}</span>
             )}
             {booking.hasLicenceFile && <LicenceLink bookingId={booking.id} />}
+            {booking.hasInsuranceFile && (
+              <LicenceLink bookingId={booking.id} kind="insurance" />
+            )}
+            {booking.insurer && (
+              <span className="text-[var(--text-muted)]">
+                {booking.insurer}
+                {booking.policyNo ? ` · ${booking.policyNo}` : ""}
+              </span>
+            )}
           </div>
 
           {booking.notes && (
@@ -153,11 +170,18 @@ export function BookingRow({
 
         <div className="text-right text-sm">
           <div className="font-bold tabular-nums">{booking.total}</div>
+          {booking.waiverCharge && (
+            <div className="text-xs text-[var(--warning)]">
+              incl. {booking.waiverCharge} waiver
+            </div>
+          )}
           {booking.deposit && (
             <div className="text-xs text-[var(--text-muted)]">+{booking.deposit} deposit</div>
           )}
         </div>
       </div>
+
+      <DocumentCheck booking={booking} />
 
       {state?.error && (
         <p className="mt-3 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">
@@ -225,5 +249,147 @@ export function BookingRow({
         )}
       </div>
     </li>
+  );
+}
+
+/**
+ * Whether anybody has actually looked at the documents.
+ *
+ * This is the whole reason the documents are collected. Payment confirms the
+ * dates — the webhook marks a paid booking confirmed so the vehicle is held —
+ * but it establishes nothing about the person. Before this existed, a renter
+ * could pay online with an expired licence and a lapsed policy and the screen
+ * would show a tidy confirmed booking ready to collect.
+ *
+ * So the unchecked state is deliberately loud, and it says what it means: do
+ * not hand over the keys. A quiet "pending" badge is one somebody stops seeing
+ * by the second week.
+ */
+function DocumentCheck({
+  booking,
+}: {
+  booking: Pick<
+    Booking,
+    | "id"
+    | "insuranceChoice"
+    | "documentsVerifiedAt"
+    | "documentsVerifiedByEmail"
+    | "documentsRejectedReason"
+  >;
+}) {
+  const [state, action, pending] = useActionState(reviewBookingDocuments, null);
+  useActionToast(state);
+  const [refusing, setRefusing] = useState(false);
+
+  const verified = Boolean(booking.documentsVerifiedAt);
+  const refused = Boolean(booking.documentsRejectedReason);
+
+  if (verified) {
+    return (
+      <p className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] pt-3 text-sm text-[var(--success)]">
+        <i className="fas fa-circle-check" aria-hidden="true" />
+        Documents checked
+        {booking.documentsVerifiedByEmail && (
+          <span className="text-xs text-[var(--text-muted)]">
+            by {booking.documentsVerifiedByEmail}
+          </span>
+        )}
+        {booking.insuranceChoice === "waiver" && (
+          <span className="rounded-full border border-[var(--warning)]/40 px-2 py-0.5 text-xs text-[var(--warning)]">
+            damage waiver taken
+          </span>
+        )}
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-3 border-t border-[var(--border-subtle)] pt-3">
+      <div
+        className={`rounded-lg border px-3 py-2 text-sm ${
+          refused
+            ? "border-[var(--danger)]/40 bg-[var(--danger)]/10 text-[var(--danger)]"
+            : "border-[var(--warning)]/40 bg-[var(--warning)]/10 text-[var(--warning)]"
+        }`}
+      >
+        <p className="font-semibold">
+          {refused
+            ? "Documents refused — do not release the vehicle"
+            : "Documents not checked yet — do not release the vehicle"}
+        </p>
+        {refused ? (
+          <p className="mt-0.5 text-xs">{booking.documentsRejectedReason}</p>
+        ) : (
+          <p className="mt-0.5 text-xs">
+            Open the licence and the insurance above. Check the name matches,
+            the licence is in date for the whole hire, and the policy covers
+            this use.
+          </p>
+        )}
+      </div>
+
+      {state?.fieldErrors?.reason && (
+        <p className="mt-2 text-sm text-[var(--danger)]">
+          {state.fieldErrors.reason[0]}
+        </p>
+      )}
+
+      {refusing ? (
+        <form action={action} className="mt-3 space-y-2">
+          <input type="hidden" name="id" value={booking.id} />
+          <input type="hidden" name="decision" value="rejected" />
+          <label className="block text-xs text-[var(--text-muted)]">
+            What is wrong — the customer is told this
+            <textarea
+              name="reason"
+              rows={2}
+              required
+              maxLength={500}
+              placeholder="The licence expires before the return date."
+              className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={pending}
+              className="rounded-lg border border-[var(--danger)]/50 px-3 py-1.5 text-sm text-[var(--danger)] disabled:opacity-50"
+            >
+              Refuse the documents
+            </button>
+            <button
+              type="button"
+              onClick={() => setRefusing(false)}
+              className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <form action={action}>
+            <input type="hidden" name="id" value={booking.id} />
+            <input type="hidden" name="decision" value="verified" />
+            <button
+              type="submit"
+              disabled={pending}
+              className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] disabled:opacity-50"
+            >
+              {pending ? "Saving…" : "Documents are in order"}
+            </button>
+          </form>
+          {!refused && (
+            <button
+              type="button"
+              onClick={() => setRefusing(true)}
+              className="rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm"
+            >
+              Something is wrong
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
