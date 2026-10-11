@@ -183,6 +183,13 @@
       "when": 1791673800000,
       "tag": "0025_partner_earnings",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791760200000,
+      "tag": "0026_commission_five_percent",
+      "breakpoints": true
     }
   ]
 }

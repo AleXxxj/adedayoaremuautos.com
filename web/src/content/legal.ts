@@ -256,12 +256,12 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 5 -->
         <div class="policy-section" id="referral">
             <h2><i class="fas fa-users"></i> 5. Referral Programme</h2>
-            <p>Our referral programme allows individuals ("Referrers") to earn a commission by introducing verified buyers to our business. The following conditions apply:</p>
+            <p>Our referral programme allows individuals ("Referrers") to earn a commission by introducing buyers and hire customers to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
             <ul>
-                <li>A commission of <strong style="color: var(--silver-classic);">1.5% of the final vehicle sale price</strong> is payable to the Referrer upon completion of a successful purchase by the referred party.</li>
-                <li>A referral is deemed successful only when the full purchase price is paid and the transaction is finalised.</li>
-                <li>Referrers must register their referral with us prior to the buyer making first contact to be eligible for commission.</li>
-                <li>Commission payments are processed within 14 business days of transaction completion via the Referrer's registered bank account.</li>
+                <li>A commission of <strong style="color: var(--silver-classic);">5% of the amount the customer pays us</strong> is payable to the Referrer upon completion of a successful purchase or vehicle hire by the referred party. Taxes, refundable deposits and third-party charges are excluded.</li>
+                <li>A referral is deemed successful only when that amount has been paid in full and the purchase or hire has been completed.</li>
+                <li>Referrers are issued a personal referral link and code on acceptance into the programme. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us.</li>
+                <li>Earnings appear on the Referrer's own partner account as they are confirmed. A payout may be requested at any time once earnings are available, and is paid on our next payment run. We do not hold funds on a Referrer's behalf and this website does not collect bank details; payment arrangements are made with each Referrer directly.</li>
                 <li>Referrers may not misrepresent our services, apply undue pressure on potential buyers, or engage in deceptive practices. Breach of this condition forfeits the referral commission.</li>
                 <li>We reserve the right to modify or terminate the referral programme at any time with reasonable notice.</li>
             </ul>

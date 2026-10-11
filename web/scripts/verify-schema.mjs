@@ -612,6 +612,20 @@ await rejects(
    The partial index is what makes that compatible with the ordinary case of
    many partners having no token at all. */
 
+// The advertised rate is 5%, and a new partner must start on it without
+// anybody remembering to type it. A default left at the old 1.5% is the kind
+// of mistake nobody notices until a partner asks why their figure is wrong.
+await allows(
+  db,
+  "a new partner starts on the advertised 5%",
+  `INSERT INTO referral_partners (market_code, code, full_name, phone)
+   VALUES ('us','RATEDFLT-AAAA','Default Rate','+13365550199');
+   DO $$ BEGIN
+     IF (SELECT commission_bps FROM referral_partners WHERE code = 'RATEDFLT-AAAA') <> 500
+     THEN RAISE EXCEPTION 'default commission is not 500 bps'; END IF;
+   END $$;`,
+);
+
 await allows(
   db,
   "registers two referral partners",

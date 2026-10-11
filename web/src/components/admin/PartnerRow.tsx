@@ -155,7 +155,7 @@ export function PartnerRow({ partner }: { partner: Partner }) {
 
           <label className="text-xs">
             <span className="mb-1 block text-[var(--text-muted)]">
-              Commission (basis points — 150 = 1.5%)
+              Commission (basis points — 500 = 5%)
             </span>
             <input
               name="commissionBps"

@@ -25,7 +25,7 @@ export async function generateMetadata({
   return {
     title: "Referral Programme",
     description:
-      "Refer buyers and hire customers to Adedayo Aremu Autos and earn commission on every completed deal. Apply in a couple of minutes and track your referrals from your own partner account.",
+      "Refer buyers and hire customers to Adedayo Aremu Autos and earn 5% commission on every completed deal. Apply in a couple of minutes and track your referrals from your own partner account.",
     alternates: {
       canonical: `/${market}/referral`,
       languages: { "en-US": "/us/referral", "en-NG": "/ng/referral" },
@@ -74,7 +74,7 @@ const STEPS = [
 /**
  * The referral programme, made real.
  *
- * The homepage has advertised 1.5% commission and "track your referrals
+ * The homepage has advertised commission and "track your referrals
  * easily" since the original site, and both CTAs pointed at a general contact
  * form — which did not even offer "referral" as an option, so every would-be
  * partner was filed as a car buyer. There was no code, no link and no
@@ -91,8 +91,8 @@ export default async function ReferralPage({
 
   const example =
     code === "us"
-      ? { car: "$30,000", earn: "$450" }
-      : { car: "₦10,000,000", earn: "₦150,000" };
+      ? { car: "$30,000", earn: "$1,500" }
+      : { car: "₦10,000,000", earn: "₦500,000" };
 
   return (
     <>
@@ -103,7 +103,7 @@ export default async function ReferralPage({
           </h1>
           <p>
             Know someone looking for a vehicle? Send them our way and earn on
-            every completed sale.
+            every completed sale and hire.
           </p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default async function ReferralPage({
           <div className="referral-page-grid">
             <div className="referral-explain">
               <div className="referral-headline">
-                1.5% <small>of every sale you refer</small>
+                5% <small>of every deal you refer</small>
               </div>
               <p className="referral-example">
                 Refer a {example.car} car and you earn{" "}

@@ -1,7 +1,7 @@
 /**
  * Referral codes.
  *
- * The site has advertised 1.5% commission and "track your referrals easily"
+ * The site has advertised commission and "track your referrals easily"
  * since the original build, with nothing behind either — no codes, no
  * attribution, so a commission could only ever be settled from memory.
  */
@@ -80,7 +80,7 @@ export function governingLaw(market: "us" | "ng"): string {
     : "the Federal Republic of Nigeria";
 }
 
-/** 150 bps -> "1.5%" */
+/** 500 bps -> "5%" */
 export function formatBps(bps: number): string {
   return `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`;
 }

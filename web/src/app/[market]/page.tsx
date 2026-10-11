@@ -514,10 +514,10 @@ export default async function MarketHome({
               </h2>
               <p>
                 Know someone looking for a quality vehicle? Refer them to us and
-                earn a commission on every successful purchase.
+                earn a commission on every completed purchase or hire.
               </p>
               <div className="highlight">
-                1.5% <small>commission</small>
+                5% <small>commission</small>
               </div>
               <ul className="referral-features">
                 {/* "Track your referrals easily" was on this list for years
@@ -538,13 +538,13 @@ export default async function MarketHome({
               <i className="fas fa-hand-holding-usd" />
               <h3>Refer &amp; Earn</h3>
               <div className="percent">
-                1.5% <small>per sale</small>
+                5% <small>per deal</small>
               </div>
-              <p>On every successful vehicle purchase through your referral</p>
+              <p>On every completed vehicle purchase or hire through your referral</p>
               <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
                 {code === "us"
-                  ? "Example: Refer a $30,000 car = $450"
-                  : "Example: Refer a ₦10M car = ₦150,000"}
+                  ? "Example: Refer a $30,000 car = $1,500"
+                  : "Example: Refer a ₦10M car = ₦500,000"}
               </p>
               <Link href={`/${code}/referral`} className="btn btn-primary">
                 Start Referring

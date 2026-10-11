@@ -1108,7 +1108,7 @@ export const referralPartnerStatus = pgEnum("referral_partner_status", [
 /**
  * Someone who sends buyers and is paid for it.
  *
- * The site has advertised 1.5% commission and "track your referrals easily"
+ * The site has advertised commission and "track your referrals easily"
  * since the original build, with nothing behind either: no codes, no
  * attribution, so a commission could only be settled from memory and an
  * argument. A partner's code is what turns a claim into a record.
@@ -1136,9 +1136,10 @@ export const referralPartners = pgTable(
 
     status: referralPartnerStatus("status").notNull().default("active"),
 
-    /** Basis points; 150 = the 1.5% the site advertises. Per partner, because
-     *  volume earns a better rate and changing it must not rewrite history. */
-    commissionBps: integer("commission_bps").notNull().default(150),
+    /** Basis points; 500 = the 5% the site advertises. Per partner, because
+     *  volume earns a better rate and changing it must not rewrite history —
+     *  every earning stores the rate that applied when it was earned. */
+    commissionBps: integer("commission_bps").notNull().default(500),
 
     /* ── The application ──────────────────────────────────────────────
        None of this is a government identifier. The rule that keeps SSN and
