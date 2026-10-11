@@ -202,6 +202,7 @@ export default async function AdminReferralsPage() {
                     status: p.status,
                     commissionBps: p.commissionBps,
                     rentalCommissionBps: p.rentalCommissionBps,
+                    agreedAt: p.agreedAt?.toISOString() ?? null,
                     createdAt: p.createdAt.toISOString(),
                     link: `${base}/r/${p.code}`,
                     enquiries: leadsBy.get(p.id) ?? 0,

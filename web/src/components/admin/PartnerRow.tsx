@@ -3,7 +3,7 @@
 import { useActionToast } from "@/components/Toast";
 
 import { useActionState, useState } from "react";
-import { updatePartner } from "@/lib/actions/referral";
+import { updatePartner, approvePartner } from "@/lib/actions/referral";
 import { formatBps } from "@/lib/referral";
 
 interface Partner {
@@ -17,6 +17,8 @@ interface Partner {
   status: string;
   commissionBps: number;
   rentalCommissionBps: number;
+  /** Null for partners who predate the agreement and have signed nothing. */
+  agreedAt: string | null;
   createdAt: string;
   link: string;
   enquiries: number;
@@ -28,6 +30,8 @@ interface Partner {
 export function PartnerRow({ partner }: { partner: Partner }) {
   const [state, action, pending] = useActionState(updatePartner, null);
   useActionToast(state);
+  const [sent, sendAgreement, sending] = useActionState(approvePartner, null);
+  useActionToast(sent, "Agreement sent.");
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -103,6 +107,39 @@ export function PartnerRow({ partner }: { partner: Partner }) {
           )}
         </div>
       </div>
+
+      {/* Live, earning, and never signed anything.
+          These are the partners registered before the agreement existed. They
+          were deliberately left active so codes in circulation kept working,
+          which is right — but it means commission could fall due under terms
+          nobody agreed, and they have no account to see it in. Surfaced here
+          rather than left to be noticed. */}
+      {!partner.agreedAt && (
+        <div className="mt-3 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-3 py-2.5">
+          <p className="text-sm font-semibold text-[var(--warning)]">
+            No signed agreement
+          </p>
+          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+            This partner predates the agreement. Their code keeps working
+            either way — sending it does not interrupt anything — but until
+            they accept, any commission they earn rests on nothing in writing
+            and they cannot open a partner account.
+          </p>
+          {sent?.error && (
+            <p className="mt-2 text-xs text-[var(--danger)]">{sent.error}</p>
+          )}
+          <form action={sendAgreement} className="mt-2">
+            <input type="hidden" name="id" value={partner.id} />
+            <button
+              type="submit"
+              disabled={sending}
+              className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-semibold text-[var(--accent-contrast)] disabled:opacity-50"
+            >
+              {sending ? "Sending…" : "Email them the agreement"}
+            </button>
+          </form>
+        </div>
+      )}
 
       {state?.error && (
         <p className="mt-3 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">

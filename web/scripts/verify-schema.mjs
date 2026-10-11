@@ -668,6 +668,28 @@ await allows(
    UPDATE referral_partners SET status = 'active', agreed_at = now() WHERE code = 'TESTONE-AAAA'`,
 );
 
+// Active without agreed_at is a real and important state: the partners who
+// registered before the agreement existed. They were left active on purpose
+// so codes in circulation kept working, which means the database must permit
+// a live partner who has signed nothing — and the admin must be able to send
+// them one without taking them offline.
+await allows(
+  db,
+  "a grandfathered partner is active having signed nothing",
+  `UPDATE referral_partners SET status = 'active', agreed_at = NULL
+   WHERE code = 'TESTTWO-BBBB'`,
+);
+
+await allows(
+  db,
+  "and can be sent an agreement while staying active",
+  `UPDATE referral_partners
+   SET agreement_token = 'grandfathered-token-123456',
+       agreement_sent_at = now(), agreement_version = '2026-10-v1'
+   WHERE code = 'TESTTWO-BBBB'
+     AND status = 'active' AND agreed_at IS NULL`,
+);
+
 await rejects(
   db,
   "rejects a rental credited to a partner who does not exist",

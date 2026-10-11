@@ -239,7 +239,17 @@ export async function approvePartner(
   if (!partner) return { ok: false, error: "That application no longer exists." };
   assertMarketAccess(user, partner.marketCode);
 
-  if (partner.status === "active") {
+  /*
+   * Active is not the same as agreed.
+   *
+   * Partners registered before the agreement existed were left active on
+   * purpose — re-reviewing them would have switched off codes already in
+   * circulation — which means they are live, earning, and have signed
+   * nothing. Refusing to send them an agreement because they are already
+   * active, as this did, is the one case where the check was simply wrong:
+   * it blocked the only route to fixing the thing that matters.
+   */
+  if (partner.status === "active" && partner.agreedAt) {
     return { ok: false, error: "They have already accepted — nothing to approve." };
   }
   if (!partner.email) {
@@ -256,10 +266,21 @@ export async function approvePartner(
   const hireBps =
     parsed.data.rentalCommissionBps ?? partner.rentalCommissionBps;
 
+  /*
+   * A partner who is already live stays live while they read it.
+   *
+   * Dropping them back to `approved` would switch off a code that is in
+   * circulation — on business cards, in WhatsApp threads — and silently stop
+   * attributing their referrals until they happened to open an email. The
+   * agreement is what their future commission rests on, not their ability to
+   * keep working in the meantime.
+   */
+  const keepActive = partner.status === "active";
+
   await db
     .update(referralPartners)
     .set({
-      status: "approved",
+      status: keepActive ? "active" : "approved",
       commissionBps: saleBps,
       rentalCommissionBps: hireBps,
       reviewedAt: new Date(),
@@ -268,7 +289,9 @@ export async function approvePartner(
       agreementToken: token,
       agreementSentAt: new Date(),
       agreementVersion: PARTNER_TERMS_VERSION,
-      // A re-approval after a decline starts the agreement over.
+      // A re-approval after a decline starts the agreement over. An already
+      // signed one is never cleared here — only a decline or a fresh
+      // application reaches this line with agreedAt set.
       agreedAt: null,
       agreementDeclinedAt: null,
     })
@@ -448,7 +471,9 @@ export async function declineAgreement(
   if (!partner) {
     return { ok: false, error: "This link is no longer valid." };
   }
-  if (partner.status === "active") {
+  // Again: active without `agreedAt` is a partner who never signed, and they
+  // are entitled to decline now that they have finally been shown the terms.
+  if (partner.status === "active" && partner.agreedAt) {
     return {
       ok: false,
       error: "You have already accepted this agreement. Call us if you want to end it.",
