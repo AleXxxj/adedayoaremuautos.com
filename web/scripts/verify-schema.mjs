@@ -677,10 +677,15 @@ await rejects(
   "referral_partner",
 );
 
-/* ── Rental documents and the damage waiver ─────────────────────────────
+/* ── Rental documents and injury cover ──────────────────────────────────
+   The business's policy covers the vehicle. It does not cover the renter's
+   own injury, and a renter may knowingly go without — that is an allowed and
+   expected choice, which is exactly why it has to be recorded rather than
+   inferred from an empty column. An absence proves nothing afterwards.
+
    The invariant worth proving is that the charge and the choice cannot
-   disagree. A renter using their own insurance who is billed for a waiver,
-   or a waiver handed out at no charge, are both quiet failures: the booking
+   disagree: somebody who declined cover must never be billed for it, and
+   cover must never be handed out free. Both are quiet failures — the booking
    looks ordinary and only the invoice is wrong. */
 
 const DOCBK = "'aaaaaaaa-0000-0000-0000-00000000dd01'";
@@ -695,41 +700,60 @@ const docBooking = (extra) => `
 
 await rejects(
   db,
-  "REJECTS a waiver booking with no rate recorded",
+  "REJECTS charging injury cover to somebody using their own insurance",
   docBooking({
-    cols: ", insurance_choice, waiver_total_minor",
-    vals: ", 'waiver', 10500",
-  }),
-  "rental_bookings_waiver_has_rate",
-);
-
-await rejects(
-  db,
-  "REJECTS charging a waiver to somebody using their own insurance",
-  docBooking({
-    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
+    cols: ", insurance_choice, injury_cover_daily_minor, injury_cover_total_minor",
     vals: ", 'own', 1500, 10500",
   }),
-  "rental_bookings_waiver_charge_matches_choice",
+  "rental_bookings_injury_charge_matches_choice",
 );
 
 await rejects(
   db,
-  "REJECTS a waiver given away at no charge",
+  "REJECTS charging injury cover to somebody who declined it",
   docBooking({
-    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
-    vals: ", 'waiver', 1500, 0",
+    cols: ", insurance_choice, injury_cover_total_minor",
+    vals: ", 'declined', 10500",
   }),
-  "rental_bookings_waiver_charge_matches_choice",
+  "rental_bookings_injury_charge_matches_choice",
+);
+
+await rejects(
+  db,
+  "REJECTS injury cover given away at no charge",
+  docBooking({
+    cols: ", insurance_choice, injury_cover_daily_minor, injury_cover_total_minor",
+    vals: ", 'company', 1500, 0",
+  }),
+  "rental_bookings_injury_charge_matches_choice",
+);
+
+await rejects(
+  db,
+  "REJECTS paid injury cover with no rate recorded",
+  docBooking({
+    cols: ", insurance_choice, injury_cover_total_minor",
+    vals: ", 'company', 10500",
+  }),
+  "rental_bookings_injury_has_rate",
 );
 
 await allows(
   db,
-  "records a waiver booking priced correctly",
+  "records a renter who knowingly declined cover",
   docBooking({
-    cols: ", insurance_choice, waiver_daily_minor, waiver_total_minor",
-    vals: ", 'waiver', 1500, 10500",
+    cols: ", insurance_choice, injury_notice_ack_at",
+    vals: ", 'declined', now()",
   }),
+);
+
+await allows(
+  db,
+  "switches them onto paid company cover",
+  `UPDATE rental_bookings
+   SET insurance_choice = 'company', injury_cover_daily_minor = 1500,
+       injury_cover_total_minor = 10500
+   WHERE id = ${DOCBK}`,
 );
 
 await rejects(
@@ -765,28 +789,28 @@ await allows(
 
 await allows(
   db,
-  "sets a hire tariff with a daily waiver fee",
+  "sets a hire tariff with a daily injury-cover fee",
   `INSERT INTO rental_rates
-     (vehicle_id, daily_minor, weekly_minor, deposit_minor, currency, waiver_daily_minor)
+     (vehicle_id, daily_minor, weekly_minor, deposit_minor, currency, injury_cover_daily_minor)
    VALUES ('11111111-1111-1111-1111-111111111111',7500,45000,30000,'USD',1500)`,
 );
 
-// Zero is not a price. A vehicle meant to carry no waiver has the column NULL,
-// which is what makes quoteRental refuse the option rather than offer free
-// cover; 0 would offer it and charge nothing, which no constraint downstream
-// would catch.
+// Zero is not a price. A vehicle meant to offer no cover has the column NULL,
+// which is what makes quoteRental refuse the option rather than offer it for
+// nothing; 0 would offer it and charge nothing, and no constraint downstream
+// would catch that.
 await rejects(
   db,
-  "REJECTS a zero daily waiver fee",
-  `UPDATE rental_rates SET waiver_daily_minor = 0
+  "REJECTS a zero daily injury-cover fee",
+  `UPDATE rental_rates SET injury_cover_daily_minor = 0
    WHERE vehicle_id = '11111111-1111-1111-1111-111111111111'`,
-  "waiver_daily_minor",
+  "injury_cover_daily_minor",
 );
 
 await allows(
   db,
-  "allows NULL, which means the waiver is not offered",
-  `UPDATE rental_rates SET waiver_daily_minor = NULL
+  "allows NULL, which means the cover is not offered",
+  `UPDATE rental_rates SET injury_cover_daily_minor = NULL
    WHERE vehicle_id = '11111111-1111-1111-1111-111111111111'`,
 );
 

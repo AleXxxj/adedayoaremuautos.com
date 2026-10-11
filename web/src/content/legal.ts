@@ -502,7 +502,8 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li>Damage caused while driving under the influence of alcohol or substances</li>
                 <li>Mechanical damage caused by misuse or neglect</li>
             </ul>
-            <p>An optional Comprehensive Damage Waiver (CDW) can be added to your rental at an extra cost, significantly reducing your financial liability in the event of an accident. Ask us for details when booking.</p>
+            <p><strong style="color: var(--silver-classic);">Injury to you is not covered.</strong> Our insurance covers the vehicle. It does not cover bodily injury to the renter or to the renter's passengers. If you are injured while driving or travelling in one of our vehicles, your own insurance, health cover or personal resources are responsible for your medical costs, and our policy will not pay them. This is disclosed again on the booking form, where you choose whether to use your own insurance, to add cover where we offer it, or to proceed without either.</p>
+            <p>Where we offer optional additional cover, the fee, what it covers and the period it applies for are stated before you book and are itemised on your receipt. We do not add cover, or charge for it, without you choosing it.</p>
         </div>
         <!-- Section 10 -->
         <div class="policy-section" id="accidents">

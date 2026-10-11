@@ -109,8 +109,8 @@ export default async function AdminRentalsPage() {
                     insuranceChoice: booking.insuranceChoice,
                     insurer: booking.insuranceProvider,
                     policyNo: booking.insurancePolicyNo,
-                    waiverCharge: booking.waiverTotalMinor
-                      ? formatMoney(money(booking.waiverTotalMinor, m.currency), m.locale)
+                    injuryCoverCharge: booking.injuryCoverTotalMinor
+                      ? formatMoney(money(booking.injuryCoverTotalMinor, m.currency), m.locale)
                       : null,
                     documentsVerifiedAt:
                       booking.documentsVerifiedAt?.toISOString() ?? null,

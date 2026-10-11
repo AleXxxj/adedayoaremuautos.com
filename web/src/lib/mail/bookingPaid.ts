@@ -34,8 +34,8 @@ export interface BookingPaidData {
   /** Formatted money strings. */
   amountPaid: string;
   depositDue: string | null;
-  /** The damage waiver, where it was taken. Itemised so the total adds up. */
-  waiverCharge: string | null;
+  /** Injury cover, where it was bought. Itemised so the total adds up. */
+  injuryCoverCharge: string | null;
   pickupLocation: string | null;
   businessPhone: string | null;
   bookingUrl: string;
@@ -64,8 +64,8 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
     // Itemised rather than folded into the total. A customer who sees one
     // figure larger than the daily rate times the days starts wondering what
     // they were charged for, and a receipt should answer that.
-    d.waiverCharge
-      ? row("Damage waiver", `${escapeHtml(d.waiverCharge)} <span style="color:${MUTED};font-size:13px">(included in the amount paid)</span>`)
+    d.injuryCoverCharge
+      ? row("Injury cover", `${escapeHtml(d.injuryCoverCharge)} <span style="color:${MUTED};font-size:13px">(included in the amount paid)</span>`)
       : "",
     d.pickupLocation ? row("Collect from", escapeHtml(d.pickupLocation)) : "",
   ]

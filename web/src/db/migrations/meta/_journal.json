@@ -204,6 +204,13 @@
       "when": 1791770000000,
       "tag": "0028_rental_documents_and_waiver",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791820000000,
+      "tag": "0029_injury_cover",
+      "breakpoints": true
     }
   ]
 }

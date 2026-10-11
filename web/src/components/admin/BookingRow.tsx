@@ -25,7 +25,7 @@ interface Booking {
   insuranceChoice: string | null;
   insurer: string | null;
   policyNo: string | null;
-  waiverCharge: string | null;
+  injuryCoverCharge: string | null;
   documentsVerifiedAt: string | null;
   documentsVerifiedByEmail: string | null;
   documentsRejectedReason: string | null;
@@ -170,9 +170,9 @@ export function BookingRow({
 
         <div className="text-right text-sm">
           <div className="font-bold tabular-nums">{booking.total}</div>
-          {booking.waiverCharge && (
+          {booking.injuryCoverCharge && (
             <div className="text-xs text-[var(--warning)]">
-              incl. {booking.waiverCharge} waiver
+              incl. {booking.injuryCoverCharge} injury cover
             </div>
           )}
           {booking.deposit && (
@@ -294,11 +294,7 @@ function DocumentCheck({
             by {booking.documentsVerifiedByEmail}
           </span>
         )}
-        {booking.insuranceChoice === "waiver" && (
-          <span className="rounded-full border border-[var(--warning)]/40 px-2 py-0.5 text-xs text-[var(--warning)]">
-            damage waiver taken
-          </span>
-        )}
+        <InsuranceBadge choice={booking.insuranceChoice} />
       </p>
     );
   }
@@ -321,9 +317,12 @@ function DocumentCheck({
           <p className="mt-0.5 text-xs">{booking.documentsRejectedReason}</p>
         ) : (
           <p className="mt-0.5 text-xs">
-            Open the licence and the insurance above. Check the name matches,
-            the licence is in date for the whole hire, and the policy covers
-            this use.
+            Open the licence above and check the name matches and it is in
+            date for the whole hire.
+            {booking.insuranceChoice === "own" &&
+              " Check their insurance certificate too."}
+            {booking.insuranceChoice === "declined" &&
+              " They have no insurance of their own and have accepted that their injury is not covered."}
           </p>
         )}
       </div>
@@ -391,5 +390,31 @@ function DocumentCheck({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Which of the three positions this renter is in.
+ *
+ * Shown at the counter, because "declined" is a real and expected state
+ * rather than a missing answer: somebody is about to be handed keys having
+ * accepted that their own injury is not covered, and whoever hands them over
+ * should know that without opening the record.
+ */
+function InsuranceBadge({ choice }: { choice: string | null }) {
+  if (!choice) return null;
+  const map: Record<string, { text: string; tone: string }> = {
+    own: { text: "own insurance", tone: "success" },
+    company: { text: "injury cover bought", tone: "success" },
+    declined: { text: "no cover — accepted", tone: "warning" },
+  };
+  const m = map[choice];
+  if (!m) return null;
+  return (
+    <span
+      className={`rounded-full border px-2 py-0.5 text-xs border-[var(--${m.tone})]/40 text-[var(--${m.tone})]`}
+    >
+      {m.text}
+    </span>
   );
 }

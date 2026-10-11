@@ -2640,10 +2640,43 @@
     color: var(--brand-400, #4e9d76);
 }
 
-/* The waiver line sits with the charges, not with the refundable deposit —
+/* The cover line sits with the charges, not with the refundable deposit —
    it is money the customer is actually spending. */
-.legacy-theme .booking-quote-waiver dt,
-.legacy-theme .booking-quote-waiver dd {
+.legacy-theme .booking-quote-cover dt,
+.legacy-theme .booking-quote-cover dd {
+    color: #e2c463;
+}
+
+/* The injury notice.
+   Shown to every renter, before the choice, and styled as a warning rather
+   than as body copy — what the business insures and what it does not is the
+   most consequential thing on this page, and the business asked for it to be
+   unmissable. */
+.legacy-theme .booking-injury-notice {
+    border: 1px solid rgba(201, 162, 39, 0.45);
+    background: rgba(201, 162, 39, 0.1);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.legacy-theme .booking-injury-notice-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 7px;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #e2c463;
+}
+
+.legacy-theme .booking-injury-notice p:last-child {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .booking-injury-notice strong {
     color: #e2c463;
 }
 

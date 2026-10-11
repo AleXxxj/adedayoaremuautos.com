@@ -53,11 +53,11 @@ const schema = z.object({
    * How the vehicle is covered while they have it.
    *
    * Required, with no default. Defaulting it either bills somebody for a
-   * waiver they never chose or hands out free cover — and a quietly assumed
+   * cover they never chose or implies cover nobody arranged — and a quietly assumed
    * answer to "who is insuring this car" is not an answer at all.
    */
-  insuranceChoice: z.enum(["own", "waiver"], {
-    message: "Please choose how the vehicle will be insured",
+  insuranceChoice: z.enum(["own", "company", "declined"], {
+    message: "Please choose how you will be covered",
   }),
   insuranceProvider: z.string().trim().max(120).optional(),
   insurancePolicyNo: z.string().trim().max(80).optional(),
@@ -165,7 +165,7 @@ export async function requestRental(
     maxDays: row.r.maxDays,
     withDriverAvailable: row.r.withDriverAvailable,
     driverDailyMinor: row.r.driverDailyMinor,
-    waiverDailyMinor: row.r.waiverDailyMinor,
+    injuryCoverDailyMinor: row.r.injuryCoverDailyMinor,
   };
 
   // Price on the server. The figure shown in the browser is a preview.
@@ -173,7 +173,7 @@ export async function requestRental(
   try {
     quote = quoteRental(tariff, days, {
       withDriver: f.withDriver,
-      waiver: f.insuranceChoice === "waiver",
+      injuryCover: f.insuranceChoice === "company",
     });
   } catch (e) {
     if (e instanceof RentalError) return { ok: false, error: e.message };
@@ -213,36 +213,46 @@ export async function requestRental(
   const licenceKey = storedLicence.key ?? null;
 
   /*
-   * Proof of insurance, required of everybody.
+   * Proof of insurance, required only of those claiming to have it.
    *
-   * Required even from renters taking our damage waiver, and that is the whole
-   * point of the distinction: the waiver means we will not pursue them for
-   * damage to OUR vehicle. It is not liability cover and does nothing for a
-   * third party they injure. Letting the fee buy an exemption from being
-   * insured at all would be selling a protection that does not exist.
+   * A renter may legitimately have none of their own: the business's policy
+   * covers the vehicle, so it is willing to hire to them provided they
+   * understand that their own injury is not covered. Demanding a certificate
+   * from somebody who has already said they do not have one would turn a
+   * disclosure into a refusal, which is not the business's position.
+   *
+   * But a renter who says they are insured has to show it, or the question
+   * was never really asked.
    */
   let insuranceKey: string | null = null;
-  if (!(insuranceFile instanceof File) || insuranceFile.size === 0) {
-    return {
-      ok: false,
-      fieldErrors: {
-        insuranceFile: [
-          "Please attach proof of your insurance. This is required even if you take our damage waiver.",
-        ],
-      },
-    };
-  }
+  if (f.insuranceChoice === "own") {
+    if (!(insuranceFile instanceof File) || insuranceFile.size === 0) {
+      return {
+        ok: false,
+        fieldErrors: {
+          insuranceFile: [
+            "Please attach your insurance certificate, or change your answer above.",
+          ],
+        },
+      };
+    }
 
-  const storedInsurance = await storeLicence(insuranceFile, "insurance");
-  if (!storedInsurance.ok) {
-    return {
-      ok: false,
-      fieldErrors: {
-        insuranceFile: [storedInsurance.error ?? "Could not read that file."],
-      },
-    };
+    const storedInsurance = await storeLicence(insuranceFile, "insurance");
+    if (!storedInsurance.ok) {
+      return {
+        ok: false,
+        fieldErrors: {
+          insuranceFile: [storedInsurance.error ?? "Could not read that file."],
+        },
+      };
+    }
+    insuranceKey = storedInsurance.key ?? null;
+  } else if (insuranceFile instanceof File && insuranceFile.size > 0) {
+    // Attached anyway. Kept, because it costs nothing and is useful at
+    // pickup, but never allowed to fail a booking that did not require it.
+    const stored = await storeLicence(insuranceFile, "insurance");
+    insuranceKey = stored.ok ? (stored.key ?? null) : null;
   }
-  insuranceKey = storedInsurance.key ?? null;
 
   /*
    * Who sent them, if anybody.
@@ -285,9 +295,16 @@ export async function requestRental(
         // total so the amount on the invoice can still be explained after the
         // fee changes — the same reason a commission stores its own rate.
         insuranceChoice: f.insuranceChoice,
-        waiverDailyMinor:
-          f.insuranceChoice === "waiver" ? (row.r.waiverDailyMinor ?? null) : null,
-        waiverTotalMinor: quote.waiverMinor,
+        injuryCoverDailyMinor:
+          f.insuranceChoice === "company"
+            ? (row.r.injuryCoverDailyMinor ?? null)
+            : null,
+        injuryCoverTotalMinor: quote.injuryCoverMinor,
+        // When they were shown, in so many words, that their own injury is
+        // not covered by the business's policy. Stamped for everybody, not
+        // only those who decline: a renter with their own insurance should
+        // also know where our cover stops.
+        injuryNoticeAckAt: new Date(),
         insuranceStorageKey: insuranceKey,
         insuranceUploadedAt: insuranceKey ? new Date() : null,
         insuranceProvider: f.insuranceProvider || null,

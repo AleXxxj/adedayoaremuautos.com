@@ -46,7 +46,7 @@ const US: RentalTariff = {
   maxDays: 90,
   withDriverAvailable: true,
   driverDailyMinor: 5_000,
-  waiverDailyMinor: 1_500,
+  injuryCoverDailyMinor: 1_500,
 };
 
 // ── 1. Straight daily ──────────────────────────────────────────────────────
@@ -254,19 +254,19 @@ console.log("\nDay counting");
   );
 }
 
-// ── The damage waiver ──────────────────────────────────────────────────────
+// ── The injury cover ──────────────────────────────────────────────────────
 //
 // The fee has to be in the total the customer is shown and charged. A waiver
 // quoted separately, or added at the counter, is the late-fee pattern the FTC
 // rule on deceptive fees is aimed squarely at — and the reason the business
 // asked for it to be boldly displayed in the first place.
-console.log("\nDamage waiver");
+console.log("\nInjury cover");
 {
   const plain = quoteRental(US, 7);
-  const covered = quoteRental(US, 7, { waiver: true });
+  const covered = quoteRental(US, 7, { injuryCover: true });
 
-  eq("no waiver unless asked for", plain.waiverMinor, 0);
-  eq("seven days at $15", covered.waiverMinor, 10_500);
+  eq("no cover unless asked for", plain.injuryCoverMinor, 0);
+  eq("seven days at $15", covered.injuryCoverMinor, 10_500);
   eq("the fee is inside the total charged", covered.totalMinor, plain.totalMinor + 10_500);
   eq("the hire itself is unchanged", covered.hireMinor, plain.hireMinor);
   eq("the deposit is unchanged", covered.depositMinor, plain.depositMinor);
@@ -278,24 +278,24 @@ console.log("\nDamage waiver");
   // The waiver must follow the car, not the invoice: charging cover for the
   // seventh day is billing for a day the vehicle is already back.
   const cheapWeek: RentalTariff = { ...US, weeklyMinor: 40_000 };
-  const six = quoteRental(cheapWeek, 6, { waiver: true });
+  const six = quoteRental(cheapWeek, 6, { injuryCover: true });
   eq("six days priced as a week", six.chargedDays, 7);
   eq("the hire is the weekly rate", six.hireMinor, 40_000);
-  eq("but the waiver is six days, not seven", six.waiverMinor, 9_000);
+  eq("but the cover is six days, not seven", six.injuryCoverMinor, 9_000);
 
   // Both extras at once, each on actual days.
-  const both = quoteRental(US, 3, { waiver: true, withDriver: true });
-  eq("driver and waiver together", both.totalMinor, both.hireMinor + 15_000 + 4_500);
+  const both = quoteRental(US, 3, { injuryCover: true, withDriver: true });
+  eq("driver and cover together", both.totalMinor, both.hireMinor + 15_000 + 4_500);
 
   // A vehicle with no fee set must not give the cover away.
-  const noFee: RentalTariff = { ...US, waiverDailyMinor: null };
+  const noFee: RentalTariff = { ...US, injuryCoverDailyMinor: null };
   let refused = false;
   try {
-    quoteRental(noFee, 3, { waiver: true });
+    quoteRental(noFee, 3, { injuryCover: true });
   } catch (e) {
     refused = e instanceof RentalError;
   }
-  ok("REFUSES the waiver where no fee is set", refused);
+  ok("REFUSES cover where no fee is set", refused);
   eq("and still quotes the hire normally", quoteRental(noFee, 3).totalMinor, 22_500);
 }
 

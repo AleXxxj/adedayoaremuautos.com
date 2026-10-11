@@ -168,8 +168,8 @@ export default async function EditVehiclePage({
                 withDriver: tariff?.withDriverAvailable ?? false,
                 driverDaily: tariff?.driverDailyMinor != null
                   ? toMajor(money(tariff.driverDailyMinor, market.currency)) : "",
-                waiverDaily: tariff?.waiverDailyMinor != null
-                  ? toMajor(money(tariff.waiverDailyMinor, market.currency)) : "",
+                injuryCoverDaily: tariff?.injuryCoverDailyMinor != null
+                  ? toMajor(money(tariff.injuryCoverDailyMinor, market.currency)) : "",
               }}
             />
           </section>

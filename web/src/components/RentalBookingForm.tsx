@@ -53,13 +53,15 @@ export function RentalBookingForm({
   /*
    * Defaults to their own insurance, never to the paid option.
    *
-   * Pre-selecting the waiver would put a charge in the total that the customer
+   * Pre-selecting the paid option would put a charge in the total the customer
    * did not ask for and might not notice — which is exactly the pattern the
    * FTC's rule on deceptive fees is aimed at, and the opposite of what the
    * business asked for in wanting it clearly communicated.
    */
-  const [insurance, setInsurance] = useState<"own" | "waiver">("own");
-  const waiverOffered = (tariff.waiverDailyMinor ?? 0) > 0;
+  const [insurance, setInsurance] = useState<"own" | "company" | "declined">(
+    "own",
+  );
+  const coverOffered = (tariff.injuryCoverDailyMinor ?? 0) > 0;
 
   /*
    * Everything the customer typed or attached, held in state.
@@ -112,15 +114,15 @@ export function RentalBookingForm({
       setDocError("Please attach a photo of your driving licence.");
       return;
     }
-    if (!insuranceFile) {
+    if (insurance === "own" && !insuranceFile) {
       setDocError(
-        "Please attach proof of your insurance. This is required even if you take our damage waiver.",
+        "Please attach your insurance certificate, or change your answer above.",
       );
       return;
     }
     setDocError(null);
     formData.set("licenceFile", licenceFile);
-    formData.set("insuranceFile", insuranceFile);
+    if (insuranceFile) formData.set("insuranceFile", insuranceFile);
     return action(formData);
   };
 
@@ -136,14 +138,14 @@ export function RentalBookingForm({
       return {
         quote: quoteRental(tariff, days, {
           withDriver,
-          waiver: insurance === "waiver" && waiverOffered,
+          injuryCover: insurance === "company" && coverOffered,
         }),
         error: null as string | null,
       };
     } catch (e) {
       return { quote: null, error: e instanceof RentalError ? e.message : "Cannot price those dates." };
     }
-  }, [from, to, withDriver, insurance, waiverOffered, tariff]);
+  }, [from, to, withDriver, insurance, coverOffered, tariff]);
 
   const fmt = (minor: number) =>
     formatMoney(money(minor, market.currency), market.locale, { showDecimals: true });
@@ -265,13 +267,13 @@ export function RentalBookingForm({
             {/* In the itemised quote AND inside the total below it. A fee the
                 customer only meets at the counter is the thing the business
                 explicitly asked to avoid. */}
-            {preview.quote.waiverMinor > 0 && (
-              <div className="booking-quote-waiver">
+            {preview.quote.injuryCoverMinor > 0 && (
+              <div className="booking-quote-cover">
                 <dt className="booking-quote-line">
-                  Damage waiver × {preview.quote.days} day
+                  Injury cover × {preview.quote.days} day
                   {preview.quote.days === 1 ? "" : "s"}
                 </dt>
-                <dd>{fmt(preview.quote.waiverMinor)}</dd>
+                <dd>{fmt(preview.quote.injuryCoverMinor)}</dd>
               </div>
             )}
             <div className="booking-quote-total">
@@ -314,12 +316,26 @@ export function RentalBookingForm({
       </label>
 
       {/* ── Insurance ─────────────────────────────────────────────────────
-          The one decision on this form that changes the price, so it is
-          stated as a choice between two priced options rather than an
-          opt-in checkbox. The fee appears here, in the quote above, and in
-          the total — three places, before anybody pays anything. */}
+          The notice comes first, and it is shown to everybody rather than
+          only to the person declining cover. What the business insures and
+          what it does not is the single most consequential thing on this
+          page, and a renter with their own policy still needs to know where
+          our cover stops. */}
+      <div className="booking-injury-notice">
+        <p className="booking-injury-notice-head">
+          <i className="fas fa-triangle-exclamation" aria-hidden="true" />
+          The vehicle is insured. You are not.
+        </p>
+        <p>
+          Our insurance covers this vehicle — if it is hit, or hits something,
+          that is covered. It does <strong>not</strong> cover injury to you.
+          If you are hurt while driving it, your medical costs are not covered
+          by our policy.
+        </p>
+      </div>
+
       <fieldset className="booking-insurance">
-        <legend>How will the vehicle be insured?</legend>
+        <legend>So how will you be covered?</legend>
 
         <label
           className={`booking-insurance-option${insurance === "own" ? " is-chosen" : ""}`}
@@ -332,50 +348,67 @@ export function RentalBookingForm({
             onChange={() => setInsurance("own")}
           />
           <span className="booking-insurance-body">
-            <strong>I will use my own insurance</strong>
+            <strong>I have my own insurance</strong>
             <span className="booking-insurance-price">No extra charge</span>
             <small>
-              Attach your certificate below. Your policy must cover you to
-              drive this vehicle for the use you intend.
+              Attach your certificate below so we can check it before you
+              collect the vehicle.
             </small>
           </span>
         </label>
 
-        {waiverOffered ? (
+        {coverOffered && (
           <label
-            className={`booking-insurance-option${insurance === "waiver" ? " is-chosen" : ""}`}
+            className={`booking-insurance-option${insurance === "company" ? " is-chosen" : ""}`}
           >
             <input
               type="radio"
               name="insuranceChoice"
-              value="waiver"
-              checked={insurance === "waiver"}
-              onChange={() => setInsurance("waiver")}
+              value="company"
+              checked={insurance === "company"}
+              onChange={() => setInsurance("company")}
             />
             <span className="booking-insurance-body">
-              <strong>Add our damage waiver</strong>
+              <strong>Cover me under your insurance</strong>
               {/* The figure, large and in the option itself — not in a
                   footnote, and not only in the total. */}
               <span className="booking-insurance-price booking-insurance-fee">
-                + {fmt(tariff.waiverDailyMinor!)} per day
-                {preview?.quote && insurance === "waiver" && (
-                  <em> — {fmt(preview.quote.waiverMinor)} for this hire</em>
+                + {fmt(tariff.injuryCoverDailyMinor!)} per day
+                {preview?.quote && insurance === "company" && (
+                  <em> — {fmt(preview.quote.injuryCoverMinor)} for this hire</em>
                 )}
               </span>
               <small>
-                We will not charge you for damage to this vehicle beyond your
-                deposit. <strong>This is not insurance</strong> — it does not
-                cover injury or damage to anyone else, so you still need your
-                own cover for that.
+                Adds cover for injury to you for the length of the hire.
               </small>
             </span>
           </label>
-        ) : (
-          <p className="booking-insurance-note">
-            Our damage waiver is not available on this vehicle, so your own
-            insurance is required.
-          </p>
         )}
+
+        {/* An allowed choice, and the expected one. It is not hidden behind
+            small print or made to look like a mistake — but it is explicit,
+            because the point of the notice above is being able to show
+            afterwards that this person read it and chose. */}
+        <label
+          className={`booking-insurance-option${insurance === "declined" ? " is-chosen" : ""}`}
+        >
+          <input
+            type="radio"
+            name="insuranceChoice"
+            value="declined"
+            checked={insurance === "declined"}
+            onChange={() => setInsurance("declined")}
+          />
+          <span className="booking-insurance-body">
+            <strong>I have none, and I accept that</strong>
+            <span className="booking-insurance-price">No extra charge</span>
+            <small>
+              I understand that if I am injured while driving this vehicle,
+              <strong> Adedayo Aremu Autos has no insurance covering me</strong>,
+              and that my medical costs would be my own.
+            </small>
+          </span>
+        </label>
 
         {err("insuranceChoice") && <Err>{err("insuranceChoice")}</Err>}
       </fieldset>
@@ -403,11 +436,17 @@ export function RentalBookingForm({
           {err("licenceFile") && <Err>{err("licenceFile")}</Err>}
         </label>
 
-        {/* Required of everybody, including renters taking the waiver — which
-            is the whole point of the distinction above. */}
-        <label className="booking-field">
+        {/* Asked for only from renters who say they have a policy. Demanding
+            a certificate from somebody who has already said they have none
+            would turn the notice above into a refusal, which is not the
+            business's position. */}
+        <label
+          className="booking-field"
+          hidden={insurance !== "own"}
+          aria-hidden={insurance !== "own"}
+        >
           <span>
-            Proof of your insurance <em>required</em>
+            Your insurance certificate <em>required</em>
           </span>
           <input
             type="file"
@@ -473,7 +512,8 @@ export function RentalBookingForm({
         <span>
           I am 21 or over, I hold a full licence that is valid for the whole
           hire period, and the documents I have attached are my own. I
-          understand the vehicle is not released until they have been checked.
+          understand the vehicle is not released until they have been
+          checked, and I have read the notice above about injury cover.
         </span>
       </label>
       {err("confirmEligible") && <Err>{err("confirmEligible")}</Err>}

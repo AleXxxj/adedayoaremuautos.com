@@ -57,7 +57,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       currency: rentalBookings.currency,
       partnerId: rentalBookings.referralPartnerId,
       status: rentalBookings.status,
-      waiverTotalMinor: rentalBookings.waiverTotalMinor,
+      injuryCoverTotalMinor: rentalBookings.injuryCoverTotalMinor,
     })
     .from(rentalBookings)
     .where(eq(rentalBookings.id, bookingId))
@@ -97,21 +97,21 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
     );
 
   /*
-   * The hire, not the damage waiver.
+   * The hire, not the injury cover.
    *
-   * The waiver fee is charged in the same payment as the hire, so the cleared
-   * total includes it — but it exists to cover the business's own insurance
-   * cost and the risk it is absorbing, not as margin to share. The agreement
-   * already excludes refundable deposits and third-party charges on the same
-   * reasoning.
+   * The cover fee is charged in the same payment as the hire, so the cleared
+   * total includes it — but it buys the renter an insurance benefit and pays
+   * for the business's own premium, rather than being margin to share. The
+   * agreement already excludes refundable deposits and third-party charges on
+   * the same reasoning.
    *
    * Clamped at zero rather than trusted: a refund recorded oddly could in
-   * principle leave the waiver larger than the cleared total, and a negative
+   * principle leave the cover larger than the cleared total, and a negative
    * basis would turn a commission into a deduction.
    */
   const clearedMinor = Number(paid?.total ?? 0);
-  const waiverMinor = Number(booking.waiverTotalMinor ?? 0);
-  const basisMinor = Math.max(0, clearedMinor - waiverMinor);
+  const coverMinor = Number(booking.injuryCoverTotalMinor ?? 0);
+  const basisMinor = Math.max(0, clearedMinor - coverMinor);
   if (basisMinor <= 0) return;
 
   // The hire rate, not the sale rate. Through `rateFor` rather than reading

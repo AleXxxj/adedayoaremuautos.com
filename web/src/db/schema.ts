@@ -235,8 +235,9 @@ export const vehicleMedia = pgTable(
 /* ── Rentals ───────────────────────────────────────────────────────────── */
 
 export const rentalInsuranceChoice = pgEnum("rental_insurance_choice", [
-  "own",    // the renter shows their own policy
-  "waiver", // the renter takes our damage waiver and pays for it
+  "own",      // the renter shows their own policy
+  "company",  // the renter pays to be covered by ours for injury
+  "declined", // the renter has neither and accepts that, knowingly
 ]);
 
 export const rentalRates = pgTable("rental_rates", {
@@ -257,14 +258,15 @@ export const rentalRates = pgTable("rental_rates", {
   driverDailyMinor: bigint("driver_daily_minor", { mode: "number" }),
 
   /**
-   * The daily damage-waiver fee.
+   * The daily fee for covering the renter's own injury under the business's
+   * policy.
    *
-   * NULL means the waiver is not offered on this vehicle, and that is the
-   * deliberate default: a vehicle whose fee nobody has set must not quietly
-   * hand out free cover. `quoteRental` refuses the option rather than pricing
+   * NULL means it is not offered on this vehicle, and that is the deliberate
+   * default: a vehicle whose fee nobody has set must not imply cover that
+   * nobody has arranged. `quoteRental` refuses the option rather than pricing
    * it at zero.
    */
-  waiverDailyMinor: bigint("waiver_daily_minor", { mode: "number" }),
+  injuryCoverDailyMinor: bigint("injury_cover_daily_minor", { mode: "number" }),
 });
 
 export const rentalBookings = pgTable(
@@ -302,18 +304,24 @@ export const rentalBookings = pgTable(
     licenceUploadedAt: timestamp("licence_uploaded_at", { withTimezone: true }),
 
     /* ── Insurance ────────────────────────────────────────────────────
-       Either the renter shows their own policy, or they take our damage
-       waiver and pay a daily fee for it. Proof of their own insurance is
-       required either way: the waiver means we will not pursue them for
-       damage to OUR vehicle, and does nothing for a third party they
-       injure. Deliberately not called insurance — selling that needs a
-       licence, where a waiver is a contract term. */
+       The business's policy covers the vehicle: if it is hit, or hits
+       something, that is insured. It does not cover the renter's own
+       injury — North Carolina is an at-fault state with no mandatory
+       personal injury protection, so a renter hurt in a crash they caused
+       has nothing here paying their medical bills.
+
+       Hence three positions, not two: their own insurance, paid cover
+       under ours, or neither — knowingly. The third is allowed and is
+       expected to be the common one, and is recorded rather than inferred
+       from an empty column, because an absence proves nothing later. */
     insuranceChoice: rentalInsuranceChoice("insurance_choice"),
     /** The fee as it stood when booked, so the invoice stays explainable. */
-    waiverDailyMinor: bigint("waiver_daily_minor", { mode: "number" }),
-    waiverTotalMinor: bigint("waiver_total_minor", { mode: "number" })
+    injuryCoverDailyMinor: bigint("injury_cover_daily_minor", { mode: "number" }),
+    injuryCoverTotalMinor: bigint("injury_cover_total_minor", { mode: "number" })
       .notNull()
       .default(0),
+    /** When they were told, in so many words, that their injury is not covered. */
+    injuryNoticeAckAt: timestamp("injury_notice_ack_at", { withTimezone: true }),
 
     /** A storage key in the PRIVATE bucket, never a URL — as with the licence. */
     insuranceStorageKey: text("insurance_storage_key"),
