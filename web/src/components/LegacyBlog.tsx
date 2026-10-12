@@ -99,8 +99,8 @@ export function LegacyNewsletter({
                 Day and month only — the year is never requested. */}
             <details className="newsletter-extra">
               <summary>
-                <i className="fas fa-gift" aria-hidden="true" /> Add your
-                birthday to get a promo offer <span>optional</span>
+                <i className="fas fa-gift" aria-hidden="true" /> Add birthday
+                for promo offer <span>optional</span>
               </summary>
               <p className="newsletter-extra-why">
                 We use it once a year — to wish you a happy birthday and send
