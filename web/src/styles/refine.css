@@ -2652,6 +2652,27 @@
    than as body copy — what the business insures and what it does not is the
    most consequential thing on this page, and the business asked for it to be
    unmissable. */
+/* The hold, on the confirmation panel. The sentence the reservation exists
+   for, so it is a panel rather than another line of body copy. */
+.legacy-theme .booking-done-hold {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px solid rgba(78, 157, 118, 0.45);
+    background: rgba(78, 157, 118, 0.1);
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #b4d4c2;
+    text-align: left;
+}
+
+.legacy-theme .booking-done-hold strong {
+    color: #fff;
+}
+
 .legacy-theme .booking-injury-notice {
     border: 1px solid rgba(201, 162, 39, 0.45);
     background: rgba(201, 162, 39, 0.1);
@@ -3834,4 +3855,144 @@
 /* The public header is shorter on a phone, and the admin has its own bar. */
 @media (max-width: 600px) {
     .toast-stack { top: 76px; }
+}
+
+/* ── The reservation page ───────────────────────────────────────────────────
+   Inside the market layout, so the legacy reset applies and utility spacing
+   would be flattened. Written here for the same reason the booking form is.
+   This is the page a customer opens standing on the forecourt deciding
+   whether to pay, so it is sized for a phone held at arm's length. */
+.legacy-theme .resv-page {
+    display: flex;
+    justify-content: center;
+    padding: 48px 18px 72px;
+}
+
+.legacy-theme .resv-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 28px 24px;
+    border: 1px solid var(--border-subtle, #262626);
+    border-radius: 16px;
+    background: var(--surface-1, #101010);
+    text-align: center;
+}
+
+.legacy-theme .resv-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted, #7d7d7d);
+}
+
+.legacy-theme .resv-title {
+    margin: 8px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.legacy-theme .resv-body {
+    margin: 14px 0 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .resv-tick {
+    font-size: 34px;
+    line-height: 1;
+}
+
+.legacy-theme .resv-details {
+    margin: 22px 0 0;
+    padding: 18px;
+    border: 1px solid var(--border-subtle, #262626);
+    border-radius: 12px;
+    background: var(--surface-2, #141414);
+    text-align: left;
+}
+
+.legacy-theme .resv-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+}
+
+.legacy-theme .resv-row + .resv-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.legacy-theme .resv-row-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #7d7d7d);
+}
+
+.legacy-theme .resv-row-value {
+    margin: 0;
+    font-size: 15px;
+    color: #e8e8e8;
+    text-align: right;
+}
+
+.legacy-theme .resv-amount {
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.legacy-theme .resv-muted {
+    color: var(--text-muted, #7d7d7d);
+    font-size: 13px;
+}
+
+/* The hold. The reason the customer can take their time, so it reads as
+   reassurance rather than as small print. */
+.legacy-theme .resv-held,
+.legacy-theme .resv-lapsed {
+    margin: 20px 0 0;
+    padding: 13px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.legacy-theme .resv-held {
+    border: 1px solid rgba(78, 157, 118, 0.45);
+    background: rgba(78, 157, 118, 0.1);
+    color: #b4d4c2;
+}
+
+.legacy-theme .resv-held strong {
+    color: #fff;
+}
+
+.legacy-theme .resv-lapsed {
+    border: 1px solid rgba(201, 162, 39, 0.45);
+    background: rgba(201, 162, 39, 0.1);
+    color: #e2c463;
+}
+
+.legacy-theme .resv-pay {
+    margin-top: 20px;
+}
+
+.legacy-theme .resv-note {
+    margin: 16px 0 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .resv-link {
+    color: var(--brand-400, #4e9d76);
+    text-decoration: underline;
 }

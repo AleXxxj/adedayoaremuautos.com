@@ -1,7 +1,9 @@
 "use server";
 
-import { and, eq, isNotNull, lt, sql } from "drizzle-orm";
+import { violates } from "@/lib/dbError";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
+import { releaseExpiredHolds, HOLD_MINUTES } from "@/lib/rentalHolds";
 import { rentalBookings, rentalPayments, vehicles } from "@/db/schema";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
@@ -23,41 +25,6 @@ export interface StartPaymentResult {
   error?: string;
 }
 
-/** How long a customer has at the checkout before the dates are released. */
-const HOLD_MINUTES = 30;
-
-/**
- * Releases holds that have run out.
- *
- * Lazy rather than scheduled. A hold only matters when somebody else wants
- * those dates, and that is exactly when this runs — so a cron job to sweep
- * them would be a moving part earning nothing. Cheap, indexed, and it means
- * an abandoned checkout cannot block a vehicle indefinitely.
- */
-async function releaseExpiredHolds(): Promise<void> {
-  await db
-    .update(rentalBookings)
-    .set({ paymentHoldUntil: null })
-    .where(
-      and(
-        eq(rentalBookings.status, "quote"),
-        isNotNull(rentalBookings.paymentHoldUntil),
-        lt(rentalBookings.paymentHoldUntil, new Date()),
-      ),
-    );
-
-  // The attempts behind those holds are dead too, and a row left "pending"
-  // forever is a payment nobody can account for.
-  await db
-    .update(rentalPayments)
-    .set({ status: "expired" })
-    .where(
-      and(
-        eq(rentalPayments.status, "pending"),
-        lt(rentalPayments.createdAt, new Date(Date.now() - HOLD_MINUTES * 60_000)),
-      ),
-    );
-}
 
 /**
  * Starts a card payment for a booking that has already been requested.
@@ -124,15 +91,27 @@ export async function startRentalPayment(
    * a payment page exists and before any money moves. Doing it the other way
    * round would mean discovering the clash with a paid card in hand.
    */
-  const holdUntil = new Date(Date.now() + HOLD_MINUTES * 60_000);
+  /*
+   * Never shorter than the hold they already have.
+   *
+   * A reservation holds the car for two days. Starting a checkout and setting
+   * the hold to thirty minutes would quietly cut that to half an hour, so a
+   * customer who opens the payment page, thinks better of it and closes the
+   * tab would lose the rest of a reservation they were promised in writing.
+   * The checkout extends a hold; it never trims one.
+   */
+  const checkoutHold = new Date(Date.now() + HOLD_MINUTES * 60_000);
+  const existing = row.b.paymentHoldUntil;
+  const holdUntil =
+    existing && existing > checkoutHold ? existing : checkoutHold;
+
   try {
     await db
       .update(rentalBookings)
       .set({ paymentHoldUntil: holdUntil })
       .where(eq(rentalBookings.id, bookingId));
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("rental_bookings_no_overlap")) {
+    if (violates(e, "rental_bookings_no_overlap")) {
       return {
         ok: false,
         error:

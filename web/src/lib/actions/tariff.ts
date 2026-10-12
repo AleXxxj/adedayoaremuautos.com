@@ -1,5 +1,6 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -108,7 +109,7 @@ export async function saveTariff(
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("rental_rates_non_negative")) {
+    if (violates(e, "rental_rates_non_negative")) {
       return { ok: false, error: "Rates cannot be negative." };
     }
     return { ok: false, error: `Could not save: ${msg}` };

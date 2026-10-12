@@ -11,6 +11,11 @@
  */
 
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "../src/lib/rental";
+import {
+  reservationExpiry,
+  canReserve,
+  holdRemaining,
+} from "../src/lib/reservation";
 
 let passed = 0;
 let failed = 0;
@@ -297,6 +302,51 @@ console.log("\nInjury cover");
   }
   ok("REFUSES cover where no fee is set", refused);
   eq("and still quotes the hire normally", quoteRental(noFee, 3).totalMinor, 22_500);
+}
+
+// ── Reservation holds ──────────────────────────────────────────────────────
+//
+// A reservation that outlasts the hire it protects blocks the car for a day
+// after the booking has already failed to happen; one that is offered on a
+// hire starting in twenty minutes promises time the business cannot give.
+console.log("\nReservation holds");
+{
+  const at = (iso: string) => new Date(iso);
+  const now = at("2026-10-12T09:00:00Z");
+
+  // Ordinary case: a hire well in the future gets the full window.
+  const farOff = at("2026-11-01T09:00:00Z");
+  eq(
+    "a distant hire is held the full 48 hours",
+    reservationExpiry(farOff, now).toISOString(),
+    "2026-10-14T09:00:00.000Z",
+  );
+
+  // The hold must never outlast the thing it protects.
+  const tomorrow = at("2026-10-13T08:00:00Z");
+  eq(
+    "a hire tomorrow is held only until pickup",
+    reservationExpiry(tomorrow, now).toISOString(),
+    tomorrow.toISOString(),
+  );
+
+  const exactly48 = at("2026-10-14T09:00:00Z");
+  eq(
+    "a hire exactly 48 hours out is held to pickup, not beyond",
+    reservationExpiry(exactly48, now).toISOString(),
+    exactly48.toISOString(),
+  );
+
+  ok("a hire in three hours can be reserved", canReserve(at("2026-10-12T12:00:00Z"), now));
+  ok("a hire in ninety minutes can be reserved", canReserve(at("2026-10-12T10:30:00Z"), now));
+  ok("a hire in twenty minutes cannot", !canReserve(at("2026-10-12T09:20:00Z"), now));
+  ok("a hire already started cannot", !canReserve(at("2026-10-12T08:00:00Z"), now));
+
+  eq("remaining, two days", holdRemaining(at("2026-10-14T09:00:00Z"), now), "2 days");
+  eq("remaining, six hours", holdRemaining(at("2026-10-12T15:00:00Z"), now), "6 hours");
+  eq("remaining, one hour", holdRemaining(at("2026-10-12T10:00:00Z"), now), "1 hour");
+  eq("remaining, minutes", holdRemaining(at("2026-10-12T09:45:00Z"), now), "45 minutes");
+  eq("remaining, gone", holdRemaining(at("2026-10-12T08:00:00Z"), now), "expired");
 }
 
 console.log(

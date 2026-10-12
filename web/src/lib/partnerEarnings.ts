@@ -1,3 +1,4 @@
+import { violates } from "@/lib/dbError";
 import "server-only";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
@@ -138,7 +139,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
   } catch (e) {
     const message = e instanceof Error ? e.message : "";
     // The ordinary case: this webhook has been delivered before.
-    if (message.includes("partner_earnings_booking_unique")) return;
+    if (violates(e, "partner_earnings_booking_unique")) return;
     // Never allowed to fail the payment that triggered it. A commission the
     // business has to work out by hand is recoverable; a 500 back to Stripe
     // makes it retry a payment that was already recorded.
@@ -256,7 +257,7 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "";
-    if (message.includes("partner_earnings_deal_unique")) return;
+    if (violates(e, "partner_earnings_deal_unique")) return;
     console.error("[partner] could not record sale commission", e);
   }
 }

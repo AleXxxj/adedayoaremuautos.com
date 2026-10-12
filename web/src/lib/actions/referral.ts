@@ -1,5 +1,6 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
 import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -187,8 +188,7 @@ export async function joinReferralProgramme(
       revalidatePath("/admin/referrals");
       return { ok: true, pending: true };
     } catch (e) {
-      const message = e instanceof Error ? e.message : "";
-      if (!message.includes("referral_partners_code_unique")) {
+      if (!violates(e, "referral_partners_code_unique")) {
         console.error("[referral] application failed", e);
         return { ok: false, error: "Something went wrong. Please try again, or call us." };
       }
@@ -541,8 +541,7 @@ export async function updatePartner(
       })
       .where(eq(referralPartners.id, v.id));
   } catch (e) {
-    const message = e instanceof Error ? e.message : "";
-    if (message.includes("referral_partners_code_unique")) {
+    if (violates(e, "referral_partners_code_unique")) {
       return { ok: false, fieldErrors: { code: ["That code is already taken."] } };
     }
     return { ok: false, error: "Could not save that change." };

@@ -1,5 +1,6 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -499,15 +500,15 @@ export async function deleteVehiclePhoto(formData: FormData): Promise<ActionResu
 function friendlyDbError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
 
-  if (msg.includes("vehicles_vin_unique_idx"))
+  if (violates(e, "vehicles_vin_unique_idx"))
     return "That VIN is already on another listing.";
-  if (msg.includes("vehicles_vin_well_formed"))
+  if (violates(e, "vehicles_vin_well_formed"))
     return "A VIN is 17 characters and does not use the letters I, O or Q. Leave it blank if you do not have it yet.";
-  if (msg.includes("vehicles_currency_matches_market"))
+  if (violates(e, "vehicles_currency_matches_market"))
     return "Currency does not match the market. This is a bug — please report it.";
-  if (msg.includes("vehicles_available_requires_price"))
+  if (violates(e, "vehicles_available_requires_price"))
     return "A vehicle cannot be published without a price.";
-  if (msg.includes("vehicles_market_slug_idx"))
+  if (violates(e, "vehicles_market_slug_idx"))
     return "Another vehicle in this market already uses that name.";
 
   return `Could not save: ${msg}`;

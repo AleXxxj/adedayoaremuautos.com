@@ -1,5 +1,6 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -112,16 +113,16 @@ export async function saveTier(
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     // The unique index is on (market, slug), and the slug comes from the name.
-    if (message.includes("rental_tiers_market_slug_unique")) {
+    if (violates(e, "rental_tiers_market_slug_unique")) {
       return {
         ok: false,
         fieldErrors: { name: ["A category with this name already exists in this market"] },
       };
     }
-    if (message.includes("rental_tiers_longer_is_cheaper")) {
+    if (violates(e, "rental_tiers_longer_is_cheaper")) {
       return { ok: false, error: "A longer hire must never cost more than the shorter one." };
     }
-    if (message.includes("rental_tiers_prices_positive")) {
+    if (violates(e, "rental_tiers_prices_positive")) {
       return { ok: false, error: "Rates must be more than zero." };
     }
     console.error("[tiers] save failed", e);

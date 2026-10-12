@@ -367,6 +367,25 @@ export const rentalBookings = pgTable(
     paymentHoldUntil: timestamp("payment_hold_until", { withTimezone: true }),
 
     /**
+     * How the customer gets back to their own booking to pay for it.
+     *
+     * Random rather than the booking id: the id appears in staff URLs and
+     * logs, while this travels by email and may be forwarded or left open on
+     * a phone. It unlocks a page showing the vehicle, dates and amount —
+     * never the renter's name, licence or documents.
+     */
+    reservationToken: text("reservation_token"),
+
+    /**
+     * When the customer was told the hold runs out.
+     *
+     * Separate from `paymentHoldUntil`, which moves — starting a checkout
+     * extends the hold, and an abandoned checkout must never leave somebody
+     * with less time than their email promised them.
+     */
+    reservedUntil: timestamp("reserved_until", { withTimezone: true }),
+
+    /**
      * The partner who sent this customer, if any.
      *
      * Commission was only ever recorded against a sale, so a partner whose

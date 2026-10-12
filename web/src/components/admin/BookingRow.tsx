@@ -4,7 +4,11 @@ import { useActionToast } from "@/components/Toast";
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { updateBookingStatus, reviewBookingDocuments } from "@/lib/actions/rentals";
+import {
+  updateBookingStatus,
+  reviewBookingDocuments,
+  adjustHold,
+} from "@/lib/actions/rentals";
 import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 import { LicenceLink } from "./LicenceLink";
@@ -21,6 +25,10 @@ interface Booking {
   licence: string | null;
   notes: string | null;
   hasLicenceFile: boolean;
+  /** ISO, while the vehicle is held for an unpaid customer. */
+  reservedUntil: string | null;
+  /** "6 hr", "2 days" — computed on the server, which is where the clock is. */
+  heldFor: string | null;
   hasInsuranceFile: boolean;
   insuranceChoice: string | null;
   insurer: string | null;
@@ -181,6 +189,7 @@ export function BookingRow({
         </div>
       </div>
 
+      <HoldPanel booking={booking} />
       <DocumentCheck booking={booking} />
 
       {state?.error && (
@@ -416,5 +425,77 @@ function InsuranceBadge({ choice }: { choice: string | null }) {
     >
       {m.text}
     </span>
+  );
+}
+
+/**
+ * The car is being held for somebody who has not paid.
+ *
+ * Shown because it is the thing that decides whether a car can be promised to
+ * the person on the phone. Before reservations existed an unpaid quote held
+ * nothing, so this screen never had to say anything about it; now a quote can
+ * be the reason a week is unavailable, and that has to be visible rather than
+ * discovered by a constraint error.
+ */
+function HoldPanel({
+  booking,
+}: {
+  booking: Pick<Booking, "id" | "status" | "reservedUntil" | "heldFor">;
+}) {
+  const [state, action, pending] = useActionState(adjustHold, null);
+  useActionToast(state);
+
+  // `heldFor` is computed on the server rather than from Date.now() here.
+  // Reading the clock during render is impure — the compiler rejects it, and
+  // rightly: the value would differ between the server's HTML and the
+  // browser's first paint.
+  if (booking.status !== "quote" || !booking.reservedUntil || !booking.heldFor) {
+    return null;
+  }
+
+  const until = new Date(booking.reservedUntil);
+  const left = booking.heldFor;
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-[var(--border-subtle)] pt-3">
+      <span className="rounded-full border border-[var(--warning)]/40 px-2.5 py-0.5 text-xs text-[var(--warning)]">
+        <i className="fas fa-lock" aria-hidden="true" /> Held, unpaid — {left}{" "}
+        left
+      </span>
+      <span className="text-xs text-[var(--text-muted)]">
+        until{" "}
+        {until.toLocaleString(undefined, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          hour: "numeric",
+          minute: "2-digit",
+        })}
+      </span>
+
+      <form action={action} className="inline">
+        <input type="hidden" name="id" value={booking.id} />
+        <input type="hidden" name="action" value="extend" />
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg border border-[var(--border-default)] px-2.5 py-1 text-xs disabled:opacity-50"
+        >
+          Extend
+        </button>
+      </form>
+
+      <form action={action} className="inline">
+        <input type="hidden" name="id" value={booking.id} />
+        <input type="hidden" name="action" value="release" />
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg border border-[var(--border-default)] px-2.5 py-1 text-xs disabled:opacity-50"
+        >
+          Release the dates
+        </button>
+      </form>
+    </div>
   );
 }

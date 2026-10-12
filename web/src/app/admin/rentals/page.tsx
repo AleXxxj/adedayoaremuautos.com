@@ -3,6 +3,7 @@ import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { listBookings } from "@/lib/repositories/rentals";
 import { MARKETS } from "@/lib/market";
+import { holdRemaining } from "@/lib/reservation";
 import { formatMoney, money } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
@@ -105,6 +106,11 @@ export default async function AdminRentalsPage() {
                     licence: booking.driverLicenseNo,
                     notes: booking.notes,
                     hasLicenceFile: Boolean(booking.licenceStorageKey),
+                    reservedUntil: booking.reservedUntil?.toISOString() ?? null,
+                    heldFor:
+                      booking.reservedUntil && booking.reservedUntil > new Date()
+                        ? holdRemaining(booking.reservedUntil)
+                        : null,
                     hasInsuranceFile: Boolean(booking.insuranceStorageKey),
                     insuranceChoice: booking.insuranceChoice,
                     insurer: booking.insuranceProvider,

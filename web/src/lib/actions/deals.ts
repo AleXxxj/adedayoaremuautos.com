@@ -1,5 +1,6 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -136,7 +137,7 @@ export async function createDeal(
       id = row.id;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (!msg.includes("deals_number_idx") || attempt === 4) {
+      if (!violates(e, "deals_number_idx") || attempt === 4) {
         return { ok: false, error: `Could not create deal: ${msg}` };
       }
       // Collision on the sequence — recompute and try again.
@@ -398,15 +399,15 @@ export async function transitionDeal(
 
 function friendlyDealError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes("deals_delivery_requires_contract"))
+  if (violates(e, "deals_delivery_requires_contract"))
     return "A deal must be contracted before it can be delivered.";
-  if (msg.includes("deals_financed_requires_terms"))
+  if (violates(e, "deals_financed_requires_terms"))
     return "A financed deal needs both an APR and a term.";
-  if (msg.includes("deals_rates_sane"))
+  if (violates(e, "deals_rates_sane"))
     return "Check the APR and tax rate — one of them is out of range.";
-  if (msg.includes("deals_lost_requires_reason"))
+  if (violates(e, "deals_lost_requires_reason"))
     return "Record why the deal was lost.";
-  if (msg.includes("deals_money_non_negative"))
+  if (violates(e, "deals_money_non_negative"))
     return "Amounts cannot be negative.";
   return `Could not save: ${msg}`;
 }

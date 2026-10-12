@@ -155,12 +155,30 @@ export function RentalBookingForm({
     return (
       <div className="booking-done">
         <i className="fas fa-circle-check" aria-hidden="true" />
-        <p className="booking-done-title">Request received</p>
+        <p className="booking-done-title">
+          {state.heldFor ? "Reserved for you" : "Request received"}
+        </p>
         <p className="booking-done-body">
           Your reference is{" "}
-          <strong className="booking-ref">{state.reference}</strong>.{" "}
+          <strong className="booking-ref">{state.reference}</strong>.
+        </p>
+
+        {/* The hold, said plainly. This is the sentence the whole reservation
+            exists for: somebody who will not pay for a car they have not seen
+            needs to know it will still be there when they arrive. */}
+        {state.heldFor && (
+          <p className="booking-done-hold">
+            <i className="fas fa-lock" aria-hidden="true" /> This vehicle is
+            held for you for <strong>{state.heldFor}</strong>. Nobody else can
+            book these dates in that time.
+          </p>
+        )}
+
+        <p className="booking-done-body">
           {payable
-            ? "Pay now and the dates are yours immediately — or leave it and we will call you to confirm."
+            ? state.heldFor
+              ? "Come and see it first if you would rather — we have emailed you a link to pay from your phone when you are happy. Or pay now and it is confirmed immediately."
+              : "Pay now and the dates are yours immediately — or leave it and we will call you to confirm."
             : "We will confirm availability and the deposit shortly."}
         </p>
 

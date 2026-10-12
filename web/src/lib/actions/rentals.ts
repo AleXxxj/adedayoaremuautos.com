@@ -1,19 +1,31 @@
 "use server";
 
+import { violates } from "@/lib/dbError";
+import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { rentalBookings, leads, vehicles, rentalRates } from "@/db/schema";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { quoteRental, rentalDays, RentalError } from "@/lib/rental";
 import { notifyStaffOfLead } from "@/lib/notify";
+import { parseTstzRange } from "@/lib/pgRange";
 import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 import { storeLicence } from "@/lib/licence";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
 import { resolveReferralPartner } from "@/lib/partner";
+import { releaseExpiredHolds } from "@/lib/rentalHolds";
+import { sendReservation } from "@/lib/mail/reservation";
+import { siteUrl } from "@/lib/siteUrl";
+import {
+  canReserve,
+  reservationExpiry,
+  holdRemaining,
+  MAX_OPEN_RESERVATIONS,
+} from "@/lib/reservation";
 import { confirmRentalEarning, cancelEarningFor } from "@/lib/partnerEarnings";
 
 export interface RentalResult {
@@ -28,6 +40,8 @@ export interface RentalResult {
   amount?: string;
   /** False when this market has no payment provider configured yet. */
   canPay?: boolean;
+  /** How long the vehicle is held, e.g. "2 days". Absent if it is not held. */
+  heldFor?: string;
 }
 
 const schema = z.object({
@@ -265,6 +279,57 @@ export async function requestRental(
    */
   const referralPartnerId = await resolveReferralPartner(f.marketCode);
 
+  /*
+   * The reservation.
+   *
+   * Every request now holds the car, not just one that reaches a checkout.
+   * Before this a quote held nothing, so a customer told "we have it" could
+   * drive over and find it gone — and plenty of people will not pay for a car
+   * they have not seen, which made the unpaid path the common one.
+   *
+   * Swept first: an expired hold that nobody has cleared would otherwise make
+   * the constraint refuse dates that are in fact free. The sweep is lazy and
+   * this is one of the two places it matters.
+   */
+  await releaseExpiredHolds();
+
+  const now = new Date();
+  const reserving = canReserve(from, now);
+  const reservedUntil = reserving ? reservationExpiry(from, now) : null;
+
+  if (reserving) {
+    /*
+     * One person cannot hold the forecourt.
+     *
+     * The expiry does most of the work, but nothing otherwise stops somebody
+     * reserving every car for two days from one phone. Counted on the number
+     * rather than the email because the number is the one field this form has
+     * always required.
+     */
+    const [open] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(rentalBookings)
+      .where(
+        and(
+          eq(rentalBookings.customerPhone, f.phone),
+          eq(rentalBookings.status, "quote"),
+          isNotNull(rentalBookings.paymentHoldUntil),
+          gt(rentalBookings.paymentHoldUntil, now),
+        ),
+      );
+
+    if ((open?.n ?? 0) >= MAX_OPEN_RESERVATIONS) {
+      return {
+        ok: false,
+        error: `You are already holding ${MAX_OPEN_RESERVATIONS} vehicles. Please pay for one or let a hold run out before reserving another, or call us and we will sort it out.`,
+      };
+    }
+  }
+
+  const reservationToken = reserving
+    ? randomBytes(24).toString("base64url")
+    : null;
+
   let bookingId = "";
   try {
     const [booking] = await db
@@ -280,6 +345,11 @@ export async function requestRental(
         driverLicenseNo: f.licenceNo,
         withDriver: f.withDriver,
         status: "quote",
+        // The hold itself. The exclusion constraint reads this column, so
+        // setting it is what turns a request into a car nobody else can take.
+        paymentHoldUntil: reservedUntil,
+        reservedUntil,
+        reservationToken,
         totalMinor: quote.totalMinor,
         depositMinor: quote.depositMinor,
         currency: market.currency,
@@ -313,14 +383,13 @@ export async function requestRental(
       .returning({ id: rentalBookings.id });
     bookingId = booking.id;
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("rental_bookings_no_overlap")) {
+    if (violates(e, "rental_bookings_no_overlap")) {
       return {
         ok: false,
         error: "That vehicle has just been booked for those dates. Please choose different dates.",
       };
     }
-    if (msg.includes("rental_bookings_period")) {
+    if (violates(e, "rental_bookings_period")) {
       return { ok: false, error: "Those dates are not a valid hire period." };
     }
     console.error("[rental] insert failed", e);
@@ -328,6 +397,41 @@ export async function requestRental(
       ok: false,
       error: "Something went wrong saving your request. Please call us and we will sort it out.",
     };
+  }
+
+  /*
+   * Tell the customer their car is held, and how to pay for it later.
+   *
+   * Fire-and-forget. The reservation exists in the database whatever the mail
+   * does, and failing a booking over a mail server would be the worse
+   * outcome by far — but this is the email that makes "come and see it, pay
+   * when you are happy" possible at all, because the link in it is the only
+   * way back to an unpaid booking once the tab is closed.
+   */
+  if (reservedUntil && reservationToken && f.email) {
+    const payUrl = `${siteUrl()}/${f.marketCode}/rentals/reserved/${reservationToken}`;
+    void sendReservation({
+      to: f.email,
+      name: f.name,
+      vehicle: [row.v.year, row.v.make, row.v.model].filter(Boolean).join(" "),
+      dates: `${f.from} → ${f.to}`,
+      reference: bookingId.slice(0, 8).toUpperCase(),
+      amount: formatMoney(money(quote.totalMinor, market.currency), market.locale),
+      depositDue:
+        quote.depositMinor > 0
+          ? formatMoney(money(quote.depositMinor, market.currency), market.locale)
+          : null,
+      heldUntil: new Intl.DateTimeFormat(market.locale, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: market.timezone,
+      }).format(reservedUntil),
+      payUrl,
+      businessPhone: null,
+    }).catch((e) => console.error("[rental] reservation email failed", e));
   }
 
   // Mirror it into the lead pipeline so rental enquiries appear alongside
@@ -382,10 +486,93 @@ export async function requestRental(
     bookingId,
     amount: formatMoney(money(quote.totalMinor, market.currency), market.locale),
     canPay,
+    heldFor: reservedUntil ? holdRemaining(reservedUntil) : undefined,
   };
 }
 
 /* ── Admin ─────────────────────────────────────────────────────────────── */
+
+const holdSchema = z.object({
+  id: z.string().uuid(),
+  action: z.enum(["extend", "release"]),
+});
+
+/**
+ * Extending or releasing a hold by hand.
+ *
+ * Both halves are needed by the same person on the same phone call. A
+ * customer rings to say they are coming Saturday and the hold runs out
+ * Friday — extend it. A customer rings to cancel, or simply never comes —
+ * release it, so the car is back on the market now rather than when the
+ * timer happens to run out.
+ *
+ * Extending is from now, not from the existing expiry: the point is "another
+ * two days from this conversation", and compounding an expiry that has
+ * already been pushed twice is how a car ends up held for a fortnight.
+ */
+export async function adjustHold(
+  _prev: RentalResult | null,
+  formData: FormData,
+): Promise<RentalResult> {
+  const { requireStaff, assertMarketAccess } = await import("@/lib/auth");
+  const user = await requireStaff();
+
+  const parsed = holdSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { ok: false, error: "Could not read that request." };
+  const v = parsed.data;
+
+  const [booking] = await db
+    .select()
+    .from(rentalBookings)
+    .where(eq(rentalBookings.id, v.id));
+  if (!booking) return { ok: false, error: "Booking not found." };
+  assertMarketAccess(user, booking.marketCode);
+
+  if (booking.status !== "quote") {
+    return { ok: false, error: "That booking is already confirmed." };
+  }
+
+  if (v.action === "release") {
+    await db
+      .update(rentalBookings)
+      .set({ paymentHoldUntil: null, reservedUntil: null })
+      .where(eq(rentalBookings.id, v.id));
+    console.log(`[rental] ${user.email} released the hold on ${v.id}`);
+    revalidatePath("/admin/rentals");
+    return { ok: true };
+  }
+
+  const range = parseTstzRange(booking.period as unknown as string);
+  const now = new Date();
+  if (range && !canReserve(range.start, now)) {
+    return {
+      ok: false,
+      error: "The hire starts too soon to hold it any longer.",
+    };
+  }
+  const until = range ? reservationExpiry(range.start, now) : null;
+  if (!until) return { ok: false, error: "Could not read those dates." };
+
+  try {
+    await db
+      .update(rentalBookings)
+      .set({ paymentHoldUntil: until, reservedUntil: until })
+      .where(eq(rentalBookings.id, v.id));
+  } catch (e) {
+    if (violates(e, "rental_bookings_no_overlap")) {
+      // The hold lapsed and somebody else took the dates in the meantime.
+      return {
+        ok: false,
+        error: "Cannot re-hold — another booking now covers those dates.",
+      };
+    }
+    return { ok: false, error: "Could not extend the hold." };
+  }
+
+  console.log(`[rental] ${user.email} extended the hold on ${v.id}`);
+  revalidatePath("/admin/rentals");
+  return { ok: true };
+}
 
 const documentsSchema = z.object({
   id: z.string().uuid(),
@@ -493,7 +680,7 @@ export async function updateBookingStatus(
       .where(eq(rentalBookings.id, id));
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("rental_bookings_no_overlap")) {
+    if (violates(e, "rental_bookings_no_overlap")) {
       // Confirming a quote is exactly when the clash surfaces: two quotes can
       // overlap freely, but only one of them can become confirmed.
       return {
