@@ -4046,7 +4046,7 @@
     }
 }
 
-@media (min-width: 901px) and (max-width: 1280px) {
+@media (min-width: 1040px) and (max-width: 1280px) {
     .legacy-theme .nav-menu {
         gap: 18px;
     }
@@ -4067,6 +4067,38 @@
     .legacy-theme .logo-text p {
         font-size: 9.5px;
         letter-spacing: 1.2px;
+    }
+}
+
+/* Below 1040px eight links, the logo and the market switch cannot share a
+   row without the text shrinking past comfortable reading size — measured:
+   they need about 1,055px. The legacy sheet only switched to the menu button
+   at 900px, so between 901px and 1039px the header broke into two ragged
+   rows, with the market switch stranded alone under the logo. The menu
+   button now takes over from 1039px down, replicating the legacy 900px rules
+   so the open menu behaves exactly as it does on a phone. */
+@media (max-width: 1039px) {
+    .legacy-theme .mobile-menu-btn {
+        display: block;
+    }
+
+    .legacy-theme .nav-menu {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 20px 0 10px;
+        border-top: 1px solid rgba(21, 77, 53, 0.2);
+        margin-top: 15px;
+    }
+
+    .legacy-theme .nav-menu.active {
+        display: flex;
+    }
+
+    .legacy-theme .header-actions {
+        margin-left: auto;
     }
 }
 

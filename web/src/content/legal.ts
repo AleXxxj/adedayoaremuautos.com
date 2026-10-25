@@ -1,4 +1,5 @@
 import type { MarketCode } from "@/lib/market";
+import { RENTAL_POLICY_US } from "./rentalPolicyUs";
 
 /**
  * Legal pages, carried over from the legacy site.
@@ -25,7 +26,7 @@ export interface LegalPage {
  * When the text itself was last changed. Shown on the page, so it must track
  * real edits to the wording — not the date of a deploy.
  */
-export const LEGAL_LAST_UPDATED = "2024-01-01";
+export const LEGAL_LAST_UPDATED = "2026-10-25";
 
 export const LEGAL_PAGES: Record<string, LegalPage> = {
   "privacy-policy": {
@@ -559,6 +560,23 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
 };
 
 export const LEGAL_SLUGS = Object.keys(LEGAL_PAGES);
+
+/**
+ * The version of a legal page that applies in this market.
+ *
+ * Most pages are shared. The Rental Policy is not: the original was written
+ * for Lagos — naira fees, a Nigerian licence held two years, a permit for
+ * leaving Lagos State — and was being served unchanged to Greensboro, where
+ * none of it applied. A market with its own version gets it here; every
+ * other page falls back to the shared text.
+ */
+const MARKET_OVERRIDES: Partial<Record<MarketCode, Record<string, LegalPage>>> = {
+  us: { "rental-policy": RENTAL_POLICY_US },
+};
+
+export function legalPageFor(slug: string, market: MarketCode): LegalPage | undefined {
+  return MARKET_OVERRIDES[market]?.[slug] ?? LEGAL_PAGES[slug];
+}
 
 /** Footer and cross-links, in the order the legacy footer listed them. */
 export const legalNav = (market: MarketCode) =>

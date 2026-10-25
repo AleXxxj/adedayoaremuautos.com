@@ -112,7 +112,7 @@ export function TariffForm({
               that nobody has arranged with an insurer. Do not price this
               until the policy actually provides it. */}
           <Field
-            label={`Injury cover, per day (${currency}) — blank to not offer it`}
+            label={`Add renter to our insurance, per day (${currency}) — blank to not offer it`}
             error={err("injuryCoverDaily")}
           >
             <input

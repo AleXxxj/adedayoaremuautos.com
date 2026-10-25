@@ -12,7 +12,7 @@
  * did this customer agree to", and only a recorded version can answer it. Bump
  * it whenever a clause below changes in substance.
  */
-export const RENTAL_TERMS_VERSION = "2026-10-v4";
+export const RENTAL_TERMS_VERSION = "2026-10-v5";
 
 export interface RentalClause {
   heading: string;
@@ -44,7 +44,7 @@ export const RENTAL_CLAUSES: RentalClause[] = [
   {
     heading: "Injury to the Renter — Important",
     body:
-      "THE VEHICLE IS INSURED. THE RENTER IS NOT. Owner maintains insurance on the vehicle itself, which covers the vehicle if it is involved in an accident. That insurance does NOT cover bodily injury to Renter or to Renter’s passengers. If Renter is injured while driving or riding in the vehicle, Renter’s own insurance, health insurance, or personal funds are responsible for their medical bills, and Owner’s policy will not pay them. Renter confirms this has been disclosed before booking and accepts it. Where Owner offers, and Renter has elected and paid for, coverage for injury to Renter, that coverage applies for the rental period on the terms stated at booking; the fee is charged per day, is quoted before booking, and is not refundable once the rental has begun.",
+      "THE VEHICLE IS INSURED. THE RENTER IS NOT. Owner maintains insurance on the vehicle itself, which covers the vehicle if it is involved in an accident. That insurance does NOT cover bodily injury to Renter or to Renter’s passengers. If Renter is injured while driving or riding in the vehicle, Renter’s own insurance, health insurance, or personal funds are responsible for their medical bills, and Owner’s policy will not pay them. Renter confirms this has been disclosed before booking and accepts it. Owner is not an insurance company and does not sell insurance. Where Owner offers it, and Renter has elected and paid for it, Owner will arrange through its licensed insurance company for Renter to be added as a driver on Owner's policy for the rental period; that coverage is provided by the insurer on the terms of its policy. The fee is set by the insurer, charged per day, quoted before booking, and not refundable once the rental has begun.",
   },
   {
     heading: "Vehicle Condition",

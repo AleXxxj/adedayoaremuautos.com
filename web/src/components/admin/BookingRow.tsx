@@ -329,9 +329,19 @@ function DocumentCheck({
             Open the license above and check the name matches and it is in
             date for the whole rental.
             {booking.insuranceChoice === "own" &&
-              " Check their insurance certificate too."}
+              " Check their proof of insurance too."}
             {booking.insuranceChoice === "declined" &&
               " They have no insurance of their own and have accepted that their injury is not covered."}
+          </p>
+        )}
+        {/* The one step the website cannot do. Adding a renter to the policy
+            is a call to the insurer, and a customer who has paid for it and
+            drives away before that call is made is uninsured while believing
+            otherwise — the worst outcome on this whole screen. */}
+        {booking.insuranceChoice === "company" && (
+          <p className="mt-1.5 text-xs font-semibold">
+            They paid to be added to our insurance. Call the insurance company
+            to add them as a driver before you release the vehicle.
           </p>
         )}
       </div>
@@ -384,7 +394,11 @@ function DocumentCheck({
               disabled={pending}
               className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] disabled:opacity-50"
             >
-              {pending ? "Saving…" : "Documents are in order"}
+              {pending
+                ? "Saving…"
+                : booking.insuranceChoice === "company"
+                  ? "Documents in order — renter added to our insurance"
+                  : "Documents are in order"}
             </button>
           </form>
           {!refused && (
@@ -414,7 +428,7 @@ function InsuranceBadge({ choice }: { choice: string | null }) {
   if (!choice) return null;
   const map: Record<string, { text: string; tone: string }> = {
     own: { text: "own insurance", tone: "success" },
-    company: { text: "injury cover bought", tone: "success" },
+    company: { text: "add to our insurance — call insurer", tone: "warning" },
     declined: { text: "no cover — accepted", tone: "warning" },
   };
   const m = map[choice];

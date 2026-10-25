@@ -304,7 +304,7 @@ export function RentalBookingForm({
             {preview.quote.injuryCoverMinor > 0 && (
               <div className="booking-quote-cover">
                 <dt className="booking-quote-line">
-                  Injury coverage × {preview.quote.days} day
+                  Added insurance × {preview.quote.days} day
                   {preview.quote.days === 1 ? "" : "s"}
                 </dt>
                 <dd>{fmt(preview.quote.injuryCoverMinor)}</dd>
@@ -403,7 +403,7 @@ export function RentalBookingForm({
               onChange={() => setInsurance("company")}
             />
             <span className="booking-insurance-body">
-              <strong>Cover me under your insurance</strong>
+              <strong>Add me to your insurance</strong>
               {/* The figure, large and in the option itself — not in a
                   footnote, and not only in the total. */}
               <span className="booking-insurance-price booking-insurance-fee">
@@ -412,8 +412,15 @@ export function RentalBookingForm({
                   <em> — {fmt(preview.quote.injuryCoverMinor)} for this rental</em>
                 )}
               </span>
+              {/* How it actually works, per the founder: the business does not
+                  sell insurance — it has no licence to — but its licensed
+                  insurer can add a renter to the business's policy for a fee.
+                  Saying so is both accurate and the thing that keeps this
+                  option on the right side of insurance licensing. */}
               <small>
-                Covers bodily injury to you for the full rental period.
+                We arrange with our licensed insurance company to add you as a
+                driver on our policy for the full rental period. The extra cost
+                is set by the insurer.
               </small>
             </span>
           </label>

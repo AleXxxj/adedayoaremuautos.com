@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, MARKET_CODES, isMarketCode } from "@/lib/market";
-import { LEGAL_PAGES, LEGAL_SLUGS, LEGAL_LAST_UPDATED } from "@/content/legal";
+import { LEGAL_PAGES, LEGAL_SLUGS, LEGAL_LAST_UPDATED, legalPageFor } from "@/content/legal";
 import {
   listLocations,
   summariseHours,
@@ -38,8 +38,9 @@ export async function generateMetadata({
   params: Promise<{ market: string; legal: string }>;
 }): Promise<Metadata> {
   const { market, legal } = await params;
-  const page = LEGAL_PAGES[legal];
-  if (!isMarketCode(market) || !page) return {};
+  if (!isMarketCode(market)) return {};
+  const page = legalPageFor(legal, market);
+  if (!page) return {};
   return {
     title: `${plain(page.title)}`,
     description: page.subtitle,
@@ -61,7 +62,9 @@ export default async function LegalPage({
   const { market: code, legal } = await params;
   if (!isMarketCode(code)) notFound();
 
-  const page = LEGAL_PAGES[legal];
+  // The market's own version where it has one — the Rental Policy differs
+  // between Greensboro and Lagos — and the shared text otherwise.
+  const page = legalPageFor(legal, code);
   // Any other single segment under /[market] belongs to a real route, so an
   // unknown one here is genuinely not found rather than a legal page.
   if (!page) notFound();
@@ -142,7 +145,7 @@ export default async function LegalPage({
         <nav className="legal-cross-links" aria-label="Other policies">
           {LEGAL_SLUGS.filter((s) => s !== legal).map((s) => (
             <Link key={s} href={`/${code}/${s}`}>
-              {plain(LEGAL_PAGES[s].title)}
+              {plain(legalPageFor(s, code)?.title ?? LEGAL_PAGES[s].title)}
             </Link>
           ))}
         </nav>
