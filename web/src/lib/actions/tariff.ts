@@ -64,7 +64,7 @@ export async function saveTariff(
   const m = (n?: number) => (n == null ? null : fromMajor(n, cur).minor);
 
   if (f.inFleet && f.daily <= 0) {
-    return { ok: false, fieldErrors: { daily: ["A hire vehicle needs a daily rate"] } };
+    return { ok: false, fieldErrors: { daily: ["A rental vehicle needs a daily rate"] } };
   }
   if (f.maxDays != null && f.maxDays < f.minDays) {
     return { ok: false, fieldErrors: { maxDays: ["Maximum must be at least the minimum"] } };

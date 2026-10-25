@@ -23,7 +23,7 @@ export interface StaffRow {
 const ROLE_NOTE: Record<string, string> = {
   owner: "Everything, including staff access and pricing",
   manager: "Everything except who can sign in",
-  sales: "Inventory, enquiries, deals and rentals",
+  sales: "Inventory, inquiries, deals and rentals",
 };
 
 /**

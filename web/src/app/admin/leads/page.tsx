@@ -58,7 +58,7 @@ export default async function AdminLeadsPage() {
           <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-1)] px-6 py-16 text-center">
             <p className="font-medium">No leads yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
-              Enquiries from the contact form and vehicle pages land here the
+              Inquiries from the contact form and vehicle pages land here the
               moment they are submitted — before any email or SMS is sent, so
               nothing can be lost in delivery.
             </p>

@@ -2652,6 +2652,23 @@
    than as body copy — what the business insures and what it does not is the
    most consequential thing on this page, and the business asked for it to be
    unmissable. */
+/* The pay-later link, shown only when no email was given — so it is the
+   customer's only copy, and it is styled to be copied rather than skimmed. */
+.legacy-theme .booking-done-link {
+    margin: 12px 0;
+    padding: 12px 14px;
+    border: 1px dashed rgba(201, 162, 39, 0.5);
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .booking-done-link strong { color: #e2c463; }
+.legacy-theme .booking-done-link a { color: var(--brand-400, #4e9d76); }
+
 /* The hold, on the confirmation panel. The sentence the reservation exists
    for, so it is a panel rather than another line of body copy. */
 .legacy-theme .booking-done-hold {
@@ -3392,7 +3409,11 @@
     color: var(--text-muted, #8f8f8f);
 }
 
-.legacy-theme .booking-accept {
+/* The age-and-documents declaration was added later and never given these
+   rules, so its checkbox sat jammed against the text with the sentence
+   wrapping underneath it. Both declarations now share one treatment. */
+.legacy-theme .booking-accept,
+.legacy-theme .booking-consent {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -3402,7 +3423,8 @@
     cursor: pointer;
 }
 
-.legacy-theme .booking-accept input {
+.legacy-theme .booking-accept input,
+.legacy-theme .booking-consent input {
     flex-shrink: 0;
     width: 17px;
     height: 17px;
@@ -3995,4 +4017,138 @@
 .legacy-theme .resv-link {
     color: var(--brand-400, #4e9d76);
     text-decoration: underline;
+}
+
+/* ── Fitting the header between tablet and wide desktop ─────────────────────
+   The header is one wrapping flex row: logo, eight nav links, the market
+   switch. Above ~1250px they fit; below 900px the nav becomes the menu
+   button. In between — which is most laptops once the browser's own chrome
+   is subtracted — the row only just fits, so the browser squeezed the logo
+   block and the tagline broke onto two lines ("BUY • RENT • RENT-TO-OWN •" /
+   "FINANCE"). The name above it never wrapped because it was nowrap and the
+   tagline was not.
+
+   Two changes. The tagline can no longer break, so where things genuinely do
+   not fit the nav moves to its own row cleanly instead of the logo
+   collapsing. And across that band the nav is set a little tighter, so for
+   most widths it does fit on one row in the first place. */
+.legacy-theme .logo-text p {
+    white-space: nowrap;
+}
+
+/* On a phone the tagline was set at 8px — below comfortable reading size —
+   and, kept to one line, ran under the menu button. The menu lists exactly
+   these four things one tap away, so on the narrowest screens the header
+   carries the name alone. */
+@media (max-width: 480px) {
+    .legacy-theme .logo-text p {
+        display: none;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1280px) {
+    .legacy-theme .nav-menu {
+        gap: 18px;
+    }
+
+    .legacy-theme .nav-menu a {
+        font-size: 13.5px;
+        letter-spacing: 0.3px;
+    }
+
+    .legacy-theme .logo-container img {
+        height: 44px;
+    }
+
+    .legacy-theme .logo-text h1 {
+        font-size: 18px;
+    }
+
+    .legacy-theme .logo-text p {
+        font-size: 9.5px;
+        letter-spacing: 1.2px;
+    }
+}
+
+/* ── Rental detail: title and spec tiles ────────────────────────────────────
+   In the two-column layout the vehicle sits in a column about 600px wide, and
+   a title sized to the viewport rather than the column ran to two very large
+   lines. Scaled down to suit the column it actually lives in. */
+.legacy-theme .rental-title {
+    font-size: clamp(24px, 2.7vw, 34px);
+}
+
+/* Each tile was allowed down to 150px, which left about 118px for a label
+   like "TRANSMISSION" plus its icon — so the icon sat on one line and the
+   word on the next, which reads as broken. The icon and label now stay
+   together on one line, set slightly smaller, and tiles keep enough room
+   for the longest label. */
+.legacy-theme .rental-specs {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+
+.legacy-theme .rental-spec dt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+}
+
+.legacy-theme .rental-spec dt i {
+    margin-right: 0;
+    flex: none;
+}
+
+/* ── The assistant button ───────────────────────────────────────────────────
+   Fixed bottom-right, which on a rental page is exactly where the booking
+   form sits — the full "Ask us" pill covered the insurance choices and the
+   privacy note. Below 1600px the content runs close enough to the edge that
+   the pill always lands on something, so it becomes a round icon there. The
+   button keeps its aria-label, so nothing is lost to a screen reader. */
+@media (max-width: 1600px) {
+    .legacy-theme .assistant-launcher {
+        width: 52px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .legacy-theme .assistant-launcher span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
+/* ── Filter dropdowns that grow with the data ───────────────────────────────
+   A <select> is as wide as its longest option, and grid columns will not
+   shrink below their content by default. So the rentals filters were exactly
+   as wide as the longest body style staff had ever typed — "5 door
+   crossover/ SUV (Wagon Style Crossover)" — and on a phone that pushed the
+   whole page 35px wider than the screen, so it slid sideways under a thumb.
+   The columns and the dropdowns may now shrink; a long option is cut off
+   inside its own box instead of widening the page. */
+.legacy-theme .filters-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+}
+
+.legacy-theme .filter-group {
+    min-width: 0;
+}
+
+.legacy-theme .filter-group select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+    .legacy-theme .filters-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

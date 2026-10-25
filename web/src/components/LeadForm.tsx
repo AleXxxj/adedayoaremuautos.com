@@ -7,11 +7,11 @@ import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
 
 const TYPE_LABELS: Record<string, string> = {
-  contact: "General enquiry",
+  contact: "General inquiry",
   test_drive: "Book a test drive",
-  finance: "Financing enquiry",
+  finance: "Financing inquiry",
   trade_in: "Value my trade-in",
-  rental: "Rental enquiry",
+  rental: "Rental inquiry",
 };
 
 export function LeadForm({
@@ -58,7 +58,7 @@ export function LeadForm({
     return (
       <div className="rounded-xl border border-[var(--success)]/40 bg-[var(--success)]/10 p-8 text-center">
         <h2 className="text-lg font-semibold text-[var(--success)]">
-          Thank you — we have your enquiry.
+          Thank you — we have your inquiry.
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
           Someone will be in touch shortly. If it is urgent, calling is fastest
@@ -99,7 +99,7 @@ export function LeadForm({
 
       {vehicleLabel && (
         <p className="rounded-lg border border-[var(--border-default)] bg-[var(--surface-2)] px-4 py-3 text-sm">
-          Enquiring about{" "}
+          Asking about{" "}
           <span className="font-semibold">{vehicleLabel}</span>
         </p>
       )}
@@ -178,11 +178,11 @@ export function LeadForm({
         disabled={pending}
         className="w-full rounded-lg bg-[var(--cta-bg)] py-3 font-semibold text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)] disabled:opacity-60 sm:w-auto sm:px-8"
       >
-        {pending ? "Sending…" : "Send enquiry"}
+        {pending ? "Sending…" : "Send inquiry"}
       </button>
 
       <p className="text-xs text-[var(--text-muted)]">
-        We use your details only to respond to this enquiry.
+        We use your details only to respond to this inquiry.
       </p>
     </form>
   );

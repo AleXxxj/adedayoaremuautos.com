@@ -150,7 +150,7 @@ export default async function MarketHome({
             eyebrow: { icon: "fas fa-key", text: "New — Rent to Own" },
             title: ["Rent it. Then ", "own it.", ""],
             body:
-              "Hire by the day or the week, and every payment counts towards keeping the car. Reach the total for your category and it is yours.",
+              "Rent by the day or the week, and every payment counts towards keeping the car. Reach the total for your category and it is yours.",
             image: "/img/hero-benz.png",
             art: "ownership",
             actions: [
@@ -220,7 +220,7 @@ export default async function MarketHome({
               </div>
               <h3>Rent to Own</h3>
               <p>
-                Hire by the day or the week and every payment counts towards
+                Rent by the day or the week and every payment counts towards
                 keeping the car. Reach the total for your category and it is
                 yours — no balloon payment, and no obligation to continue.
               </p>
@@ -235,7 +235,7 @@ export default async function MarketHome({
               </div>
               <h3>Rent a Car</h3>
               <p>
-                Flexible daily, weekly, or monthly rentals. Longer hires are
+                Flexible daily, weekly, or monthly rentals. Longer rentals are
                 priced on the better rate automatically, so you are never
                 charged more than the days you take.
               </p>
@@ -334,7 +334,7 @@ export default async function MarketHome({
                           href={`/${code}/contact?vehicle=${v.slug}`}
                           className="btn btn-outline"
                         >
-                          <i className="fas fa-envelope" /> Enquire
+                          <i className="fas fa-envelope" /> Inquire
                         </Link>
                       </div>
                     </div>
@@ -360,7 +360,7 @@ export default async function MarketHome({
               Rent it. Then <span>own it.</span>
             </h2>
             <p>
-              Hire by the day or the week and every payment counts towards
+              Rent by the day or the week and every payment counts towards
               keeping the car. Reach the total for your category and it is
               yours — no balloon payment, no obligation to continue.
             </p>
@@ -406,7 +406,7 @@ export default async function MarketHome({
             <div className="work-step">
               <span className="work-step-index">01</span>
               <i className="fas fa-inbox" aria-hidden="true" />
-              <h3>Your enquiry is recorded, not just sent</h3>
+              <h3>Your inquiry is recorded, not just sent</h3>
               <p>
                 Every message is written down the moment you send it and lands
                 with a named person. Nothing depends on someone noticing an
@@ -430,7 +430,7 @@ export default async function MarketHome({
               <i className="fas fa-calendar-check" aria-hidden="true" />
               <h3>A reserved vehicle is reserved</h3>
               <p>
-                Hire dates are checked against live bookings before they are
+                Rental dates are checked against live bookings before they are
                 confirmed. Two customers cannot be given the same vehicle for
                 the same days.
               </p>
@@ -514,10 +514,10 @@ export default async function MarketHome({
               </h2>
               <p>
                 Know someone looking for a quality vehicle? Refer them to us and
-                earn a commission on every completed purchase or hire.
+                earn a commission on every completed purchase or rental.
               </p>
               <div className="highlight">
-                5% <small>on car hire</small>
+                5% <small>on car rental</small>
               </div>
               <ul className="referral-features">
                 {/* "Track your referrals easily" was on this list for years
@@ -525,7 +525,7 @@ export default async function MarketHome({
                     live stock, every referral and what is owed — so the claim
                     stays, and hire is added because a referred booking earns
                     the same way a referred sale does. */}
-                <li><i className="fas fa-check-circle" /> 5% on every completed car hire you refer</li>
+                <li><i className="fas fa-check-circle" /> 5% on every completed car rental you refer</li>
                 <li><i className="fas fa-check-circle" /> 1.5% on every completed vehicle sale</li>
                 <li><i className="fas fa-check-circle" /> No limits - refer as many customers as you want</li>
                 <li><i className="fas fa-check-circle" /> Payout requested from your own dashboard</li>
@@ -539,13 +539,13 @@ export default async function MarketHome({
               <i className="fas fa-hand-holding-usd" />
               <h3>Refer &amp; Earn</h3>
               <div className="percent">
-                5% <small>on hire</small>
+                5% <small>on rentals</small>
               </div>
               <p>Plus 1.5% on every completed vehicle sale through your referral</p>
               <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
                 {code === "us"
-                  ? "Example: a $900 week's hire = $45. A $30,000 car = $450."
-                  : "Example: a ₦300,000 week's hire = ₦15,000. A ₦10M car = ₦150,000."}
+                  ? "Example: a $900 week's rental = $45. A $30,000 car = $450."
+                  : "Example: a ₦300,000 week's rental = ₦15,000. A ₦10M car = ₦150,000."}
               </p>
               <Link href={`/${code}/referral`} className="btn btn-primary">
                 Start Referring

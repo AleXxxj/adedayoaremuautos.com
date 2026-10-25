@@ -136,7 +136,7 @@ export default async function AdminPayoutsPage() {
           <div className="rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--surface-1)] px-6 py-16 text-center">
             <p className="font-medium">No payout requests yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
-              Partners request payouts from their own dashboard once a hire or
+              Partners request payouts from their own dashboard once a rental or
               sale they introduced has completed. Requests arrive here, and the
               figure they can ask for is already net of anything outstanding.
             </p>

@@ -246,7 +246,7 @@ export function NightDrive({
           <div className="relative grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-400)]">
-                Referral programme
+                Referral program
               </p>
               <h2
                 className="mt-4 text-3xl font-bold uppercase tracking-tight sm:text-4xl"

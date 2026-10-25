@@ -67,7 +67,7 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
     d.injuryCoverCharge
       ? row("Injury cover", `${escapeHtml(d.injuryCoverCharge)} <span style="color:${MUTED};font-size:13px">(included in the amount paid)</span>`)
       : "",
-    d.pickupLocation ? row("Collect from", escapeHtml(d.pickupLocation)) : "",
+    d.pickupLocation ? row("Pick up at", escapeHtml(d.pickupLocation)) : "",
   ]
     .filter(Boolean)
     .join("");
@@ -105,16 +105,16 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
   </td></tr>
 
   <tr><td style="padding:22px 28px 0">
-    <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">WHEN YOU COLLECT</div>
+    <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">WHEN YOU PICK UP</div>
     <ul style="margin:10px 0 0;padding-left:20px;font-size:15px;line-height:1.7;color:#333">
-      <li>Bring the driving licence of whoever will be driving, and your insurance certificate.</li>
+      <li>Bring the driver's license of whoever will be driving, and your insurance certificate.</li>
       <li>We check both before the vehicle is released, so please make sure the names match your booking.</li>
       ${
         d.depositDue
           ? `<li>A refundable security deposit of <strong>${escapeHtml(d.depositDue)}</strong> is taken at pickup — it was not charged today.</li>`
           : ""
       }
-      <li>We will be in touch to agree a collection time.</li>
+      <li>We'll be in touch to set a pickup time.</li>
     </ul>
   </td></tr>
 
@@ -149,14 +149,14 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
     `Pick-up:     ${d.startLabel}`,
     `Return:      ${d.endLabel}`,
     `Duration:    ${nights}`,
-    d.pickupLocation ? `Collect from: ${d.pickupLocation}` : null,
+    d.pickupLocation ? `Pick up at: ${d.pickupLocation}` : null,
     "",
-    "When you collect:",
-    "- Bring the driving licence of whoever will be driving.",
+    "When you pick up:",
+    "- Bring the driver's license of whoever will be driving.",
     d.depositDue
       ? `- A refundable security deposit of ${d.depositDue} is taken at pickup. It was not charged today.`
       : null,
-    "- We will be in touch to agree a collection time.",
+    "- We'll be in touch to set a pickup time.",
     "",
     d.businessPhone ? `Questions? Call ${d.businessPhone} and quote ${d.reference}.` : null,
     "",

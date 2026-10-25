@@ -99,7 +99,7 @@ export async function requestPayout(
   revalidatePath("/admin/payouts");
   return {
     ok: true,
-    message: "Payout requested. We will be in touch to arrange it.",
+    message: "Payout requested. We'll be in touch to arrange it.",
   };
 }
 

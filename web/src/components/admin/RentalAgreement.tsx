@@ -56,7 +56,7 @@ export function RentalAgreement({ d }: { d: AgreementData }) {
     ["Renter", d.renterName],
     ["Phone", <Blank key="p" value={d.phone} width="180px" />],
     ["Email", <Blank key="e" value={d.email} width="180px" />],
-    ["Driving licence no.", <Blank key="l" value={d.licenceNo} width="180px" />],
+    ["Driver's license no.", <Blank key="l" value={d.licenceNo} width="180px" />],
     ["Vehicle", d.vehicle + (d.vin ? ` · VIN ${d.vin}` : "")],
     ["Rental period", d.periodLabel],
     ["Authorized use", d.authorizedUse],

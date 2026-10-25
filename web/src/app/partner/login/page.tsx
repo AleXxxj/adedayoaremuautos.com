@@ -51,7 +51,7 @@ export default async function PartnerLoginPage({
       <p className="mt-6 text-xs leading-relaxed text-[#6f6f6f]">
         Not a partner yet?{" "}
         <Link href="/us/referral" className="text-[#4e9d76] underline">
-          Apply to the referral programme
+          Apply to the referral program
         </Link>
         . Lost your password? Email{" "}
         <a

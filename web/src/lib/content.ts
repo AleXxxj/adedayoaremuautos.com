@@ -32,7 +32,7 @@ export const SERVICES: Service[] = [
     blurb:
       "Daily, weekly and monthly hire. Availability is live, so the car you book is the car you get.",
     href: (m) => `/${m}/contact?type=rental`,
-    cta: "Enquire about rental",
+    cta: "Ask about renting",
   },
   {
     key: "finance",

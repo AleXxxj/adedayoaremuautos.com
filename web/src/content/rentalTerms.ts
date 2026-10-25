@@ -12,7 +12,7 @@
  * did this customer agree to", and only a recorded version can answer it. Bump
  * it whenever a clause below changes in substance.
  */
-export const RENTAL_TERMS_VERSION = "2026-10-v3";
+export const RENTAL_TERMS_VERSION = "2026-10-v4";
 
 export interface RentalClause {
   heading: string;
@@ -39,12 +39,12 @@ export const RENTAL_CLAUSES: RentalClause[] = [
   {
     heading: "Insurance and Licensing",
     body:
-      "Renter must provide, before the vehicle is released, a valid driver’s license and proof of insurance that covers Renter to operate the vehicle for the intended use. Renter understands that personal auto insurance may exclude delivery, rideshare, commercial, rental, or business use and must confirm coverage before operating the vehicle. Owner will verify both documents and may refuse release if they are missing, expired, or do not match the person collecting the vehicle.",
+      "Renter must provide, before the vehicle is released, a valid driver’s license and proof of insurance that covers Renter to operate the vehicle for the intended use. Renter understands that personal auto insurance may exclude delivery, rideshare, commercial, rental, or business use and must confirm coverage before operating the vehicle. Owner will verify both documents and may refuse release if they are missing, expired, or do not match the person picking up the vehicle.",
   },
   {
     heading: "Injury to the Renter — Important",
     body:
-      "THE VEHICLE IS INSURED. THE RENTER IS NOT. Owner maintains insurance on the vehicle itself, which responds if the vehicle is struck or strikes something. That insurance does NOT cover bodily injury to Renter or to Renter’s passengers. If Renter is injured while operating or travelling in the vehicle, Renter’s own insurance, health cover, or personal resources are responsible for their medical costs, and Owner’s policy will not pay them. Renter confirms this has been disclosed before booking and accepts it. Where Owner offers, and Renter has elected and paid for, cover for injury to Renter, that cover applies for the rental period on the terms stated at booking; the fee is charged per day, is quoted before booking, and is not refundable once the rental has begun.",
+      "THE VEHICLE IS INSURED. THE RENTER IS NOT. Owner maintains insurance on the vehicle itself, which covers the vehicle if it is involved in an accident. That insurance does NOT cover bodily injury to Renter or to Renter’s passengers. If Renter is injured while driving or riding in the vehicle, Renter’s own insurance, health insurance, or personal funds are responsible for their medical bills, and Owner’s policy will not pay them. Renter confirms this has been disclosed before booking and accepts it. Where Owner offers, and Renter has elected and paid for, coverage for injury to Renter, that coverage applies for the rental period on the terms stated at booking; the fee is charged per day, is quoted before booking, and is not refundable once the rental has begun.",
   },
   {
     heading: "Vehicle Condition",

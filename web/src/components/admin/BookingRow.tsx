@@ -155,7 +155,7 @@ export function BookingRow({
               </a>
             )}
             {booking.licence && (
-              <span className="text-[var(--text-muted)]">Licence {booking.licence}</span>
+              <span className="text-[var(--text-muted)]">License {booking.licence}</span>
             )}
             {booking.hasLicenceFile && <LicenceLink bookingId={booking.id} />}
             {booking.hasInsuranceFile && (
@@ -326,8 +326,8 @@ function DocumentCheck({
           <p className="mt-0.5 text-xs">{booking.documentsRejectedReason}</p>
         ) : (
           <p className="mt-0.5 text-xs">
-            Open the licence above and check the name matches and it is in
-            date for the whole hire.
+            Open the license above and check the name matches and it is in
+            date for the whole rental.
             {booking.insuranceChoice === "own" &&
               " Check their insurance certificate too."}
             {booking.insuranceChoice === "declined" &&
@@ -353,7 +353,7 @@ function DocumentCheck({
               rows={2}
               required
               maxLength={500}
-              placeholder="The licence expires before the return date."
+              placeholder="The license expires before the return date."
               className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] px-3 py-2 text-sm text-[var(--text-primary)]"
             />
           </label>

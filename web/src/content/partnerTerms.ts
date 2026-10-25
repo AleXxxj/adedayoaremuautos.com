@@ -27,7 +27,7 @@ export interface PartnerClause {
 export const PARTNER_CLAUSES: PartnerClause[] = [
   {
     heading: "What you do",
-    body: "You introduce people to Adedayo Aremu Autos — for vehicle hire, and for buying a vehicle where we have told you in writing that sales are included. You do this as an independent person or business, not as our employee or agent. You cannot agree a price, accept money, or make a promise on our behalf.",
+    body: "You introduce people to Adedayo Aremu Autos — for vehicle rental, and for buying a vehicle where we have told you in writing that sales are included. You do this as an independent person or business, not as our employee or agent. You cannot agree a price, accept money, or make a promise on our behalf.",
   },
   {
     heading: "How a referral is recorded",
@@ -35,7 +35,7 @@ export const PARTNER_CLAUSES: PartnerClause[] = [
   },
   {
     heading: "What you are paid",
-    body: "There are two rates and both are shown on your partner account: one for vehicle hire and a lower one for vehicle sales. Commission is calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the hire or sale has completed.",
+    body: "There are two rates and both are shown on your partner account: one for vehicle rental and a lower one for vehicle sales. Commission is calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the rental or sale has completed.",
   },
   {
     heading: "When you are paid",

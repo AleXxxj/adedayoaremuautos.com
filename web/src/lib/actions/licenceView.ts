@@ -53,7 +53,7 @@ export async function viewLicence(
       error:
         kind === "insurance"
           ? "No proof of insurance was uploaded for this booking."
-          : "No licence was uploaded for this booking.",
+          : "No license was uploaded for this booking.",
     };
   }
 

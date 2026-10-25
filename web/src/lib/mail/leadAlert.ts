@@ -46,8 +46,8 @@ function readableType(type: string): string {
 export function leadSubject(d: LeadAlertData): string {
   const kind = readableType(d.type).toLowerCase();
   return d.vehicle
-    ? `New ${kind} enquiry — ${d.name} · ${d.vehicle}`
-    : `New ${kind} enquiry — ${d.name}`;
+    ? `New ${kind} inquiry — ${d.name} · ${d.vehicle}`
+    : `New ${kind} inquiry — ${d.name}`;
 }
 
 function row(label: string, value: string): string {
@@ -65,7 +65,7 @@ export function renderLeadAlert(d: LeadAlertData): { html: string; text: string 
   const dialable = (d.phone ?? "").replace(/[^\d+]/g, "");
 
   const rows = [
-    row("Enquiry", `<strong>${escapeHtml(kind)}</strong>`),
+    row("Inquiry", `<strong>${escapeHtml(kind)}</strong>`),
     d.vehicle ? row("Vehicle", escapeHtml(d.vehicle)) : "",
     d.email
       ? row(
@@ -89,7 +89,7 @@ export function renderLeadAlert(d: LeadAlertData): { html: string; text: string 
 
   <tr><td style="background:#0a0a0a;padding:18px 28px">
     <span style="font-size:11px;letter-spacing:.16em;color:#8f8f8f">ADEDAYO AREMU AUTOS</span>
-    <div style="margin-top:4px;font-size:16px;font-weight:700;color:#f0f0f0">New enquiry</div>
+    <div style="margin-top:4px;font-size:16px;font-weight:700;color:#f0f0f0">New inquiry</div>
   </td></tr>
 
   <!-- The name, big. This is the one thing worth reading at a glance. -->
@@ -128,7 +128,7 @@ export function renderLeadAlert(d: LeadAlertData): { html: string; text: string 
 
   <tr><td style="background:#fafafa;border-top:1px solid ${RULE};padding:16px 28px">
     <div style="font-size:12px;line-height:1.6;color:${MUTED}">
-      Sent automatically when an enquiry is submitted on the website. Reply to
+      Sent automatically when an inquiry is submitted on the website. Reply to
       this email and it goes to the customer.
     </div>
   </td></tr>
@@ -140,7 +140,7 @@ export function renderLeadAlert(d: LeadAlertData): { html: string; text: string 
   // Not optional. A message with no text part scores worse with spam filters,
   // and a phone's notification preview is drawn from it.
   const text = [
-    `New ${kind.toLowerCase()} enquiry`,
+    `New ${kind.toLowerCase()} inquiry`,
     "",
     d.name,
     d.phone ? `Phone: ${d.phone}` : null,

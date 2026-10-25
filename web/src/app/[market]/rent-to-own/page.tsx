@@ -31,7 +31,7 @@ export async function generateMetadata({
   return {
     title: "Rent to Own",
     description:
-      "Hire a vehicle by the day or the week. Every payment counts towards owning it. When your rent reaches the agreed total, the car is yours.",
+      "Rent a vehicle by the day or the week. Every payment counts towards owning it. When your rent reaches the agreed total, the car is yours.",
     alternates: {
       canonical: `/${market}/rent-to-own`,
       languages: { "en-US": "/us/rent-to-own", "en-NG": "/ng/rent-to-own" },
@@ -48,7 +48,7 @@ const STEPS = [
   {
     icon: "fas fa-calendar-days",
     title: "Drive it as a rental",
-    body: "Hire by the day or the week, exactly as you would any hire car. Insured, maintained, and yours to use.",
+    body: "Rent by the day or the week, exactly as you would any rental car. Insured, maintained, and yours to use.",
   },
   {
     icon: "fas fa-arrow-trend-up",
@@ -126,10 +126,10 @@ export default async function RentToOwnPage({
             icon="fas fa-key"
             eyebrow={`${market.name}`}
             title="Rent to Own is opening in the United States first"
-            body="We are running the programme from Greensboro to begin with. Daily and weekly hire is available here now, and we will tell you the moment rent to own reaches this market."
+            body="We are running the program from Greensboro to begin with. Daily and weekly rentals are available here now, and we will tell you the moment rent to own reaches this market."
             actions={[
-              { href: `/${code}/rentals`, label: "See hire options", icon: "fas fa-car", primary: true },
-              { href: "/us/rent-to-own", label: "View the US programme", icon: "fas fa-arrow-right" },
+              { href: `/${code}/rentals`, label: "See rental options", icon: "fas fa-car", primary: true },
+              { href: "/us/rent-to-own", label: "View the US program", icon: "fas fa-arrow-right" },
             ]}
           />
         </div>
@@ -139,7 +139,7 @@ export default async function RentToOwnPage({
             <p className="intro-text">
               {cheapest ? (
                 <>
-                  Hire from{" "}
+                  Rent from{" "}
                   <span className="highlight">{fmt(cheapest.dailyMinor)} a day</span>. When
                   your rent reaches{" "}
                   <span className="highlight">
@@ -149,7 +149,7 @@ export default async function RentToOwnPage({
                 </>
               ) : (
                 <>
-                  Hire by the day or the week, and every payment counts towards
+                  Rent by the day or the week, and every payment counts towards
                   owning the vehicle outright.
                 </>
               )}
@@ -229,14 +229,14 @@ export default async function RentToOwnPage({
                             division suggests. */}
                         <span className="rto-own-time">
                           about {Math.round(path.days / 7)} weeks of continuous
-                          hire ({path.days} days)
+                          rental ({path.days} days)
                         </span>
                       </div>
                     ) : (
                       <div className="rto-tier-own rto-tier-own--hire">
-                        <span className="rto-own-label">Hire only</span>
+                        <span className="rto-own-label">Rental only</span>
                         <span className="rto-own-time">
-                          This category is not on the ownership programme.
+                          This category is not part of the ownership program.
                         </span>
                       </div>
                     )}
@@ -288,7 +288,7 @@ export default async function RentToOwnPage({
             </h3>
             <ul>
               <li>
-                This is a rental-purchase arrangement. You are hiring the
+                This is a rental-purchase arrangement. You are renting the
                 vehicle, and ownership transfers only when the total rent for
                 your category has been paid in full.
               </li>
@@ -301,7 +301,7 @@ export default async function RentToOwnPage({
                 </li>
               ))}
               <li>
-                You may stop at any time. If you do, you have hired a vehicle
+                You may stop at any time. If you do, you have rented a vehicle
                 and owe nothing further — but rent already paid is not
                 refunded.
               </li>
@@ -310,7 +310,7 @@ export default async function RentToOwnPage({
                 ownership. They are returned when the vehicle is.
               </li>
               <li>
-                The vehicle remains ours, insured and maintained under the hire
+                The vehicle remains ours, insured and maintained under the rental
                 agreement, until ownership transfers.
               </li>
             </ul>
@@ -332,7 +332,7 @@ export default async function RentToOwnPage({
             </p>
             <div className="rto-cta-actions">
               <Link href={`/${code}/contact?type=rent_to_own`} className="btn btn-primary">
-                <i className="fas fa-paper-plane" /> Enquire about Rent to Own
+                <i className="fas fa-paper-plane" /> Ask about Rent to Own
               </Link>
               {tel && (
                 <a href={`tel:${sites[0].phone}`} className="btn btn-outline">

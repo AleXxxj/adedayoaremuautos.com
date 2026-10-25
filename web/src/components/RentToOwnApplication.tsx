@@ -27,9 +27,9 @@ const START_LABELS: Record<string, string> = {
 };
 
 const LICENCE_LABELS: Record<string, string> = {
-  yes: "holds a valid licence",
-  applying: "applying for a licence",
-  no: "no licence yet",
+  yes: "has a valid license",
+  applying: "applying for a license",
+  no: "no license yet",
 };
 
 export function RentToOwnApplication({
@@ -195,7 +195,7 @@ export function RentToOwnApplication({
         </div>
 
         <div className="form-group">
-          <label htmlFor="rto-licence">Do you hold a valid driving licence?</label>
+          <label htmlFor="rto-licence">Do you have a valid driver&rsquo;s license?</label>
           <select id="rto-licence" name="licence" defaultValue="yes">
             <option value="yes">Yes</option>
             <option value="applying">Not yet — applying</option>

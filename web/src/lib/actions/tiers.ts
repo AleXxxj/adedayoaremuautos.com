@@ -111,7 +111,6 @@ export async function saveTier(
       await db.insert(rentalTiers).values(values);
     }
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
     // The unique index is on (market, slug), and the slug comes from the name.
     if (violates(e, "rental_tiers_market_slug_unique")) {
       return {
@@ -120,7 +119,7 @@ export async function saveTier(
       };
     }
     if (violates(e, "rental_tiers_longer_is_cheaper")) {
-      return { ok: false, error: "A longer hire must never cost more than the shorter one." };
+      return { ok: false, error: "A longer rental must never cost more than the shorter one." };
     }
     if (violates(e, "rental_tiers_prices_positive")) {
       return { ok: false, error: "Rates must be more than zero." };

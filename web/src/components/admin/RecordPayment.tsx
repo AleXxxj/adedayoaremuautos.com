@@ -49,7 +49,7 @@ export function RecordPayment({
             <option value="bank_transfer">Bank transfer</option>
             <option value="cash">Cash</option>
             <option value="card">Card</option>
-            <option value="cheque">Cheque</option>
+            <option value="cheque">Check</option>
             <option value="other">Other</option>
           </select>
         </label>

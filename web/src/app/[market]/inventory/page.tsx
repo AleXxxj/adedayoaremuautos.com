@@ -181,7 +181,7 @@ export default async function InventoryPage({
                 points={[
                   "Every vehicle inspected before it is listed",
                   "Photographs and full specification on each listing",
-                  "Financing and hire arranged in-house",
+                  "Financing and rentals arranged in-house",
                 ]}
                 actions={[
                   { href: `/${code}/contact`, label: "Tell us what you want", icon: "fas fa-paper-plane", primary: true },
@@ -235,7 +235,7 @@ export default async function InventoryPage({
                           href={`/${code}/contact?vehicle=${v.slug}`}
                           className="btn btn-outline"
                         >
-                          <i className="fas fa-envelope" /> Enquire
+                          <i className="fas fa-envelope" /> Inquire
                         </Link>
                       </div>
                     </div>

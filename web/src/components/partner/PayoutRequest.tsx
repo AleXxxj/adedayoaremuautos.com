@@ -58,7 +58,7 @@ export function PayoutRequest({
         className="mt-5 rounded-xl border border-[#2a5c42] bg-[#112018] px-4 py-3.5 text-sm text-[#b4d4c2]"
         aria-live="polite"
       >
-        You have asked for {outstanding}. We will be in touch to arrange it —
+        You have asked for {outstanding}. We&rsquo;ll be in touch to arrange it —
         you will get an email when it has been sent.
       </p>
     );
@@ -67,7 +67,7 @@ export function PayoutRequest({
   if (availableMinor <= 0) {
     return (
       <p className="mt-5 text-sm text-[#7d7d7d]">
-        Once a hire or sale you introduced has completed, what you have earned
+        Once a rental or sale you introduced has completed, what you have earned
         appears here and you can request it.
       </p>
     );

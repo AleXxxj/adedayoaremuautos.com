@@ -102,9 +102,9 @@ export function renderReservation(d: ReservationMail): {
   </td></tr>
 
   <tr><td style="padding:22px 28px 28px">
-    <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">WHEN YOU COLLECT</div>
+    <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">WHEN YOU PICK UP</div>
     <ul style="margin:10px 0 0;padding-left:20px;font-size:15px;line-height:1.7;color:#333">
-      <li>Bring the driving licence of whoever will be driving.</li>
+      <li>Bring the driver's license of whoever will be driving.</li>
       <li>We check your documents before the vehicle is released, so please make sure the names match your booking.</li>
       ${d.depositDue ? `<li>The refundable deposit of <strong>${escapeHtml(d.depositDue)}</strong> is taken at pickup, not now.</li>` : ""}
     </ul>
@@ -139,7 +139,7 @@ export function renderReservation(d: ReservationMail): {
     "",
     d.payUrl,
     "",
-    "When you collect, bring the driving licence of whoever will be driving. We check your documents before the vehicle is released.",
+    "When you pick up the vehicle, bring the driver's license of whoever will be driving. We check your documents before the vehicle is released.",
     "",
     "Adedayo Aremu Autos",
   ].join("\n");

@@ -74,7 +74,7 @@ export default async function AdminConversationsPage() {
                 </span>
               </>
             )}
-            {becameLeads > 0 && ` · ${becameLeads} became enquiries`}
+            {becameLeads > 0 && ` · ${becameLeads} became inquiries`}
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default async function AdminConversationsPage() {
             <p className="font-medium">Nobody has used the assistant yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
               It answers from live stock, rental rates and rent-to-own terms.
-              When someone leaves a name and number it files an enquiry in{" "}
+              When someone leaves a name and number it files an inquiry in{" "}
               <Link href="/admin/leads" className="text-[var(--link)] hover:underline">
                 Leads
               </Link>{" "}

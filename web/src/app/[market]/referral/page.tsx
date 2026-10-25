@@ -23,9 +23,9 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Referral Programme",
+    title: "Referral Program",
     description:
-      "Refer customers to Adedayo Aremu Autos and earn 5% commission on every completed car hire and 1.5% on every vehicle sale. Apply in a couple of minutes and track your referrals from your own partner account.",
+      "Refer customers to Adedayo Aremu Autos and earn 5% commission on every completed car rental and 1.5% on every vehicle sale. Apply in a couple of minutes and track your referrals from your own partner account.",
     alternates: {
       canonical: `/${market}/referral`,
       languages: { "en-US": "/us/referral", "en-NG": "/ng/referral" },
@@ -67,7 +67,7 @@ const STEPS = [
   {
     icon: "fas fa-hand-holding-usd",
     title: "You get paid",
-    body: "5% on every car hire you introduce and 1.5% on every vehicle sale, once it completes and the money has cleared.",
+    body: "5% on every car rental you introduce and 1.5% on every vehicle sale, once it completes and the money has cleared.",
   },
 ];
 
@@ -104,11 +104,11 @@ export default async function ReferralPage({
       <div className="page-header page-header--referral">
         <div className="page-header-content">
           <h1>
-            Referral <span>Programme</span>
+            Referral <span>Program</span>
           </h1>
           <p>
             Know someone looking for a vehicle? Send them our way and earn on
-            every completed sale and hire.
+            every completed sale and rental.
           </p>
         </div>
       </div>
@@ -118,10 +118,10 @@ export default async function ReferralPage({
           <div className="referral-page-grid">
             <div className="referral-explain">
               <div className="referral-headline">
-                5% <small>of every car hire you refer</small>
+                5% <small>of every car rental you refer</small>
               </div>
               <p className="referral-example">
-                A {example.hire} week&rsquo;s hire earns you{" "}
+                A {example.hire} week&rsquo;s rental earns you{" "}
                 <strong>{example.hireEarn}</strong>. And{" "}
                 <strong>1.5%</strong> on vehicle sales — a {example.car} car
                 earns you <strong>{example.carEarn}</strong>.
@@ -155,12 +155,12 @@ export default async function ReferralPage({
                     credited to whoever introduced them first.
                   </li>
                   <li>
-                    Commission is paid on <strong>completed</strong> hires and
-                    sales only — not on enquiries, and not on anything cancelled
+                    Commission is paid on <strong>completed</strong> rentals and
+                    sales only — not on inquiries, and not on anything cancelled
                     or refunded.
                   </li>
                   <li>
-                    Car hire pays <strong>5%</strong> and vehicle sales pay{" "}
+                    Car rental pays <strong>5%</strong> and vehicle sales pay{" "}
                     <strong>1.5%</strong>, both calculated on what the customer
                     actually pays us — not including deposits you get back or
                     taxes.

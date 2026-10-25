@@ -38,7 +38,7 @@ export async function generateMetadata({
 /** Icons matching the original's requirement cards, keyed by what they cover. */
 const REQUIREMENT_ICONS: Record<string, string> = {
   "Valid ID": "fas fa-id-card",
-  "Valid driver's licence": "fas fa-id-card",
+  "Valid driver's license": "fas fa-id-card",
   "Proof of income": "fas fa-file-invoice",
   "Bank verification": "fas fa-university",
   "Down payment": "fas fa-money-bill",

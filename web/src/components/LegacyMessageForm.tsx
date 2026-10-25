@@ -18,7 +18,7 @@ const INTERESTS: { value: string; label: string }[] = [
   // ?type=referral, but there was no matching option — so the browser fell
   // back to the first entry and every would-be partner was filed as "Buying a
   // Car". The programme has therefore recorded no referral leads at all.
-  { value: "referral", label: "Joining the referral programme" },
+  { value: "referral", label: "Joining the referral program" },
 ];
 
 /**
@@ -116,7 +116,7 @@ export function LegacyMessageForm({
 
         {vehicleLabel && (
           <p className="form-note">
-            Enquiring about <strong>{vehicleLabel}</strong>
+            Asking about <strong>{vehicleLabel}</strong>
           </p>
         )}
 
@@ -196,7 +196,7 @@ export function LegacyMessageForm({
         </button>
 
         <p className="form-privacy">
-          We use your details only to answer this enquiry.
+          We use your details only to answer this inquiry.
         </p>
       </form>
     </div>

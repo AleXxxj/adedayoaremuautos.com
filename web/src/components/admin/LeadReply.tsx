@@ -52,7 +52,7 @@ export function LeadReply({
   const about = vehicle ? ` about the ${vehicle}` : "";
   const greeting =
     `Hello ${firstName}, this is Adedayo Aremu Autos following up on your ` +
-    `enquiry${about}. How can we help?`;
+    `inquiry${about}. How can we help?`;
 
   const wa = waNumber
     ? `https://wa.me/${waNumber}?text=${encodeURIComponent(greeting)}`
@@ -60,7 +60,7 @@ export function LeadReply({
   const sms = phone ? `sms:${phone}?&body=${encodeURIComponent(greeting)}` : null;
   const mail = email
     ? `mailto:${email}?subject=${encodeURIComponent(
-        `Adedayo Aremu Autos — your enquiry${about}`,
+        `Adedayo Aremu Autos — your inquiry${about}`,
       )}&body=${encodeURIComponent(`${greeting}\n\n`)}`
     : null;
 

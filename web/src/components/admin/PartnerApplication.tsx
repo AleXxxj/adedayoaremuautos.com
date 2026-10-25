@@ -196,7 +196,7 @@ export function PartnerApplication({ app }: { app: Application }) {
                 means a second email correcting the first. */}
             <label className="text-xs">
               <span className="mb-1 block text-[var(--text-muted)]">
-                Hire — bps ({formatBps(app.rentalCommissionBps)})
+                Rental — bps ({formatBps(app.rentalCommissionBps)})
               </span>
               <input
                 name="rentalCommissionBps"

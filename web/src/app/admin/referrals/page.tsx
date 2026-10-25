@@ -178,7 +178,7 @@ export default async function AdminReferralsPage() {
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
               The referral panels on the homepage lead to an application form.
               Applications arrive here for a decision, and once a partner has
-              accepted the agreement their enquiries and bookings appear against
+              accepted the agreement their inquiries and bookings appear against
               their name.
             </p>
           </div>
@@ -205,7 +205,7 @@ export default async function AdminReferralsPage() {
                     agreedAt: p.agreedAt?.toISOString() ?? null,
                     createdAt: p.createdAt.toISOString(),
                     link: `${base}/r/${p.code}`,
-                    enquiries: leadsBy.get(p.id) ?? 0,
+                    inquiries: leadsBy.get(p.id) ?? 0,
                     sales: sale?.closed ?? 0,
                     soldValue: formatMoney(money(soldMinor, m.currency), m.locale),
                     owed: formatMoney(

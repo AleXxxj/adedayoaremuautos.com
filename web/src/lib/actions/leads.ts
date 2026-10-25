@@ -102,7 +102,7 @@ export async function submitLead(
     return {
       ok: false,
       error:
-        "We have already received several enquiries from this number. Please call us directly and we will help right away.",
+        "We have already received several inquiries from this number. Please call us directly and we will help right away.",
     };
   }
 
@@ -186,7 +186,7 @@ export async function submitLead(
     return {
       ok: false,
       error:
-        "Something went wrong saving your enquiry. Please call us on (336) 207-6521 and we will help immediately.",
+        "Something went wrong saving your inquiry. Please call us on (336) 207-6521 and we will help immediately.",
     };
   }
 

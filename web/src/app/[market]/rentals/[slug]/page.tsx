@@ -31,7 +31,7 @@ export async function generateMetadata({
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   return {
     title: `Rent a ${title}`,
-    description: `Hire a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,
+    description: `Rent a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,
     alternates: { canonical: `/${market}/rentals/${slug}` },
     openGraph: v.image ? { images: [v.image] } : undefined,
   };
@@ -74,12 +74,12 @@ export default async function RentalDetailPage({
     v.bodyStyle && { icon: "fas fa-car-side", label: "Body", value: v.bodyStyle },
     {
       icon: "fas fa-calendar-day",
-      label: "Minimum hire",
+      label: "Min. rental",
       value: `${v.tariff.minDays} day${v.tariff.minDays === 1 ? "" : "s"}`,
     },
     v.tariff.maxDays && {
       icon: "fas fa-calendar-week",
-      label: "Maximum hire",
+      label: "Max. rental",
       value: `${v.tariff.maxDays} days`,
     },
   ].filter(Boolean) as { icon: string; label: string; value: string }[];
@@ -154,7 +154,7 @@ export default async function RentalDetailPage({
               </dl>
               <p className="rental-note">
                 <i className="fas fa-circle-info" aria-hidden="true" /> Longer
-                hires are priced on the best combination of these rates
+                rentals are priced on the best combination of these rates
                 automatically. You are never charged more than the daily rate
                 multiplied by the number of days.
               </p>
@@ -181,11 +181,14 @@ export default async function RentalDetailPage({
           <aside className="rental-book">
             <div className="rental-book-card">
               <h2>
-                Request this <span>vehicle</span>
+                Reserve this <span>vehicle</span>
               </h2>
+              {/* This used to say the booking did not hold until a deposit was
+                  taken — true before reservations existed, and the first
+                  thing a customer read on the card afterwards. */}
               <p className="rental-book-lead">
-                Pick your dates and the price appears as you type. We confirm
-                availability and take a deposit before the booking holds.
+                Pick your dates to see the price. Reserving holds the vehicle
+                for you for up to 2 days, so you can see it before you pay.
               </p>
               <RentalBookingForm
                 market={market}

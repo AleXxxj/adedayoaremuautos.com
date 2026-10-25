@@ -222,7 +222,7 @@ export function Showroom({
         <div className="grid gap-10 rounded-[2rem] bg-[var(--brand-900)] p-10 text-white sm:p-14 lg:grid-cols-[1.4fr_1fr] lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-400)]">
-              Referral programme
+              Referral program
             </p>
             <h2
               className="mt-4 text-4xl font-normal leading-tight"

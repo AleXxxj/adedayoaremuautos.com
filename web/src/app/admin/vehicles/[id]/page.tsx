@@ -149,7 +149,7 @@ export default async function EditVehiclePage({
             </h2>
             <p className="mb-4 text-sm text-[var(--text-muted)]">
               A vehicle appears on the rentals page only when it is offered for
-              hire and has a daily rate.
+              rent and has a daily rate.
             </p>
             <TariffForm
               vehicleId={vehicle.id}

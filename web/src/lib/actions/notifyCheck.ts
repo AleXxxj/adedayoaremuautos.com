@@ -54,7 +54,7 @@ export async function sendTestNotification(): Promise<NotifyCheckResult> {
     phone: "+1 336 207 6521",
     email: user.email,
     message:
-      "This is a test of lead notifications. If you are reading it, alerts are working — real enquiries will arrive the same way.",
+      "This is a test of lead notifications. If you are reading it, alerts are working — real inquiries will arrive the same way.",
     vehicle: null,
     adminUrl: `${siteUrl()}/admin/leads`,
   });

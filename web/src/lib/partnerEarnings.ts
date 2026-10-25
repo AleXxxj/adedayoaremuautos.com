@@ -137,7 +137,6 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
       `[partner] rental commission recorded for ${partner.id} on booking ${bookingId}`,
     );
   } catch (e) {
-    const message = e instanceof Error ? e.message : "";
     // The ordinary case: this webhook has been delivered before.
     if (violates(e, "partner_earnings_booking_unique")) return;
     // Never allowed to fail the payment that triggered it. A commission the
@@ -256,7 +255,6 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
       confirmedAt: new Date(),
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : "";
     if (violates(e, "partner_earnings_deal_unique")) return;
     console.error("[partner] could not record sale commission", e);
   }

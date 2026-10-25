@@ -94,7 +94,7 @@ export function AgreementTerms({ booking }: { booking: Booking }) {
             className={field}
           />
           <span className="mt-1 block text-xs text-[var(--text-muted)]">
-            As printed on the licence. Booked as &ldquo;{booking.customerName}
+            As printed on the license. Booked as &ldquo;{booking.customerName}
             &rdquo; — leave blank to use that.
           </span>
         </label>

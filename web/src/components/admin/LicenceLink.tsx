@@ -43,7 +43,7 @@ export function LicenceLink({
             ? "Opening…"
             : kind === "insurance"
               ? "Insurance on file"
-              : "Licence on file"}
+              : "License on file"}
         </button>
       </form>
 

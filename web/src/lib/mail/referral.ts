@@ -31,7 +31,7 @@ function shell(heading: string, bodyHtml: string): string {
   <tr><td style="padding:28px">${bodyHtml}</td></tr>
   <tr><td style="background:#fafafa;border-top:1px solid ${RULE};padding:18px 28px">
     <div style="font-size:12px;line-height:1.6;color:${MUTED}">
-      Sent because you applied to the Adedayo Aremu Autos referral programme.
+      Sent because you applied to the Adedayo Aremu Autos referral program.
     </div>
   </td></tr>
 </table>
@@ -69,7 +69,7 @@ export async function sendApplicationReceived(o: { to: string; name: string }): 
     "Application received",
     `<p style="margin:0 0 14px;font-size:16px;color:#111">Hello ${escapeHtml(first)},</p>
      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#333">
-       Thank you for applying to our referral programme. We have your
+       Thank you for applying to our referral program. We have your
        application and someone will read it properly.
      </p>
      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#333">
@@ -84,7 +84,7 @@ export async function sendApplicationReceived(o: { to: string; name: string }): 
   const text = [
     `Hello ${first},`,
     "",
-    "Thank you for applying to our referral programme. We have your application and someone will read it properly.",
+    "Thank you for applying to our referral program. We have your application and someone will read it properly.",
     "",
     "You will hear from us within one working day, either by email or by phone. If we go ahead, the next step is a short agreement to read and accept — nothing is owed by you at any point.",
     "",
@@ -126,7 +126,7 @@ export async function sendAgreementToSign(o: {
      </p>
      <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#333">
        Your commission is <strong>${escapeHtml(o.hireRate)}</strong> on car
-       hire and <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale,
+       rentals and <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale,
        calculated on what the customer actually pays us, on completed deals you
        introduce.
      </p>
@@ -147,7 +147,7 @@ export async function sendAgreementToSign(o: {
     "",
     "Good news — we would like to take your application forward. The last step is the partner agreement. It is short, it is in plain English, and you should read it before you accept it.",
     "",
-    `Your commission is ${o.hireRate} on car hire and ${o.saleRate} on a vehicle sale, calculated on what the customer actually pays us, on completed deals you introduce.`,
+    `Your commission is ${o.hireRate} on car rental and ${o.saleRate} on a vehicle sale, calculated on what the customer actually pays us, on completed deals you introduce.`,
     "",
     "Read and accept the agreement:",
     o.link,
@@ -179,7 +179,7 @@ export async function sendApplicationDeclined(o: {
     "About your application",
     `<p style="margin:0 0 14px;font-size:16px;color:#111">Hello ${escapeHtml(first)},</p>
      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#333">
-       Thank you for applying to our referral programme. We are not taking
+       Thank you for applying to our referral program. We are not taking
        your application forward at this time.
      </p>
      ${
@@ -195,7 +195,7 @@ export async function sendApplicationDeclined(o: {
   const text = [
     `Hello ${first},`,
     "",
-    "Thank you for applying to our referral programme. We are not taking your application forward at this time.",
+    "Thank you for applying to our referral program. We are not taking your application forward at this time.",
     ...(reason ? ["", reason] : []),
     "",
     "This is not a judgement on you and it is not permanent — you are welcome to apply again later, or to call us if you would like to talk it through.",
@@ -231,7 +231,7 @@ export async function sendPartnerWelcome(o: {
        Your agreement is accepted and your referral code is live from now.
        Anyone who books or buys through your link is recorded against your
        name, and you earn <strong>${escapeHtml(o.hireRate)}</strong> on car
-       hire or <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale.
+       rentals or <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale.
      </p>
 
      <div style="margin:0 0 20px;border:1px solid ${RULE};border-radius:10px;padding:18px;text-align:center">
@@ -256,7 +256,7 @@ export async function sendPartnerWelcome(o: {
   const text = [
     `Congratulations ${first},`,
     "",
-    `Your agreement is accepted and your referral code is live from now. Anyone who books or buys through your link is recorded against your name, and you earn ${o.hireRate} on car hire or ${o.saleRate} on a vehicle sale.`,
+    `Your agreement is accepted and your referral code is live from now. Anyone who books or buys through your link is recorded against your name, and you earn ${o.hireRate} on car rental or ${o.saleRate} on a vehicle sale.`,
     "",
     `Your code: ${o.code}`,
     `Your link: ${o.link}`,
@@ -267,7 +267,7 @@ export async function sendPartnerWelcome(o: {
     "Adedayo Aremu Autos",
   ].join("\n");
 
-  await send(o.to, "Welcome to the Adedayo Aremu Autos partner programme", html, text);
+  await send(o.to, "Welcome to the Adedayo Aremu Autos partner program", html, text);
 }
 
 /** An application is waiting. Sent to whoever handles the leads. */

@@ -164,7 +164,7 @@ export default async function PartnerDashboard() {
             <Figure
               label="Still to come"
               value={fmt(totals.pendingMinor)}
-              hint="Hires not finished yet"
+              hint="Rentals not finished yet"
             />
             <Figure
               label="Requested"
@@ -200,7 +200,7 @@ export default async function PartnerDashboard() {
           <ShareLink link={link} code={partner.code} />
           <p className="mt-3 text-xs leading-relaxed text-[#6f6f6f]">
             Anyone who opens your link is recorded against your name for 90
-            days, whichever page they go on to enquire from. If they call
+            days, whichever page they contact us from. If they call
             instead, give them your code and we will enter it by hand.
           </p>
         </Panel>
@@ -208,7 +208,7 @@ export default async function PartnerDashboard() {
         {/* ── What you have sent ────────────────────────────────────── */}
         <Panel title="What you have sent us">
           <div className="grid grid-cols-3 gap-4">
-            <Figure label="Enquiries" value={String(counts.total)} />
+            <Figure label="Inquiries" value={String(counts.total)} />
             <Figure label="Still open" value={String(counts.open)} />
             <Figure label="Completed" value={String(counts.won)} />
           </div>
@@ -216,7 +216,7 @@ export default async function PartnerDashboard() {
           {bookings.length > 0 && (
             <div className="mt-6">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[#7d7d7d]">
-                Hires
+                Rentals
               </h3>
               <ul className="mt-2 divide-y divide-[#1f1f1f]">
                 {bookings.map((b) => (
@@ -265,7 +265,7 @@ export default async function PartnerDashboard() {
 
           {counts.total === 0 && bookings.length === 0 && sales.length === 0 && (
             <p className="mt-5 text-sm leading-relaxed text-[#9b9b9b]">
-              Nothing yet. Share your link above and anyone who enquires through
+              Nothing yet. Share your link above and anyone who contacts us through
               it appears here, with its status, as it moves along.
             </p>
           )}
@@ -279,7 +279,7 @@ export default async function PartnerDashboard() {
                 <li key={e.id} className="py-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="text-sm text-[#d4d4d4]">
-                      {e.source === "rental" ? "Car hire" : "Vehicle sale"}
+                      {e.source === "rental" ? "Car rental" : "Vehicle sale"}
                       <span className="ml-2 text-xs text-[#6f6f6f]">
                         {formatBps(e.commissionBps)} of{" "}
                         {formatMoney(
@@ -380,7 +380,7 @@ export default async function PartnerDashboard() {
                     <span className="min-w-0 truncate text-[#d4d4d4]">
                       {v.year} {v.make} {v.model}
                       {v.listingKind === "rental" && (
-                        <span className="ml-2 text-xs text-[#7d7d7d]">hire</span>
+                        <span className="ml-2 text-xs text-[#7d7d7d]">rental</span>
                       )}
                     </span>
                     <span className="shrink-0 tabular-nums text-[#9b9b9b]">
@@ -445,7 +445,7 @@ function Figure({
 const WORDS: Record<string, { text: string; tone: string }> = {
   quote: { text: "Awaiting payment", tone: "#9b9b9b" },
   confirmed: { text: "Confirmed", tone: "#4e9d76" },
-  active: { text: "On hire now", tone: "#4e9d76" },
+  active: { text: "Rental in progress", tone: "#4e9d76" },
   returned: { text: "Completed", tone: "#4e9d76" },
   cancelled: { text: "Cancelled", tone: "#8a8a8a" },
   pending: { text: "Not yet earned", tone: "#c8a94e" },

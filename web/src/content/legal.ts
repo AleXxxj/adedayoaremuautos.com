@@ -58,7 +58,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>When you interact with us — whether to purchase a vehicle, apply for financing, rent a car, or make an inquiry — we may collect the following personal information:</p>
             <ul>
                 <li>Full name, email address, phone number, and home/business address</li>
-                <li>Government-issued identification (e.g., NIN, driver's licence, international passport)</li>
+                <li>Government-issued identification (e.g., NIN, driver's license, international passport)</li>
                 <li>Financial information including bank account details, employment information, and income verification for financing applications</li>
                 <li>Vehicle preferences, purchase history, and transaction records</li>
                 <li>Messages and communications you send to us via contact forms, email, or WhatsApp</li>
@@ -102,7 +102,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 4 -->
         <div class="policy-section" id="data-security">
             <h2><i class="fas fa-shield-alt"></i> 4. Data Security</h2>
-            <p>We take the security of your personal information seriously. We implement appropriate technical and organisational measures to protect your data against unauthorised access, alteration, disclosure, or destruction. These measures include:</p>
+            <p>We take the security of your personal information seriously. We implement appropriate technical and organizational measures to protect your data against unauthorised access, alteration, disclosure, or destruction. These measures include:</p>
             <ul>
                 <li>Secure storage of physical and digital records with restricted access</li>
                 <li>Use of encrypted communication channels for sensitive data transmission</li>
@@ -170,7 +170,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li><a href="#services"><i class="fas fa-chevron-right"></i> Our Services</a></li>
                 <li><a href="#vehicle-sales"><i class="fas fa-chevron-right"></i> Vehicle Sales</a></li>
                 <li><a href="#financing"><i class="fas fa-chevron-right"></i> Financing Terms</a></li>
-                <li><a href="#referral"><i class="fas fa-chevron-right"></i> Referral Programme</a></li>
+                <li><a href="#referral"><i class="fas fa-chevron-right"></i> Referral Program</a></li>
                 <li><a href="#payments"><i class="fas fa-chevron-right"></i> Payments & Deposits</a></li>
                 <li><a href="#liability"><i class="fas fa-chevron-right"></i> Limitation of Liability</a></li>
                 <li><a href="#prohibited"><i class="fas fa-chevron-right"></i> Prohibited Conduct</a></li>
@@ -218,7 +218,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                         <td>Flexible instalment payment plans for vehicle purchases, ranging from 6 to 24 months.</td>
                     </tr>
                     <tr>
-                        <td><strong style="color: var(--silver-classic);">Referral Programme</strong></td>
+                        <td><strong style="color: var(--silver-classic);">Referral Program</strong></td>
                         <td>Commission-based referral system for partners who introduce verified buyers.</td>
                     </tr>
                 </tbody>
@@ -243,11 +243,11 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 4 -->
         <div class="policy-section" id="financing">
             <h2><i class="fas fa-hand-holding-usd"></i> 4. Financing Terms</h2>
-            <p>Our vehicle financing is subject to credit assessment and approval. By applying for financing, you authorise us to verify your financial information and share it with relevant financial partners. The following terms apply:</p>
+            <p>Our vehicle financing is subject to credit assessment and approval. By applying for financing, you authorize us to verify your financial information and share it with relevant financial partners. The following terms apply:</p>
             <ul>
                 <li>A minimum down payment is required. The amount varies based on the vehicle price and your assessed creditworthiness.</li>
                 <li>Instalment payment plans range from 6 to 24 months. Interest rates will be disclosed in your financing agreement before signing.</li>
-                <li>Vehicles financed through our programme remain in our name or that of our financing partner until full repayment is completed.</li>
+                <li>Vehicles financed through our program remain in our name or that of our financing partner until full repayment is completed.</li>
                 <li>Missed or late instalments may result in penalties, repossession of the vehicle, and/or legal action as specified in the financing agreement.</li>
                 <li>Early full repayment is permitted. Any applicable early repayment terms will be stated in your agreement.</li>
             </ul>
@@ -255,15 +255,15 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         </div>
         <!-- Section 5 -->
         <div class="policy-section" id="referral">
-            <h2><i class="fas fa-users"></i> 5. Referral Programme</h2>
-            <p>Our referral programme allows individuals ("Referrers") to earn a commission by introducing buyers and hire customers to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
+            <h2><i class="fas fa-users"></i> 5. Referral Program</h2>
+            <p>Our referral program allows individuals ("Referrers") to earn a commission by introducing buyers and rental customers to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
             <ul>
-                <li>Commission is payable to the Referrer upon completion of a successful vehicle hire or purchase by the referred party, at <strong style="color: var(--silver-classic);">5% on vehicle hire</strong> and <strong style="color: var(--silver-classic);">1.5% on a vehicle sale</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
-                <li>A referral is deemed successful only when that amount has been paid in full and the purchase or hire has been completed.</li>
-                <li>Referrers are issued a personal referral link and code on acceptance into the programme. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us.</li>
+                <li>Commission is payable to the Referrer upon completion of a successful vehicle rental or purchase by the referred party, at <strong style="color: var(--silver-classic);">5% on vehicle rental</strong> and <strong style="color: var(--silver-classic);">1.5% on a vehicle sale</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
+                <li>A referral is deemed successful only when that amount has been paid in full and the purchase or rental has been completed.</li>
+                <li>Referrers are issued a personal referral link and code on acceptance into the program. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us.</li>
                 <li>Earnings appear on the Referrer's own partner account as they are confirmed. A payout may be requested at any time once earnings are available, and is paid on our next payment run. We do not hold funds on a Referrer's behalf and this website does not collect bank details; payment arrangements are made with each Referrer directly.</li>
                 <li>Referrers may not misrepresent our services, apply undue pressure on potential buyers, or engage in deceptive practices. Breach of this condition forfeits the referral commission.</li>
-                <li>We reserve the right to modify or terminate the referral programme at any time with reasonable notice.</li>
+                <li>We reserve the right to modify or terminate the referral program at any time with reasonable notice.</li>
             </ul>
         </div>
         <!-- Section 6 -->
@@ -370,7 +370,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <div class="requirement-card">
                     <i class="fas fa-birthday-cake"></i>
                     <h4>Minimum Age</h4>
-                    <p>Must be at least 21 years of age at the time of rental.</p>
+                    <p>Must be at least 18 years of age at the time of rental.</p>
                 </div>
                 <div class="requirement-card">
                     <i class="fas fa-id-card"></i>
@@ -379,8 +379,8 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 </div>
                 <div class="requirement-card">
                     <i class="fas fa-car"></i>
-                    <h4>Driver's Licence</h4>
-                    <p>A valid Nigerian driver's licence held for at least 2 years.</p>
+                    <h4>Driver's License</h4>
+                    <p>A valid Nigerian driver's license held for at least 2 years.</p>
                 </div>
                 <div class="requirement-card">
                     <i class="fas fa-phone-alt"></i>
@@ -388,7 +388,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                     <p>A valid phone number and verifiable home or office address.</p>
                 </div>
             </div>
-            <p>For renters aged 21–24, a Young Driver surcharge may apply as stated in your rental agreement. International renters must present a valid international driving permit alongside their foreign licence.</p>
+            <p>For renters aged 21–24, a Young Driver surcharge may apply as stated in your rental agreement. International renters must present a valid international driving permit alongside their foreign license.</p>
         </div>
         <!-- Section 2 -->
         <div class="policy-section" id="booking">
@@ -407,10 +407,10 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>Rental periods are structured as follows:</p>
             <ul>
                 <li><strong style="color: var(--silver-classic);">Daily Rental:</strong> Minimum rental period is 1 day (24 hours). The rental clock begins at the time the vehicle is collected.</li>
-                <li><strong style="color: var(--silver-classic);">Weekly Rental:</strong> 7 consecutive days from the collection time. Weekly rates offer a discount over daily pricing.</li>
+                <li><strong style="color: var(--silver-classic);">Weekly Rental:</strong> 7 consecutive days from the pickup time. Weekly rates offer a discount over daily pricing.</li>
                 <li><strong style="color: var(--silver-classic);">Monthly Rental:</strong> 30 consecutive days. Monthly rates offer further discounts and are available on approved vehicles.</li>
             </ul>
-            <p>The return time must match the collection time. A grace period of up to 1 hour is allowed. Returns more than 1 hour after the agreed time will attract an additional full-day rental charge at the daily rate.</p>
+            <p>The return time must match the pickup time. A grace period of up to 1 hour is allowed. Returns more than 1 hour after the agreed time will attract an additional full-day rental charge at the daily rate.</p>
             <div class="warning-box">
                 <p><i class="fas fa-exclamation-triangle" style="color: var(--illustration-gold); margin-right: 8px;"></i> Extensions to the rental period must be requested and approved before the original return time. Unauthorised extensions will be treated as a breach of the rental agreement.</p>
             </div>
@@ -421,7 +421,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>Rental rates vary by vehicle type, rental duration, and season. Current rates are available on our Rentals page or on request via WhatsApp. All rates are in Nigerian Naira (₦) and include:</p>
             <ul>
                 <li>Basic third-party insurance cover</li>
-                <li>Standard maintenance (oil, tyres, etc.) for long-term rentals</li>
+                <li>Standard maintenance (oil, tires, etc.) for long-term rentals</li>
                 <li>Roadside assistance during business hours</li>
             </ul>
             <p>The following charges are <strong style="color: var(--silver-classic);">not included</strong> in the base rate and will be billed separately where applicable:</p>
@@ -442,7 +442,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                     <tr><td>Lost key replacement</td><td class="fee-amount">Actual cost + ₦10,000</td></tr>
                 </tbody>
             </table>
-            <p>Full rental payment is due before vehicle collection. We accept bank transfer and electronic payment. Cash is accepted only for amounts up to ₦500,000.</p>
+            <p>Full rental payment is due before vehicle pickup. We accept bank transfer and electronic payment. Cash is accepted only for amounts up to ₦500,000.</p>
         </div>
         <!-- Section 5 -->
         <div class="policy-section" id="deposit">
@@ -463,7 +463,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <ul>
                 <li>Clean on the exterior and interior (no excessive dirt, stains, or odours)</li>
                 <li>Free from new damage not recorded on the original VCR</li>
-                <li>With the same fuel level as at collection</li>
+                <li>With the same fuel level as at pickup</li>
                 <li>With all accessories, keys, and documents included at rental</li>
             </ul>
         </div>
@@ -488,7 +488,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 8 -->
         <div class="policy-section" id="fuel">
             <h2><i class="fas fa-gas-pump"></i> 8. Fuel Policy</h2>
-            <p>All vehicles are provided with a full tank of fuel at collection. You are required to return the vehicle with a full tank. If the vehicle is returned with less fuel than at collection, a refuelling charge will be deducted from your security deposit. This charge includes the cost of fuel plus a ₦3,000 refuelling service fee.</p>
+            <p>All vehicles are provided with a full tank of fuel at pickup. You are required to return the vehicle with a full tank. If the vehicle is returned with less fuel than at collection, a refuelling charge will be deducted from your security deposit. This charge includes the cost of fuel plus a ₦3,000 refuelling service fee.</p>
             <p>Please use the correct fuel type for the vehicle as indicated in the vehicle handbook. Using the wrong fuel type will result in damage charges being applied to you in full.</p>
         </div>
         <!-- Section 9 -->
@@ -502,7 +502,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li>Damage caused while driving under the influence of alcohol or substances</li>
                 <li>Mechanical damage caused by misuse or neglect</li>
             </ul>
-            <p><strong style="color: var(--silver-classic);">Injury to you is not covered.</strong> Our insurance covers the vehicle. It does not cover bodily injury to the renter or to the renter's passengers. If you are injured while driving or travelling in one of our vehicles, your own insurance, health cover or personal resources are responsible for your medical costs, and our policy will not pay them. This is disclosed again on the booking form, where you choose whether to use your own insurance, to add cover where we offer it, or to proceed without either.</p>
+            <p><strong style="color: var(--silver-classic);">Injury to you is not covered.</strong> Our insurance covers the vehicle. It does not cover bodily injury to the renter or to the renter's passengers. If you are injured while driving or traveling in one of our vehicles, your own insurance, health cover or personal resources are responsible for your medical costs, and our policy will not pay them. This is disclosed again on the booking form, where you choose whether to use your own insurance, to add cover where we offer it, or to proceed without either.</p>
             <p>Where we offer optional additional cover, the fee, what it covers and the period it applies for are stated before you book and are itemised on your receipt. We do not add cover, or charge for it, without you choosing it.</p>
         </div>
         <!-- Section 10 -->
@@ -536,7 +536,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                     <tr><td>More than 72 hours before rental start</td><td class="fee-amount">Full refund of rental payment</td></tr>
                     <tr><td>24 – 72 hours before rental start</td><td class="fee-amount">50% refund of rental payment</td></tr>
                     <tr><td>Less than 24 hours before rental start</td><td class="fee-amount">No refund</td></tr>
-                    <tr><td>No-show (renter fails to collect)</td><td class="fee-amount">No refund</td></tr>
+                    <tr><td>No-show (renter fails to pick up the vehicle)</td><td class="fee-amount">No refund</td></tr>
                 </tbody>
             </table>
             <p>The security deposit is always fully refunded upon cancellation, provided no services have been rendered. In the event we cancel your reservation due to circumstances on our part (vehicle unavailability, etc.), a full refund of all amounts paid will be issued within 3 business days.</p>

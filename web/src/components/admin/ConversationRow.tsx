@@ -51,7 +51,7 @@ export function ConversationRow({
                 href="/admin/leads"
                 className="rounded-full border border-[var(--success)]/40 px-2 py-0.5 text-xs text-[var(--success)] hover:underline"
               >
-                filed as an enquiry
+                filed as an inquiry
               </Link>
             )}
           </div>

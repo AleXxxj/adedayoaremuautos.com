@@ -21,7 +21,7 @@ interface Partner {
   agreedAt: string | null;
   createdAt: string;
   link: string;
-  enquiries: number;
+  inquiries: number;
   sales: number;
   soldValue: string;
   owed: string;
@@ -97,7 +97,7 @@ export function PartnerRow({ partner }: { partner: Partner }) {
             owed at {formatBps(partner.commissionBps)} on sales
           </div>
           <div className="mt-2 text-xs text-[var(--text-muted)]">
-            {partner.enquiries} enquir{partner.enquiries === 1 ? "y" : "ies"} ·{" "}
+            {partner.inquiries} inquir{partner.inquiries === 1 ? "y" : "ies"} ·{" "}
             {partner.sales} sold
           </div>
           {partner.sales > 0 && (
@@ -193,7 +193,7 @@ export function PartnerRow({ partner }: { partner: Partner }) {
 
           <label className="text-xs">
             <span className="mb-1 block text-[var(--text-muted)]">
-              Hire commission (bps — 500 = 5%)
+              Rental commission (bps — 500 = 5%)
             </span>
             <input
               name="rentalCommissionBps"

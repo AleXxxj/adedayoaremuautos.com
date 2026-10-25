@@ -146,7 +146,7 @@ function TierCard({ tier, onEdit }: { tier: TierRow; onEdit: () => void }) {
           <>
             Owns it after{" "}
             <strong className="text-[var(--text-primary)]">{path.days} days</strong>{" "}
-            of continuous hire, having paid{" "}
+            of continuous rental, having paid{" "}
             <strong className="text-[var(--text-primary)]">
               {formatMoney(path.totalPaid, cfg.locale)}
             </strong>
@@ -154,7 +154,7 @@ function TierCard({ tier, onEdit }: { tier: TierRow; onEdit: () => void }) {
           </>
         ) : (
           <span className="text-[var(--text-muted)]">
-            Hire only — no ownership threshold set.
+            Rental only — no ownership threshold set.
           </span>
         )}
       </p>

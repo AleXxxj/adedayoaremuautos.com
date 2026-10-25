@@ -42,6 +42,14 @@ export interface RentalResult {
   canPay?: boolean;
   /** How long the vehicle is held, e.g. "2 days". Absent if it is not held. */
   heldFor?: string;
+  /** Whether the pay-later link went out by email. */
+  emailed?: boolean;
+  /**
+   * The pay-later link itself, returned only to the person who just made the
+   * booking. Without an email address this response is the one place they
+   * can get it, so the confirmation panel shows it when nothing was sent.
+   */
+  reservationUrl?: string;
 }
 
 const schema = z.object({
@@ -86,7 +94,7 @@ const schema = z.object({
    * liability.
    */
   confirmEligible: z.literal("on", {
-    message: "Please confirm you meet the hire requirements",
+    message: "Please confirm you meet the rental requirements",
   }),
   note: z.string().trim().max(2000).optional(),
   website: z.string().max(0).optional(),
@@ -167,7 +175,7 @@ export async function requestRental(
     .where(and(eq(vehicles.marketCode, f.marketCode), eq(vehicles.slug, f.vehicleSlug)))
     .limit(1);
 
-  if (!row) return { ok: false, error: "That vehicle is not available for hire." };
+  if (!row) return { ok: false, error: "That vehicle is not available to rent." };
 
   const tariff = {
     dailyMinor: row.r.dailyMinor,
@@ -212,7 +220,7 @@ export async function requestRental(
     return {
       ok: false,
       fieldErrors: {
-        licenceFile: ["Please attach a photo of your driving licence."],
+        licenceFile: ["Please attach a photo of your driver's license."],
       },
     };
   }
@@ -245,7 +253,7 @@ export async function requestRental(
         ok: false,
         fieldErrors: {
           insuranceFile: [
-            "Please attach your insurance certificate, or change your answer above.",
+            "Please attach proof of insurance, or choose a different option above.",
           ],
         },
       };
@@ -321,7 +329,7 @@ export async function requestRental(
     if ((open?.n ?? 0) >= MAX_OPEN_RESERVATIONS) {
       return {
         ok: false,
-        error: `You are already holding ${MAX_OPEN_RESERVATIONS} vehicles. Please pay for one or let a hold run out before reserving another, or call us and we will sort it out.`,
+        error: `You are already holding ${MAX_OPEN_RESERVATIONS} vehicles. Please pay for one or let a hold run out before reserving another, or call us and we'll help.`,
       };
     }
   }
@@ -390,7 +398,7 @@ export async function requestRental(
       };
     }
     if (violates(e, "rental_bookings_period")) {
-      return { ok: false, error: "Those dates are not a valid hire period." };
+      return { ok: false, error: "Those dates are not a valid rental period." };
     }
     console.error("[rental] insert failed", e);
     return {
@@ -487,6 +495,10 @@ export async function requestRental(
     amount: formatMoney(money(quote.totalMinor, market.currency), market.locale),
     canPay,
     heldFor: reservedUntil ? holdRemaining(reservedUntil) : undefined,
+    emailed: Boolean(reservedUntil && reservationToken && f.email),
+    reservationUrl: reservationToken
+      ? `${siteUrl()}/${f.marketCode}/rentals/reserved/${reservationToken}`
+      : undefined,
   };
 }
 
@@ -547,7 +559,7 @@ export async function adjustHold(
   if (range && !canReserve(range.start, now)) {
     return {
       ok: false,
-      error: "The hire starts too soon to hold it any longer.",
+      error: "The rental starts too soon to hold it any longer.",
     };
   }
   const until = range ? reservationExpiry(range.start, now) : null;
@@ -708,7 +720,7 @@ export async function updateBookingStatus(
     if (status === "returned") {
       await confirmRentalEarning(id);
     } else if (status === "cancelled") {
-      await cancelEarningFor({ bookingId: id }, "The hire was cancelled.");
+      await cancelEarningFor({ bookingId: id }, "The rental was cancelled.");
     }
   }
 

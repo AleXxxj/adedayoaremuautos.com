@@ -32,7 +32,7 @@ export function PartnerHeader({
             partner works out their earnings on the wrong one and then asks why
             the number on the screen disagrees with theirs. */}
         <p className="mt-1 text-sm text-[#9b9b9b]">
-          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car hire ·{" "}
+          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car rental ·{" "}
           <strong className="text-[#d4d4d4]">{saleRate}</strong> on vehicle
           sales
         </p>

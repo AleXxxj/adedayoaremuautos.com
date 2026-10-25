@@ -9,6 +9,7 @@ import { formatMoney, money } from "@/lib/money";
 import type { MarketConfig } from "@/lib/market";
 import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rentalTerms";
 import { RentalPayButton } from "@/components/RentalPayButton";
+import { RESERVATION_HOURS } from "@/lib/reservation";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -111,12 +112,12 @@ export function RentalBookingForm({
      * them independently either way.
      */
     if (!licenceFile) {
-      setDocError("Please attach a photo of your driving licence.");
+      setDocError("Please attach a photo of your driver's license.");
       return;
     }
     if (insurance === "own" && !insuranceFile) {
       setDocError(
-        "Please attach your insurance certificate, or change your answer above.",
+        "Please attach proof of insurance, or choose a different option above.",
       );
       return;
     }
@@ -177,10 +178,25 @@ export function RentalBookingForm({
         <p className="booking-done-body">
           {payable
             ? state.heldFor
-              ? "Come and see it first if you would rather — we have emailed you a link to pay from your phone when you are happy. Or pay now and it is confirmed immediately."
-              : "Pay now and the dates are yours immediately — or leave it and we will call you to confirm."
-            : "We will confirm availability and the deposit shortly."}
+              ? state.emailed
+                ? "You can come see the vehicle first — we've emailed you a link to pay from your phone when you're ready. Or pay now to confirm right away."
+                : "You can come see the vehicle first and pay from the link below when you're ready. Or pay now to confirm right away."
+              : "Pay now to confirm these dates right away, or we'll call you to confirm."
+            : "We'll contact you shortly to confirm availability and the deposit."}
         </p>
+
+        {/* No email was given, so the link the customer needs to pay later
+            would otherwise exist nowhere they can reach. Shown here, once,
+            to the person who just made the booking — and saying so, because
+            this page is the only copy they will get. */}
+        {payable && state.heldFor && !state.emailed && state.reservationUrl && (
+          <p className="booking-done-link">
+            <strong>Save this link</strong> — it&rsquo;s the only copy, because no
+            email was provided:
+            <br />
+            <a href={state.reservationUrl}>{state.reservationUrl}</a>
+          </p>
+        )}
 
         {/* Offered after the request is safely recorded, never instead of it:
             somebody who abandons the checkout has still made an enquiry. */}
@@ -217,7 +233,7 @@ export function RentalBookingForm({
 
       <div className="booking-dates">
         <label className="booking-field">
-          <span>Pick-up</span>
+          <span>Pickup date</span>
           <input
             name="from"
             type="date"
@@ -230,7 +246,7 @@ export function RentalBookingForm({
           {err("from") && <Err>{err("from")}</Err>}
         </label>
         <label className="booking-field">
-          <span>Return</span>
+          <span>Return date</span>
           <input
             name="to"
             type="date"
@@ -288,7 +304,7 @@ export function RentalBookingForm({
             {preview.quote.injuryCoverMinor > 0 && (
               <div className="booking-quote-cover">
                 <dt className="booking-quote-line">
-                  Injury cover × {preview.quote.days} day
+                  Injury coverage × {preview.quote.days} day
                   {preview.quote.days === 1 ? "" : "s"}
                 </dt>
                 <dd>{fmt(preview.quote.injuryCoverMinor)}</dd>
@@ -327,7 +343,7 @@ export function RentalBookingForm({
 
       <label className="booking-field">
         <span>
-          Email <em>optional</em>
+          Email <em>recommended — we send your reservation link here</em>
         </span>
         <input name="email" type="email" autoComplete="email" value={val("email")} onChange={set("email")} />
         {err("email") && <Err>{err("email")}</Err>}
@@ -345,15 +361,15 @@ export function RentalBookingForm({
           The vehicle is insured. You are not.
         </p>
         <p>
-          Our insurance covers this vehicle — if it is hit, or hits something,
-          that is covered. It does <strong>not</strong> cover injury to you.
-          If you are hurt while driving it, your medical costs are not covered
-          by our policy.
+          Our insurance covers this vehicle if it is involved in an accident.
+          It does <strong>not</strong> cover bodily injury to you, the renter.
+          If you are injured while driving, our insurance will not pay your
+          medical bills.
         </p>
       </div>
 
       <fieldset className="booking-insurance">
-        <legend>So how will you be covered?</legend>
+        <legend>How will you be covered?</legend>
 
         <label
           className={`booking-insurance-option${insurance === "own" ? " is-chosen" : ""}`}
@@ -369,8 +385,8 @@ export function RentalBookingForm({
             <strong>I have my own insurance</strong>
             <span className="booking-insurance-price">No extra charge</span>
             <small>
-              Attach your certificate below so we can check it before you
-              collect the vehicle.
+              Attach your insurance document below for review and safety
+              purposes.
             </small>
           </span>
         </label>
@@ -393,11 +409,11 @@ export function RentalBookingForm({
               <span className="booking-insurance-price booking-insurance-fee">
                 + {fmt(tariff.injuryCoverDailyMinor!)} per day
                 {preview?.quote && insurance === "company" && (
-                  <em> — {fmt(preview.quote.injuryCoverMinor)} for this hire</em>
+                  <em> — {fmt(preview.quote.injuryCoverMinor)} for this rental</em>
                 )}
               </span>
               <small>
-                Adds cover for injury to you for the length of the hire.
+                Covers bodily injury to you for the full rental period.
               </small>
             </span>
           </label>
@@ -418,12 +434,12 @@ export function RentalBookingForm({
             onChange={() => setInsurance("declined")}
           />
           <span className="booking-insurance-body">
-            <strong>I have none, and I accept that</strong>
+            <strong>I don&rsquo;t have insurance, and I accept the risk</strong>
             <span className="booking-insurance-price">No extra charge</span>
             <small>
               I understand that if I am injured while driving this vehicle,
-              <strong> Adedayo Aremu Autos has no insurance covering me</strong>,
-              and that my medical costs would be my own.
+              <strong> the rental company&rsquo;s insurance does not cover me</strong>,
+              and I am responsible for my own medical bills.
             </small>
           </span>
         </label>
@@ -434,7 +450,7 @@ export function RentalBookingForm({
       <div className="booking-licence">
         <label className="booking-field">
           <span>
-            Photo of your driving licence <em>required</em>
+            Photo of your driver&rsquo;s license <em>required</em>
           </span>
           <input
             type="file"
@@ -464,7 +480,7 @@ export function RentalBookingForm({
           aria-hidden={insurance !== "own"}
         >
           <span>
-            Your insurance certificate <em>required</em>
+            Proof of insurance <em>required</em>
           </span>
           <input
             type="file"
@@ -491,16 +507,17 @@ export function RentalBookingForm({
         <p className="booking-licence-note">
           <i className="fas fa-lock" aria-hidden="true" />
           <span>
-            Sending it now saves time at pickup. It is stored privately, never
-            shown on this website, and can only be opened by our staff through a
-            link that expires within minutes. We will not ask for your bank
-            details, card number, SSN or BVN — not here, and not by email.
+            Uploading now saves time at pickup. Your documents are stored
+            privately, never shown on this website, and can only be opened by
+            our staff through a link that expires within minutes. We will never
+            ask for your bank details, card number, SSN or BVN — here or by
+            email.
           </span>
         </p>
 
         <label className="booking-field">
           <span>
-            Licence number <em>optional</em>
+            Driver&rsquo;s license number <em>optional</em>
           </span>
           <input name="licenceNo" value={val("licenceNo")} onChange={set("licenceNo")} />
         </label>
@@ -508,7 +525,7 @@ export function RentalBookingForm({
         <div className="booking-field-row">
           <label className="booking-field">
             <span>
-              Insurer <em>optional</em>
+              Insurance company <em>optional</em>
             </span>
             <input name="insuranceProvider" autoComplete="organization" value={val("insuranceProvider")} onChange={set("insuranceProvider")} />
           </label>
@@ -528,17 +545,17 @@ export function RentalBookingForm({
       <label className="booking-consent">
         <input type="checkbox" name="confirmEligible" required />
         <span>
-          I am 21 or over, I hold a full licence that is valid for the whole
-          hire period, and the documents I have attached are my own. I
-          understand the vehicle is not released until they have been
-          checked, and I have read the notice above about injury cover.
+          I am 18 or older, I have a valid driver&rsquo;s license for the entire
+          rental period, and the documents I attached are my own. I understand
+          the vehicle will not be released until our team has reviewed them,
+          and I have read the injury notice above.
         </span>
       </label>
       {err("confirmEligible") && <Err>{err("confirmEligible")}</Err>}
 
       <label className="booking-field">
         <span>
-          Anything else? <em>optional</em>
+          Anything else we should know? <em>optional</em>
         </span>
         <textarea name="note" rows={3} value={val("note")} onChange={set("note")} />
       </label>
@@ -549,7 +566,7 @@ export function RentalBookingForm({
       <details className="booking-terms">
         <summary>
           <i className="fas fa-file-contract" aria-hidden="true" /> Rental terms
-          <span>read before you request</span>
+          <span>please read before reserving</span>
         </summary>
         <div className="booking-terms-body">
           {RENTAL_CLAUSES.map((c, i) => (
@@ -572,9 +589,7 @@ export function RentalBookingForm({
       <label className="booking-accept">
         <input type="checkbox" name="acceptTerms" required />
         <span>
-          I have read and accept the rental terms above. I confirm I hold a
-          valid driving licence and the insurance required for how I intend to
-          use the vehicle.
+          I have read and agree to the rental terms above.
         </span>
       </label>
       {err("acceptTerms") && <Err>{err("acceptTerms")}</Err>}
@@ -584,12 +599,13 @@ export function RentalBookingForm({
         disabled={pending}
         className="btn btn-primary booking-submit"
       >
-        {pending ? "Sending…" : "Request booking"} <i className="fas fa-calendar-check" />
+        {pending ? "Reserving…" : "Reserve this vehicle"} <i className="fas fa-calendar-check" />
       </button>
 
       <p className="booking-fineprint">
-        Sending a request does not hold the vehicle. We confirm availability and
-        take the deposit first.
+        We hold the vehicle for you for up to {RESERVATION_HOURS / 24} days after
+        you reserve. Pay online right away, or come see it first and pay when
+        you pick it up. The refundable deposit is taken at pickup.
       </p>
     </form>
   );

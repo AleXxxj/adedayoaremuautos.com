@@ -61,7 +61,7 @@ export default async function RentalPaidPage({
               confirmed and the vehicle is reserved for your dates.
             </p>
             <p className="booking-result-note">
-              Bring your driving licence to collection. The refundable security
+              Bring your driver&rsquo;s license when you pick up the vehicle. The refundable security
               deposit is taken at pickup, not online.
             </p>
           </>

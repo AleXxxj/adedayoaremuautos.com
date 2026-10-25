@@ -213,10 +213,10 @@ export function VehicleForm({
         <Field label="Engine">
           <input name="engine" defaultValue={defaults.engine ?? ""} className={input} />
         </Field>
-        <Field label="Exterior colour">
+        <Field label="Exterior color">
           <input name="exteriorColor" defaultValue={defaults.exteriorColor ?? ""} className={input} />
         </Field>
-        <Field label="Interior colour">
+        <Field label="Interior color">
           <input name="interiorColor" defaultValue={defaults.interiorColor ?? ""} className={input} />
         </Field>
         <Field label="Body style">

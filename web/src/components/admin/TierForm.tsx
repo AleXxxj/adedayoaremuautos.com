@@ -193,7 +193,7 @@ export function TierForm({
             className={input}
           />
           <Hint>
-            Leave blank for hire only — the category will not offer ownership.
+            Leave blank for rental only — the category will not offer ownership.
           </Hint>
         </Field>
 
@@ -215,7 +215,7 @@ export function TierForm({
         <p className="mb-2 font-semibold">What this publishes</p>
         {preview ? (
           <p className="text-[var(--text-secondary)]">
-            A customer hiring continuously owns the vehicle after{" "}
+            A customer renting continuously owns the vehicle after{" "}
             <strong className="text-[var(--text-primary)]">{preview.days} days</strong>{" "}
             (about {Math.round(preview.days / 7)} weeks), having paid{" "}
             <strong className="text-[var(--text-primary)]">

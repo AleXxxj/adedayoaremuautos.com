@@ -79,7 +79,7 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
           You&rsquo;re <span>In</span>
         </h2>
         <p>
-          This is your referral link. Anyone who opens it and enquires within 90
+          This is your referral link. Anyone who opens it and contacts us within 90
           days is recorded against your name.
         </p>
 

@@ -119,7 +119,7 @@ export function RentToOwnCalculator({
             <dd>{result.perWeek}</dd>
           </div>
           <div>
-            <dt>Weeks of hire</dt>
+            <dt>Weeks of rental</dt>
             <dd>{result.weeksNeeded}</dd>
           </div>
           <div>
@@ -131,7 +131,7 @@ export function RentToOwnCalculator({
         <p className="rto-calc-fine">
           Ownership transfers once {result.threshold} of rent has been paid. No
           separate purchase price, no balloon payment, and no obligation to
-          continue — stop whenever you like and you have simply hired a car.
+          continue — stop whenever you like and you have simply rented a car.
         </p>
       </div>
     </div>

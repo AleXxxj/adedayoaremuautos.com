@@ -39,7 +39,7 @@ export function LegacyContactForm({ market }: { market: MarketCode }) {
       <div className="contact-form">
         <h3>Thank you</h3>
         <p style={{ color: "var(--silver-classic)", marginTop: 12, lineHeight: 1.7 }}>
-          We have your enquiry and someone will be in touch shortly. If it is
+          We have your inquiry and someone will be in touch shortly. If it is
           urgent, calling is fastest.
         </p>
       </div>

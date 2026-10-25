@@ -23,8 +23,8 @@ export async function generateMetadata({
     title: "Car Rentals",
     description:
       market === "us"
-        ? "Daily, weekly and monthly car hire in Greensboro, North Carolina."
-        : "Daily, weekly and monthly car hire in Nigeria, with or without a driver.",
+        ? "Daily, weekly and monthly car rental in Greensboro, North Carolina."
+        : "Daily, weekly and monthly car rental in Nigeria, with or without a driver.",
     alternates: {
       canonical: `/${market}/rentals`,
       languages: { "en-US": "/us/rentals", "en-NG": "/ng/rentals" },
@@ -227,7 +227,7 @@ export default async function RentalsPage({
         {fleet.length === 0 ? (
           <div className="no-results">
             <i className="fas fa-car" />
-            <h3>{all.length === 0 ? "No vehicles in the hire fleet yet" : "No vehicles found"}</h3>
+            <h3>{all.length === 0 ? "No vehicles in the rental fleet yet" : "No vehicles found"}</h3>
             <p>
               {all.length === 0
                 ? "Tell us what you need and for how long, and we will let you know what we can arrange."
@@ -362,11 +362,11 @@ export default async function RentalsPage({
           <div className="term-item">
             <i className="fas fa-id-card" />
             <div>
-              <h4>Valid Driver&rsquo;s Licence</h4>
+              <h4>Valid Driver&rsquo;s License</h4>
               <p>
                 {code === "us"
-                  ? "A valid US or international licence, held for the full hire period. Drivers must be 21 or over."
-                  : "A valid Nigerian or international licence, held for the full hire period."}
+                  ? "A valid US or international driver's license for the full rental period. Drivers must be 18 or older."
+                  : "A valid Nigerian or international driver's license for the full rental period. Drivers must be 18 or older."}
               </p>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default async function RentalsPage({
             <i className="fas fa-gas-pump" />
             <div>
               <h4>Fuel Policy</h4>
-              <p>Collected with a full tank. Return it the same way.</p>
+              <p>Comes with a full tank. Return it the same way.</p>
             </div>
           </div>
 
@@ -397,11 +397,11 @@ export default async function RentalsPage({
             <div className="term-item">
               <i className="fas fa-calendar-day" />
               <div>
-                <h4>Minimum Hire</h4>
+                <h4>Minimum Rental</h4>
                 <p>
                   {minDays === 1
-                    ? "One day. Longer hires are automatically priced on the better weekly or monthly rate."
-                    : `${minDays} days. Longer hires are automatically priced on the better weekly or monthly rate.`}
+                    ? "One day. Longer rentals are automatically priced on the better weekly or monthly rate."
+                    : `${minDays} days. Longer rentals are automatically priced on the better weekly or monthly rate.`}
                 </p>
               </div>
             </div>

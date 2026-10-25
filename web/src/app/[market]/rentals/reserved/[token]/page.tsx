@@ -96,7 +96,7 @@ export default async function ReservedPage({
         <p className="resv-body">
           {vehicle}
           {dates ? `, ${dates}` : ""}. Nothing more to pay today — the
-          refundable deposit is taken when you collect.
+          refundable deposit is taken when you pick up the vehicle.
         </p>
       </Shell>
     );

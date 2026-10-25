@@ -58,7 +58,7 @@ export function TariffForm({
           onChange={(e) => setInFleet(e.target.checked)}
           className="size-4"
         />
-        Offer this vehicle for hire
+        Offer this vehicle for rent
       </label>
 
       {inFleet && (
@@ -128,7 +128,7 @@ export function TariffForm({
           <p className="text-xs text-[var(--text-muted)]">
             Leave weekly or monthly blank to omit that tier. Customers are always
             quoted the cheapest combination of the tiers you set, so a six-day
-            hire is priced as a week when that costs less.
+            rental is priced as a week when that costs less.
           </p>
         </>
       )}

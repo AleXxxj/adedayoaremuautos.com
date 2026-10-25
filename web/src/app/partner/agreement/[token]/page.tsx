@@ -122,7 +122,7 @@ export default async function PartnerAgreementPage({
           {partner.fullName}
           {partner.businessName ? ` (${partner.businessName})` : ""}
         </Field>
-        <Field label="Commission on hire">
+        <Field label="Commission on rentals">
           {formatBps(partner.rentalCommissionBps)}
         </Field>
         <Field label="Commission on a sale">

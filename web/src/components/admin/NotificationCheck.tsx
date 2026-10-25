@@ -26,7 +26,7 @@ export function NotificationCheck() {
       </summary>
 
       <p className="mt-3 text-sm text-[var(--text-muted)]">
-        Alerts never block an enquiry: if email or SMS fails, the lead is still
+        Alerts never block an inquiry: if email or SMS fails, the lead is still
         saved and still appears below. That safety means a broken setup is
         invisible, so this sends a real test and reports exactly what happened.
       </p>

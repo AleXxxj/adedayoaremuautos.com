@@ -16,7 +16,7 @@ export async function generateMetadata({
   return {
     title: "Automotive Insights",
     description:
-      "Expert advice, tips, and guides for car enthusiasts and buyers — buying, financing, hiring and looking after a vehicle.",
+      "Expert advice, tips, and guides for car enthusiasts and buyers — buying, financing, renting and looking after a vehicle.",
     alternates: {
       canonical: `/${market}/blog`,
       languages: { "en-US": "/us/blog", "en-NG": "/ng/blog" },
