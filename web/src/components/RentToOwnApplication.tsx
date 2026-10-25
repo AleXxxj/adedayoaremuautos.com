@@ -67,7 +67,7 @@ export function RentToOwnApplication({
     // column nobody queries.
     const answers = [
       `Start: ${START_LABELS[String(formData.get("startWhen"))] ?? "—"}`,
-      `Licence: ${LICENCE_LABELS[String(formData.get("licence"))] ?? "—"}`,
+      `License: ${LICENCE_LABELS[String(formData.get("licence"))] ?? "—"}`,
     ];
     const notes = String(formData.get("notes") ?? "").trim();
     formData.set("message", [notes, answers.join(" · ")].filter(Boolean).join("\n\n"));

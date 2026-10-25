@@ -26,7 +26,7 @@ function LoginForm() {
 
       {notStaff && (
         <p className="rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">
-          That account exists but is not authorised for admin access.
+          That account exists but is not authorized for admin access.
         </p>
       )}
 
