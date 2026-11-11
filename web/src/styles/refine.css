@@ -2309,9 +2309,9 @@
 /* Longhand deliberately: the `padding` shorthand would reset padding-top and
    silently cancel .page-top, which sits at the same specificity. */
 .legacy-theme .rental-detail {
-    padding-right: 20px;
+    padding-right: max(20px, env(safe-area-inset-right));
     padding-bottom: clamp(56px, 7vw, 90px);
-    padding-left: 20px;
+    padding-left: max(20px, env(safe-area-inset-left));
 }
 
 .legacy-theme .rental-detail-container {
@@ -2550,7 +2550,7 @@
     display: block;
 }
 
-.legacy-theme .booking-field > span {
+.legacy-theme .booking-field > label {
     display: block;
     margin-bottom: 7px;
     font-size: 13.5px;
@@ -2588,10 +2588,11 @@
     border-color: var(--brand-400, #4e9d76);
 }
 
-/* The native date picker indicator is black on black by default. */
+/* The page's color-scheme is dark, so the native date picker icon is drawn
+   light already; inverting it, as this once did, made it dark on dark. */
 .legacy-theme .booking-field input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.55;
+    filter: none;
+    opacity: 0.8;
     cursor: pointer;
 }
 
@@ -2608,8 +2609,8 @@
 }
 
 .legacy-theme .booking-driver input {
-    width: 17px;
-    height: 17px;
+    width: 22px;
+    height: 22px;
     accent-color: var(--brand-400, #4e9d76);
     cursor: pointer;
 }
@@ -2648,7 +2649,6 @@
 }
 
 .legacy-theme .booking-quote-line {
-    text-transform: capitalize;
     color: var(--text-secondary, #b9b9b9);
 }
 
@@ -3473,7 +3473,7 @@
     border-bottom: 1px solid var(--border, #262626);
 }
 
-/* Scrolls inside itself: twelve clauses inline would bury the form. */
+/* Scrolls inside itself: thirteen clauses inline would bury the form. */
 .legacy-theme .booking-terms-body {
     max-height: 300px;
     overflow-y: auto;
@@ -3514,9 +3514,9 @@
 .legacy-theme .booking-accept input,
 .legacy-theme .booking-consent input {
     flex-shrink: 0;
-    width: 17px;
-    height: 17px;
-    margin-top: 2px;
+    width: 22px;
+    height: 22px;
+    margin-top: 0;
     accent-color: var(--brand-400, #4e9d76);
     cursor: pointer;
 }
@@ -4301,3 +4301,107 @@
 .legacy-theme .booking-done:focus {
     outline: none;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   23b. Booking in four steps, with the price pinned to the bottom of a phone.
+   Appended last on purpose: several rules replace earlier ones of equal weight.
+   ------------------------------------------------------------------------ */
+.legacy-theme .booking-step { display: grid; gap: 16px; }
+.legacy-theme .booking-step[hidden] { display: none !important; }
+.legacy-theme .booking-step-head { display: flex; align-items: center; gap: 12px; }
+.legacy-theme .booking-back { display: inline-flex; align-items: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 0 10px 0 0; border: 0; background: none; color: var(--text-secondary, #b9b9b9); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
+.legacy-theme .booking-progress { display: flex; gap: 4px; margin-left: auto; }
+.legacy-theme .booking-progress span { width: 14px; height: 4px; border-radius: 2px; background: var(--border, #262626); }
+.legacy-theme .booking-progress .is-done, .legacy-theme .booking-progress .is-current { background: var(--brand-400, #4e9d76); }
+.legacy-theme .booking-step-title { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.3; color: #fff; }
+.legacy-theme .booking-step-title:focus { outline: none; }
+.legacy-theme .booking-step-count { display: block; margin-bottom: 2px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-step-lead { margin: -8px 0 0; font-size: 14px; line-height: 1.6; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-restored { margin: 0; padding: 10px 12px; border: 1px solid rgba(78, 157, 118, 0.35); border-radius: 10px; background: rgba(42, 92, 66, 0.1); font-size: 13.5px; line-height: 1.5; color: var(--text-secondary, #b9b9b9); }
+
+/* Fields */
+.legacy-theme .booking-field-hint { display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.5; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-field input:disabled { opacity: 0.55; cursor: progress; }
+.legacy-theme .booking-field input[type="date"] { min-height: 48px; }
+.legacy-theme .booking-field input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+/* A real focus ring again: the field rule above sets outline:none (3:1+ on every surface). */
+.legacy-theme .booking-form :is(input, textarea, button, summary, a):focus-visible { outline: 2px solid var(--focus, #5fc791); outline-offset: 2px; }
+.legacy-theme .booking-consent, .legacy-theme .booking-accept, .legacy-theme .booking-driver { min-height: 44px; }
+
+/* Length shortcuts */
+.legacy-theme .booking-lengths { display: grid; gap: 8px; }
+.legacy-theme .booking-lengths > p { margin: 0; font-size: 13px; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-lengths-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+.legacy-theme .booking-length { display: grid; justify-items: center; gap: 2px; min-height: 56px; padding: 8px 6px; border: 1px solid var(--border-default, #333); border-radius: 10px; background: #0a0a0a; color: var(--text-secondary, #b9b9b9); font: inherit; cursor: pointer; touch-action: manipulation; }
+.legacy-theme .booking-length strong { font-size: 14px; font-weight: 600; color: #fff; }
+.legacy-theme .booking-length span { font-size: 13px; font-variant-numeric: tabular-nums; }
+.legacy-theme .booking-length[aria-pressed="true"] { border-color: rgba(78, 157, 118, 0.65); background: rgba(78, 157, 118, 0.08); }
+
+/* Already booked, inside step 1 (the list reuses .rental-taken) */
+.legacy-theme .booking-taken { display: grid; gap: 8px; }
+.legacy-theme .booking-taken h4 { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-taken p { margin: 0; font-size: 13.5px; color: var(--text-secondary, #b9b9b9); }
+
+/* Note, terms, review, messages */
+.legacy-theme .booking-note-toggle { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--brand-400, #4e9d76); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.legacy-theme .booking-terms-close { display: inline-flex; align-items: center; min-height: 44px; margin-top: 16px; padding: 0 16px; border: 1px solid var(--border, #262626); border-radius: 10px; background: none; color: var(--text-secondary, #b9b9b9); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.legacy-theme .booking-review { margin: 0; border: 1px solid var(--border, #262626); border-radius: 12px; }
+.legacy-theme .booking-review > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: center; padding: 10px 6px 10px 14px; border-top: 1px solid var(--border, #262626); }
+.legacy-theme .booking-review > div:first-child { border-top: 0; }
+.legacy-theme .booking-review dt { grid-column: 1; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-review dd { grid-column: 1; margin: 2px 0 0; font-size: 15px; line-height: 1.5; color: #fff; overflow-wrap: anywhere; }
+.legacy-theme .booking-review dd.booking-review-action { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+.legacy-theme .booking-review-edit { min-width: 44px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--brand-400, #4e9d76); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
+.legacy-theme .booking-messages { display: grid; gap: 12px; }
+.legacy-theme .booking-messages:empty { display: none; }
+.legacy-theme .booking-change-dates { margin-top: 10px; min-height: 44px; }
+.legacy-theme .booking-sending { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--text-secondary, #b9b9b9); }
+.legacy-theme .booking-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.legacy-theme .booking-done-body + .booking-done-body { margin-top: 8px; }
+
+/* The bar: static at the end of the card on wide or short screens */
+.legacy-theme .booking-bar { display: flex; align-items: center; gap: 12px; margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--border, #262626); }
+.legacy-theme .booking-bar-price { flex: 1 1 auto; min-width: 0; margin: 0; display: grid; gap: 2px; }
+.legacy-theme .booking-bar-price strong { font-size: 15px; font-weight: 700; line-height: 1.3; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legacy-theme .booking-bar-price span { font-size: 12.5px; line-height: 1.35; color: var(--text-muted, #8f8f8f); }
+.legacy-theme .booking-bar-price .booking-bar-addons { color: #e2c463; }
+.legacy-theme .booking-bar-price.is-warning strong { color: #e2c463; }
+.legacy-theme .booking-bar-btn { flex: none; justify-content: center; min-width: 96px; min-height: 48px; padding: 0 14px; font-size: 14px; letter-spacing: 0.3px; touch-action: manipulation; }
+.legacy-theme .booking-bar-btn[aria-disabled="true"] { opacity: 0.6; }
+html:has(.legacy-theme .booking-form) { scroll-padding-top: 104px; }
+
+/* Pinned on phones and tablets in portrait; back in the page under 501px tall */
+@media (max-width: 1000px) and (min-height: 501px) {
+    .legacy-theme .booking-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 880; margin: 0; padding: 10px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: rgba(10, 10, 10, 0.97); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45); transition: transform 0.18s ease; }
+    .legacy-theme:has(.booking-bar) { padding-bottom: var(--booking-bar-h, 72px); }
+    html:has(.legacy-theme .booking-bar) { scroll-padding-top: 88px; scroll-padding-bottom: calc(var(--booking-bar-h, 72px) + 16px); }
+    .legacy-theme:has(.booking-bar) .back-to-top { display: none; }
+    .legacy-theme:has(.booking-bar) .assistant-launcher:not(.is-open) { bottom: calc(var(--booking-bar-h, 72px) + 12px); }
+    .legacy-theme:has(.booking-bar) .country-notification { bottom: calc(var(--booking-bar-h, 72px) + 12px); }
+}
+@media (min-width: 521px) and (max-width: 1000px) and (min-height: 501px) {
+    .legacy-theme:has(.booking-bar) .assistant-launcher.is-open { bottom: calc(var(--booking-bar-h, 72px) + 12px); }
+    .legacy-theme:has(.booking-bar) .assistant-panel { bottom: calc(var(--booking-bar-h, 72px) + 76px); height: min(560px, calc(100dvh - 140px - var(--booking-bar-h, 72px))); }
+}
+/* Out of the keyboard's way while typing; still reachable by Tab and screen readers */
+@media (max-width: 1000px) and (min-height: 501px) and (hover: none) and (pointer: coarse) {
+    .legacy-theme .booking-form[data-typing] .booking-bar:not(:focus-within) { transform: translateY(calc(100% + 32px)); }
+}
+/* NotifyPrompt's own rule: never over a form somebody is filling in */
+@media (max-width: 1000px) {
+    .legacy-theme:has(.rental-book) .notify-prompt { display: none; }
+}
+@media (min-width: 1001px) {
+    .legacy-theme .rental-book[data-fits="false"] { position: static; }
+}
+@media (max-width: 600px) {
+    .legacy-theme .rental-detail { padding-right: max(16px, env(safe-area-inset-right)); padding-left: max(16px, env(safe-area-inset-left)); }
+    .legacy-theme .rental-book-card { padding: 18px 14px; }
+    .legacy-theme .booking-terms-body { max-height: none; overflow: visible; }
+}
+/* Landscape notch; no-ops on every page without viewport-fit=cover */
+.legacy-theme .header { padding-left: max(15px, env(safe-area-inset-left)); padding-right: max(15px, env(safe-area-inset-right)); }
+.legacy-theme .footer { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+.legacy-theme .newsletter-section--compact { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+.legacy-theme .rental-detail .rto-crumbs { margin-bottom: 12px; }
+.legacy-theme .rental-detail .rto-crumbs a { display: inline-flex; align-items: center; min-height: 44px; }

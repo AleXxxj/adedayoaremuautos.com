@@ -10,6 +10,9 @@
  * Run: npm run test:rental
  */
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { regexes } from "zod/v4/core";
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "../src/lib/rental";
 import {
   reservationExpiry,
@@ -21,6 +24,7 @@ import {
 import { todayIn, endOfLocalDay } from "../src/lib/localDate";
 import { bookingTiming, timingLabel } from "../src/lib/bookingTiming";
 import { phoneDigitsKey } from "../src/lib/phoneKey";
+import { FIELD_STEP, NO_STEP, MESSAGES, EMAIL_RE, stepProblem, routeForResult, isDatesError, overlapsTaken, addDaysIso, lengthsFor, type Snapshot } from "../src/components/rentalBookingSteps";
 
 let passed = 0;
 let failed = 0;
@@ -458,6 +462,72 @@ console.log("\nWhat the admin list says about a booking's dates (src/lib/booking
   eq("the next morning it is late", say("confirmed", "2026-11-13T15:00:00Z"), "Not collected — due out 1 day ago");
   eq("8 PM on the return day: due back today, not overdue", say("active", "2026-11-20T01:00:00Z"), "Due back today");
   eq("the next morning it is overdue", say("active", "2026-11-20T15:00:00Z"), "Overdue by 1 day");
+}
+
+// ── The booking form's steps ───────────────────────────────────────────────
+//
+// The form checks each step in the browser before moving on, with the
+// server's own messages. If requestRental's wording or fields change and the
+// steps module doesn't, the renter is told one thing on the phone and another
+// by the server: this fails the build instead.
+console.log("\nBooking steps (src/components/rentalBookingSteps.ts)");
+{
+  const actions = readFileSync(join(process.cwd(), "src/lib/actions/rentals.ts"), "utf8");
+  const at = actions.indexOf("const schema = z.object({");
+  const keys = [...actions.slice(at, actions.indexOf("\n});", at)).matchAll(/^ {2}(\w+):/gm)].map((m) => m[1]).concat("licenceFile", "insuranceFile");
+  ok("the request schema was found", keys.length >= 19, keys.join(", "));
+  for (const k of keys) ok(`${k} belongs to a step or is a constant`, k in FIELD_STEP || NO_STEP.includes(k));
+  ok("dates, then details, then license and insurance", FIELD_STEP.from < FIELD_STEP.name && FIELD_STEP.name < FIELD_STEP.insuranceChoice);
+  eq("coverage on step 3", FIELD_STEP.insuranceChoice, 3); eq("license photo on step 3", FIELD_STEP.licenceFile, 3);
+  eq("eligibility on step 3", FIELD_STEP.confirmEligible, 3); eq("terms on step 4", FIELD_STEP.acceptTerms, 4);
+  for (const m of [MESSAGES.pickupMissing, MESSAGES.pickupPast, MESSAGES.returnMissing, MESSAGES.returnBeforePickup, MESSAGES.taken,
+    MESSAGES.name, MESSAGES.phoneMissing, MESSAGES.phoneShort, MESSAGES.email, MESSAGES.license, MESSAGES.proof, MESSAGES.eligible, MESSAGES.terms])
+    ok(`the server still says "${m}"`, actions.includes(m));
+  const base: Snapshot = { today: "2026-11-11", from: "2026-11-20", to: "2026-11-27", days: 7, quoteError: null, overlap: false,
+    name: "Ann Smith", phone: "(336) 555-0100", email: "", preparing: null, hasLicence: true, own: true, hasProof: true,
+    sizeMessage: null, eligible: true, acceptedTerms: true };
+  const msg = (s: 1 | 2 | 3 | 4, p: Partial<Snapshot>) => stepProblem(s, { ...base, ...p })?.message ?? null;
+  const thrown = (f: () => unknown) => { try { f(); return null; } catch (e) { return (e as Error).message; } };
+  const short = thrown(() => quoteRental({ ...US, minDays: 3 }, 2));
+  const long = thrown(() => quoteRental({ ...US, maxDays: 30 }, 31));
+  const driver = thrown(() => quoteRental({ ...US, withDriverAvailable: false }, 7, { withDriver: true }));
+  for (const s of [1, 2, 3, 4] as const) eq(`step ${s} passes`, msg(s, {}), null);
+  eq("no pickup", msg(1, { from: "" }), MESSAGES.pickupMissing); eq("pickup yesterday", msg(1, { from: "2026-11-10" }), MESSAGES.pickupPast);
+  eq("pickup today", msg(1, { from: "2026-11-11" }), null); eq("no return", msg(1, { to: "" }), MESSAGES.returnMissing);
+  eq("same-day return", msg(1, { to: "2026-11-20", days: 0 }), MESSAGES.returnBeforePickup);
+  eq("too short, in quoteRental's words", msg(1, { quoteError: short, days: 2 }), short);
+  eq("a driver problem points at the driver box", stepProblem(1, { ...base, quoteError: driver })?.field, "withDriver");
+  eq("taken dates", msg(1, { overlap: true }), MESSAGES.taken);
+  eq("one-letter name", msg(2, { name: " a " }), MESSAGES.name); eq("no phone", msg(2, { phone: " " }), MESSAGES.phoneMissing);
+  eq("7-digit phone", msg(2, { phone: "555-0100" }), MESSAGES.phoneShort);
+  for (const p of ["(336) 555-0100", "+1 336 555 0100", "0801 234 5678", "+234 801 234 5678"]) eq(`phone ${p}`, msg(2, { phone: p }), null);
+  eq("ann@gmail", msg(2, { email: "ann@gmail" }), MESSAGES.email); eq("a@b.c", msg(2, { email: "a@b.c" }), MESSAGES.email);
+  eq("ann@gmail.com", msg(2, { email: " ann@gmail.com " }), null);
+  eq("still preparing", stepProblem(3, { ...base, preparing: "insuranceFile" })?.field, "insuranceFile");
+  eq("no license", msg(3, { hasLicence: false }), MESSAGES.license); eq("own, no proof", msg(3, { hasProof: false }), MESSAGES.proof);
+  eq("declined, no proof", msg(3, { own: false, hasProof: false }), null); eq("not eligible", msg(3, { eligible: false }), MESSAGES.eligible);
+  eq("terms", msg(4, { acceptedTerms: false }), MESSAGES.terms);
+  eq("email pattern is zod's", EMAIL_RE.source, regexes.email.source);
+  for (const s of ["Those dates could not be read.", "That vehicle is already booked for some of those dates. Please choose different dates.",
+    "That vehicle has just been booked for those dates. Please choose different dates.", "Those dates are not a valid rental period."]) {
+    ok(`still in rentals.ts: ${s}`, actions.includes(s)); ok(`Change dates for: ${s}`, isDatesError(s)); }
+  for (const s of [short, long, driver]) ok(`Change dates for: ${s}`, isDatesError(s ?? ""));
+  for (const s of ["You're already holding 2 cars. Let one of those holds end before reserving another, or call us and we'll help.",
+    "That vehicle is not available to rent.", "Something went wrong saving your request. Please call us and we will sort it out."])
+    ok(`no Change dates for: ${s}`, !isDatesError(s));
+  const w = [{ start: "2026-11-20", end: "2026-11-27", label: "", heldUntil: null }];
+  eq("pickup on a return day", overlapsTaken("2026-11-27", "2026-11-30", w, 0), false);
+  eq("return on a start day", overlapsTaken("2026-11-15", "2026-11-20", w, 0), false);
+  eq("26th to 28th", overlapsTaken("2026-11-26", "2026-11-28", w, 0), true);
+  const held = [{ ...w[0], heldUntil: "2026-11-12T04:59:00.000Z" }];
+  eq("a running hold blocks", overlapsTaken("2026-11-21", "2026-11-22", held, Date.parse("2026-11-12T00:00:00Z")), true);
+  eq("an ended hold does not", overlapsTaken("2026-11-21", "2026-11-22", held, Date.parse("2026-11-12T06:00:00Z")), false);
+  eq("month end", addDaysIso("2026-11-28", 7), "2026-12-05"); eq("year end", addDaysIso("2026-12-28", 7), "2027-01-04");
+  eq("leap day", addDaysIso("2028-02-28", 1), "2028-02-29");
+  eq("lengths", lengthsFor({ minDays: 1, maxDays: null }).join(","), "7,14,30"); eq("lengths min 10", lengthsFor({ minDays: 10, maxDays: null }).join(","), "14,30");
+  eq("lengths max 5", lengthsFor({ minDays: 1, maxDays: 5 }).join(","), "");
+  eq("earliest field wins", routeForResult({ acceptTerms: ["x"], phone: ["y"] })?.field, "phone");
+  eq("constants route nowhere", routeForResult({ vehicleSlug: ["x"] }), null);
 }
 
 console.log(

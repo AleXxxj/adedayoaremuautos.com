@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { formatRange } from "@/lib/pgRange";
+import { formatRange, parseTstzRange } from "@/lib/pgRange";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { getFleetVehicle, bookedWindows } from "@/lib/repositories/rentals";
 import { listLocations } from "@/lib/repositories/locations";
 import { RentalBookingForm } from "@/components/RentalBookingForm";
-import { TakenDates } from "@/components/TakenDates";
+import type { TakenWindow } from "@/components/rentalBookingSteps";
 import { formatMoney, money } from "@/lib/money";
-import { RESERVATION_HOURS } from "@/lib/reservation";
 import { providerConfigured, providerFor } from "@/lib/payments/provider";
 
 /**
@@ -22,6 +21,16 @@ import { providerConfigured, providerFor } from "@/lib/payments/provider";
  * the page falls back on when the database cannot be reached at all.
  */
 export const revalidate = 300;
+
+/*
+ * Edge to edge on phones with a notch or a home indicator, on this page only.
+ *
+ * The booking form pins its price and its button to the bottom of a phone's
+ * screen; without "cover" there is no env(safe-area-inset-bottom) to keep
+ * them clear of the home indicator. Next keeps width=device-width and
+ * initial-scale=1 beside it. Zoom is never limited.
+ */
+export const viewport: Viewport = { viewportFit: "cover" };
 
 export async function generateMetadata({
   params,
@@ -43,7 +52,11 @@ export async function generateMetadata({
   }
   return {
     title: `Rent a ${title}`,
-    description: `Rent a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,
+    // No deposit promised for a car that takes none.
+    description:
+      v.tariff.depositMinor > 0
+        ? `Rent a ${title} by the day, week or month. See your total and deposit before you book.`
+        : `Rent a ${title} by the day, week or month. See your total before you book.`,
     alternates: { canonical: `/${market}/rentals/${slug}` },
     openGraph: v.image ? { images: [v.image] } : undefined,
   };
@@ -81,6 +94,30 @@ export default async function RentalDetailPage({
   const contactPhone = sites.find((s) => s.phone)?.phone ?? null;
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
+  const payOnline = providerConfigured(providerFor(code));
+
+  /*
+   * Dates already taken, handed to the form as data.
+   *
+   * The form lists them on its first step and checks a choice against them
+   * before moving on, [start, end) like the database: a pickup on someone
+   * else's return day is fine. Each hold carries its end, because the page is
+   * cached and a hold mostly ends by the clock, with nothing to refresh it;
+   * the browser drops the ones already over. The server still decides.
+   */
+  const takenWindows: TakenWindow[] = taken.flatMap((t) => {
+    const r = parseTstzRange(t.period);
+    return r
+      ? [
+          {
+            start: r.start.toISOString().slice(0, 10),
+            end: r.end.toISOString().slice(0, 10),
+            label: formatRange(t.period, market.locale),
+            heldUntil: t.status === "quote" && t.heldUntil ? t.heldUntil.toISOString() : null,
+          },
+        ]
+      : [];
+  });
 
   // Only what this vehicle actually has. A spec grid padded with "—" reads as
   // missing data rather than a car that simply has no third row of seats.
@@ -169,21 +206,14 @@ export default async function RentalDetailPage({
                   </div>
                 )}
               </dl>
+              {/* One sentence. The second, "never more than the daily rate
+                  times the days", stopped being true once a driver or added
+                  insurance is chosen. */}
               <p className="rental-note">
                 <i className="fas fa-circle-info" aria-hidden="true" /> Longer
-                rentals are priced on the best combination of these rates
-                automatically. You are never charged more than the daily rate
-                multiplied by the number of days.
+                rentals get the cheapest mix of these rates automatically.
               </p>
             </section>
-
-            <TakenDates
-              windows={taken.map((t) => ({
-                label: formatRange(t.period, market.locale),
-                heldUntil:
-                  t.status === "quote" && t.heldUntil ? t.heldUntil.toISOString() : null,
-              }))}
-            />
           </div>
 
           <aside className="rental-book">
@@ -193,21 +223,22 @@ export default async function RentalDetailPage({
                   <h2>
                     Reserve this <span>vehicle</span>
                   </h2>
-                  {/* This used to say the booking did not hold until a deposit was
-                      taken — true before reservations existed, and the first
-                      thing a customer read on the card afterwards. */}
+                  {/* What reserving costs, first. The hold and how long it
+                      lasts are said once, in the form's fine print beside
+                      Reserve, where the decision is made. */}
                   <p className="rental-book-lead">
-                    Pick your dates to see the price. Reserving holds the vehicle
-                    for you for up to {RESERVATION_HOURS / 24} days, so you can see
-                    it before you pay.
+                    {payOnline
+                      ? "Reserving is free. Pay online now, or when you pick it up."
+                      : "Reserving is free. Pay when you pick it up."}
                   </p>
                   <RentalBookingForm
                     market={market}
                     vehicleSlug={v.slug}
                     vehicleTitle={title}
                     contactPhone={contactPhone}
-                    payOnline={providerConfigured(providerFor(code))}
+                    payOnline={payOnline}
                     tariff={v.tariff}
+                    taken={takenWindows}
                   />
                 </>
               ) : (

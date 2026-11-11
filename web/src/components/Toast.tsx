@@ -24,6 +24,11 @@ export interface Toast {
   id: number;
   tone: ToastTone;
   text: string;
+  /**
+   * Shown but not read out. For a form that already says the same thing,
+   * in place, to a screen reader: the message would otherwise be heard twice.
+   */
+  quiet?: boolean;
 }
 
 let toasts: Toast[] = [];
@@ -69,15 +74,17 @@ export function dismissErrorToasts() {
  * should not stack two copies of "Saved" — but its timer restarts so it stays
  * for the full span from the most recent press.
  */
-export function pushToast(tone: ToastTone, text: string) {
+export function pushToast(tone: ToastTone, text: string, opts: { quiet?: boolean } = {}) {
   const trimmed = text.trim();
   if (!trimmed) return;
 
   const existing = toasts.find((t) => t.text === trimmed && t.tone === tone);
   if (existing) {
-    toasts = toasts.filter((t) => t.id !== existing.id).concat({ ...existing, id: nextId++ });
+    toasts = toasts
+      .filter((t) => t.id !== existing.id)
+      .concat({ ...existing, id: nextId++, quiet: opts.quiet });
   } else {
-    toasts = [...toasts, { id: nextId++, tone, text: trimmed }];
+    toasts = [...toasts, { id: nextId++, tone, text: trimmed, quiet: opts.quiet }];
   }
   // More than a few at once is noise rather than information.
   if (toasts.length > 3) toasts = toasts.slice(-3);
@@ -99,16 +106,23 @@ function ToastItem({ toast }: { toast: Toast }) {
     <div
       className={`toast toast--${toast.tone}`}
       // A success is a status; an error interrupts. Screen readers treat the
-      // two differently and should.
-      role={toast.tone === "error" ? "alert" : "status"}
-      aria-live={toast.tone === "error" ? "assertive" : "polite"}
+      // two differently and should. A quiet one is neither: the form it came
+      // from reads the same message out where it is shown.
+      role={toast.quiet ? undefined : toast.tone === "error" ? "alert" : "status"}
+      aria-live={toast.quiet ? undefined : toast.tone === "error" ? "assertive" : "polite"}
+      aria-hidden={toast.quiet || undefined}
     >
       <i
         className={`fas ${toast.tone === "error" ? "fa-circle-exclamation" : "fa-circle-check"}`}
         aria-hidden="true"
       />
       <span>{toast.text}</span>
-      <button type="button" onClick={() => dismissToast(toast.id)} aria-label="Dismiss">
+      <button
+        type="button"
+        onClick={() => dismissToast(toast.id)}
+        aria-label="Dismiss"
+        tabIndex={toast.quiet ? -1 : undefined}
+      >
         <i className="fas fa-times" aria-hidden="true" />
       </button>
     </div>
@@ -156,6 +170,9 @@ function isForAReader(message: string): boolean {
  * One line per form. It fires only when the result object identity changes,
  * which is exactly once per submission — `useActionState` hands back a new
  * object each time, and the same object re-rendering must not re-announce.
+ *
+ * `quiet` for a form that announces its own results in place (the booking
+ * form): the toast is still seen, but a screen reader hears the message once.
  */
 export function useActionToast(
   state:
@@ -168,15 +185,17 @@ export function useActionToast(
     | null
     | undefined,
   successText?: string,
+  opts: { quiet?: boolean } = {},
 ) {
   const seen = useRef<unknown>(null);
+  const { quiet } = opts;
 
   useEffect(() => {
     if (!state || state === seen.current) return;
     seen.current = state;
 
     if (state.error) {
-      pushToast("error", state.error);
+      pushToast("error", state.error, { quiet });
       return;
     }
 
@@ -199,7 +218,7 @@ export function useActionToast(
     // go through — silence after pressing submit is the worst of the options.
     const anyFieldError = Object.values(state.fieldErrors ?? {}).some((m) => m?.[0]);
     if (fieldMessages.length === 0 && anyFieldError) {
-      pushToast("error", "Please check the form and try again.");
+      pushToast("error", "Please check the form and try again.", { quiet });
       return;
     }
 
@@ -210,10 +229,11 @@ export function useActionToast(
         more > 0
           ? `${fieldMessages[0]} (and ${more} other problem${more === 1 ? "" : "s"})`
           : fieldMessages[0],
+        { quiet },
       );
       return;
     }
 
-    if (state.ok) pushToast("success", state.message ?? successText ?? "Saved.");
-  }, [state, successText]);
+    if (state.ok) pushToast("success", state.message ?? successText ?? "Saved.", { quiet });
+  }, [state, successText, quiet]);
 }
