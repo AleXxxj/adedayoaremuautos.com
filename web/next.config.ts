@@ -1,6 +1,35 @@
 import type { NextConfig } from "next";
 
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
 const nextConfig: NextConfig = {
+  /*
+   * Listing photos, resized to the size they are shown at.
+   *
+   * They are stored as uploaded — up to 6 megapixels, a few megabytes each —
+   * and Supabase's own resizing is not on this plan, so the rental list was
+   * sending 13 MB of photos to fill eleven 112-pixel thumbnails (measured
+   * November 2026). Only the vehicles bucket, and no query strings, so the
+   * resizer can't be pointed at anything else.
+   *
+   * Cached for a month: a changed photo is stored under a new random name, so
+   * a long cache can never show an old one. The bucket itself sends
+   * "no-cache", which would otherwise make every visit download them again.
+   */
+  images: {
+    remotePatterns: supabase
+      ? [
+          {
+            protocol: "https",
+            hostname: new URL(supabase).hostname,
+            port: "",
+            pathname: "/storage/v1/object/public/vehicles/**",
+            search: "",
+          },
+        ]
+      : [],
+    minimumCacheTTL: 2678400,
+  },
   experimental: {
     // Matches the hosting platform, so local development fails where the live
     // site would. Vercel refuses any request body over 4.5 MB before the app

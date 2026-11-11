@@ -1,15 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode, type MarketConfig } from "@/lib/market";
 import { listFleet, type FleetVehicle } from "@/lib/repositories/rentals";
 import { formatMoney, money, toMajor } from "@/lib/money";
-import { whatsappUrl } from "@/lib/contact";
-import {
-  LegacyRentalFilters,
-  RentalResultsBar,
-  type RentalFilterOptions,
-} from "@/components/LegacyRentalFilters";
+import { RentalToolbar, type RentalFilterOptions } from "@/components/RentalToolbar";
+import { canResize } from "@/lib/photo";
+import "@/styles/rentals.css";
 
 export const dynamic = "force-dynamic";
 
@@ -102,15 +100,19 @@ export default async function RentalsPage({
   const name = (v: FleetVehicle) =>
     [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
 
+  // Sorted on what a week costs, because that is the price each card leads
+  // with: by the daily rate, a car shown at "$85 a day" sorted ahead of one
+  // shown at "$550 a week" and the list looked out of order.
+  const weekCost = (v: FleetVehicle) => v.tariff.weeklyMinor ?? v.tariff.dailyMinor * 7;
   fleet = [...fleet].sort((a, b) => {
     switch (q.sort) {
       case "price-high":
-        return b.tariff.dailyMinor - a.tariff.dailyMinor;
+        return weekCost(b) - weekCost(a);
       case "name":
         return name(a).localeCompare(name(b));
       case "price-low":
       default:
-        return a.tariff.dailyMinor - b.tariff.dailyMinor;
+        return weekCost(a) - weekCost(b);
     }
   });
 
@@ -159,282 +161,171 @@ export default async function RentalsPage({
       <div className="page-header page-header--rentals">
         <div className="page-header-content">
           <h1>
-            Car <span>Rentals</span>
+            Rent a <span>car</span>
           </h1>
-          <p>Flexible rental options for any occasion - daily, weekly, or monthly</p>
+          <p>By the day, the week or the month. Tap a car to see open dates and book.</p>
         </div>
       </div>
 
-      {/* Rental type cards. Shown only when there is a fleet to quote from —
-          three price cards above an empty grid would be advertising nothing. */}
-      {all.length > 0 && (
-        <div className="rental-types">
-          <div className="type-card">
-            <i className="fas fa-sun" />
-            <h3>Daily Rental</h3>
-            <p>Perfect for short trips, business meetings, and weekend getaways</p>
-            <div className="price">
-              {fromDaily != null ? (
-                <>
-                  {fmt(fromDaily)}
-                  <small>/day</small>
-                </>
-              ) : (
-                <small>On request</small>
-              )}
-            </div>
-          </div>
-          <div className="type-card">
-            <i className="fas fa-calendar-week" />
-            <h3>Weekly Rental</h3>
-            <p>Save more with our weekly rates - ideal for vacations and projects</p>
-            <div className="price">
-              {fromWeekly != null ? (
-                <>
-                  {fmt(fromWeekly)}
-                  <small>/week</small>
-                </>
-              ) : (
-                <small>On request</small>
-              )}
-            </div>
-          </div>
-          <div className="type-card">
-            <i className="fas fa-calendar-alt" />
-            <h3>Monthly Rental</h3>
-            <p>Best value for long-term needs - corporate and personal use</p>
-            <div className="price">
-              {fromMonthly != null ? (
-                <>
-                  {fmt(fromMonthly)}
-                  <small>/month</small>
-                </>
-              ) : (
-                <small>On request</small>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="rent-page">
+        {/* One line instead of three cards: each car shows its own prices,
+            so all this needs to say is where they start. */}
+        {all.length > 0 && fromDaily != null && (
+          <p className="rent-from">
+            From <strong>{fmt(fromDaily)}</strong> a day
+            {fromWeekly != null && (
+              <>
+                {" "}· <strong>{fmt(fromWeekly)}</strong> a week
+              </>
+            )}
+            {fromMonthly != null && (
+              <>
+                {" "}· <strong>{fmt(fromMonthly)}</strong> a month
+              </>
+            )}
+          </p>
+        )}
 
-      {all.length > 0 && <LegacyRentalFilters options={options} />}
+        {all.length > 0 && (
+          <RentalToolbar options={options} showing={fleet.length} total={all.length} />
+        )}
 
-      {all.length > 0 && (
-        <RentalResultsBar showing={fleet.length} total={all.length} />
-      )}
-
-      <div className="cars-listing">
         {fleet.length === 0 ? (
           <div className="no-results">
             <i className="fas fa-car" />
-            <h3>{all.length === 0 ? "No vehicles in the rental fleet yet" : "No vehicles found"}</h3>
+            <h3>{all.length === 0 ? "No cars to rent right now" : "No cars match those filters"}</h3>
             <p>
               {all.length === 0
                 ? "Tell us what you need and for how long, and we will let you know what we can arrange."
-                : "Try adjusting your filters or browse all rentals"}
+                : "Clear a filter or two to see more."}
             </p>
             <Link
               href={all.length === 0 ? `/${code}/contact?type=rental` : `/${code}/rentals`}
               className="btn btn-primary"
               style={{ marginTop: 20, display: "inline-flex", width: "auto" }}
             >
-              {all.length === 0 ? "Ask about a rental" : "View All Rentals"}
+              {all.length === 0 ? "Ask about a rental" : "See all cars"}
             </Link>
           </div>
         ) : (
-          <div className="cars-grid" id="rental-cars">
-            {fleet.map((v) => {
+          /* One row per car on a phone, a grid on a wider screen. The whole
+             card is the link, and it leads with the weekly price: most
+             renters here rent by the week. The deposit, every rate and the
+             open dates are on the car's own page, where they decide. */
+          <ul className="rent-list" id="rental-cars">
+            {fleet.map((v, i) => {
               const title = name(v);
-              const wa = whatsappUrl(
-                code,
-                `Hello, I'd like to rent the ${title}.`,
-              );
+              const weekly = v.tariff.weeklyMinor;
               return (
-                <div className="car-card" key={v.id}>
-                  <div className="car-image">
-                    <Link href={`/${code}/rentals/${v.slug}`}>
+                <li key={v.id}>
+                  <Link href={`/${code}/rentals/${v.slug}`} className="rent-card">
+                    <span className="rent-card-photo">
                       {v.image ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={v.image} alt={title} loading="lazy" />
+                        // Sized to the slot it fills: about 112 pixels wide on a
+                        // phone, a third of the row on a wider screen. The first
+                        // is fetched early; it is usually the largest thing on
+                        // the first screen.
+                        <Image
+                          src={v.image}
+                          alt=""
+                          fill
+                          sizes="(min-width: 768px) 360px, 112px"
+                          preload={i === 0}
+                          unoptimized={!canResize(v.image)}
+                        />
                       ) : (
-                        <div className="car-image-placeholder">Photography coming soon</div>
-                      )}
-                    </Link>
-                    {v.tariff.withDriverAvailable && (
-                      <span className="car-badge">With driver</span>
-                    )}
-                  </div>
-
-                  <div className="car-details">
-                    <h3 className="car-title">
-                      <Link href={`/${code}/rentals/${v.slug}`}>{title}</Link>
-                    </h3>
-
-                    <div className="car-specs">
-                      {v.transmission && (
-                        <span>
-                          <i className="fas fa-cog" /> {v.transmission}
+                        <span className="rent-card-nophoto">
+                          <i className="fas fa-car" aria-hidden="true" />
                         </span>
                       )}
-                      {v.fuelType && (
-                        <span>
-                          <i className="fas fa-gas-pump" /> {v.fuelType}
-                        </span>
+                    </span>
+                    <span className="rent-card-body">
+                      <h3 className="rent-card-name">{title}</h3>
+                      <span className="rent-card-price">
+                        <strong>{fmt(weekly ?? v.tariff.dailyMinor)}</strong>{" "}
+                        {weekly != null ? "a week" : "a day"}
+                      </span>
+                      <span className="rent-card-meta">
+                        {[
+                          weekly != null ? `or ${fmt(v.tariff.dailyMinor)} a day` : null,
+                          v.transmission,
+                          v.seats != null ? `${v.seats} seats` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                      {v.tariff.withDriverAvailable && (
+                        <span className="rent-card-badge">Driver available</span>
                       )}
-                      {v.seats != null && (
-                        <span>
-                          <i className="fas fa-users" /> {v.seats} seats
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="rental-prices">
-                      <div className="price-row">
-                        <span className="duration">
-                          <i className="fas fa-sun" /> Daily
-                        </span>
-                        <span className="amount">{fmt(v.tariff.dailyMinor)}</span>
-                      </div>
-                      {v.tariff.weeklyMinor != null && (
-                        <div className="price-row">
-                          <span className="duration">
-                            <i className="fas fa-calendar-week" /> Weekly
-                          </span>
-                          <span className="amount">{fmt(v.tariff.weeklyMinor)}</span>
-                        </div>
-                      )}
-                      {v.tariff.monthlyMinor != null && (
-                        <div className="price-row">
-                          <span className="duration">
-                            <i className="fas fa-calendar-alt" /> Monthly
-                          </span>
-                          <span className="amount">{fmt(v.tariff.monthlyMinor)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {v.tariff.depositMinor > 0 && (
-                      <div className="deposit-info">
-                        <i className="fas fa-shield-alt" />
-                        <span>
-                          Security deposit: {fmt(v.tariff.depositMinor)} (refundable)
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="car-actions">
-                      {/* The original's Book button opened a WhatsApp chat with
-                          a number the business does not own, so nothing was
-                          ever booked. This goes to the availability calendar,
-                          which checks real dates against real bookings. */}
-                      <Link href={`/${code}/rentals/${v.slug}`} className="btn btn-primary">
-                        <i className="fas fa-calendar-check" /> Book
-                      </Link>
-                      {wa && (
-                        <a
-                          href={wa}
-                          className="btn btn-whatsapp"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`Ask about the ${title} on WhatsApp`}
-                        >
-                          <i className="fab fa-whatsapp" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                    <span className="rent-card-go" aria-hidden="true">
+                      <i className="fas fa-chevron-right" />
+                    </span>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
-      </div>
 
-      {/* Terms. Every figure here is read from the tariffs actually on file —
-          the original quoted a ₦100,000–₦500,000 deposit, 200km/day and free
-          Lagos delivery, none of which was tied to anything. Items the
-          business has not set are left out rather than guessed. */}
-      <div className="terms-section">
-        <h3>
-          Rental <span>Terms &amp; Conditions</span>
-        </h3>
-        <div className="terms-grid">
-          <div className="term-item">
-            <i className="fas fa-id-card" />
+        {/* Terms, folded. Every figure is read from the tariffs on file — the
+            original quoted a deposit, a mileage allowance and free delivery
+            that were tied to nothing. Items the business has not set are left
+            out rather than guessed. */}
+        <details className="rent-terms">
+          <summary>Rental terms: license, deposit, fuel</summary>
+          <dl>
             <div>
-              <h4>Valid Driver&rsquo;s License</h4>
-              <p>
+              <dt>Driver&rsquo;s license</dt>
+              <dd>
                 {code === "us"
-                  ? "A valid US or international driver's license for the full rental period. Drivers must be 18 or older."
-                  : "A valid Nigerian or international driver's license for the full rental period. Drivers must be 18 or older."}
-              </p>
+                  ? "A valid US or international driver's license for the whole rental. Drivers must be 18 or older."
+                  : "A valid Nigerian or international driver's license for the whole rental. Drivers must be 18 or older."}
+              </dd>
             </div>
-          </div>
-
-          {deposits.length > 0 && (
-            <div className="term-item">
-              <i className="fas fa-money-bill" />
+            {deposits.length > 0 && (
               <div>
-                <h4>Security Deposit</h4>
-                <p>
+                <dt>Security deposit</dt>
+                <dd>
                   {Math.min(...deposits) === Math.max(...deposits)
-                    ? `${fmt(deposits[0])}, refunded on return.`
-                    : `${fmt(Math.min(...deposits))} – ${fmt(Math.max(...deposits))} depending on the vehicle, refunded on return.`}
-                </p>
+                    ? `${fmt(deposits[0])}, refunded when you bring the car back.`
+                    : `${fmt(Math.min(...deposits))} to ${fmt(Math.max(...deposits))} depending on the car, refunded when you bring it back.`}
+                </dd>
               </div>
-            </div>
-          )}
-
-          <div className="term-item">
-            <i className="fas fa-gas-pump" />
+            )}
             <div>
-              <h4>Fuel Policy</h4>
-              <p>Comes with a full tank. Return it the same way.</p>
+              <dt>Fuel</dt>
+              <dd>It comes with a full tank. Bring it back full.</dd>
             </div>
-          </div>
-
-          {minDays != null && (
-            <div className="term-item">
-              <i className="fas fa-calendar-day" />
+            {minDays != null && (
               <div>
-                <h4>Minimum Rental</h4>
-                <p>
-                  {minDays === 1
-                    ? "One day. Longer rentals are automatically priced on the better weekly or monthly rate."
-                    : `${minDays} days. Longer rentals are automatically priced on the better weekly or monthly rate.`}
-                </p>
+                <dt>Shortest rental</dt>
+                <dd>
+                  {minDays === 1 ? "One day." : `${minDays} days.`} Longer rentals get the
+                  weekly or monthly rate automatically when it is cheaper.
+                </dd>
               </div>
-            </div>
-          )}
-
-          {driverAvailable && (
-            <div className="term-item">
-              <i className="fas fa-user-tie" />
+            )}
+            {driverAvailable && (
               <div>
-                <h4>Chauffeur Service</h4>
-                <p>
-                  A driver can be added to selected vehicles. The daily driver
-                  rate is shown on the vehicle before you book.
-                </p>
+                <dt>With a driver</dt>
+                <dd>
+                  Some cars can come with a driver. The daily driver rate is shown on the car
+                  before you book.
+                </dd>
               </div>
-            </div>
-          )}
-
-          <div className="term-item">
-            <i className="fas fa-file-contract" />
+            )}
             <div>
-              <h4>Mileage, Insurance &amp; Delivery</h4>
-              {/* The original published "200km/day, ₦100/km excess, free
-                  delivery within Lagos" as fact. None of it is recorded
-                  anywhere, so it is confirmed in writing per booking until the
-                  business sets the real allowances. */}
-              <p>
-                Confirmed in writing with your booking, before any payment is
-                taken.
-              </p>
+              <dt>Mileage, insurance and delivery</dt>
+              <dd>Confirmed in writing with your booking, before any payment is taken.</dd>
             </div>
-          </div>
-        </div>
+          </dl>
+          {code === "us" && (
+            <p style={{ marginTop: 12 }}>
+              <Link href={`/${code}/rental-policy`}>Read the full rental policy</Link>
+            </p>
+          )}
+        </details>
       </div>
     </>
   );
