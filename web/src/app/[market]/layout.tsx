@@ -26,6 +26,7 @@ import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
+import Image from "next/image";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -86,8 +87,16 @@ export default async function MarketLayout({
       <div className="header">
         <div className="header-container">
           <div className="logo-container">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/logo.png" alt="Adedayo Aremu Autos Logo" />
+            {/* Stored at 1536×1024 (450 KB) for print and email; resized here to
+                the 50-odd pixels it is shown at. Eager: it is on every screen. */}
+            <Image
+              src="/img/logo.png"
+              alt="Adedayo Aremu Autos Logo"
+              width={1536}
+              height={1024}
+              sizes="80px"
+              loading="eager"
+            />
             <div className="logo-text">
               <h1>
                 ADEDAYO AREMU <span>AUTOS</span>
@@ -136,8 +145,14 @@ export default async function MarketLayout({
           <div className="footer-grid">
             <div className="footer-about">
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 15 }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/img/logo.png" alt="Logo" style={{ height: 45 }} />
+                <Image
+                  src="/img/logo.png"
+                  alt="Logo"
+                  width={1536}
+                  height={1024}
+                  sizes="80px"
+                  style={{ height: 45, width: "auto" }}
+                />
                 <h3 style={{ color: "var(--silver-classic)", fontSize: 20 }}>
                   ADEDAYO AREMU <span>AUTOS</span>
                 </h3>

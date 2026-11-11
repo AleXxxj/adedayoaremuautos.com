@@ -10,6 +10,8 @@ import { siteUrl } from "@/lib/siteUrl";
 import { requiresBuyersGuide } from "@/lib/compliance/disclosures";
 import { LegacyGallery } from "@/components/LegacyCarDetail";
 import { LegacyCarTabs, LegacyTestDriveForm, type SpecRow } from "@/components/LegacyCarTabs";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -312,8 +314,14 @@ export default async function CarDetailPage({
                     >
                       <div className="related-image">
                         {r.primaryImage ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={mediaUrl(r.primaryImage)} alt={rTitle} loading="lazy" />
+                          <Image
+                            src={mediaUrl(r.primaryImage)}
+                            alt={rTitle}
+                            width={600}
+                            height={300}
+                            sizes="(min-width: 768px) 300px, 100vw"
+                            unoptimized={!canResize(mediaUrl(r.primaryImage))}
+                          />
                         ) : (
                           <div className="car-image-placeholder">Photo coming soon</div>
                         )}

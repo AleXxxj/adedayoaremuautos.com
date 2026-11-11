@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 /**
  * One car a partner can send someone, ready to share from a phone.
@@ -44,11 +46,12 @@ export function ShareCar({
     <li className="overflow-hidden rounded-xl border border-[#262626] bg-[#0d0d0d]">
       <div className="flex gap-3 p-3">
         {image ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <Image
             src={image}
             alt=""
-            loading="lazy"
+            width={96}
+            height={80}
+            unoptimized={!canResize(image)}
             className="h-20 w-24 shrink-0 rounded-lg object-cover"
           />
         ) : (

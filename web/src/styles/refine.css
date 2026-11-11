@@ -1398,6 +1398,14 @@
     z-index: 2;
 }
 
+/* Each slide's photo: next/image with `fill` sets the position and size;
+   this keeps it under the scrim and crops it the way the background did. */
+.legacy-theme .hero-slide-photo {
+    z-index: 0;
+    object-fit: cover;
+    object-position: center;
+}
+
 /* The badge already marks the market; a second rule above the headline is one
    mark too many on a slide that also carries an eyebrow. */
 .legacy-theme .hero-slide .hero-content::before {

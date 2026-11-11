@@ -8,6 +8,8 @@ import { formatMoney, money, fromMajor } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
 import { LegacyFilters, ActiveFilters } from "@/components/LegacyFilters";
 import { EmptyState } from "@/components/EmptyState";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 export const dynamic = "force-dynamic";
 
@@ -197,8 +199,14 @@ export default async function InventoryPage({
                   <div className="car-card" key={v.id}>
                     <div className="car-image">
                       {v.primaryImage ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={mediaUrl(v.primaryImage)} alt={name} loading="lazy" />
+                        <Image
+                          src={mediaUrl(v.primaryImage)}
+                          alt={name}
+                          width={760}
+                          height={570}
+                          sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"
+                          unoptimized={!canResize(mediaUrl(v.primaryImage))}
+                        />
                       ) : (
                         <div className="car-image-placeholder">Photography coming soon</div>
                       )}

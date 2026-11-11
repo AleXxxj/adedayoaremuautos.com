@@ -7,6 +7,8 @@ import { formatMoney, money } from "@/lib/money";
 import { pathToOwnership } from "@/lib/rentToOwn";
 import { mediaUrl } from "@/lib/media";
 import { EmptyState } from "@/components/EmptyState";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -154,8 +156,14 @@ export default async function TierPage({
                     <div className="car-card" key={v.id}>
                       <div className="car-image">
                         {v.imageKey ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={mediaUrl(v.imageKey)} alt={name} loading="lazy" />
+                          <Image
+                            src={mediaUrl(v.imageKey)}
+                            alt={name}
+                            width={760}
+                            height={570}
+                            sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"
+                            unoptimized={!canResize(mediaUrl(v.imageKey))}
+                          />
                         ) : (
                           <div className="car-image-placeholder">
                             Photography coming soon

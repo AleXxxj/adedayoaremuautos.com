@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 export interface HeroSlide {
   key: string;
@@ -164,7 +165,6 @@ export function HeroSlider({
         <div
           key={s.key}
           className={`hero-slide${i === index ? " is-active" : ""}`}
-          style={{ backgroundImage: `url('${s.image}')` }}
           aria-hidden={i !== index}
           // inert keeps hidden slides out of the tab order and the
           // accessibility tree; aria-hidden alone leaves the buttons focusable.
@@ -172,6 +172,17 @@ export function HeroSlider({
           aria-roledescription="slide"
           aria-label={`${i + 1} of ${count}`}
         >
+          {/* A photo rather than a CSS background, so it can be resized: the
+              three slides were PNGs of 1.4–2 MB each, all downloaded on every
+              visit. Under the scrim (::after, z-index 1) and the text (2). */}
+          <Image
+            className="hero-slide-photo"
+            src={s.image}
+            alt=""
+            fill
+            sizes="100vw"
+            preload={i === 0}
+          />
           <div className="hero-content">
             {/* In each slide's flow rather than positioned once over them all:
                 an offset tuned to one slide's headline collides with the next

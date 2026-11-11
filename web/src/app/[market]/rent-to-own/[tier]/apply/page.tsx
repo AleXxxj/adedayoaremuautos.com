@@ -8,6 +8,8 @@ import { formatMoney, money } from "@/lib/money";
 import { pathToOwnership } from "@/lib/rentToOwn";
 import { mediaUrl } from "@/lib/media";
 import { RentToOwnApplication } from "@/components/RentToOwnApplication";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 export const dynamic = "force-dynamic";
 
@@ -79,8 +81,13 @@ export default async function ApplyPage({
             {car ? (
               <div className="rto-apply-car">
                 {car.imageKey ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={mediaUrl(car.imageKey)} alt={carName ?? ""} />
+                  <Image
+                    src={mediaUrl(car.imageKey)}
+                    alt={carName ?? ""}
+                    width={108}
+                    height={76}
+                    unoptimized={!canResize(mediaUrl(car.imageKey))}
+                  />
                 ) : null}
                 <div>
                   <strong>{carName}</strong>

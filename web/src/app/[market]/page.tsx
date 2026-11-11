@@ -11,6 +11,8 @@ import { articlesFor } from "@/content/articles";
 import { formatMoney, money } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
 import { LegacyContactForm } from "@/components/LegacyContactForm";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 /**
  * The homepage was the only page without a canonical URL, which matters most
@@ -295,8 +297,14 @@ export default async function MarketHome({
                   <div className="car-card" key={v.id}>
                     <div className="car-image">
                       {v.primaryImage ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={mediaUrl(v.primaryImage)} alt={name} />
+                        <Image
+                          src={mediaUrl(v.primaryImage)}
+                          alt={name}
+                          width={760}
+                          height={570}
+                          sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"
+                          unoptimized={!canResize(mediaUrl(v.primaryImage))}
+                        />
                       ) : (
                         <div className="car-image-placeholder">Photography coming soon</div>
                       )}
@@ -496,8 +504,13 @@ export default async function MarketHome({
             </div>
 
             <div className="about-image">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/img/ceo.png" alt="Adedayo Aremu, Founder and CEO" />
+              <Image
+                src="/img/ceo.png"
+                alt="Adedayo Aremu, Founder and CEO"
+                width={1024}
+                height={1536}
+                sizes="(min-width: 900px) 440px, 100vw"
+              />
             </div>
           </div>
         </div>

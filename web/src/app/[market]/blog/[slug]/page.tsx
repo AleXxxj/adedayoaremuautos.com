@@ -8,6 +8,7 @@ import { ARTICLE_HEADS } from "@/content/articleHeads";
 import { approvedComments } from "@/lib/actions/blog";
 import { socialLinks } from "@/lib/contact";
 import { LegacyCommentForm, LegacyShare } from "@/components/LegacyBlog";
+import Image from "next/image";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -216,8 +217,7 @@ export default async function ArticlePage({
 
         <div className="author-box">
           <div className="author-image">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/ceo.png" alt="Adedayo Aremu" />
+            <Image src="/img/ceo.png" alt="Adedayo Aremu" width={100} height={150} />
           </div>
           <div className="author-info">
             <h3>

@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { fromMajor, formatMoney, monthlyPayment, money, type CurrencyCode } from "@/lib/money";
 import type { MarketConfig } from "@/lib/market";
+import Image from "next/image";
+import { canResize } from "@/lib/photo";
 
 /**
  * The original gallery, reproduced with its class names.
@@ -42,11 +44,14 @@ export function LegacyGallery({
       <div className="media-container" id="mediaContainer">
         {images.map((src, n) => (
           <div className={`media-slide${n === i ? " active" : ""}`} key={src}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt={n === i ? `${alt} — photo ${n + 1} of ${images.length}` : ""}
-              loading={n === 0 ? "eager" : "lazy"}
+              width={1200}
+              height={800}
+              sizes="(min-width: 1100px) 760px, 100vw"
+              preload={n === 0}
+              unoptimized={!canResize(src)}
             />
           </div>
         ))}
@@ -71,8 +76,14 @@ export function LegacyGallery({
                 aria-label={`Show photo ${n + 1}`}
                 aria-current={n === i}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading="lazy" />
+                <Image
+                  src={src}
+                  alt=""
+                  width={160}
+                  height={120}
+                  sizes="96px"
+                  unoptimized={!canResize(src)}
+                />
               </button>
             ))}
           </div>
