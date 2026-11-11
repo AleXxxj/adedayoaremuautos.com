@@ -1113,10 +1113,14 @@ export function RentalBookingForm({
             exists for: somebody who will not pay for a car they have not seen
             needs to know it will still be there when they arrive. */}
         {state.heldFor && (
+          // The sentence in one span: the panel is a flex row, and loose
+          // text around <strong> became three columns.
           <p className="booking-done-hold">
-            <i className="fas fa-lock" aria-hidden="true" /> This vehicle is
-            held for you for <strong>{state.heldFor}</strong>. Nobody else can
-            book these dates in that time.
+            <i className="fas fa-lock" aria-hidden="true" />
+            <span>
+              This vehicle is held for you for <strong>{state.heldFor}</strong>.
+              Nobody else can book these dates in that time.
+            </span>
           </p>
         )}
 
