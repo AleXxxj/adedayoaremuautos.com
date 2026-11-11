@@ -6,7 +6,7 @@ import { z } from "zod";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { deals, financeAgreements, instalments, financePayments } from "@/db/schema";
-import { requireStaff, assertMarketAccess } from "@/lib/auth";
+import { requireSection, assertMarketAccess } from "@/lib/auth";
 import { MARKETS, type MarketCode } from "@/lib/market";
 import { money, fromMajor } from "@/lib/money";
 import { generateSchedule } from "@/lib/amortization";
@@ -43,7 +43,7 @@ export async function createAgreementFromDeal(
   _prev: FinanceResult | null,
   formData: FormData,
 ): Promise<FinanceResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/finance");
   const dealId = String(formData.get("dealId") ?? "");
   const firstDueRaw = String(formData.get("firstDueDate") ?? "");
 
@@ -158,7 +158,7 @@ export async function recordPayment(
   _prev: FinanceResult | null,
   formData: FormData,
 ): Promise<FinanceResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/finance");
 
   const raw = Object.fromEntries(formData.entries());
   const cleaned = Object.fromEntries(

@@ -4,6 +4,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { deals, dealEvents, vehicles } from "@/db/schema";
 import { requireStaff, canAccessMarket } from "@/lib/auth";
+import { canReach } from "@/lib/adminNav";
 import { AdminChrome } from "../../layout";
 import { DealWorksheet } from "@/components/admin/DealWorksheet";
 import { DealStage } from "@/components/admin/DealStage";
@@ -51,6 +52,9 @@ export default async function DealPage({
     minor == null ? 0 : toMajor(money(minor, cur));
 
   const readOnly = deal.status === "delivered";
+  // Sales work deals but not the finance ledger (src/lib/adminNav.ts). The
+  // finance action and page refuse them, so the controls must not be offered.
+  const canFinance = canReach(user.role, "/admin/finance");
 
   return (
     <AdminChrome email={user.email} role={user.role}>
@@ -98,16 +102,24 @@ export default async function DealPage({
               {agreement ? (
                 <p className="text-sm">
                   Agreement{" "}
-                  <Link
-                    href={`/admin/finance/${agreement.id}`}
-                    className="font-mono text-[var(--link)] hover:underline"
-                  >
-                    {agreement.number}
-                  </Link>{" "}
+                  {canFinance ? (
+                    <Link
+                      href={`/admin/finance/${agreement.id}`}
+                      className="font-mono text-[var(--link)] hover:underline"
+                    >
+                      {agreement.number}
+                    </Link>
+                  ) : (
+                    <span className="font-mono">{agreement.number}</span>
+                  )}{" "}
                   is live for this deal.
                 </p>
-              ) : (
+              ) : canFinance ? (
                 <CreateAgreement dealId={deal.id} />
+              ) : (
+                <p className="text-sm text-[var(--text-secondary)]">
+                  A manager creates the finance agreement for this deal.
+                </p>
               )}
             </div>
           )}

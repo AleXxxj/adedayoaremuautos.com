@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { vehicles, vehicleMedia, rentalRates, rentalBookings } from "@/db/schema";
 import { MARKETS, type MarketCode } from "@/lib/market";
@@ -121,6 +121,25 @@ export async function getFleetVehicle(
 }
 
 /**
+ * The bookings that keep a car from being booked again.
+ *
+ * Confirmed and active hires, and reservations whose hold is still running —
+ * the same set the database's no-overlap constraint protects. This used to
+ * leave reservations out, so a reserved car showed as free right up until a
+ * second customer had filled in the whole form, photos and all, only to be
+ * told the dates were taken. Expired holds are excluded by time rather than by
+ * waiting for the sweep, so a reservation nobody came back for stops showing
+ * the moment it ends.
+ */
+function blocksTheCar(now: Date) {
+  return or(
+    eq(rentalBookings.status, "confirmed"),
+    eq(rentalBookings.status, "active"),
+    and(eq(rentalBookings.status, "quote"), gt(rentalBookings.paymentHoldUntil, now)),
+  );
+}
+
+/**
  * Whether a vehicle is free for a window.
  *
  * This is a courtesy check for the UI, NOT the guarantee. Between this query
@@ -139,10 +158,7 @@ export async function isAvailable(
     .where(
       and(
         eq(rentalBookings.vehicleId, vehicleId),
-        or(
-          eq(rentalBookings.status, "confirmed"),
-          eq(rentalBookings.status, "active"),
-        ),
+        blocksTheCar(new Date()),
         sql`${rentalBookings.period} && tstzrange(${from.toISOString()}, ${to.toISOString()}, '[)')`,
       ),
     );
@@ -150,21 +166,26 @@ export async function isAvailable(
   return Number(row.n) === 0;
 }
 
-/** Confirmed windows ahead, so the UI can grey out taken dates. */
+/**
+ * Taken and held windows ahead, so the UI can show which dates are gone.
+ *
+ * Each comes with its hold's end, because the page that lists them is cached
+ * and a hold ends by the clock: the browser drops reservations that have run
+ * out since the page was rendered. Only meaningful while status is "quote";
+ * a confirmed hire can keep an old hold time that no longer means anything.
+ */
 export async function bookedWindows(vehicleId: string, fromDate: Date) {
   return db
     .select({
       period: rentalBookings.period,
       status: rentalBookings.status,
+      heldUntil: rentalBookings.paymentHoldUntil,
     })
     .from(rentalBookings)
     .where(
       and(
         eq(rentalBookings.vehicleId, vehicleId),
-        or(
-          eq(rentalBookings.status, "confirmed"),
-          eq(rentalBookings.status, "active"),
-        ),
+        blocksTheCar(fromDate),
         sql`upper(${rentalBookings.period}) >= ${fromDate.toISOString()}`,
       ),
     );

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { staff, auditLog } from "@/db/schema";
 import { requireStaff } from "@/lib/auth";
@@ -272,8 +272,26 @@ export async function resendInvite(
   formData: FormData,
 ): Promise<StaffResult> {
   await requireOwner();
-  const email = String(formData.get("email") ?? "");
-  if (!email) return { ok: false, error: "Nothing to do." };
+  const requested = String(formData.get("email") ?? "").trim();
+  if (!requested) return { ok: false, error: "Nothing to do." };
+
+  /*
+   * Only for somebody who is actually staff.
+   *
+   * The address arrives as a form field, which can be edited, and the link
+   * this makes signs its holder in as that account. Referral partners have
+   * accounts in the same sign-in system, so without this an owner's browser
+   * could be made to hand back a working sign-in link for a partner's account
+   * — or anyone's. The link is generated for the address on the staff record,
+   * not the one typed.
+   */
+  const [member] = await db
+    .select({ email: staff.email })
+    .from(staff)
+    .where(sql`lower(${staff.email}) = lower(${requested})`)
+    .limit(1);
+  if (!member) return { ok: false, error: "That address is not a member of staff." };
+  const email = member.email;
 
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: "recovery",

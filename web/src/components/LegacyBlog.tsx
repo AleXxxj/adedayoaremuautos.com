@@ -55,11 +55,9 @@ export function LegacyNewsletter({
         </h2>
 
         {state?.ok ? (
-          <p>
-            {state.already
-              ? "You are on the list — thank you."
-              : "Thank you. We will send the next one to that address."}
-          </p>
+          // One reply for everyone, so the form cannot be used to check
+          // whether somebody else's address is on the list.
+          <p>Thanks — we got your sign-up.</p>
         ) : (
           <>
             <p>

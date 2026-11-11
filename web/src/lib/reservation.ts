@@ -43,6 +43,27 @@ export function canReserve(pickup: Date, now = new Date()): boolean {
   return pickup.getTime() - now.getTime() >= MIN_RESERVATION_MINUTES * 60_000;
 }
 
+/**
+ * The hold a booking returns to when a checkout ends without payment.
+ *
+ * Opening the payment page may lengthen a hold but never shortens it (see
+ * startRentalPayment). When that checkout then fails, expires or is abandoned,
+ * the hold goes back to what the customer was promised before they tapped
+ * "Pay now": the reservation, if it is still running, and nothing otherwise.
+ *
+ * Both exits used to clear the hold outright. A customer who reserved for two
+ * days, glanced at the payment page and closed it lost the car thirty minutes
+ * later, after the confirmation screen had told them nobody else could book
+ * those dates.
+ *
+ * `promised` is the hold to restore: the booking's reservation end when a
+ * checkout expires, or the hold as it stood before this attempt when a
+ * checkout could not be started.
+ */
+export function holdAfterCheckout(promised: Date | null, now = new Date()): Date | null {
+  return promised && promised.getTime() > now.getTime() ? promised : null;
+}
+
 /** "2 days", "6 hours", "45 minutes" — for a sentence, not a table. */
 export function holdRemaining(until: Date, now = new Date()): string {
   const ms = until.getTime() - now.getTime();

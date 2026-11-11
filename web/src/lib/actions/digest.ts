@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { campaigns } from "@/db/schema";
-import { requireStaff, allowedMarkets } from "@/lib/auth";
+import { requireSection, allowedMarkets } from "@/lib/auth";
 import { isMarketCode, type MarketCode } from "@/lib/market";
 import { runWeeklyDigest, digestPreview } from "@/lib/digest/weekly";
 
@@ -25,7 +25,7 @@ export async function sendDigestNow(
   _prev: DigestActionResult | null,
   formData: FormData,
 ): Promise<DigestActionResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/campaigns");
   const market = String(formData.get("marketCode") ?? "");
 
   if (!isMarketCode(market)) return { ok: false, error: "Choose a market." };
@@ -72,7 +72,7 @@ export interface DigestReadiness {
  * server, and a screen does not need them to say what is wrong.
  */
 export async function digestReadiness(): Promise<DigestReadiness> {
-  await requireStaff();
+  await requireSection("/admin/campaigns");
   return {
     cronSecretSet: Boolean(process.env.CRON_SECRET?.trim()),
     mailConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
@@ -86,7 +86,7 @@ export interface DigestPreviewRow {
 
 /** What Saturday's digest would contain for a market, as it stands today. */
 export async function previewDigest(market: string): Promise<DigestPreviewRow[]> {
-  await requireStaff();
+  await requireSection("/admin/campaigns");
   if (!isMarketCode(market)) return [];
 
   const rows = await digestPreview(market as MarketCode);
@@ -98,7 +98,7 @@ export async function previewDigest(market: string): Promise<DigestPreviewRow[]>
 
 /** Stops a digest that was interrupted from sitting half-sent forever. */
 export async function markDigestDone(id: string): Promise<void> {
-  await requireStaff();
+  await requireSection("/admin/campaigns");
   await db
     .update(campaigns)
     .set({ status: "sent", completedAt: new Date() })

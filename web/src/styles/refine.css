@@ -2865,6 +2865,54 @@
     color: #e2c463;
 }
 
+/* Field messages. The only .field-error rules were scoped to the contact
+   form, so inside the booking form a refused file or a server's "please fix
+   this" rendered as plain body text, easy to miss. Three classes deep, to win
+   over `.booking-field > span`, which styles the field's label. */
+.legacy-theme .booking-form .field-error {
+    display: block;
+    margin-top: 6px;
+    color: #f3a6a3;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* A request that never arrived. Sits right above the button, where the renter
+   is looking, and offers a person: a text with the car and dates filled in. */
+.legacy-theme .booking-fallback {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(217, 83, 79, 0.4);
+    border-radius: 10px;
+    background: rgba(217, 83, 79, 0.1);
+}
+
+.legacy-theme .booking-fallback p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #f3a6a3;
+}
+
+.legacy-theme .booking-fallback p strong {
+    color: #f7c2c0;
+}
+
+.legacy-theme .booking-fallback-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 10px;
+}
+
+.legacy-theme .booking-fallback-actions .btn {
+    justify-content: center;
+    min-height: 44px;
+}
+
 .legacy-theme .booking-submit {
     width: 100%;
     justify-content: center;

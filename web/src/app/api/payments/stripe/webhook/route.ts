@@ -5,6 +5,8 @@ import { rentalBookings, rentalPayments } from "@/db/schema";
 import { verifyStripeWebhook } from "@/lib/payments/stripe";
 import { sendBookingReceipt } from "@/lib/payments/receipt";
 import { recordRentalEarning } from "@/lib/partnerEarnings";
+import { restoreHoldAfterCheckout } from "@/lib/rentalHolds";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -156,7 +158,12 @@ async function markPaid(sessionId: string, bookingId: string | null) {
   await recordRentalEarning(target);
 }
 
-/** A checkout that expired or failed. The dates go back on the market. */
+/**
+ * A checkout that expired or failed.
+ *
+ * The payment attempt is marked expired, and the booking's hold goes back to
+ * whatever is still legitimately running — see restoreHoldAfterCheckout.
+ */
 async function markUnpaid(sessionId: string, bookingId: string | null) {
   const [payment] = await db
     .update(rentalPayments)
@@ -173,8 +180,7 @@ async function markUnpaid(sessionId: string, bookingId: string | null) {
   const target = payment?.bookingId ?? bookingId;
   if (!target) return;
 
-  await db
-    .update(rentalBookings)
-    .set({ paymentHoldUntil: null })
-    .where(and(eq(rentalBookings.id, target), eq(rentalBookings.status, "quote")));
+  await restoreHoldAfterCheckout(target);
+  // The vehicle page lists held dates; this one may just have opened up.
+  revalidatePath("/[market]/rentals/[slug]", "page");
 }

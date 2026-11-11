@@ -8,7 +8,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { referralPartners } from "@/db/schema";
-import { requireStaff, assertMarketAccess } from "@/lib/auth";
+import { requireSection, assertMarketAccess } from "@/lib/auth";
 import {
   normaliseCode,
   suggestCode,
@@ -107,9 +107,15 @@ export async function joinReferralProgramme(
   if (v.website) return { ok: true, code: "PENDING" };
   if (v.renderedAt && Date.now() - v.renderedAt < 2000) return { ok: true, code: "PENDING" };
 
-  // Same person applying twice. What they are told depends on where their
-  // first application got to, because "we already have you" is useless when
-  // what they want to know is whether they were accepted.
+  /*
+   * Same number applying twice: one reply, whatever the status.
+   *
+   * This used to answer according to where the first application had got to
+   * — and for an approved partner it handed back their code and link. This is
+   * a public form, so anyone who knew a phone number could learn whether its
+   * owner was a partner, and get the code that pays them. The partner sees
+   * their own status, code and link by signing in.
+   */
   const [existing] = await db
     .select()
     .from(referralPartners)
@@ -122,25 +128,10 @@ export async function joinReferralProgramme(
     .limit(1);
 
   if (existing) {
-    if (existing.status === "active") {
-      return { ok: true, code: existing.code, link: `${siteUrl()}/r/${existing.code}` };
-    }
-    if (existing.status === "pending") {
-      return {
-        ok: false,
-        error: "We already have your application and are reviewing it. We will email you.",
-      };
-    }
-    if (existing.status === "approved") {
-      return {
-        ok: false,
-        error:
-          "You have been approved — check your email for the agreement. Call us if it has not arrived.",
-      };
-    }
     return {
       ok: false,
-      error: "This number is already registered. Please call us and we will sort it out.",
+      error:
+        "We already have an application for this phone number. If you're already a partner, sign in to your partner page to see your code and link. Otherwise, we'll be in touch by email.",
     };
   }
 
@@ -228,7 +219,7 @@ export async function approvePartner(
   _prev: PartnerResult | null,
   formData: FormData,
 ): Promise<PartnerResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/referrals");
   const parsed = reviewSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { ok: false, error: "Could not read that request." };
 
@@ -324,7 +315,7 @@ export async function declinePartner(
   _prev: PartnerResult | null,
   formData: FormData,
 ): Promise<PartnerResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/referrals");
   const parsed = declineSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { ok: false, error: "Could not read that request." };
 
@@ -507,7 +498,7 @@ export async function updatePartner(
   _prev: PartnerResult | null,
   formData: FormData,
 ): Promise<PartnerResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/referrals");
   const parsed = updateSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { ok: false, error: "Nothing to change." };
   const v = parsed.data;

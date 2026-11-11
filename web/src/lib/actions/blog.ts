@@ -4,17 +4,15 @@ import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { newsletterSubscribers, articleComments } from "@/db/schema";
-import { requireStaff } from "@/lib/auth";
+import { requireSection, allowedMarkets } from "@/lib/auth";
 
 export interface BlogResult {
   ok: boolean;
   error?: string;
   fieldErrors?: Record<string, string[]>;
-  /** Set when an existing subscriber re-submits, so the copy can differ. */
-  already?: boolean;
 }
 
 /* ── Newsletter ────────────────────────────────────────────────────────── */
@@ -61,9 +59,17 @@ const subscribeSchema = z.object({
  * The legacy form had no action attribute at all, so every address anyone
  * entered was thrown away by the browser on submit.
  *
- * Re-subscribing is not an error: it clears any previous unsubscribe and
- * reports success, because telling someone "you are already on the list" is
- * both unhelpful and leaks whether an address is on it.
+ * Every outcome gets the same reply. It used to answer "You are on the list"
+ * for an address already subscribed, which let anyone check whether a given
+ * email was on the list by typing it in.
+ *
+ * And this public form never re-subscribes an address that opted out. It
+ * used to clear the unsubscribe, so anyone could put somebody back on the
+ * list who had asked to come off it — the one thing commercial email law is
+ * firm about. A person who genuinely wants back in can ask us. For an
+ * address already on the list, the form only fills in what is missing (a
+ * first name, or a birthday added later); it never overwrites, so a stranger
+ * typing someone's email cannot change their details either.
  */
 export async function subscribeToNewsletter(
   _prev: BlogResult | null,
@@ -94,9 +100,13 @@ export async function subscribeToNewsletter(
   const ip =
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? null;
 
+  const s = newsletterSubscribers;
+  // A birthday is a pair: kept as a pair, or filled in as a pair.
+  const noBirthday = sql`${s.birthDay} is null and ${s.birthMonth} is null`;
+
   try {
-    const [row] = await db
-      .insert(newsletterSubscribers)
+    await db
+      .insert(s)
       .values({
         email: v.email,
         marketCode: v.marketCode,
@@ -108,24 +118,17 @@ export async function subscribeToNewsletter(
         consentIp: ip,
       })
       .onConflictDoUpdate({
-        target: newsletterSubscribers.email,
+        target: s.email,
+        // Fill gaps only; never overwrite, never re-subscribe.
         set: {
-          unsubscribedAt: null,
-          marketCode: v.marketCode,
-          // Only overwrite when something was actually supplied, so
-          // re-subscribing with the email box alone does not wipe a birthday
-          // the person gave the first time.
-          ...(v.firstName ? { firstName: v.firstName } : {}),
-          ...(v.birthDay != null && v.birthMonth != null
-            ? { birthDay: v.birthDay, birthMonth: v.birthMonth }
-            : {}),
+          firstName: sql`coalesce(${s.firstName}, excluded.first_name)`,
+          birthDay: sql`case when ${noBirthday} then excluded.birth_day else ${s.birthDay} end`,
+          birthMonth: sql`case when ${noBirthday} then excluded.birth_month else ${s.birthMonth} end`,
         },
-      })
-      .returning({ createdAt: newsletterSubscribers.createdAt });
+        setWhere: sql`${s.unsubscribedAt} is null`,
+      });
 
-    // A row whose createdAt predates this request was already on the list.
-    const already = Date.now() - row.createdAt.getTime() > 5_000;
-    return { ok: true, already };
+    return { ok: true };
   } catch (e) {
     console.error("[newsletter] subscribe failed", e);
     return {
@@ -246,7 +249,7 @@ export async function moderateComment(
   _prev: BlogResult | null,
   formData: FormData,
 ): Promise<BlogResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/comments");
   const id = String(formData.get("id") ?? "");
   const action = String(formData.get("action") ?? "");
 
@@ -254,23 +257,25 @@ export async function moderateComment(
     return { ok: false, error: "Nothing to do." };
   }
 
-  await db
+  // Scoped to this person's markets in the same statement, as the list is:
+  // an id from another market updates nothing.
+  const [moderated] = await db
     .update(articleComments)
     .set({
       status: action === "approve" ? "approved" : "rejected",
       moderatedAt: new Date(),
       moderatedByEmail: user.email,
     })
-    .where(eq(articleComments.id, id));
+    .where(
+      and(
+        eq(articleComments.id, id),
+        inArray(articleComments.marketCode, allowedMarkets(user)),
+      ),
+    )
+    .returning({ id: articleComments.id });
+
+  if (!moderated) return { ok: false, error: "That comment is not one you can moderate." };
 
   revalidatePath("/admin/comments");
   return { ok: true };
-}
-
-export async function listCommentsForModeration() {
-  return db
-    .select()
-    .from(articleComments)
-    .orderBy(desc(articleComments.createdAt))
-    .limit(200);
 }

@@ -416,8 +416,11 @@ export async function uploadVehiclePhoto(formData: FormData): Promise<ActionResu
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, error: "No file selected." };
   }
-  if (file.size > 10 * 1024 * 1024) {
-    return { ok: false, error: "Image must be 10 MB or smaller." };
+  // The platform refuses requests over 4.5 MB before this runs, so a larger
+  // limit here only promised an explanation nobody could receive. The browser
+  // shrinks photos first; this catches anything that slipped past it.
+  if (file.size > 4 * 1024 * 1024) {
+    return { ok: false, error: "Image must be 4 MB or smaller." };
   }
 
   const [vehicle] = await db

@@ -57,11 +57,33 @@ export class PaymentError extends Error {
   }
 }
 
-/** Whether a provider has been given keys. Used to hide what cannot work. */
+/**
+ * Whether a provider can take real money here. Used to hide what cannot work.
+ *
+ * Having a key is not enough on the live site: a test key there sends real
+ * customers to a checkout marked "TEST MODE" that declines every real card.
+ * That is what production was running on Oct 8, when a real customer opened
+ * the payment page the minute they booked and the session expired unpaid. So
+ * on the production deployment a test key counts as no key — "Pay now"
+ * disappears and startRentalPayment refuses — until a live key is set.
+ * Previews and local development keep test keys working, because that is
+ * where they belong.
+ */
 export function providerConfigured(name: ProviderName): boolean {
-  return name === "stripe"
-    ? Boolean(process.env.STRIPE_SECRET_KEY?.trim())
-    : Boolean(process.env.PAYSTACK_SECRET_KEY?.trim());
+  const key = (
+    name === "stripe" ? process.env.STRIPE_SECRET_KEY : process.env.PAYSTACK_SECRET_KEY
+  )?.trim();
+  if (!key) return false;
+  if (process.env.VERCEL_ENV === "production" && isTestKey(key)) return false;
+  return true;
+}
+
+/**
+ * Stripe's secret and restricted test keys start sk_test_ and rk_test_;
+ * Paystack's test secret keys start sk_test_ too.
+ */
+export function isTestKey(key: string): boolean {
+  return /^(sk|rk)_test_/.test(key);
 }
 
 /**

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { financeAgreements, instalments, financePayments, deals } from "@/db/schema";
-import { requireStaff, canAccessMarket } from "@/lib/auth";
+import { requireSection, canAccessMarket } from "@/lib/auth";
 import { AdminChrome } from "../../layout";
 import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
@@ -27,7 +27,9 @@ export default async function AgreementPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ created?: string }>;
 }) {
-  const user = await requireStaff();
+  // The same rule as the finance list. A sales account cannot open the list,
+  // so it must not be able to open an agreement by typing its address either.
+  const user = await requireSection("/admin/finance");
   const { id } = await params;
   const { created } = await searchParams;
 

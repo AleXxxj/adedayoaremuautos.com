@@ -1,9 +1,10 @@
 "use server";
 
 import { violates } from "@/lib/dbError";
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { releaseExpiredHolds, HOLD_MINUTES } from "@/lib/rentalHolds";
+import { holdAfterCheckout } from "@/lib/reservation";
 import { rentalBookings, rentalPayments, vehicles } from "@/db/schema";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
@@ -156,12 +157,13 @@ export async function startRentalPayment(
 
     return { ok: true, url: session.url };
   } catch (e) {
-    // The hold only exists to protect a payment that is about to happen. If
-    // one cannot be started, holding the vehicle would keep it off the market
-    // for half an hour for nothing.
+    // The extra half hour only exists to protect a payment that is about to
+    // happen, so if one cannot be started it goes. The reservation the
+    // customer already had does not: the hold returns to exactly what it was
+    // before they pressed the button.
     await db
       .update(rentalBookings)
-      .set({ paymentHoldUntil: null })
+      .set({ paymentHoldUntil: holdAfterCheckout(existing) })
       .where(eq(rentalBookings.id, bookingId));
 
     if (e instanceof PaymentError) return { ok: false, error: e.message };
@@ -170,33 +172,3 @@ export async function startRentalPayment(
   }
 }
 
-/** Whether a market can take card payments at all, for hiding the button. */
-export async function paymentAvailable(market: string): Promise<boolean> {
-  if (!isMarketCode(market)) return false;
-  return providerConfigured(providerFor(market as MarketCode));
-}
-
-/** What a customer sees on the confirmation page after returning. */
-export async function paymentStateFor(
-  bookingId: string,
-): Promise<{ status: string; reference: string; amount: string } | null> {
-  if (!bookingId) return null;
-  const [row] = await db
-    .select({ b: rentalBookings })
-    .from(rentalBookings)
-    .where(eq(rentalBookings.id, bookingId))
-    .limit(1);
-  if (!row) return null;
-
-  const cfg = MARKETS[row.b.marketCode as MarketCode];
-  const [paid] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(rentalPayments)
-    .where(and(eq(rentalPayments.bookingId, bookingId), eq(rentalPayments.status, "paid")));
-
-  return {
-    status: (paid?.n ?? 0) > 0 ? "paid" : row.b.status,
-    reference: bookingId.slice(0, 8).toUpperCase(),
-    amount: formatMoney(money(row.b.totalMinor, cfg.currency), cfg.locale),
-  };
-}

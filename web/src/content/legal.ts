@@ -26,7 +26,7 @@ export interface LegalPage {
  * When the text itself was last changed. Shown on the page, so it must track
  * real edits to the wording — not the date of a deploy.
  */
-export const LEGAL_LAST_UPDATED = "2026-10-25";
+export const LEGAL_LAST_UPDATED = "2026-11-11";
 
 export const LEGAL_PAGES: Record<string, LegalPage> = {
   "privacy-policy": {

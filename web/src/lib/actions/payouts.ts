@@ -5,7 +5,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { partnerPayouts, referralPartners } from "@/db/schema";
-import { requirePartner, requireStaff, assertMarketAccess } from "@/lib/auth";
+import { requirePartner, requireSection, assertMarketAccess } from "@/lib/auth";
 import { partnerTotals, settleEarnings } from "@/lib/partnerEarnings";
 import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
@@ -125,7 +125,10 @@ export async function decidePayout(
   _prev: PayoutResult | null,
   formData: FormData,
 ): Promise<PayoutResult> {
-  const user = await requireStaff();
+  // Owner only, like the page. Money leaving the business is the one
+  // decision the menu reserves for the owner, and the menu alone is not a
+  // lock: this action can be called directly by any signed-in staff account.
+  const user = await requireSection("/admin/payouts");
   const parsed = decideSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { ok: false, error: "Could not read that request." };
   const v = parsed.data;

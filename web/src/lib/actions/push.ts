@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireStaff, allowedMarkets } from "@/lib/auth";
+import { requireSection, allowedMarkets } from "@/lib/auth";
 import { pushToMarket } from "@/lib/push/send";
 
 export interface PushFormResult {
@@ -48,7 +48,7 @@ export async function sendPushBroadcast(
   _prev: PushFormResult | null,
   formData: FormData,
 ): Promise<PushFormResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/campaigns");
 
   const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {

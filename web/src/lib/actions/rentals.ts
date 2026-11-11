@@ -17,8 +17,10 @@ import { storeLicence } from "@/lib/licence";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
 import { resolveReferralPartner } from "@/lib/partner";
-import { releaseExpiredHolds } from "@/lib/rentalHolds";
+import { releaseExpiredHolds, findOwnHold } from "@/lib/rentalHolds";
 import { sendReservation } from "@/lib/mail/reservation";
+import { listLocations, formatPhone } from "@/lib/repositories/locations";
+import { phoneDigitsKey, phoneKeySql } from "@/lib/phoneKey";
 import { siteUrl } from "@/lib/siteUrl";
 import {
   canReserve,
@@ -27,6 +29,12 @@ import {
   MAX_OPEN_RESERVATIONS,
 } from "@/lib/reservation";
 import { confirmRentalEarning, cancelEarningFor } from "@/lib/partnerEarnings";
+
+/**
+ * Every public vehicle page, as a route pattern for revalidatePath(…, "page").
+ * Not exported: a "use server" file may export only async functions.
+ */
+const RENTAL_PAGES = "/[market]/rentals/[slug]";
 
 export interface RentalResult {
   ok: boolean;
@@ -44,6 +52,11 @@ export interface RentalResult {
   heldFor?: string;
   /** Whether the pay-later link went out by email. */
   emailed?: boolean;
+  /**
+   * The request matched a reservation this person already holds — a retry
+   * after a lost reply — so the existing booking is reported, not a new one.
+   */
+  alreadyReserved?: boolean;
   /**
    * The pay-later link itself, returned only to the person who just made the
    * booking. Without an email address this response is the one place they
@@ -206,6 +219,34 @@ export async function requestRental(
   const period = `[${from.toISOString()},${to.toISOString()})`;
 
   /*
+   * The same reservation, arriving twice.
+   *
+   * A phone can lose the reply after this function has saved the booking —
+   * a dropped signal, or iOS suspending the tab — and the form then offers to
+   * try again. The retry used to collide with the renter's own hold and tell
+   * them the car "has just been booked", after uploading their documents a
+   * second time. Same vehicle, same dates, same phone number and still held:
+   * it is theirs, so it is reported as it stands and nothing new is stored.
+   *
+   * Checked before the documents are stored. The reservation link is not
+   * returned: anyone who knew the number and the dates could otherwise fetch
+   * it. The booking id is, so the renter can still pay from this screen.
+   */
+  const already = await findOwnHold({ vehicleId: row.v.id, period, phone: f.phone });
+  if (already) {
+    return {
+      ok: true,
+      alreadyReserved: true,
+      reference: already.id.slice(0, 8).toUpperCase(),
+      bookingId: already.id,
+      amount: formatMoney(money(already.totalMinor, already.currency), market.locale),
+      canPay: providerConfigured(providerFor(f.marketCode)),
+      heldFor: already.heldUntil ? holdRemaining(already.heldUntil) : undefined,
+    };
+  }
+  const phoneKey = phoneDigitsKey(f.phone);
+
+  /*
    * Documents, stored before the booking row.
    *
    * A rejected file stops the request with a message the visitor can act on,
@@ -312,14 +353,17 @@ export async function requestRental(
      * The expiry does most of the work, but nothing otherwise stops somebody
      * reserving every car for two days from one phone. Counted on the number
      * rather than the email because the number is the one field this form has
-     * always required.
+     * always required — and on its digits rather than as typed, so writing it
+     * differently does not make a new person.
      */
     const [open] = await db
       .select({ n: sql<number>`count(*)::int` })
       .from(rentalBookings)
       .where(
         and(
-          eq(rentalBookings.customerPhone, f.phone),
+          phoneKey
+            ? sql`${phoneKeySql(rentalBookings.customerPhone)} = ${phoneKey}`
+            : eq(rentalBookings.customerPhone, f.phone),
           eq(rentalBookings.status, "quote"),
           isNotNull(rentalBookings.paymentHoldUntil),
           gt(rentalBookings.paymentHoldUntil, now),
@@ -418,6 +462,16 @@ export async function requestRental(
    */
   if (reservedUntil && reservationToken && f.email) {
     const payUrl = `${siteUrl()}/${f.marketCode}/rentals/reserved/${reservationToken}`;
+    // The showroom line, so "Questions? Call …" has a number in it. Looked up
+    // the same way the receipt does; a lookup failure costs the email one
+    // sentence, never the booking.
+    let businessPhone: string | null = null;
+    try {
+      const sites = await listLocations(f.marketCode);
+      businessPhone = formatPhone(sites.find((s) => s.phone)?.phone ?? null);
+    } catch (e) {
+      console.error("[rental] showroom phone lookup failed", e);
+    }
     void sendReservation({
       to: f.email,
       name: f.name,
@@ -438,7 +492,8 @@ export async function requestRental(
         timeZone: market.timezone,
       }).format(reservedUntil),
       payUrl,
-      businessPhone: null,
+      businessPhone,
+      payOnline: providerConfigured(providerFor(f.marketCode)),
     }).catch((e) => console.error("[rental] reservation email failed", e));
   }
 
@@ -483,6 +538,9 @@ export async function requestRental(
 
   revalidatePath("/admin/rentals");
   revalidatePath("/admin/leads");
+  // The vehicle's page lists held dates as taken now, and it is cached for
+  // five minutes; without this a hold would not show until the cache expired.
+  if (reservedUntil) revalidatePath(`/${f.marketCode}/rentals/${f.vehicleSlug}`);
 
   // Offered only where a provider is actually configured, so a customer is
   // never shown a payment button that cannot work.
@@ -551,6 +609,7 @@ export async function adjustHold(
       .where(eq(rentalBookings.id, v.id));
     console.log(`[rental] ${user.email} released the hold on ${v.id}`);
     revalidatePath("/admin/rentals");
+    revalidatePath(RENTAL_PAGES, "page"); // the dates are open again
     return { ok: true };
   }
 
@@ -583,6 +642,7 @@ export async function adjustHold(
 
   console.log(`[rental] ${user.email} extended the hold on ${v.id}`);
   revalidatePath("/admin/rentals");
+  revalidatePath(RENTAL_PAGES, "page");
   return { ok: true };
 }
 
@@ -726,5 +786,8 @@ export async function updateBookingStatus(
 
   revalidatePath("/admin/rentals");
   revalidatePath("/partner");
+  // Confirming, cancelling or closing a booking changes which dates show as
+  // taken on the vehicle's public page.
+  revalidatePath(RENTAL_PAGES, "page");
   return { ok: true };
 }

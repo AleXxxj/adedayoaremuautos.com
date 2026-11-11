@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { staff, referralPartners } from "@/db/schema";
 import { createClient } from "./supabase/server";
+import { assertSection } from "./adminNav";
 import type { MarketCode } from "./market";
 
 export interface Staff {
@@ -68,6 +69,23 @@ export async function requireStaff(): Promise<Staff> {
     role: record.role,
     marketScope: record.marketScope,
   };
+}
+
+/**
+ * requireStaff, plus the role rule for one admin section.
+ *
+ * The admin menu (src/lib/adminNav.ts) says which roles may use each section,
+ * and pages enforce it with assertSection. Actions have to enforce it too:
+ * every export of a "use server" file is an endpoint anyone signed in can call
+ * directly, menu or no menu. Several of them checked only that the caller was
+ * staff, so a sales account could approve a partner payout, change a
+ * partner's commission rate or record a finance payment it cannot even see.
+ * Using the same table as the menu keeps the two from drifting apart.
+ */
+export async function requireSection(href: string): Promise<Staff> {
+  const user = await requireStaff();
+  assertSection(user.role, href);
+  return user;
 }
 
 export interface PartnerSession {

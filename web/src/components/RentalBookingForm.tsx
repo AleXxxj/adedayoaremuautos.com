@@ -1,15 +1,32 @@
 "use client";
 
-import { useActionToast } from "@/components/Toast";
+import { useActionToast, pushToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useMemo, useState, useRef } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useSyncExternalStore,
+} from "react";
+import { unstable_isUnrecognizedActionError } from "next/navigation";
 import { requestRental, type RentalResult } from "@/lib/actions/rentals";
+import { displayPhone } from "@/lib/phoneDisplay";
 import { quoteRental, rentalDays, RentalError, type RentalTariff } from "@/lib/rental";
 import { formatMoney, money } from "@/lib/money";
 import type { MarketConfig } from "@/lib/market";
 import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rentalTerms";
 import { RentalPayButton } from "@/components/RentalPayButton";
 import { RESERVATION_HOURS } from "@/lib/reservation";
+import {
+  shrinkPhoto,
+  megabytes,
+  DOCUMENT_PHOTO,
+  UPLOAD_LIMIT_BYTES,
+  UPLOAD_LIMIT_LABEL,
+} from "@/lib/shrinkPhoto";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -33,20 +50,99 @@ function unitLabel(tier: string, quantity: number): string {
   return quantity === 1 ? unit[0] : unit[1];
 }
 
+/**
+ * The booking's result, plus the failures the server never gets to report.
+ *
+ * "unconfirmed" is deliberately not "not sent": a phone can lose the reply
+ * after the booking was saved, so the renter is told only what is known —
+ * that no confirmation came back. "reload" is the page being out of date
+ * after a release, when every retry from it would fail the same way.
+ */
+type FormState =
+  | (RentalResult & { sendFailed?: "unconfirmed" | "reload" })
+  | null;
+
+type Doc = "licence" | "insurance";
+
+/** Never changes; lets useSyncExternalStore answer "has this page hydrated?". */
+const subscribeNothing = () => () => {};
+
 export function RentalBookingForm({
   market,
   vehicleSlug,
+  vehicleTitle,
+  contactPhone,
+  payOnline,
   tariff,
 }: {
   market: MarketConfig;
   vehicleSlug: string;
+  /** "2019 Toyota Camry SE", for the text-us message if sending fails. */
+  vehicleTitle: string;
+  /** The showroom line in +1… form, or null when none is on file. */
+  contactPhone: string | null;
+  /** Whether this market can take a real card online right now. */
+  payOnline: boolean;
   tariff: RentalTariff;
 }) {
-  const [state, action, pending] = useActionState<RentalResult | null, FormData>(
-    requestRental,
+  // The showroom line as people write it, or null when none is on file. The
+  // messages below only offer a text or a call when there is a number.
+  const phoneLabel = displayPhone(contactPhone, market.code);
+  const unconfirmedMessage = phoneLabel
+    ? `We couldn't confirm that your request reached us. Your details are still here. Try again, or text or call us at ${phoneLabel} and we'll check.`
+    : "We couldn't confirm that your request reached us. Your details are still here. Try again, or contact us and we'll check.";
+  const reloadMessage =
+    "This page was updated while you had it open. Please reload it and send your request again.";
+
+  /*
+   * A request that gets no answer is caught here.
+   *
+   * Without this, a refused upload (Vercel's 413), a dropped connection or a
+   * crash on the server threw out of the action, React handed it to the page's
+   * error boundary, and the renter got "We could not load this page" with
+   * everything they had typed gone — and the same again on every retry. Caught,
+   * it is an ordinary message beside the button, the form keeps its contents,
+   * and the renter is offered a person instead of a dead end.
+   *
+   * What it does not claim is that nothing was sent: the reply can be lost
+   * after the booking was saved. requestRental recognizes a retry of the same
+   * reservation and answers with it instead of booking twice.
+   *
+   * The previous state is not forwarded: requestRental never reads it, and
+   * sending it would only add the last result to every request's body.
+   */
+  const [state, action, pending] = useActionState<FormState, FormData>(
+    async (_prev, formData) => {
+      try {
+        return await requestRental(null, formData);
+      } catch (e) {
+        // After a release the action's id changes, and every retry from a
+        // page opened before it fails the same way until it is reloaded.
+        if (unstable_isUnrecognizedActionError(e)) {
+          return { ok: false, sendFailed: "reload", error: reloadMessage };
+        }
+        console.error("[booking] no reply from the server", e);
+        return { ok: false, sendFailed: "unconfirmed", error: unconfirmedMessage };
+      }
+    },
     null,
   );
   useActionToast(state);
+
+  /*
+   * Reserve stays disabled until the page has hydrated.
+   *
+   * The form is submitted by onSubmit (see the <form> below), so before the
+   * JavaScript runs a tap would be a plain browser submit. That used to be a
+   * GET, which put the renter's name, phone and email in the address bar and
+   * the server logs. The form now says method="post" as well, but nothing
+   * should be submitted before the code that checks and sends it is there.
+   */
+  const hydrated = useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -67,16 +163,14 @@ export function RentalBookingForm({
   /*
    * Everything the customer typed or attached, held in state.
    *
-   * React resets an uncontrolled form once its action has run, which is
-   * usually a kindness and is badly wrong here: a single validation failure
-   * emptied the whole form, and this one now requires two photographs. Being
-   * asked to find your licence and your insurance certificate again because
-   * you mistyped a phone number is where somebody gives up and rings a
-   * competitor.
-   *
-   * The files especially. A file input cannot be repopulated by the browser,
-   * so the only way to survive a round trip is to hold the File itself and
-   * attach it to the payload on the way out.
+   * This began as a defense against React resetting the form after its
+   * action ran: a single validation failure emptied the whole thing, photos
+   * included, and being asked to find your license and insurance card again
+   * because you mistyped a phone number is where somebody gives up and calls
+   * a competitor. The form no longer resets at all (see the <form> below),
+   * but state stays the source of truth: the text-us fallback reads the name
+   * from it, and the files sent are the shrunk copies held here, not the
+   * full-size originals still sitting in the inputs.
    */
   const [fields, setFields] = useState<Record<string, string>>({});
   const set = (name: string) => (
@@ -86,7 +180,81 @@ export function RentalBookingForm({
 
   const [licenceFile, setLicenceFile] = useState<File | null>(null);
   const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
-  const [docError, setDocError] = useState<string | null>(null);
+  /*
+   * One message per document, plus one for the button.
+   *
+   * A single shared message meant choosing the insurance card erased the
+   * license's "too large" warning, and a refusal at submit appeared beside
+   * the upload fields — a screen or more above the button the renter had
+   * just pressed, which then seemed to do nothing.
+   */
+  const [docErrors, setDocErrors] = useState<{
+    licence?: string;
+    insurance?: string;
+    submit?: string;
+  }>({});
+  // Held in state like the text fields, so they survive a retry.
+  const [eligible, setEligible] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  /*
+   * Photos are made smaller the moment they are chosen, not at submit.
+   *
+   * See src/lib/shrinkPhoto.ts for why: two ordinary phone photos used to add
+   * up to more than the hosting platform accepts in one request. Doing it on
+   * choice means "Preparing…" appears beside the field the renter just used,
+   * and Reserve waits for it. The pick counters stop a slow first photo from
+   * replacing a second one chosen while it was still being prepared.
+   */
+  const [preparing, setPreparing] = useState({ licence: false, insurance: false });
+  const picks = useRef({ licence: 0, insurance: 0 });
+
+  async function attach(which: Doc, input: HTMLInputElement) {
+    const file = input.files?.[0] ?? null;
+    const setFile = which === "licence" ? setLicenceFile : setInsuranceFile;
+    setDocErrors((e) => ({ ...e, [which]: undefined, submit: undefined }));
+    const pick = ++picks.current[which];
+
+    if (!file) {
+      // Picker cancelled. Also ends any "Preparing…" from an earlier pick,
+      // which would otherwise wait on a photo nobody is sending any more.
+      setFile(null);
+      setPreparing((p) => ({ ...p, [which]: false }));
+      return;
+    }
+
+    setPreparing((p) => ({ ...p, [which]: true }));
+    let ready: File;
+    try {
+      ready = await shrinkPhoto(file, DOCUMENT_PHOTO);
+    } catch {
+      ready = file; // could not shrink it; the size check below decides
+    }
+    if (picks.current[which] !== pick) return; // a newer choice took over
+    setPreparing((p) => ({ ...p, [which]: false }));
+
+    if (ready.size > UPLOAD_LIMIT_BYTES) {
+      // Only a large PDF, or an image this browser cannot read, gets here.
+      setFile(null);
+      input.value = ""; // so the picker does not show a file we are not sending
+      setDocErrors((e) => ({
+        ...e,
+        [which]: `That file is ${megabytes(ready.size)}, over our ${UPLOAD_LIMIT_LABEL} limit. Try a screenshot of it, or a smaller photo.`,
+      }));
+      return;
+    }
+    setFile(ready);
+  }
+
+  // The insurance card only counts while "own insurance" is the choice.
+  const stillPreparing =
+    preparing.licence || (insurance === "own" && preparing.insurance);
+
+  /** A refusal at submit: shown beside the button and announced as a toast. */
+  function refuse(message: string) {
+    setDocErrors((e) => ({ ...e, submit: message }));
+    pushToast("error", message);
+  }
   /*
    * Mount time, kept in a ref and stamped on at submit.
    *
@@ -105,27 +273,74 @@ export function RentalBookingForm({
     /*
      * The documents come from state, not from the inputs.
      *
-     * After a failed submit the inputs are empty — React has reset them —
-     * while these still hold what the customer chose, so this is what keeps a
-     * second attempt from needing the photographs again. Checked here too, so
-     * the message is immediate rather than a round trip; the server refuses
-     * them independently either way.
+     * State holds the shrunk copies the renter chose; the inputs still hold
+     * the full-size originals. Checked here too, so the message is immediate
+     * rather than a round trip; the server refuses them independently either
+     * way.
      */
+    if (stillPreparing) {
+      refuse("Still preparing your photo. One moment, then tap Reserve again.");
+      return;
+    }
     if (!licenceFile) {
-      setDocError("Please attach a photo of your driver's license.");
+      refuse("Please attach a photo of your driver's license.");
       return;
     }
     if (insurance === "own" && !insuranceFile) {
-      setDocError(
-        "Please attach proof of insurance, or choose a different option above.",
+      refuse("Please attach proof of insurance, or choose a different option above.");
+      return;
+    }
+
+    /*
+     * Only what this choice needs, and never more than the limit.
+     *
+     * A certificate attached under "own insurance" and left behind after
+     * switching options used to be sent anyway, counting against the size
+     * limit for nothing. The total is checked here as well as on choosing,
+     * because the limit is for the whole request, not each file.
+     */
+    const sending = [licenceFile, insurance === "own" ? insuranceFile : null].filter(
+      (f): f is File => f !== null,
+    );
+    const total = sending.reduce((sum, f) => sum + f.size, 0);
+    if (total > UPLOAD_LIMIT_BYTES) {
+      refuse(
+        `Your files add up to ${megabytes(total)}, over our ${UPLOAD_LIMIT_LABEL} limit. Try a screenshot instead of a large PDF.`,
       );
       return;
     }
-    setDocError(null);
+
+    setDocErrors((e) => ({ ...e, submit: undefined }));
     formData.set("licenceFile", licenceFile);
-    if (insuranceFile) formData.set("insuranceFile", insuranceFile);
-    return action(formData);
+    if (insurance === "own" && insuranceFile) {
+      formData.set("insuranceFile", insuranceFile);
+    } else {
+      // The hidden input may still hold the original, full-size file.
+      formData.delete("insuranceFile");
+    }
+    startTransition(() => action(formData));
   };
+
+  /*
+   * The way out when sending fails: a text to the showroom with the car, the
+   * dates and the name already written, so nobody has to start over.
+   */
+  const shortDate = (iso: string) =>
+    new Intl.DateTimeFormat(market.locale, {
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    }).format(new Date(`${iso}T00:00:00Z`));
+  const smsBody =
+    `Hi, I'd like to rent the ${vehicleTitle}` +
+    (from && to ? ` from ${shortDate(from)} to ${shortDate(to)}` : "") +
+    "." +
+    (val("name").trim() ? ` My name is ${val("name").trim()}.` : "");
+  // "?&body=" is the form both iPhone and Android Messages read.
+  const smsHref = contactPhone
+    ? `sms:${contactPhone}?&body=${encodeURIComponent(smsBody)}`
+    : null;
+  const telHref = contactPhone ? `tel:${contactPhone}` : null;
 
   /**
    * Preview only — the server prices the booking again from the same tariff
@@ -176,13 +391,22 @@ export function RentalBookingForm({
         )}
 
         <p className="booking-done-body">
-          {payable
+          {/* A retry after a lost reply, recognized by the server: the first
+              request had gone through, so the renter is told it is the same
+              booking rather than a new one. */}
+          {state.alreadyReserved
+            ? payable
+              ? "We already had this reservation, so nothing was booked twice. Pay now to confirm right away, or pay when you pick it up."
+              : "We already had this reservation, so nothing was booked twice. Come and see the vehicle, and pay when you pick it up."
+            : payable
             ? state.heldFor
               ? state.emailed
                 ? "You can come see the vehicle first — we've emailed you a link to pay from your phone when you're ready. Or pay now to confirm right away."
                 : "You can come see the vehicle first and pay from the link below when you're ready. Or pay now to confirm right away."
               : "Pay now to confirm these dates right away, or we'll call you to confirm."
-            : "We'll contact you shortly to confirm availability and the deposit."}
+            : state.heldFor
+              ? "Come and see the vehicle, and pay when you pick it up. We'll call you to confirm."
+              : "We'll contact you shortly to confirm availability and the deposit."}
         </p>
 
         {/* No email was given, so the link the customer needs to pay later
@@ -210,7 +434,31 @@ export function RentalBookingForm({
   const err = (f: string) => state?.fieldErrors?.[f]?.[0];
 
   return (
-    <form action={submit} className="booking-form">
+    /*
+     * onSubmit, not action={…}. React resets a form after an `action` prop
+     * runs, by calling the browser's own form.reset(). Text fields held in
+     * state survive that, but checkboxes and radio buttons do not: after any
+     * round trip — a failed send, or just a "please fix this field" from the
+     * server — the insurance option still looked chosen (its highlight comes
+     * from state) while its radio button was cleared, so resubmitting sent no
+     * choice at all and came back with an error the renter could not see a
+     * reason for. Dispatching the same action from onSubmit keeps `pending`
+     * and the result, without the reset. The browser still checks required
+     * fields first: submit only fires for a valid form.
+     *
+     * method="post" because without an `action` the browser's own submit
+     * would be a GET — the renter's details in the address bar and the
+     * server's logs — if one ever happened before the page hydrated. Reserve
+     * is also disabled until then.
+     */
+    <form
+      method="post"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit(new FormData(e.currentTarget));
+      }}
+      className="booking-form"
+    >
       <input type="hidden" name="marketCode" value={market.code} />
       <input type="hidden" name="vehicleSlug" value={vehicleSlug} />
       {withDriver && <input type="hidden" name="withDriver" value="true" />}
@@ -225,7 +473,9 @@ export function RentalBookingForm({
         </label>
       </div>
 
-      {state?.error && (
+      {/* A send that failed is reported beside the button instead, with a way
+          to reach a person; this spot is several screens above it. */}
+      {state?.error && !state.sendFailed && (
         <p className="booking-alert" role="alert">
           {state.error}
         </p>
@@ -459,21 +709,29 @@ export function RentalBookingForm({
           <span>
             Photo of your driver&rsquo;s license <em>required</em>
           </span>
+          {/* No `capture`: forcing the camera meant a renter could not attach a
+              photo they already had, and could never attach a screenshot or
+              PDF of a digital insurance card. Staff still see the physical
+              license at pickup. Plain image/* also lets an iPhone hand over
+              a JPEG rather than its HEIC original. */}
           <input
             type="file"
             name="licenceFile"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,image/*"
-            capture="environment"
-            onChange={(e) => {
-              setLicenceFile(e.target.files?.[0] ?? null);
-              setDocError(null);
-            }}
+            accept="image/*,application/pdf"
+            onChange={(e) => void attach("licence", e.currentTarget)}
           />
-          {licenceFile && (
+          {preparing.licence ? (
             <span className="booking-attached">
-              <i className="fas fa-check" aria-hidden="true" /> {licenceFile.name}
+              <i className="fas fa-spinner fa-spin" aria-hidden="true" /> Preparing photo…
             </span>
+          ) : (
+            licenceFile && (
+              <span className="booking-attached">
+                <i className="fas fa-check" aria-hidden="true" /> {licenceFile.name}
+              </span>
+            )
           )}
+          {docErrors.licence && <Err alert>{docErrors.licence}</Err>}
           {err("licenceFile") && <Err>{err("licenceFile")}</Err>}
         </label>
 
@@ -492,22 +750,23 @@ export function RentalBookingForm({
           <input
             type="file"
             name="insuranceFile"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,image/*"
-            capture="environment"
-            onChange={(e) => {
-              setInsuranceFile(e.target.files?.[0] ?? null);
-              setDocError(null);
-            }}
+            accept="image/*,application/pdf"
+            onChange={(e) => void attach("insurance", e.currentTarget)}
           />
-          {insuranceFile && (
+          {preparing.insurance ? (
             <span className="booking-attached">
-              <i className="fas fa-check" aria-hidden="true" /> {insuranceFile.name}
+              <i className="fas fa-spinner fa-spin" aria-hidden="true" /> Preparing photo…
             </span>
+          ) : (
+            insuranceFile && (
+              <span className="booking-attached">
+                <i className="fas fa-check" aria-hidden="true" /> {insuranceFile.name}
+              </span>
+            )
           )}
+          {docErrors.insurance && <Err alert>{docErrors.insurance}</Err>}
           {err("insuranceFile") && <Err>{err("insuranceFile")}</Err>}
         </label>
-
-        {docError && <Err>{docError}</Err>}
 
         {/* Every sentence here describes something the code actually does.
             Reassurance a system does not deliver is worse than none. */}
@@ -550,7 +809,13 @@ export function RentalBookingForm({
           carries one — so this is checked against the document rather than
           stored as a second copy of it. */}
       <label className="booking-consent">
-        <input type="checkbox" name="confirmEligible" required />
+        <input
+          type="checkbox"
+          name="confirmEligible"
+          required
+          checked={eligible}
+          onChange={(e) => setEligible(e.target.checked)}
+        />
         <span>
           I am 18 or older, I have a valid driver&rsquo;s license for the entire
           rental period, and the documents I attached are my own. I understand
@@ -594,30 +859,91 @@ export function RentalBookingForm({
       <input type="hidden" name="termsVersion" value={RENTAL_TERMS_VERSION} />
 
       <label className="booking-accept">
-        <input type="checkbox" name="acceptTerms" required />
+        <input
+          type="checkbox"
+          name="acceptTerms"
+          required
+          checked={acceptedTerms}
+          onChange={(e) => setAcceptedTerms(e.target.checked)}
+        />
         <span>
           I have read and agree to the rental terms above.
         </span>
       </label>
       {err("acceptTerms") && <Err>{err("acceptTerms")}</Err>}
 
+      {state?.sendFailed && (
+        <div className="booking-fallback" role="alert">
+          <p>
+            <strong>
+              {state.sendFailed === "reload" ? "Please reload." : "No confirmation yet."}
+            </strong>{" "}
+            {state.error}
+          </p>
+          {state.sendFailed === "unconfirmed" && (
+            <div className="booking-fallback-actions">
+              {smsHref && telHref ? (
+                <>
+                  <a className="btn btn-primary" href={smsHref}>
+                    <i className="fas fa-comment-sms" aria-hidden="true" /> Text us
+                  </a>
+                  <a className="btn btn-outline" href={telHref}>
+                    <i className="fas fa-phone" aria-hidden="true" /> Call us
+                  </a>
+                </>
+              ) : (
+                <a className="btn btn-outline" href={`/${market.code}/contact`}>
+                  <i className="fas fa-envelope" aria-hidden="true" /> Contact us
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* A refusal at the moment of pressing Reserve, shown where the renter is
+          looking. The message beside the upload field is for choosing files. */}
+      {docErrors.submit && (
+        <p className="booking-alert" role="alert">
+          {docErrors.submit}
+        </p>
+      )}
+
       <button
         type="submit"
-        disabled={pending}
+        disabled={!hydrated || pending || stillPreparing}
         className="btn btn-primary booking-submit"
       >
-        {pending ? "Reserving…" : "Reserve this vehicle"} <i className="fas fa-calendar-check" />
+        {pending
+          ? "Reserving…"
+          : stillPreparing
+            ? "Preparing photo…"
+            : "Reserve this vehicle"}{" "}
+        <i className="fas fa-calendar-check" />
       </button>
 
+      {/* Promises only what is on offer: while online payment is switched off
+          (no live key yet) there is no "pay online" to choose. */}
       <p className="booking-fineprint">
         We hold the vehicle for you for up to {RESERVATION_HOURS / 24} days after
-        you reserve. Pay online right away, or come see it first and pay when
-        you pick it up. The refundable deposit is taken at pickup.
+        you reserve.{" "}
+        {payOnline
+          ? "Pay online right away, or come see it first and pay when you pick it up."
+          : "Come see it first, and pay when you pick it up."}{" "}
+        The refundable deposit is taken at pickup.
       </p>
     </form>
   );
 }
 
-function Err({ children }: { children: React.ReactNode }) {
-  return <span className="field-error">{children}</span>;
+/**
+ * A message under a field. `alert` for ones that appear without a submit —
+ * a file refused the moment it was chosen — so a screen reader hears them.
+ */
+function Err({ children, alert = false }: { children: React.ReactNode; alert?: boolean }) {
+  return (
+    <span className="field-error" role={alert ? "alert" : undefined}>
+      {children}
+    </span>
+  );
 }

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { deals, dealEvents, vehicles, leads } from "@/db/schema";
-import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
+import { requireStaff, assertMarketAccess, canAccessMarket, type Staff } from "@/lib/auth";
 import { MARKETS, type MarketCode } from "@/lib/market";
 import { fromMajor } from "@/lib/money";
 import { computeDeal, defaultFees, formatDealNumber, type Fee } from "@/lib/deal";
@@ -100,6 +100,15 @@ export async function createDeal(
   // Starting from a lead carries the customer across, so nobody retypes it.
   if (leadId) {
     const [lead] = await db.select().from(leads).where(eq(leads.id, leadId));
+    /*
+     * Only a lead this person may see, for a car in the same market. The id
+     * arrives from the browser, so without this a member of staff limited to
+     * one market could copy another market's customer into a deal and change
+     * that lead's status — the same gap closed in updateLeadStatus.
+     */
+    if (lead && (!canAccessMarket(user, lead.marketCode) || lead.marketCode !== vehicle.marketCode)) {
+      return { ok: false, error: "That inquiry belongs to a different market." };
+    }
     if (lead) {
       customerName ||= lead.name;
       customerPhone ||= lead.phone ?? "";

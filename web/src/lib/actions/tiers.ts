@@ -6,7 +6,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { rentalTiers } from "@/db/schema";
-import { requireStaff, assertMarketAccess } from "@/lib/auth";
+import { requireSection, assertMarketAccess } from "@/lib/auth";
 import { MARKETS } from "@/lib/market";
 import { fromMajor } from "@/lib/money";
 
@@ -72,7 +72,7 @@ export async function saveTier(
   _prev: TierResult | null,
   formData: FormData,
 ): Promise<TierResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/tiers");
 
   const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {
@@ -104,9 +104,33 @@ export async function saveTier(
     isActive: v.isActive ?? false,
   };
 
+  /*
+   * An existing tier is checked by what it is, not by what the form says.
+   *
+   * The market check above reads the market posted with the form. Updating by
+   * id alone then let a manager scoped to one market post their own market
+   * code with another market's tier id, and overwrite that tier — its prices,
+   * its currency, even switch it off. Tier ids are not secret: the public
+   * rent-to-own page sends them to every visitor. A tier never moves market.
+   */
+  if (v.id) {
+    const [existing] = await db
+      .select({ marketCode: rentalTiers.marketCode })
+      .from(rentalTiers)
+      .where(eq(rentalTiers.id, v.id));
+    if (!existing) return { ok: false, error: "That category no longer exists." };
+    assertMarketAccess(user, existing.marketCode);
+    if (existing.marketCode !== v.marketCode) {
+      return { ok: false, error: "A category cannot move to a different market." };
+    }
+  }
+
   try {
     if (v.id) {
-      await db.update(rentalTiers).set(values).where(eq(rentalTiers.id, v.id));
+      await db
+        .update(rentalTiers)
+        .set(values)
+        .where(and(eq(rentalTiers.id, v.id), eq(rentalTiers.marketCode, v.marketCode)));
     } else {
       await db.insert(rentalTiers).values(values);
     }
@@ -146,7 +170,7 @@ export async function retireTier(
   _prev: TierResult | null,
   formData: FormData,
 ): Promise<TierResult> {
-  const user = await requireStaff();
+  const user = await requireSection("/admin/tiers");
   const id = String(formData.get("id") ?? "");
   const market = String(formData.get("marketCode") ?? "");
   if (!id || (market !== "us" && market !== "ng")) {

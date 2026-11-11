@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { rentalBookings, vehicles } from "@/db/schema";
+import { rentalBookings, rentalPayments, vehicles } from "@/db/schema";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
 import { parseTstzRange } from "@/lib/pgRange";
 import { holdRemaining } from "@/lib/reservation";
 import { releaseExpiredHolds } from "@/lib/rentalHolds";
+import { providerConfigured, providerFor } from "@/lib/payments/provider";
 import { RentalPayButton } from "@/components/RentalPayButton";
 
 export const dynamic = "force-dynamic";
@@ -85,24 +86,48 @@ export default async function ReservedPage({
     );
   }
 
-  // Already paid. Said as the good news it is, rather than as an error.
+  /*
+   * Past the reservation stage. Said as the good news it is — but only what
+   * is true: a booking staff confirmed by phone has not been paid for, so it
+   * must not say "nothing more to pay", and a rental already under way or
+   * finished is not "confirmed" any more.
+   */
   if (b.status !== "quote") {
+    const [paid] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(rentalPayments)
+      .where(and(eq(rentalPayments.bookingId, b.id), eq(rentalPayments.status, "paid")));
+    const paidOnline = (paid?.n ?? 0) > 0;
+    const what = `${vehicle}${dates ? `, ${dates}` : ""}.`;
+
     return (
       <Shell>
         <div className="resv-tick">✅</div>
         <h1 className="resv-title">
-          This booking is confirmed
+          {b.status === "active"
+            ? "Your rental is under way"
+            : b.status === "returned"
+              ? "This rental is complete"
+              : "This booking is confirmed"}
         </h1>
         <p className="resv-body">
-          {vehicle}
-          {dates ? `, ${dates}` : ""}. Nothing more to pay today — the
-          refundable deposit is taken when you pick up the vehicle.
+          {what}{" "}
+          {b.status === "returned"
+            ? "Thank you for renting with us."
+            : b.status === "active"
+              ? "Call us if you need to keep the vehicle longer."
+              : paidOnline
+                ? "Nothing more to pay today — the refundable deposit is taken when you pick up the vehicle."
+                : `Pay the rental total of ${amount} and the refundable deposit when you pick up the vehicle.`}
         </p>
       </Shell>
     );
   }
 
   const held = b.reservedUntil && b.reservedUntil > new Date();
+  // No pay button that cannot work. While the market has no live card key,
+  // the page still shows the hold, and says the rental is paid at pickup.
+  const payOnline = providerConfigured(providerFor(code));
 
   return (
     <Shell>
@@ -117,7 +142,7 @@ export default async function ReservedPage({
         <Row label="Reference">
           <code className="resv-row-value">{b.id.slice(0, 8).toUpperCase()}</code>
         </Row>
-        <Row label="To pay now">
+        <Row label={payOnline ? "To pay now" : "Rental total"}>
           <strong className="resv-amount">{amount}</strong>
         </Row>
         {b.depositMinor > 0 && (
@@ -135,14 +160,23 @@ export default async function ReservedPage({
             <strong>{holdRemaining(b.reservedUntil!)}</strong>. Nobody else can
             book these dates in that time.
           </p>
-          <div className="resv-pay">
-            <RentalPayButton bookingId={b.id} amount={amount} />
-          </div>
-          <p className="resv-note">
-            Come and see the vehicle first if you would rather — you can pay
-            from this page on your phone when you are happy with it. The
-            deposit is taken at pickup, not now.
-          </p>
+          {payOnline ? (
+            <>
+              <div className="resv-pay">
+                <RentalPayButton bookingId={b.id} amount={amount} />
+              </div>
+              <p className="resv-note">
+                Come and see the vehicle first if you would rather — you can
+                pay from this page on your phone when you are happy with it.
+                The deposit is taken at pickup, not now.
+              </p>
+            </>
+          ) : (
+            <p className="resv-note">
+              Come and see the vehicle, and pay when you pick it up. The
+              refundable deposit is taken then too.
+            </p>
+          )}
         </>
       ) : (
         <>
@@ -150,12 +184,16 @@ export default async function ReservedPage({
               somebody arriving at this page has been told a car was theirs. */}
           <p className="resv-lapsed">
             The hold on this vehicle has run out, so these dates are open to
-            other customers again. Your request is still with us — paying now
-            will confirm it if the dates are still free.
+            other customers again. Your request is still with us —{" "}
+            {payOnline
+              ? "paying now will confirm it if the dates are still free."
+              : "call us and we will check whether the dates are still free."}
           </p>
-          <div className="resv-pay">
-            <RentalPayButton bookingId={b.id} amount={amount} />
-          </div>
+          {payOnline && (
+            <div className="resv-pay">
+              <RentalPayButton bookingId={b.id} amount={amount} />
+            </div>
+          )}
         </>
       )}
 

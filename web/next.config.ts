@@ -2,11 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    // A licence photo from a phone is routinely 3–5MB and the default cap for
-    // a server action is 1MB, which would reject them with a stack trace
-    // rather than a message. The upload itself refuses anything over 8MB with
-    // an explanation, so this only has to be large enough to reach that check.
-    serverActions: { bodySizeLimit: "10mb" },
+    // Matches the hosting platform, so local development fails where the live
+    // site would. Vercel refuses any request body over 4.5 MB before the app
+    // runs, whatever this says: it was "10mb" here while the live site was
+    // turning away two-photo bookings with a 413 (measured November 2026).
+    // Uploads are shrunk in the browser to fit (src/lib/shrinkPhoto.ts), and
+    // the default of 1 MB would still be too small for a license plus an
+    // insurance card.
+    serverActions: { bodySizeLimit: "4.5mb" },
   },
   /* config options here */
 };

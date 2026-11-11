@@ -15,7 +15,9 @@ import {
   reservationExpiry,
   canReserve,
   holdRemaining,
+  holdAfterCheckout,
 } from "../src/lib/reservation";
+import { phoneDigitsKey } from "../src/lib/phoneKey";
 
 let passed = 0;
 let failed = 0;
@@ -347,6 +349,49 @@ console.log("\nReservation holds");
   eq("remaining, one hour", holdRemaining(at("2026-10-12T10:00:00Z"), now), "1 hour");
   eq("remaining, minutes", holdRemaining(at("2026-10-12T09:45:00Z"), now), "45 minutes");
   eq("remaining, gone", holdRemaining(at("2026-10-12T08:00:00Z"), now), "expired");
+
+  // Backing out of the payment page must not cancel the reservation. The
+  // checkout stretched the hold to cover itself; when it ends unpaid, the hold
+  // goes back to the two days the customer was promised, not to nothing.
+  const reservedTo = at("2026-10-14T09:00:00Z");
+  eq(
+    "an unpaid checkout hands back the reservation",
+    holdAfterCheckout(reservedTo, now)?.toISOString() ?? "none",
+    reservedTo.toISOString(),
+  );
+  eq(
+    "a reservation that has already run out is not revived",
+    holdAfterCheckout(at("2026-10-12T08:59:00Z"), now)?.toISOString() ?? "none",
+    "none",
+  );
+  eq(
+    "a reservation ending this very moment is over",
+    holdAfterCheckout(now, now)?.toISOString() ?? "none",
+    "none",
+  );
+  eq(
+    "a booking that never had a reservation holds nothing",
+    holdAfterCheckout(null, now)?.toISOString() ?? "none",
+    "none",
+  );
+}
+
+// ── Phone keys ─────────────────────────────────────────────────────────────
+//
+// One person, however they type their number. The two-reservation limit and
+// the retry check both match on this, so a different spelling of the same
+// phone must not count as a different renter.
+console.log("\nPhone keys");
+{
+  const us = "3365550100";
+  eq("US, plain", phoneDigitsKey("3365550100"), us);
+  eq("US, punctuated", phoneDigitsKey("(336) 555-0100"), us);
+  eq("US, with +1", phoneDigitsKey("+1 336 555 0100"), us);
+  eq("US, with leading 1", phoneDigitsKey("13365550100"), us);
+  const ng = "8012345678";
+  eq("Nigeria, local 0", phoneDigitsKey("0801 234 5678"), ng);
+  eq("Nigeria, +234", phoneDigitsKey("+234 801 234 5678"), ng);
+  eq("too short to be a number matches nothing", phoneDigitsKey("12345"), null);
 }
 
 console.log(

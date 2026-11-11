@@ -4,7 +4,7 @@ import { useActionToast } from "@/components/Toast";
 
 import { useActionState } from "react";
 import { moderateComment, type BlogResult } from "@/lib/actions/blog";
-import type { ArticleComment } from "@/db/schema";
+import type { ModerationComment } from "@/lib/repositories/comments";
 
 const STATUS_STYLE: Record<string, string> = {
   pending: "text-[var(--warning)]",
@@ -12,7 +12,7 @@ const STATUS_STYLE: Record<string, string> = {
   rejected: "text-[var(--text-muted)]",
 };
 
-export function CommentRow({ comment }: { comment: ArticleComment }) {
+export function CommentRow({ comment }: { comment: ModerationComment }) {
   const [state, action, pending] = useActionState<BlogResult | null, FormData>(
     moderateComment,
     null,

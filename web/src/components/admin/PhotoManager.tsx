@@ -6,6 +6,12 @@ import { useActionState, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { mediaUrl } from "@/lib/media";
 import type { ActionResult } from "@/lib/actions/vehicles";
+import {
+  shrinkPhoto,
+  megabytes,
+  LISTING_PHOTO,
+  UPLOAD_LIMIT_BYTES,
+} from "@/lib/shrinkPhoto";
 
 interface Photo {
   id: string;
@@ -25,11 +31,15 @@ interface Outcome {
  *
  * Uploads run one request per file rather than one request for the batch.
  * That is not a limitation being worked around, it is the only shape that
- * works: a phone photograph is routinely 3–5MB and a server action body is
- * capped at 10MB, so half a dozen pictures in a single request would be
- * rejected wholesale — and one oversized file would take the other five down
- * with it. Sent one at a time, each is judged on its own, a failure names the
- * file that failed, and everything else still lands.
+ * works: the hosting platform refuses any request over 4.5 MB, so half a dozen
+ * pictures in a single request would be rejected wholesale — and one
+ * oversized file would take the other five down with it. Sent one at a time,
+ * each is judged on its own, a failure names the file that failed, and
+ * everything else still lands.
+ *
+ * Each photo is also made smaller in the browser first (src/lib/shrinkPhoto.ts).
+ * A modern phone photo can be 5 MB or more on its own, which the platform
+ * turned away with a bare "unexpected response" before this code saw it.
  *
  * What was wrong before was the selecting, not the sending: the input took a
  * single file, so listing a car with eight photographs meant eight rounds of
@@ -77,20 +87,33 @@ export function PhotoManager({
     try {
       for (let i = 0; i < chosen.length; i++) {
         setBusy({ done: i, total: chosen.length });
-        const file = chosen[i];
+        const original = chosen[i];
+        // Never throws: anything it cannot shrink comes back as it was.
+        const file = await shrinkPhoto(original, LISTING_PHOTO);
+        if (file.size > UPLOAD_LIMIT_BYTES) {
+          // Refused here with the reason, not by the platform with a 413.
+          results.push({
+            name: original.name,
+            ok: false,
+            error: `${megabytes(file.size)} is over the ${megabytes(UPLOAD_LIMIT_BYTES)} limit. Save it as a smaller JPEG and try again.`,
+          });
+          setOutcomes([...results]);
+          continue;
+        }
         const fd = new FormData();
         fd.set("vehicleId", vehicleId);
         fd.set("file", file);
 
         try {
           const res = await upload(null, fd);
-          results.push({ name: file.name, ok: Boolean(res?.ok), error: res?.error });
+          results.push({ name: original.name, ok: Boolean(res?.ok), error: res?.error });
         } catch (e) {
           // A request that never arrives — a dropped connection mid-upload —
           // is reported against the file it belongs to rather than ending the
           // run, so the remaining photographs still get their turn.
           results.push({
-            name: file.name,
+            // The name the person chose, not the converted copy's ".jpg".
+            name: original.name,
             ok: false,
             error: e instanceof Error ? e.message : "Upload did not complete.",
           });
@@ -229,8 +252,9 @@ export function PhotoManager({
               added:
             </p>
             <ul className="mt-1 space-y-0.5">
-              {failed.map((f) => (
-                <li key={f.name}>
+              {failed.map((f, i) => (
+                // By position: two files can share a name.
+                <li key={`${i}-${f.name}`}>
                   {f.name} — {f.error ?? "unknown problem"}
                 </li>
               ))}
@@ -239,7 +263,8 @@ export function PhotoManager({
         )}
 
         <p className="mt-2 text-xs text-[var(--text-muted)]">
-          JPEG, PNG, WebP or AVIF. Maximum 10 MB each.
+          JPEG, PNG, WebP or AVIF. Large photos are made smaller automatically
+          before they upload.
         </p>
       </div>
     </section>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
-import { listTiers } from "@/lib/repositories/tiers";
+import { listTiers, toOwnershipTier } from "@/lib/repositories/tiers";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { formatMoney, money, toMajor } from "@/lib/money";
 import { pathToOwnership } from "@/lib/rentToOwn";
@@ -275,7 +275,9 @@ export default async function RentToOwnPage({
                 <p>The same arithmetic we invoice with. Change the pattern and see.</p>
               </div>
 
-              <RentToOwnCalculator tiers={tiers} locale={market.locale} />
+              {/* Only the prices the arithmetic needs reach the browser — not
+                  the database rows, ids and all. */}
+              <RentToOwnCalculator tiers={tiers.map(toOwnershipTier)} locale={market.locale} />
             </div>
           )}
 

@@ -32,9 +32,13 @@ export default async function NewDealPage({
       ),
     );
 
-  const lead = leadId
+  // Only a lead from a market this person works in. The id comes from the
+  // address bar; without the check, any lead's name, phone and email could be
+  // pre-filled into this form by changing it.
+  const found = leadId
     ? (await db.select().from(leads).where(eq(leads.id, leadId)))[0]
     : undefined;
+  const lead = found && markets.includes(found.marketCode) ? found : undefined;
 
   return (
     <AdminChrome email={user.email} role={user.role}>

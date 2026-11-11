@@ -2,7 +2,7 @@
 
 import { createECDH } from "node:crypto";
 import webpush from "web-push";
-import { requireStaff } from "@/lib/auth";
+import { requireSection } from "@/lib/auth";
 
 export interface KeyReport {
   name: string;
@@ -79,7 +79,8 @@ function inspect(name: string, raw: string | undefined, expected: number): KeyRe
  * real send is refused by Google with a 401.
  */
 export async function checkPushKeys(): Promise<PushCheckResult> {
-  await requireStaff();
+  // Shown only on the Broadcasts page, so the same role rule as that page.
+  await requireSection("/admin/campaigns");
 
   const publicKey = inspect(
     "NEXT_PUBLIC_VAPID_PUBLIC_KEY",

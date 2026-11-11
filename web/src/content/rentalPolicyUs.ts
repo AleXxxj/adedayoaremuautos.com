@@ -87,7 +87,7 @@ export const RENTAL_POLICY_US: LegalPage = {
         <div class="policy-section" id="booking">
             <h2><i class="fas fa-calendar-check"></i> 2. Reserving a Vehicle</h2>
             <p>You can reserve on our website, by phone, or in person.</p>
-            <p><strong style="color: var(--silver-classic);">Your vehicle is held for you.</strong> When you reserve online, we hold the vehicle for up to 2 days so you can come and see it before you pay. The hold always ends by your pickup time. While it lasts, nobody else can book those dates. You can pay online at any point during the hold, using the link we email you, or on our website right away.</p>
+            <p><strong style="color: var(--silver-classic);">Your vehicle is held for you.</strong> When you reserve online, we hold the vehicle for up to 2 days so you can come and see it before you pay. The hold always ends by your pickup time. While it lasts, nobody else can book those dates. When online payment is available, you can pay during the hold using the link we email you, or on our website right away. Otherwise, you pay when you pick up the vehicle.</p>
             <p>If the hold ends and the rental has not been paid for, the dates become available to other customers again. You can hold up to two vehicles at a time. If you need more time, call us — we can usually extend a hold.</p>
             <p>Before we hand over the keys, all of the following must be in place:</p>
             <ul>

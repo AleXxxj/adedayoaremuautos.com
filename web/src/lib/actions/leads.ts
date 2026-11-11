@@ -218,8 +218,8 @@ export async function updateLeadStatus(
   _prev: LeadResult | null,
   formData: FormData,
 ): Promise<LeadResult> {
-  const { requireStaff } = await import("@/lib/auth");
-  await requireStaff();
+  const { requireStaff, assertMarketAccess } = await import("@/lib/auth");
+  const user = await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
@@ -231,6 +231,9 @@ export async function updateLeadStatus(
 
   const [before] = await db.select().from(leads).where(eq(leads.id, id));
   if (!before) return { ok: false, error: "Lead not found." };
+  // Staff limited to one market can see only that market's leads, so they
+  // must not be able to change another market's by sending its id directly.
+  assertMarketAccess(user, before.marketCode);
 
   await db
     .update(leads)

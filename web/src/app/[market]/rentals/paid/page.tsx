@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { isMarketCode } from "@/lib/market";
-import { paymentStateFor } from "@/lib/actions/rentalPayment";
+import { paymentStateFor } from "@/lib/payments/status";
 
 export const dynamic = "force-dynamic";
 

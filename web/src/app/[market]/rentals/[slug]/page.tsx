@@ -4,8 +4,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { getFleetVehicle, bookedWindows } from "@/lib/repositories/rentals";
+import { listLocations } from "@/lib/repositories/locations";
 import { RentalBookingForm } from "@/components/RentalBookingForm";
+import { TakenDates } from "@/components/TakenDates";
 import { formatMoney, money } from "@/lib/money";
+import { RESERVATION_HOURS } from "@/lib/reservation";
+import { providerConfigured, providerFor } from "@/lib/payments/provider";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -61,7 +65,12 @@ export default async function RentalDetailPage({
   const v = await getFleetVehicle(code, slug);
   if (!v) notFound();
 
-  const taken = await bookedWindows(v.id, new Date());
+  const [taken, sites] = await Promise.all([
+    bookedWindows(v.id, new Date()),
+    listLocations(code),
+  ]);
+  // The showroom line, for "Text us" if a booking cannot be sent.
+  const contactPhone = sites.find((s) => s.phone)?.phone ?? null;
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
 
@@ -160,22 +169,13 @@ export default async function RentalDetailPage({
               </p>
             </section>
 
-            {taken.length > 0 && (
-              <section className="rental-block">
-                <h2>Already booked</h2>
-                <p className="rental-block-lead">
-                  These dates are taken. Anything else is open.
-                </p>
-                <ul className="rental-taken">
-                  {taken.map((t, i) => (
-                    <li key={i}>
-                      <i className="fas fa-calendar-xmark" aria-hidden="true" />
-                      {formatRange(t.period, market.locale)}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <TakenDates
+              windows={taken.map((t) => ({
+                label: formatRange(t.period, market.locale),
+                heldUntil:
+                  t.status === "quote" && t.heldUntil ? t.heldUntil.toISOString() : null,
+              }))}
+            />
           </div>
 
           <aside className="rental-book">
@@ -188,11 +188,15 @@ export default async function RentalDetailPage({
                   thing a customer read on the card afterwards. */}
               <p className="rental-book-lead">
                 Pick your dates to see the price. Reserving holds the vehicle
-                for you for up to 2 days, so you can see it before you pay.
+                for you for up to {RESERVATION_HOURS / 24} days, so you can see
+                it before you pay.
               </p>
               <RentalBookingForm
                 market={market}
                 vehicleSlug={v.slug}
+                vehicleTitle={title}
+                contactPhone={contactPhone}
+                payOnline={providerConfigured(providerFor(code))}
                 tariff={v.tariff}
               />
             </div>

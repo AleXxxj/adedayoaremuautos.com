@@ -4,8 +4,16 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const LICENCE_BUCKET = "licences";
 
-/** Generous enough for a phone photo, small enough to refuse a video. */
-export const MAX_LICENCE_BYTES = 8 * 1024 * 1024;
+/**
+ * The most one document may be.
+ *
+ * Bound by the platform, not by taste: a request over 4.5 MB never reaches
+ * this code (see next.config.ts), and the form sends two documents at most.
+ * The browser shrinks photos well below this, so in practice it only stops a
+ * large PDF. It was 8 MB, which promised an explanation for files the live
+ * site could never receive.
+ */
+export const MAX_LICENCE_BYTES = 4 * 1024 * 1024;
 
 const ALLOWED = new Set([
   "image/jpeg",
@@ -82,7 +90,10 @@ export async function storeLicence(
 ): Promise<LicenceUpload> {
   if (file.size === 0) return { ok: false, error: "That file appears to be empty." };
   if (file.size > MAX_LICENCE_BYTES) {
-    return { ok: false, error: "That file is too large — please keep it under 8MB." };
+    return {
+      ok: false,
+      error: "That file is too large. Please use a photo, a screenshot, or a PDF under 4 MB.",
+    };
   }
 
   const buffer = new Uint8Array(await file.arrayBuffer());

@@ -30,6 +30,12 @@ export interface ReservationMail {
   heldUntil: string;
   payUrl: string;
   businessPhone: string | null;
+  /**
+   * Whether the market can take a real card online right now. While it
+   * cannot (no live key yet), the email still confirms the hold and links to
+   * the reservation, but it does not tell anyone to pay from their phone.
+   */
+  payOnline: boolean;
 }
 
 export function reservationSubject(d: ReservationMail): string {
@@ -72,7 +78,7 @@ export function renderReservation(d: ReservationMail): {
         ${row("Reference", `<strong>${escapeHtml(d.reference)}</strong>`)}
         ${row("Vehicle", escapeHtml(d.vehicle))}
         ${row("Dates", escapeHtml(d.dates))}
-        ${row("To pay", `<strong>${escapeHtml(d.amount)}</strong>`)}
+        ${row(d.payOnline ? "To pay" : "Rental total", `<strong>${escapeHtml(d.amount)}</strong>`)}
         ${d.depositDue ? row("Deposit at pickup", `${escapeHtml(d.depositDue)} <span style="color:${MUTED};font-size:13px">refundable</span>`) : ""}
       </table>
     </div>
@@ -86,14 +92,22 @@ export function renderReservation(d: ReservationMail): {
     </div>
   </td></tr>
 
-  <tr><td style="padding:0 28px">
+  <tr><td style="padding:0 28px">${
+    d.payOnline
+      ? `
     <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">TWO WAYS TO DO THIS</div>
     <ul style="margin:10px 0 0;padding-left:20px;font-size:15px;line-height:1.7;color:#333">
       <li><strong>Come and see it first.</strong> Have a look at the vehicle, and pay from the link below on your phone when you are happy.</li>
       <li><strong>Or pay now</strong> and it is confirmed immediately.</li>
-    </ul>
+    </ul>`
+      : `
+    <div style="font-size:13px;font-weight:700;color:#111;letter-spacing:.02em">NEXT STEP</div>
+    <p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#333">
+      Come and see the vehicle, and pay when you pick it up.
+    </p>`
+  }
     <p style="margin:18px 0 0">
-      <a href="${escapeHtml(d.payUrl)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:8px">View your reservation and pay</a>
+      <a href="${escapeHtml(d.payUrl)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:8px">${d.payOnline ? "View your reservation and pay" : "View your reservation"}</a>
     </p>
     <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:${MUTED}">
       If the button does not work, copy this into your browser:<br>
@@ -127,21 +141,26 @@ export function renderReservation(d: ReservationMail): {
     "",
     `Reference: ${d.reference}`,
     `Dates: ${d.dates}`,
-    `To pay: ${d.amount}`,
+    `${d.payOnline ? "To pay" : "Rental total"}: ${d.amount}`,
     ...(d.depositDue ? [`Deposit at pickup: ${d.depositDue} (refundable)`] : []),
     "",
     `HELD UNTIL ${d.heldUntil}`,
-    "After that the dates go back on the market. Call us if you need longer — we can usually extend it.",
+    `After that the dates go back on the market. Call us${d.businessPhone ? ` at ${d.businessPhone}` : ""} if you need longer — we can usually extend it.`,
     "",
-    "Two ways to do this:",
-    "  - Come and see the vehicle first, and pay from the link below on your phone when you are happy.",
-    "  - Or pay now and it is confirmed immediately.",
+    ...(d.payOnline
+      ? [
+          "Two ways to do this:",
+          "  - Come and see the vehicle first, and pay from the link below on your phone when you are happy.",
+          "  - Or pay now and it is confirmed immediately.",
+        ]
+      : ["Next step: come and see the vehicle, and pay when you pick it up."]),
     "",
-    d.payUrl,
+    `${d.payOnline ? "View your reservation and pay" : "View your reservation"}: ${d.payUrl}`,
     "",
     "When you pick up the vehicle, bring the driver's license of whoever will be driving. We check your documents before the vehicle is released.",
     "",
     "Adedayo Aremu Autos",
+    ...(d.businessPhone ? [d.businessPhone] : []),
   ].join("\n");
 
   return { html, text };
