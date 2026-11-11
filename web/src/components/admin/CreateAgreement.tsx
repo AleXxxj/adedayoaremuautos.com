@@ -47,7 +47,7 @@ export function CreateAgreement({ dealId }: { dealId: string }) {
       </div>
 
       <p className="text-xs text-[var(--text-muted)]">
-        Generates the full instalment schedule from the deal&rsquo;s financed
+        Generates the full installment schedule from the deal&rsquo;s financed
         amount, rate and term. The schedule is stored once and becomes the
         record of what the customer signed — it is never recomputed.
       </p>

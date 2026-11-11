@@ -32,7 +32,7 @@ export function RecordPayment({
       )}
       {state?.ok && !state.error && (
         <p className="rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
-          Payment recorded and allocated to the oldest outstanding instalments.
+          Payment recorded and allocated to the oldest outstanding installments.
         </p>
       )}
 
@@ -74,8 +74,8 @@ export function RecordPayment({
       </button>
 
       <p className="text-xs text-[var(--text-muted)]">
-        Applied to the oldest outstanding instalment first, so arrears clear before
-        future instalments.
+        Applied to the oldest outstanding installment first, so arrears clear before
+        future installments.
       </p>
     </form>
   );

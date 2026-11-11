@@ -91,7 +91,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-share-alt"></i> 3. Information Sharing</h2>
             <p>We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following limited circumstances:</p>
             <ul>
-                <li><strong style="color: var(--silver-classic);">Financial Partners:</strong> With banks or financing institutions to process loan and instalment payment applications, strictly under confidentiality agreements.</li>
+                <li><strong style="color: var(--silver-classic);">Financial Partners:</strong> With banks or financing institutions to process loan and installment payment applications, strictly under confidentiality agreements.</li>
                 <li><strong style="color: var(--silver-classic);">Legal Authorities:</strong> When required by law, court order, or regulation, or to protect the rights, property, or safety of Adedayo Aremu Autos, our customers, or others.</li>
                 <li><strong style="color: var(--silver-classic);">Service Providers:</strong> With trusted third-party service providers (e.g., logistics, insurance) who assist in delivering our services, bound by strict data processing agreements.</li>
                 <li><strong style="color: var(--silver-classic);">Referral Partners:</strong> With our referral partners only to the extent necessary to attribute and process a referral commission: for a booking recorded against a partner, they can see the vehicle, the total and the booking's status. Your name, contact details, documents and payment details are not shared with them.</li>
@@ -247,9 +247,9 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>Our vehicle financing is subject to credit assessment and approval. By applying for financing, you authorize us to verify your financial information and share it with relevant financial partners. The following terms apply:</p>
             <ul>
                 <li>A minimum down payment is required. The amount varies based on the vehicle price and your assessed creditworthiness.</li>
-                <li>Instalment payment plans range from 6 to 24 months. Interest rates will be disclosed in your financing agreement before signing.</li>
+                <li>Installment payment plans range from 6 to 24 months. Interest rates will be disclosed in your financing agreement before signing.</li>
                 <li>Vehicles financed through our program remain in our name or that of our financing partner until full repayment is completed.</li>
-                <li>Missed or late instalments may result in penalties, repossession of the vehicle, and/or legal action as specified in the financing agreement.</li>
+                <li>Missed or late installments may result in penalties, repossession of the vehicle, and/or legal action as specified in the financing agreement.</li>
                 <li>Early full repayment is permitted. Any applicable early repayment terms will be stated in your agreement.</li>
             </ul>
             <p>The specific terms of your financing — including total cost, interest rate, repayment schedule, and consequences of default — will be set out in a written financing agreement, which you must sign before any vehicle is released.</p>

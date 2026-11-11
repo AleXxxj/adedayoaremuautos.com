@@ -80,7 +80,7 @@ export default async function FinancePage() {
             <p className="font-medium">No finance agreements yet</p>
             <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-muted)]">
               Contract a financed deal, then create the agreement from it. The
-              instalment schedule is generated once and becomes the record of
+              installment schedule is generated once and becomes the record of
               what the customer signed.
             </p>
             <Link href="/admin/deals" className="mt-6 inline-block text-sm text-[var(--link)] hover:underline">

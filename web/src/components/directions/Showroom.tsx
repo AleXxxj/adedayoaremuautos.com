@@ -58,7 +58,7 @@ export function Showroom({
           <p className="mt-7 max-w-md text-lg leading-relaxed text-[var(--text-secondary)]">
             {m === "us"
               ? "Inspected vehicles with the history in the open, and financing decided under this roof — not passed to a bank and hoped for."
-              : "Verified foreign-used and Nigerian-used vehicles, documentation handled end to end, and instalment plans that fit real budgets."}
+              : "Verified foreign-used and Nigerian-used vehicles, documentation handled end to end, and installment plans that fit real budgets."}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">

@@ -47,6 +47,7 @@ const RULES = [
   [/\btyres?\b/i, "tire"],
   [/\bcheques?\b/i, "check"],
   [/\bwhilst\b/i, "while"],
+  [/\binstalments?\b/i, "installment"],
   [/\btravell(ed|ing|er)\b/i, "traveled / traveling"],
   [/\bcollect(ing|ion)? (the|your) (vehicle|car)\b|\bcollection time\b|\bwhen you collect\b/i, "pick up / pickup"],
 ];
@@ -68,6 +69,8 @@ function isIdentifier(line, start, end) {
   // line or straight after `{`, `,` or `(`. "Licence: " inside a sentence or
   // a template string is copy, and is still reported.
   if (/^\??\s*:/.test(line.slice(end)) && /(^|[{,(])\s*$/.test(line.slice(0, start))) return true;
+  // A lone argument — .from(instalments) — is a name, not a sentence.
+  if (before === "(" && after === ")") return true;
   const q = line[start - 1];
   if ((q === '"' || q === "'" || q === "`") && line[end] === q) return true; // "licence" as a value
   return false;

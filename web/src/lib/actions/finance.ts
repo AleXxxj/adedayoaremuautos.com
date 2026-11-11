@@ -268,9 +268,9 @@ export async function recordPayment(
 function friendly(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes("instalments_state_matches_money"))
-    return "Instalment state and amount disagree. This is a bug — please report it.";
+    return "Installment state and amount disagree. This is a bug — please report it.";
   if (msg.includes("instalments_no_overpayment"))
-    return "Tried to allocate more to an instalment than it is worth.";
+    return "Tried to allocate more to an installment than it is worth.";
   if (msg.includes("agreements_currency_matches_market"))
     return "Currency does not match the market.";
   if (msg.includes("agreements_number_idx"))

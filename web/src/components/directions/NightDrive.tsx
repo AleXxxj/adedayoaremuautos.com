@@ -82,7 +82,7 @@ export function NightDrive({
           <p className="mt-8 max-w-md text-lg text-[var(--text-secondary)]">
             {m === "us"
               ? "Every vehicle inspected, every history report in the open, every payment worked out before you sign."
-              : "Foreign-used and Nigerian-used, verified and documented, on instalment plans that make sense."}
+              : "Foreign-used and Nigerian-used, verified and documented, on installment plans that make sense."}
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">

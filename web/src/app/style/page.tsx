@@ -115,7 +115,7 @@ export default function StyleProof() {
           <p className="mt-6 max-w-lg text-lg text-[var(--text-secondary)]">
             {market === "us"
               ? "Inspected vehicles, transparent history reports, and financing decided in-house — serving the Triad."
-              : "Verified foreign-used and Nigerian-used vehicles, full documentation handled, flexible instalment plans."}
+              : "Verified foreign-used and Nigerian-used vehicles, full documentation handled, flexible installment plans."}
           </p>
 
           <div className="mt-9 flex flex-wrap gap-3">

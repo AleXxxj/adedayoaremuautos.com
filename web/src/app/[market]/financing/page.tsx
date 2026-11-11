@@ -27,7 +27,7 @@ export async function generateMetadata({
     description:
       market === "us"
         ? "In-house vehicle financing in Greensboro, North Carolina. Work out a payment, then apply."
-        : "Flexible instalment plans on quality vehicles. Work out a payment, then apply.",
+        : "Flexible installment plans on quality vehicles. Work out a payment, then apply.",
     alternates: {
       canonical: `/${market}/financing`,
       languages: { "en-US": "/us/financing", "en-NG": "/ng/financing" },
