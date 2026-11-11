@@ -208,7 +208,11 @@ export default async function MarketLayout({
               </ul>
             </div>
 
-            <CurrencySwitcher base={market.currency} />
+            {/* Not on the Greensboro site: everything there is priced and paid
+                in dollars, and an estimate in naira, pounds or euros helps no
+                one renting a car in the Triad. It also took a screen of the
+                footer on a phone. Nothing else reads the choice it stores. */}
+            {code !== "us" && <CurrencySwitcher base={market.currency} />}
           </div>
         </div>
 
