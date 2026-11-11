@@ -6,6 +6,10 @@
  * attribution, so a commission could only ever be settled from memory.
  */
 
+// A type only, so the client components that import this file never pull in
+// the database the repository queries.
+import type { FleetVehicle } from "@/lib/repositories/rentals";
+
 /**
  * Where a followed partner link is remembered.
  *
@@ -170,4 +174,26 @@ export function rateFor(p: PartnerRates, source: "sale" | "rental"): number {
  */
 export function commissionOn(basisMinor: number, bps: number): number {
   return Math.round((basisMinor * bps) / 10000);
+}
+
+/**
+ * The arithmetic of one week's rental on real cars: the first `n` cars in the
+ * fleet with a weekly rate, and what a partner on the default rate earns on
+ * one week of each. Never a promise of what anyone will earn, which the FTC
+ * treats as an earnings claim that has to be backed up.
+ *
+ * Amounts are in minor units; each page formats them in its market's currency.
+ * The referral page lists three, and the home page shows the first of the same
+ * list, so the two always quote the same car.
+ */
+export function weeklyExamples(fleet: FleetVehicle[], n: number) {
+  return fleet
+    .filter((v) => v.tariff.weeklyMinor != null)
+    .slice(0, n)
+    .map((v) => ({
+      id: v.id,
+      car: [v.year, v.make, v.model].filter(Boolean).join(" "),
+      weekMinor: v.tariff.weeklyMinor!,
+      earnMinor: commissionOn(v.tariff.weeklyMinor!, DEFAULT_RENTAL_COMMISSION_BPS),
+    }));
 }

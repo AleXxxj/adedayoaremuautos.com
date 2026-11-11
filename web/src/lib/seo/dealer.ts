@@ -69,8 +69,12 @@ export async function dealerJsonLd(market: MarketCode) {
     logo: `${base}/icon.svg`,
     image: `${base}/icon.svg`,
     email: CONTACT_EMAIL,
+    // Rent to own only where it is offered: the Nigeria page says it is
+    // opening in the United States first.
     description:
-      "Vehicle sales, rentals, rent-to-own and financing from Adedayo Aremu Autos.",
+      market === "us"
+        ? "Vehicle sales, rentals, rent-to-own and financing from Adedayo Aremu Autos."
+        : "Vehicle sales, rentals and financing from Adedayo Aremu Autos.",
     priceRange: "$$",
     areaServed:
       market === "us"
@@ -123,14 +127,16 @@ function geoOf(lat: string | null, lng: string | null) {
  * The site itself, as distinct from the business that runs it.
  *
  * Small, but it is the node that carries the name a search engine prints
- * above a set of sitelinks.
+ * above a set of sitelinks. One per market, like the dealer: the two used to
+ * share an `@id` while giving different URLs, which says one thing has two
+ * addresses.
  */
 export function websiteJsonLd(market: MarketCode) {
   const base = siteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${base}#website`,
+    "@id": `${base}/${market}#website`,
     url: `${base}/${market}`,
     name: "Adedayo Aremu Autos",
     alternateName: ALSO_KNOWN_AS,

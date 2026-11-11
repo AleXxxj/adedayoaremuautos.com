@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode, type MarketConfig } from "@/lib/market";
-import { listFleet, type FleetVehicle } from "@/lib/repositories/rentals";
+import {
+  listFleet,
+  byWeekCost,
+  fromPrices,
+  type FleetVehicle,
+} from "@/lib/repositories/rentals";
 import { formatMoney, money, toMajor } from "@/lib/money";
 import { ListToolbar, type ListFilter } from "@/components/ListToolbar";
 import { CarRow } from "@/components/CarRow";
@@ -109,32 +114,21 @@ export default async function RentalsPage({
   const name = (v: FleetVehicle) =>
     [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
 
-  // Sorted on what a week costs, because that is the price each card leads
-  // with: by the daily rate, a car shown at "$85 a day" sorted ahead of one
-  // shown at "$550 a week" and the list looked out of order.
-  const weekCost = (v: FleetVehicle) => v.tariff.weeklyMinor ?? v.tariff.dailyMinor * 7;
+  // Sorted on what a week costs, the price each card leads with (weekCost).
   fleet = [...fleet].sort((a, b) => {
     switch (q.sort) {
       case "price-high":
-        return weekCost(b) - weekCost(a);
+        return byWeekCost(b, a);
       case "name":
         return name(a).localeCompare(name(b));
       case "price-low":
       default:
-        return weekCost(a) - weekCost(b);
+        return byWeekCost(a, b);
     }
   });
 
-  // "From" prices for the three type cards, taken from the cheapest vehicle
-  // that actually offers each term. The original hardcoded ₦25,000 / ₦150,000
-  // / ₦500,000 whether or not anything was available at those rates.
-  const cheapest = (pick: (v: FleetVehicle) => number | null | undefined) => {
-    const vals = all.map(pick).filter((n): n is number => typeof n === "number");
-    return vals.length ? Math.min(...vals) : null;
-  };
-  const fromDaily = cheapest((v) => v.tariff.dailyMinor);
-  const fromWeekly = cheapest((v) => v.tariff.weeklyMinor);
-  const fromMonthly = cheapest((v) => v.tariff.monthlyMinor);
+  // From the whole fleet, not the filtered list: where the prices start.
+  const { fromDaily, fromWeekly, fromMonthly } = fromPrices(all);
 
   const deposits = all.map((v) => v.tariff.depositMinor).filter((d) => d > 0);
   const minDays = all.length ? Math.min(...all.map((v) => v.tariff.minDays)) : null;

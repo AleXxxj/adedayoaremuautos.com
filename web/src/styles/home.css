@@ -1,0 +1,312 @@
+/*
+ * The home page, phone first (app/[market]/page.tsx).
+ *
+ * Every selector starts with `.legacy-theme .home-*`, at specificity 0,2,0 or
+ * more, so it beats the legacy reset (`.legacy-theme :where(…)`, which zeroes
+ * margins and padding) whatever order the sheets load in. None of the legacy
+ * section classes (.hero, .section, .services, .featured, .features) are
+ * used: they bring their own layout, and ScrollReveal hides them until they
+ * scroll into view.
+ *
+ * On a phone it is under five screens: a short hero, six task tiles, three
+ * cars for rent, referrals, what we promise, and how to reach us. On a wide
+ * screen the hero is a band, the tiles one row, the cars a row of three, and
+ * the two middle sections sit side by side.
+ */
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+/* Clears the fixed header, like the legacy .hero it replaces. */
+.legacy-theme .home-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin-top: 74px;
+    padding: 28px 16px 24px;
+}
+
+/* next/image with `fill` positions and sizes it; this keeps it under the
+   scrim and crops toward the car. */
+.legacy-theme .home-hero-photo {
+    z-index: 0;
+    object-fit: cover;
+    object-position: 65% 40%;
+}
+
+/* The same directional scrim as the old hero (refine.css §2): dark where the
+   text is, clear where the car is. */
+.legacy-theme .home-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            100deg,
+            rgba(4, 8, 6, 0.94) 0%,
+            rgba(4, 8, 6, 0.88) 38%,
+            rgba(4, 8, 6, 0.55) 58%,
+            rgba(4, 8, 6, 0.2) 78%,
+            rgba(4, 8, 6, 0.45) 100%
+        ),
+        linear-gradient(to top, rgba(4, 8, 6, 0.85) 0%, transparent 45%);
+}
+
+.legacy-theme .home-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.legacy-theme .home-hero-title {
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    color: #fff;
+    max-width: 24ch;
+}
+
+.legacy-theme .home-hero-title span {
+    color: #7ac9a0;
+}
+
+.legacy-theme .home-hero-text {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+/* "Questions? Call …": the link already carries its own 44px height. */
+.legacy-theme .home-hero-call {
+    margin-top: 4px;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────────── */
+
+.legacy-theme .home-section {
+    max-width: 1232px;
+    margin: 0 auto;
+    padding: 28px 16px;
+}
+
+.legacy-theme .home-h2 {
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.legacy-theme .home-eyebrow {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7cc3a0;
+}
+
+.legacy-theme .home-terms,
+.legacy-theme .home-fine,
+.legacy-theme .home-sub {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.legacy-theme .home-terms {
+    margin-top: 12px;
+}
+
+.legacy-theme .home-sub {
+    margin-bottom: 14px;
+}
+
+/* A text link is still a tap target: 44px tall whatever its text. */
+.legacy-theme .home-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: #7cc3a0;
+    text-decoration: underline;
+}
+
+/* ── Task tiles ───────────────────────────────────────────────────────── */
+
+.legacy-theme .home-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    list-style: none;
+}
+
+/* The whole tile is the link: the icon and title on one line, the detail
+   under both. */
+.legacy-theme .home-tile {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    align-content: start;
+    gap: 4px 8px;
+    height: 100%;
+    min-height: 76px;
+    padding: 12px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+    text-decoration: none;
+}
+
+.legacy-theme .home-tile i {
+    font-size: 18px;
+    color: #7cc3a0;
+}
+
+.legacy-theme .home-tile--main {
+    border-color: rgba(78, 157, 118, 0.6);
+    background: rgba(78, 157, 118, 0.12);
+}
+
+.legacy-theme .home-tile-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.legacy-theme .home-tile-detail {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+/* Full width under a thumb on a phone; their own width on a wider screen. */
+.legacy-theme .home-more,
+.legacy-theme .home-actions .btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+/* ── Refer and earn ───────────────────────────────────────────────────── */
+
+.legacy-theme .home-refer-card {
+    padding: 20px 16px;
+    border: 1px solid rgba(78, 157, 118, 0.45);
+    border-radius: 16px;
+    background: linear-gradient(135deg, #12251d, #0b1712);
+}
+
+.legacy-theme .home-refer-card p:not(.home-eyebrow) {
+    margin-top: 10px;
+}
+
+/* ── What you can count on, and how to reach us ───────────────────────── */
+
+.legacy-theme .home-checks {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+    list-style: none;
+}
+
+.legacy-theme .home-checks li {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Level with the first line of text. */
+.legacy-theme .home-checks li > i {
+    margin-top: 4px;
+    color: #7cc3a0;
+}
+
+.legacy-theme .home-founder {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* flex: none, or the line of text beside it squeezes the photo to an oval. */
+.legacy-theme .home-founder img {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top;
+}
+
+/* For a screen reader only: the tiles need a heading, a sighted reader
+   doesn't. */
+.legacy-theme .home-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ── Wider screens ────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+    .legacy-theme .home-tiles,
+    .legacy-theme .home-rent .cl-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .legacy-theme .home-section {
+        padding: 40px 24px;
+    }
+
+    .legacy-theme .home-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .legacy-theme .home-more,
+    .legacy-theme .home-actions .btn {
+        width: auto;
+    }
+}
+
+/* A band: the copy on the left, the car on the right. */
+@media (min-width: 1024px) {
+    .legacy-theme .home-hero {
+        display: flex;
+        align-items: center;
+        min-height: 320px;
+        padding: 48px 24px;
+    }
+
+    .legacy-theme .home-hero-title {
+        font-size: 44px;
+    }
+
+    .legacy-theme .home-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        max-width: 1232px;
+        margin: 0 auto;
+    }
+}
+
+/* All the tiles on one row. */
+@media (min-width: 1100px) {
+    .legacy-theme .home-tiles {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}

@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MARKETS, MARKET_CODES, isMarketCode } from "@/lib/market";
@@ -21,7 +22,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
 import { NotifyPrompt } from "@/components/NotifyPrompt";
 import { Toaster } from "@/components/Toast";
-import { BackToTop } from "@/components/BackToTop";
+import { TabBar } from "@/components/TabBar";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { socialLinks } from "@/lib/contact";
@@ -31,6 +32,15 @@ import Image from "next/image";
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
 }
+
+/**
+ * Lets the page run under an iPhone's rounded corners and home indicator, so
+ * the tab bar can sit at the very bottom and pad itself clear of the
+ * indicator (env(safe-area-inset-bottom), refine.css). The page pads its
+ * sides by the insets, which are 0 in portrait and clear the notch in
+ * landscape.
+ */
+export const viewport: Viewport = { viewportFit: "cover" };
 
 /**
  * Public chrome, reproducing the original site's header and footer markup and
@@ -63,7 +73,10 @@ export default async function MarketLayout({
     { href: `/${code}/rent-to-own`, label: "Rent to Own" },
     { href: `/${code}/rentals`, label: "Rentals" },
     { href: `/${code}/financing`, label: "Financing" },
-    { href: `/${code}/blog`, label: "Blog" },
+    // There are no US articles, so the US header has the car check instead.
+    code === "us"
+      ? { href: "/us/check", label: "Check a Car" }
+      : { href: `/${code}/blog`, label: "Blog" },
     { href: `/${code}/about`, label: "About" },
     { href: `/${code}/contact`, label: "Contact" },
   ];
@@ -72,7 +85,6 @@ export default async function MarketLayout({
     <div className="legacy-theme">
       <ScrollReveal />
       <CountryNotice currentMarket={code} />
-      <BackToTop />
       {/* Form results, pinned to the viewport: every form put its
           answer at its own top, which on a long form is off-screen
           from the button that caused it. */}
@@ -163,8 +175,8 @@ export default async function MarketLayout({
                   what that market cannot yet deliver. */}
               <p>
                 {code === "us"
-                  ? "Your trusted partner for premium car sales, rent to own, rentals, and financing in Greensboro and across the Triad. We deliver excellence with every vehicle."
-                  : "Your trusted partner for premium car sales, rentals, and financing in Nigeria. We deliver excellence with every vehicle."}
+                  ? "Car sales, rentals, rent to own and financing in Greensboro, NC."
+                  : "Car sales, rentals and financing in Nigeria."}
               </p>
               {/* The original linked every icon to `#`. A dead social icon on
                   a dealership site reads as an abandoned account, so these
@@ -186,23 +198,15 @@ export default async function MarketLayout({
               )}
             </div>
 
+            {/* Hidden on a phone, where the tab bar and the menu carry the
+                same links. The list of makes that stood beside it is gone:
+                three of its five matched no car. */}
             <div className="footer-links">
               <h4>Quick Links</h4>
               <ul>
-                {nav.map((n) => (
+                {[...nav, { href: `/${code}/referral`, label: "Refer a Renter" }].map((n) => (
                   <li key={n.href}>
                     <Link href={n.href}>{n.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="footer-links">
-              <h4>Vehicles</h4>
-              <ul>
-                {["Toyota", "Lexus", "Honda", "Mercedes-Benz", "BMW"].map((b) => (
-                  <li key={b}>
-                    <Link href={`/${code}/inventory?make=${encodeURIComponent(b)}`}>{b}</Link>
                   </li>
                 ))}
               </ul>
@@ -233,6 +237,9 @@ export default async function MarketLayout({
           </div>
         </div>
       </div>
+
+      {/* Last, so it is the last stop for a keyboard. Phones only. */}
+      <TabBar market={code} />
     </div>
   );
 }

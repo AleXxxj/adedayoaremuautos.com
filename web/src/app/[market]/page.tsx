@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { HeroSlider } from "@/components/HeroSlider";
 import { notFound } from "next/navigation";
-import { MARKETS, isMarketCode, formatDistance, type MarketCode } from "@/lib/market";
+import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
 import { dealerJsonLd, websiteJsonLd } from "@/lib/seo/dealer";
 import { listInventory } from "@/lib/repositories/vehicles";
+import {
+  listFleet,
+  byWeekCost,
+  fromPrices,
+  type FleetVehicle,
+} from "@/lib/repositories/rentals";
 import { listLocations, formatPhone, summariseHours, type OpeningHour } from "@/lib/repositories/locations";
 import { getSiteStats, formatMilestone } from "@/lib/stats";
-import { articlesFor } from "@/content/articles";
 import { formatMoney, money } from "@/lib/money";
-import { mediaUrl } from "@/lib/media";
-import { LegacyContactForm } from "@/components/LegacyContactForm";
-import Image from "next/image";
-import { canResize } from "@/lib/photo";
+import { DEFAULT_RENTAL_COMMISSION_BPS, formatBps, weeklyExamples } from "@/lib/referral";
+import { CONTACT_EMAIL, mapLinkUrl, whatsappUrl } from "@/lib/contact";
+import { CarRow } from "@/components/CarRow";
+import "@/styles/car-list.css";
+import "@/styles/home.css";
 
 /**
  * The homepage was the only page without a canonical URL, which matters most
@@ -87,18 +93,36 @@ export async function generateMetadata({
  */
 export const revalidate = 60;
 
+/** Read from the default partner rate, never typed: the referral page quotes the same. */
+const RATE = formatBps(DEFAULT_RENTAL_COMMISSION_BPS);
+
+/** "1 car", "11 cars". */
+const cars = (n: number) => `${n} ${n === 1 ? "car" : "cars"}`;
+
+const carName = (v: FleetVehicle) =>
+  [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
+
+interface Tile {
+  title: string;
+  detail: string;
+  href: string;
+  icon: string;
+  main?: boolean;
+}
+
 /**
- * The original homepage, reproduced.
+ * The home page, built for a phone first: under five screens instead of
+ * nineteen.
  *
- * Same sections in the same order, same class names, same markup shape — so
- * the extracted stylesheet renders it as it renders the live legacy site. The
- * difference is underneath: vehicles, figures, guides and the location block
- * come from the database instead of being hardcoded in the file.
+ * The first screen answers "what can I do here?": the weekly price, and one
+ * tile per task with a live count. Then three cars for rent, referrals, what
+ * the business promises, and how to reach it. Each topic's detail is on its
+ * own page — the tiles and the tab bar lead there — so nothing here repeats
+ * a page that already exists.
  *
- * Deliberate corrections to the original, all factual rather than stylistic:
- *   - prices are not FX-converted (the legacy rate was frozen in the markup)
- *   - the sold figure is the owner's real number plus live sales
- *   - links point at routes that exist
+ * Every price, count and rate is computed from the database and the site's
+ * own constants. Nothing is typed by hand, so the home page can't disagree
+ * with the page it links to.
  */
 export default async function MarketHome({
   params,
@@ -109,17 +133,55 @@ export default async function MarketHome({
   if (!isMarketCode(code)) notFound();
 
   const market = MARKETS[code];
-  const [{ vehicles, total }, stats, sites, dealer] = await Promise.all([
-    listInventory(code, { limit: 4 }),
+  const [fleet, { total: forSale }, stats, sites, dealer] = await Promise.all([
+    listFleet(code),
+    listInventory(code, { limit: 1 }),
     getSiteStats(code),
     listLocations(code),
     dealerJsonLd(code),
   ]);
 
+  const us = code === "us";
   const site = sites[0];
-  const articles = articlesFor(code).slice(0, 4);
-  const CONTACT_EMAIL = "info@adedayoaremuautos.com";
-  const fmt = (m: number) => formatMoney(money(m, market.currency), market.locale);
+  const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
+
+  // The same order as the rental list, so these are its first three cars.
+  const rows = [...fleet].sort(byWeekCost).slice(0, 3);
+  const { fromDaily, fromWeekly } = fromPrices(fleet);
+  // The first example on the referral page, so the two quote the same car.
+  const example = weeklyExamples(fleet, 1)[0];
+
+  const phone = formatPhone(site?.phone ?? null);
+  const hours = summariseHours(site?.hours as OpeningHour[] | null | undefined, market.locale);
+  const address = site
+    ? [
+        site.addressLine1,
+        site.addressLine2,
+        [site.city, site.region].filter(Boolean).join(", ") +
+          (site.postalCode ? ` ${site.postalCode}` : ""),
+      ]
+        .filter((l): l is string => Boolean(l && l.trim()))
+        .join(", ")
+    : null;
+  // Null until the business confirms a line that someone watches.
+  const whatsapp = whatsappUrl(code);
+
+  const tiles: Tile[] = [
+    fleet.length > 0
+      ? { title: "Rent a car", detail: `${cars(fleet.length)} to rent`, href: `/${code}/rentals`, icon: "fa-key", main: true }
+      : { title: "Rent a car", detail: "Ask about a rental", href: `/${code}/contact?type=rental`, icon: "fa-key", main: true },
+    ...(us
+      ? [{ title: "Rent to own", detail: "Your rent counts toward owning the car", href: `/${code}/rent-to-own`, icon: "fa-hand-holding-heart" }]
+      : []),
+    forSale > 0
+      ? { title: "Buy a car", detail: `${cars(forSale)} for sale`, href: `/${code}/inventory`, icon: "fa-car" }
+      : { title: "Buy a car", detail: "Tell us what you want", href: `/${code}/contact`, icon: "fa-car" },
+    { title: "Financing", detail: "Estimate a payment, then apply", href: `/${code}/financing`, icon: "fa-calculator" },
+    ...(us
+      ? [{ title: "Check a car", detail: "Free VIN check", href: `/${code}/check`, icon: "fa-clipboard-check" }]
+      : []),
+    { title: "Refer and earn", detail: `Earn ${RATE} on renters you send`, href: `/${code}/referral`, icon: "fa-hand-holding-dollar" },
+  ];
 
   return (
     <>
@@ -135,571 +197,256 @@ export default async function MarketHome({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd(code)) }}
       />
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      {/* The hero leads with rent to own, because that is what the business
-          now leads with. The first slide is server-rendered, so the marketing
-          message is the first thing painted and the first thing a crawler
-          reads — "opens on first load" without an interstitial to dismiss. */}
-      <HeroSlider
-        market={{
-          code,
-          label: code === "us" ? "Greensboro, North Carolina" : "Nigeria",
-          currency: market.currency,
-        }}
-        slides={[
-          {
-            key: "rent-to-own",
-            eyebrow: { icon: "fas fa-key", text: "New — Rent to Own" },
-            title: ["Rent it. Then ", "own it.", ""],
-            body:
-              "Rent by the day or the week, and every payment counts towards keeping the car. Reach the total for your category and it is yours.",
-            image: "/img/hero-benz.png",
-            art: "ownership",
-            actions: [
-              { href: `/${code}/rent-to-own`, label: "HOW IT WORKS", icon: "fas fa-key", primary: true },
-              { href: `/${code}/rent-to-own#calculator`, label: "WHEN WOULD IT BE MINE?", icon: "fas fa-calculator" },
-            ],
-          },
-          {
-            key: "buy",
-            title: ["Buy, Rent & ", "Finance Cars", " with Confidence"],
-            body:
-              code === "us"
-                ? "Premium vehicles, verified quality, and flexible payment plans tailored for you. Serving Greensboro and the Triad."
-                : "Premium vehicles, verified quality, and flexible payment plans tailored for you. Experience luxury and reliability with every ride.",
-            image: "/img/hero-nissan.png",
-            actions: [
-              { href: `/${code}/inventory`, label: "VIEW CARS", icon: "fas fa-car", primary: true },
-              { href: `/${code}/rentals`, label: "RENT A CAR", icon: "fas fa-key" },
-            ],
-          },
-          {
-            key: "finance",
-            title: ["Figures you see are the ", "figures you sign", ""],
-            body:
-              "Payment estimates run the same arithmetic as the agreement itself. Work out what a vehicle costs before you speak to anyone.",
-            image: "/img/hero-wide.png",
-            art: "figures",
-            actions: [
-              { href: `/${code}/financing`, label: "APPLY FOR FINANCING", icon: "fas fa-hand-holding-usd", primary: true },
-              { href: `/${code}/financing#calculator`, label: "USE THE CALCULATOR", icon: "fas fa-calculator" },
-            ],
-          },
-        ]}
-      />
-
-      {/* ── Services ─────────────────────────────────────────────────────── */}
-      <div className="services">
-        <div className="services-container">
-          <div className="section-title">
-            <h2>
-              Our <span>Services</span>
-            </h2>
-            <p>Comprehensive automotive solutions tailored to your needs</p>
-          </div>
-          <div className="services-grid">
-            <div className="service-card">
-              <div className="service-icon">
-                <i className="fas fa-car" />
-              </div>
-              <h3>Buy a Car</h3>
-              <p>
-                {code === "us"
-                  ? "Explore our curated collection of inspected vehicles. Each car comes with its history report and a full breakdown of price, tax and fees."
-                  : "Explore our curated collection of premium, verified vehicles from top brands. Each car comes with a comprehensive inspection report."}
-              </p>
-              <Link href={`/${code}/inventory`} className="service-link">
-                Browse Collection <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
-
-            {/* Second, directly after buying: it is the offer the business
-                now leads with, and it reads as the step between renting and
-                owning only if it sits between them. */}
-            <div className="service-card">
-              <div className="service-icon">
-                <i className="fas fa-hand-holding-heart" />
-              </div>
-              <h3>Rent to Own</h3>
-              <p>
-                Rent by the day or the week and every payment counts towards
-                keeping the car. Reach the total for your category and it is
-                yours — no balloon payment, and no obligation to continue.
-              </p>
-              <Link href={`/${code}/rent-to-own`} className="service-link">
-                How It Works <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
-
-            <div className="service-card">
-              <div className="service-icon">
-                <i className="fas fa-key" />
-              </div>
-              <h3>Rent a Car</h3>
-              <p>
-                Flexible daily, weekly, or monthly rentals. Longer rentals are
-                priced on the better rate automatically, so you are never
-                charged more than the days you take.
-              </p>
-              <Link href={`/${code}/rentals`} className="service-link">
-                View Rentals <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
-
-            <div className="service-card">
-              <div className="service-icon">
-                <i className="fas fa-hand-holding-usd" />
-              </div>
-              <h3>Finance a Car</h3>
-              <p>
-                {code === "us"
-                  ? "Financing arranged in-house over 24 to 72 months. Work out a payment before you speak to anyone."
-                  : "Flexible payment plans from 6 to 24 months. Drive your dream car today with our easy financing options."}
-              </p>
-              <Link href={`/${code}/financing`} className="service-link">
-                Learn More <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Featured vehicles ────────────────────────────────────────────── */}
-      <div className="featured">
-        <div className="featured-container">
-          <div className="section-header">
-            <div>
-              <h2>
-                Featured <span>Vehicles</span>
-              </h2>
-              <p>Hand-picked premium cars for you</p>
-            </div>
-            {total > 0 && (
-              <Link href={`/${code}/inventory`} className="view-all">
-                View All <i className="fas fa-arrow-right" />
-              </Link>
+      {/* ── Hero ─────────────────────────────────────────────────────────
+          Leads with what most people here come for, a car by the week, and
+          its real starting price. Short, so the tiles below are on the same
+          screen. The photo is the page's only preload. */}
+      <section className="home-hero">
+        <Image
+          className="home-hero-photo"
+          src="/img/hero-benz.png"
+          alt=""
+          fill
+          sizes="100vw"
+          preload
+        />
+        <div className="home-hero-inner">
+          <h2 className="home-hero-title">
+            {us && fleet.length > 0 ? (
+              <>
+                Rent a car <span>by the week</span> in Greensboro
+              </>
+            ) : us ? (
+              "Buy, rent or finance a car in Greensboro"
+            ) : (
+              "Buy, rent or finance a car in Nigeria"
             )}
-          </div>
-
-          {vehicles.length === 0 ? (
-            <div className="no-results">
-              <h3>No vehicles listed yet</h3>
-              <p>
-                Tell us what you are looking for and we will source it before it
-                reaches the site.
-              </p>
-            </div>
-          ) : (
-            <div className="cars-grid">
-              {vehicles.map((v) => {
-                const name = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
-                return (
-                  <div className="car-card" key={v.id}>
-                    <div className="car-image">
-                      {v.primaryImage ? (
-                        <Image
-                          src={mediaUrl(v.primaryImage)}
-                          alt={name}
-                          width={760}
-                          height={570}
-                          sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"
-                          unoptimized={!canResize(mediaUrl(v.primaryImage))}
-                        />
-                      ) : (
-                        <div className="car-image-placeholder">Photography coming soon</div>
-                      )}
-                      <span className="car-badge">{v.condition}</span>
-                    </div>
-                    <div className="car-details">
-                      <h3 className="car-title">{name}</h3>
-                      <div className="car-specs">
-                        <span>
-                          <i className="fas fa-calendar" /> {v.year}
-                        </span>
-                        {v.mileage != null && (
-                          <span>
-                            <i className="fas fa-tachometer-alt" />{" "}
-                            {formatDistance(v.mileage, market)}
-                          </span>
-                        )}
-                        {v.transmission && (
-                          <span>
-                            <i className="fas fa-cog" /> {v.transmission}
-                          </span>
-                        )}
-                      </div>
-                      <div className="car-price">
-                        {v.priceMinor != null ? fmt(v.priceMinor) : "Price on request"}
-                      </div>
-                      <div className="car-actions">
-                        <Link
-                          href={`/${code}/inventory/${v.slug}`}
-                          className="btn btn-primary"
-                        >
-                          View
-                        </Link>
-                        <Link
-                          href={`/${code}/contact?vehicle=${v.slug}`}
-                          className="btn btn-outline"
-                        >
-                          <i className="fas fa-envelope" /> Inquire
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          </h2>
+          {/* Both payment modes let a renter pay at pickup. */}
+          {fleet.length > 0 && fromDaily != null && (
+            <p className="home-hero-text">
+              {fromWeekly != null
+                ? `From ${fmt(fromWeekly)} a week.`
+                : `From ${fmt(fromDaily)} a day.`}{" "}
+              Reserve online, then pay when you pick it up.
+            </p>
+          )}
+          {site?.phone && phone && (
+            <p className="home-hero-call">
+              <a href={`tel:${site.phone}`} className="home-link">
+                Questions? Call {phone}
+              </a>
+            </p>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* ── Rent to own ──────────────────────────────────────────────────
-          The business now leads with this, so it sits directly under the
-          vehicles rather than further down: the first thing after the stock
-          is what to do about it. */}
-      <div className="rto-banner">
-        <div className="rto-banner-inner">
-          <div className="rto-banner-copy">
-            <span className="rto-banner-eyebrow">
-              <i className="fas fa-key" aria-hidden="true" /> New
-            </span>
-            <h2>
-              Rent it. Then <span>own it.</span>
-            </h2>
-            <p>
-              Rent by the day or the week and every payment counts towards
-              keeping the car. Reach the total for your category and it is
-              yours — no balloon payment, no obligation to continue.
-            </p>
-            <div className="rto-banner-actions">
-              <Link href={`/${code}/rent-to-own`} className="btn btn-primary">
-                <i className="fas fa-key" /> How Rent to Own works
+      {/* ── Tasks ────────────────────────────────────────────────────────
+          One tile per thing a visitor came to do, each with a live count
+          where there is one. */}
+      <section className="home-section">
+        <h2 className="home-sr">What do you need?</h2>
+        <ul className="home-tiles">
+          {tiles.map((t) => (
+            <li key={t.title}>
+              <Link href={t.href} className={`home-tile${t.main ? " home-tile--main" : ""}`}>
+                <i className={`fas ${t.icon}`} aria-hidden="true" />
+                <span className="home-tile-title">{t.title}</span>
+                <span className="home-tile-detail">{t.detail}</span>
               </Link>
-              <Link href={`/${code}/rent-to-own#calculator`} className="btn btn-outline">
-                <i className="fas fa-calculator" /> When would it be mine?
-              </Link>
-            </div>
-          </div>
+            </li>
+          ))}
+        </ul>
+        {/* The rent-to-own disclosure in one line, beside the tile that
+            offers it. It says no more than /rent-to-own does: the old "every
+            payment counts" left out the deposit and the refund rule. */}
+        {us && (
+          <p className="home-terms">
+            Rent to own: once your rent reaches the total for your car&rsquo;s
+            category, the car is yours. Deposits don&rsquo;t count. No balloon
+            payment. Stop anytime and owe nothing more, but rent already paid
+            isn&rsquo;t refunded.{" "}
+            <Link href={`/${code}/rent-to-own`} className="home-link">
+              See the terms
+            </Link>
+          </p>
+        )}
+      </section>
 
-          <div className="rto-banner-figure" aria-hidden="true">
-            <div className="rto-banner-track">
-              <span className="rto-banner-fill" />
-            </div>
-            <div className="rto-banner-marks">
-              <span>Week 1</span>
-              <span>Halfway</span>
-              <span className="is-end">Yours</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── How we work ──────────────────────────────────────────────────
-          Every claim here is one the platform actually enforces, not a
-          promise. Written for a buyer, but each line is a thing the site does
-          rather than a thing the copy says. */}
-      <div className="how-we-work">
-        <div className="how-we-work-container">
-          <div className="section-title">
-            <h2>
-              How We <span>Work</span>
-            </h2>
-            <p>
-              The part most dealerships leave to a phone call and a promise.
-            </p>
-          </div>
-
-          <div className="work-grid">
-            <div className="work-step">
-              <span className="work-step-index">01</span>
-              <i className="fas fa-inbox" aria-hidden="true" />
-              <h3>Your inquiry is recorded, not just sent</h3>
-              <p>
-                Every message is written down the moment you send it and lands
-                with a named person. Nothing depends on someone noticing an
-                email.
-              </p>
-            </div>
-
-            <div className="work-step">
-              <span className="work-step-index">02</span>
-              <i className="fas fa-calculator" aria-hidden="true" />
-              <h3>The figures you see are the figures you sign</h3>
-              <p>
-                Payment estimates run the same arithmetic as the agreement
-                itself — not a separate calculator that happens to sit on the
-                website.
-              </p>
-            </div>
-
-            <div className="work-step">
-              <span className="work-step-index">03</span>
-              <i className="fas fa-calendar-check" aria-hidden="true" />
-              <h3>A reserved vehicle is reserved</h3>
-              <p>
-                Rental dates are checked against live bookings before they are
-                confirmed. Two customers cannot be given the same vehicle for
-                the same days.
-              </p>
-            </div>
-
-            <div className="work-step">
-              <span className="work-step-index">04</span>
-              <i className="fas fa-shield-halved" aria-hidden="true" />
-              <h3>We do not ask for what we do not need</h3>
-              <p>
-                No {code === "ng" ? "BVN" : "Social Security Number"}, bank
-                details or ID number through this website. Identity is verified
-                in person, with the paperwork.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── About / founder ──────────────────────────────────────────────── */}
-      <div className="about-section">
-        <div className="about-container">
-          <div className="about-grid">
-            <div className="about-content">
-              <h2>
-                Meet <span>Adedayo Aremu</span>
-              </h2>
-              <h3>Founder &amp; CEO</h3>
-              <p>
-                Adedayo Aremu is an entrepreneurial professional and founder of
-                Adedayo Aremu Autos, a growing automotive enterprise committed
-                to excellence, transparency, and customer-centered service. With
-                a strategic mindset and strong business acumen, he has
-                positioned his brand to deliver reliable vehicle sourcing,
-                quality assurance, and value-driven automotive solutions.
-              </p>
-              <p>
-                Focused on sustainable growth, Adedayo is building a dealership
-                model that prioritises professionalism, financial intelligence,
-                and scalable systems. His long-term vision is to establish
-                Adedayo Aremu Autos as a recognised and respected name in the
-                automotive marketplace.
-              </p>
-
-              <div className="about-stats">
-                <div className="about-stat">
-                  <h4>{formatMilestone(stats.vehiclesSold, market.locale)}</h4>
-                  <p>Vehicles Sold</p>
-                </div>
-                <div className="about-stat">
-                  <h4>{stats.available}</h4>
-                  <p>Available Now</p>
-                </div>
-                <div className="about-stat">
-                  <h4>{code === "us" ? "Greensboro" : "Nigeria"}</h4>
-                  <p>Where We Are</p>
-                </div>
-              </div>
-
-              <Link href={`/${code}/about`} className="btn btn-primary">
-                READ FULL STORY <i className="fas fa-arrow-right" />
-              </Link>
-            </div>
-
-            <div className="about-image">
-              <Image
-                src="/img/ceo.png"
-                alt="Adedayo Aremu, Founder and CEO"
-                width={1024}
-                height={1536}
-                sizes="(min-width: 900px) 440px, 100vw"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      {/* ── Referral programme ───────────────────────────────────────────── */}
-      <div className="referral-section">
-        <div className="referral-container">
-          <div className="referral-grid">
-            <div className="referral-content">
-              <h2>
-                Earn with <span>Our Referral Program</span>
-              </h2>
-              <p>
-                Know someone who needs a car? Send them our way and earn on
-                every week they rent.
-              </p>
-              <div className="highlight">
-                5% <small>on car rental</small>
-              </div>
-              <ul className="referral-features">
-                {/* Rentals only. Sale referrals are on hold while a North
-                    Carolina lawyer looks at G.S. 20-306, which limits paying
-                    unlicensed people for vehicle-sale referrals. */}
-                <li><i className="fas fa-check-circle" /> 5% of every rental your renter pays for</li>
-                <li><i className="fas fa-check-circle" /> Again every week they keep renting</li>
-                <li><i className="fas fa-check-circle" /> Cars to share, with messages ready to send</li>
-                <li><i className="fas fa-check-circle" /> Payout requested from your own partner page</li>
-                <li><i className="fas fa-check-circle" /> Free to join — no recruiting</li>
-              </ul>
-              <Link href={`/${code}/referral`} className="btn btn-primary">
-                Become a Partner
-              </Link>
-            </div>
-            <div className="referral-card">
-              <i className="fas fa-hand-holding-usd" />
-              <h3>Refer &amp; Earn</h3>
-              <div className="percent">
-                5% <small>on rentals</small>
-              </div>
-              <p>Every week a renter you sent keeps the car</p>
-              {/* The arithmetic, not a promise: real rates are on the
-                  referral page, from the cars actually for rent. */}
-              <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
-                Your friend rents for a week: you earn 5% of what they pay.
-              </p>
-              <Link href={`/${code}/referral`} className="btn btn-primary">
-                Start Referring
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Blog / insights ──────────────────────────────────────────────── */}
-      {articles.length > 0 && (
-        <div className="blog-section">
-          <div className="blog-container">
-            <div className="section-title">
-              <h2>
-                Automotive <span>Insights</span>
-              </h2>
-              <p>Expert advice and tips for car buyers and enthusiasts</p>
-            </div>
-            <div className="blog-grid">
-              {articles.map((a) => (
-                <div className="blog-card" key={a.slug}>
-                  {a.image && (
-                    <div className="blog-image">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={a.image} alt={a.title} loading="lazy" />
-                    </div>
-                  )}
-                  <div className="blog-content">
-                    <span className="blog-category">{a.category}</span>
-                    <h3 className="blog-title">
-                      <Link href={`/${code}/blog/${a.slug}`}>{a.title}</Link>
-                    </h3>
-                    <div className="blog-meta">
-                      <span>
-                        <i className="fas fa-clock" /> {a.readMinutes} min read
-                      </span>
-                    </div>
-                    <p className="blog-excerpt">{a.excerpt}</p>
-                    <Link href={`/${code}/blog/${a.slug}`} className="service-link">
-                      Read Article <i className="fas fa-arrow-right" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* ── Cars for rent ────────────────────────────────────────────────
+          The rental list's first three cars, in its rows. */}
+      {fleet.length > 0 && (
+        <section className="home-section home-rent">
+          <h2 className="home-h2">Cars for rent</h2>
+          <p className="home-sub">Longer rentals get the better rate automatically.</p>
+          <ul className="cl-list">
+            {rows.map((v) => {
+              const weekly = v.tariff.weeklyMinor;
+              return (
+                <CarRow
+                  key={v.id}
+                  href={`/${code}/rentals/${v.slug}`}
+                  image={v.image}
+                  preload={false}
+                  title={carName(v)}
+                  price={fmt(weekly ?? v.tariff.dailyMinor)}
+                  unit={weekly != null ? "a week" : "a day"}
+                  details={[
+                    weekly != null && `or ${fmt(v.tariff.dailyMinor)} a day`,
+                    v.transmission,
+                    v.seats != null && `${v.seats} seats`,
+                  ]}
+                  badge={v.tariff.withDriverAvailable ? "Driver available" : null}
+                />
+              );
+            })}
+          </ul>
+          <Link href={`/${code}/rentals`} className="btn btn-outline home-more">
+            See all {cars(fleet.length)} for rent
+          </Link>
+        </section>
       )}
 
-      {/* ── Why choose us ────────────────────────────────────────────────── */}
-      <div className="features">
-        <div className="features-container">
-          <div className="section-title">
-            <h2>
-              Why <span>Choose Us</span>
-            </h2>
-            <p>Experience the difference of dealing with a trusted, professional dealer</p>
-          </div>
-          <div className="features-grid">
-            {[
-              { icon: "fa-shield-alt", t: "Trusted Dealer", b: code === "us" ? "Dealing face to face in Greensboro with integrity and transparency." : "Years of experience serving satisfied customers across Nigeria with integrity and transparency." },
-              { icon: "fa-check-circle", t: "Verified Vehicles", b: "Every car undergoes rigorous inspection before listing to ensure quality and reliability." },
-              { icon: "fa-hand-holding-usd", t: "Flexible Payment", b: "Cash or financing options to suit your budget, with the full breakdown shown before you commit." },
-              { icon: "fa-truck", t: code === "us" ? "Serving the Triad" : "Nationwide Delivery", b: code === "us" ? "Greensboro based, delivering across the Triad." : "We deliver your car anywhere in Nigeria with full insurance during transit." },
-              { icon: "fa-file-contract", t: "Paperwork Done", b: code === "us" ? "Title, registration and transfer handled for you." : "Full documentation, customs clearance, and transfer processed for you hassle-free." },
-              { icon: "fa-headset", t: "After-Sales Support", b: "Comprehensive after-sales service including maintenance support and warranty options." },
-            ].map((f) => (
-              <div className="feature" key={f.t}>
-                <div className="feature-icon">
-                  <i className={`fas ${f.icon}`} />
-                </div>
-                <h3>{f.t}</h3>
-                <p>{f.b}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Contact ──────────────────────────────────────────────────────── */}
-      <div className="contact-section" id="contact">
-        <div className="contact-container">
-          <div className="contact-info">
-            {/* h3, not h2 — the stylesheet styles `.contact-info h3`, so an h2
-                here rendered as unstyled small text. */}
-            <h3>
-              Get in <span>Touch</span>
-            </h3>
-            <p>Ready to find your perfect vehicle? Contact us today for personalised assistance.</p>
-
-            <div className="contact-details">
-              {site?.phone && (
-                <div className="contact-item">
-                  <i className="fas fa-phone-alt" />
-                  <a href={`tel:${site.phone}`}>{formatPhone(site.phone)}</a>
-                </div>
-              )}
-              <div className="contact-item">
-                <i className="fas fa-envelope" />
-                <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-              </div>
-              {site && (
-                <div className="contact-item">
-                  <i className="fas fa-map-marker-alt" />
-                  <span>
-                    {site.addressLine1}, {site.city}
-                    {site.region ? `, ${site.region}` : ""} {site.postalCode}
-                  </span>
-                </div>
-              )}
-              {site && summariseHours(site.hours as OpeningHour[] | null, market.locale) && (
-                <div className="contact-item">
-                  <i className="fas fa-clock" />
-                  <span>{summariseHours(site.hours as OpeningHour[] | null, market.locale)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* WhatsApp is driven by the location's real number. The legacy site
-                hardcoded wa.me/2348012345678, which is not a number the
-                business owns — so it is rendered only where we have a real one
-                rather than pointing customers at a stranger. */}
-            {site?.phone ? (
-              <a
-                href={`https://wa.me/${site.phone.replace(/[^0-9]/g, "")}`}
-                className="btn btn-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i className="fab fa-whatsapp" /> CHAT ON WHATSAPP
-              </a>
-            ) : (
-              <Link href={`/${code}/contact`} className="btn btn-primary">
-                <i className="fas fa-paper-plane" /> SEND US A MESSAGE
-              </Link>
+      <div className="home-pair">
+        {/* ── Refer and earn ─────────────────────────────────────────────
+            Rentals only. Sale referrals are on hold while a North Carolina
+            lawyer looks at G.S. 20-306, which limits paying unlicensed
+            people for vehicle-sale referrals. The rate and the example are
+            computed, and the example is one week of one real car: the
+            arithmetic, not a promise of what anyone will earn. */}
+        <section className="home-section">
+          <div className="home-refer-card">
+            <p className="home-eyebrow">Earn with referrals</p>
+            <h2 className="home-h2">Send a renter. Earn {RATE}.</h2>
+            <p>
+              Know someone who needs a car? You get {RATE} of each rental they
+              pay for, every week they keep renting.
+            </p>
+            {example && (
+              <p>
+                Example: {example.car} rents for {fmt(example.weekMinor)} a week ·{" "}
+                <strong>you earn {fmt(example.earnMinor)}</strong>
+              </p>
             )}
+            <p className="home-fine">
+              Free to join. No recruiting. Paid once your renter has paid and
+              the car is back. Nothing is paid on canceled or refunded rentals,
+              and refundable deposits and taxes don&rsquo;t count. Request
+              payouts from your partner page.
+            </p>
+            <div className="home-actions">
+              <Link href={`/${code}/referral`} className="btn btn-primary">
+                Become a partner
+              </Link>
+            </div>
+            {/* The only public link to partner login. */}
+            <Link href="/partner/login" className="home-link">
+              Already a partner? Log in
+            </Link>
           </div>
+        </section>
 
-          <LegacyContactForm market={code} />
-        </div>
+        {/* ── What you can count on ──────────────────────────────────────
+            Each line is something the site does, not a promise in copy:
+            estimates and agreements share one calculation, and the database
+            refuses overlapping bookings. */}
+        <section className="home-section">
+          <h2 className="home-h2">What you can count on</h2>
+          <ul className="home-checks">
+            <li>
+              <i className="fas fa-check" aria-hidden="true" />
+              <span>
+                The figures you see are the figures you sign. Our estimates use
+                the same math as the agreement.
+              </span>
+            </li>
+            <li>
+              <i className="fas fa-check" aria-hidden="true" />
+              <span>
+                No double bookings. We check your dates against every other
+                booking.
+              </span>
+            </li>
+            <li>
+              <i className="fas fa-check" aria-hidden="true" />
+              <span>
+                We never ask for your {us ? "Social Security number" : "BVN"} or
+                bank details on this website. To rent, we ask for a photo of
+                your driver&rsquo;s license.
+              </span>
+            </li>
+          </ul>
+          <div className="home-founder">
+            <Image src="/img/ceo.png" alt="Adedayo Aremu" width={1024} height={1536} sizes="56px" />
+            <p>
+              Founded by Adedayo Aremu ·{" "}
+              {formatMilestone(stats.vehiclesSold, market.locale)} vehicles sold
+              <br />
+              <Link href={`/${code}/about`} className="home-link">
+                Read our story
+              </Link>
+            </p>
+          </div>
+        </section>
       </div>
 
+      {/* ── Visit or call ──────────────────────────────────────────────────
+          Every line from the location record, and nothing without one: with
+          no showroom on file (Nigeria today) it is the email and the form. */}
+      <section className="home-section">
+        <h2 className="home-h2">{site ? "Visit or call" : "Contact us"}</h2>
+        <ul className="home-checks">
+          {address && (
+            <li>
+              <i className="fas fa-location-dot" aria-hidden="true" />
+              <span>
+                {address}
+                <br />
+                <a
+                  href={mapLinkUrl(address)}
+                  className="home-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Get directions<span className="home-sr"> (opens in a new tab)</span>
+                </a>
+              </span>
+            </li>
+          )}
+          {hours && (
+            <li>
+              <i className="fas fa-clock" aria-hidden="true" />
+              <span>{hours}</span>
+            </li>
+          )}
+          <li>
+            <i className="fas fa-envelope" aria-hidden="true" />
+            <span>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="home-link">
+                {CONTACT_EMAIL}
+              </a>
+            </span>
+          </li>
+        </ul>
+        <div className="home-actions">
+          {site?.phone && phone && (
+            <a href={`tel:${site.phone}`} className="btn btn-primary">
+              Call {phone}
+            </a>
+          )}
+          <Link
+            href={`/${code}/contact`}
+            className={`btn ${site?.phone ? "btn-outline" : "btn-primary"}`}
+          >
+            Send a message
+          </Link>
+          {whatsapp && (
+            <a href={whatsapp} className="btn btn-outline" target="_blank" rel="noopener noreferrer">
+              Chat on WhatsApp
+            </a>
+          )}
+        </div>
+      </section>
     </>
   );
 }

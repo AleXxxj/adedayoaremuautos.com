@@ -126,5 +126,9 @@ export async function saveTariff(
 
   revalidatePath(`/admin/vehicles/${f.vehicleId}`);
   revalidatePath(`/${vehicle.marketCode}/rentals`);
+  // The home page quotes the cheapest weekly rate, lists the first cars and
+  // counts the fleet; the referral page works its examples from the rates.
+  revalidatePath(`/${vehicle.marketCode}`);
+  revalidatePath(`/${vehicle.marketCode}/referral`);
   return { ok: true };
 }

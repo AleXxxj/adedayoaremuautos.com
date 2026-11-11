@@ -85,6 +85,37 @@ export async function listFleet(market: MarketCode): Promise<FleetVehicle[]> {
 }
 
 /**
+ * What a week in this car costs: its weekly rate, or seven days where it has
+ * none.
+ *
+ * Lists sort on this because the weekly price is what each card leads with:
+ * sorted by the daily rate, a car shown at "$85 a day" came ahead of one shown
+ * at "$550 a week" and the list looked out of order. The rental list and the
+ * home page use the same order, so the home page's first cars are the list's.
+ */
+export const weekCost = (v: FleetVehicle) => v.tariff.weeklyMinor ?? v.tariff.dailyMinor * 7;
+
+/** Cheapest week first. Array sort is stable, so ties keep the fleet's order. */
+export const byWeekCost = (a: FleetVehicle, b: FleetVehicle) => weekCost(a) - weekCost(b);
+
+/**
+ * "From" prices, each taken from the cheapest car that actually offers that
+ * term, or null where none does. The original hardcoded ₦25,000 / ₦150,000 /
+ * ₦500,000 whether or not anything was available at those rates.
+ */
+export function fromPrices(fleet: FleetVehicle[]) {
+  const cheapest = (pick: (v: FleetVehicle) => number | null | undefined) => {
+    const vals = fleet.map(pick).filter((n): n is number => typeof n === "number");
+    return vals.length ? Math.min(...vals) : null;
+  };
+  return {
+    fromDaily: cheapest((v) => v.tariff.dailyMinor),
+    fromWeekly: cheapest((v) => v.tariff.weeklyMinor),
+    fromMonthly: cheapest((v) => v.tariff.monthlyMinor),
+  };
+}
+
+/**
  * One car's rental page.
  *
  * A car never offered for rent has no rental page: it has no rates, so the

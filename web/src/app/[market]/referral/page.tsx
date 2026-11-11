@@ -6,8 +6,8 @@ import { listFleet } from "@/lib/repositories/rentals";
 import {
   DEFAULT_RENTAL_COMMISSION_BPS,
   PAID_REFERRAL_DISCLOSURE,
-  commissionOn,
   formatBps,
+  weeklyExamples,
 } from "@/lib/referral";
 import { ReferralSignup } from "@/components/ReferralSignup";
 
@@ -99,15 +99,7 @@ export default async function ReferralPage({
 
   const fleet = await listFleet(code);
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
-  const examples = fleet
-    .filter((v) => v.tariff.weeklyMinor != null)
-    .slice(0, 3)
-    .map((v) => ({
-      id: v.id,
-      car: [v.year, v.make, v.model].filter(Boolean).join(" "),
-      week: fmt(v.tariff.weeklyMinor!),
-      earn: fmt(commissionOn(v.tariff.weeklyMinor!, DEFAULT_RENTAL_COMMISSION_BPS)),
-    }));
+  const examples = weeklyExamples(fleet, 3);
 
   return (
     <>
@@ -139,7 +131,7 @@ export default async function ReferralPage({
                       <li key={e.id}>
                         <span className="referral-car">{e.car}</span>
                         <span className="referral-car-math">
-                          Rents for {e.week} a week · <strong>you earn {e.earn}</strong>
+                          Rents for {fmt(e.weekMinor)} a week · <strong>you earn {fmt(e.earnMinor)}</strong>
                         </span>
                       </li>
                     ))}

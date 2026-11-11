@@ -40,7 +40,11 @@ const ORDER_BY = {
   mileage_asc: asc(vehicles.mileage),
 } as const satisfies Record<SortKey, unknown>;
 
-/** Public inventory for one market. Only ever returns listable vehicles. */
+/**
+ * Public inventory for one market. Only ever returns listable vehicles, and
+ * only cars offered for sale: a rental-only car has no sale price, so it would
+ * be counted as "for sale" and listed as "Price on request".
+ */
 export async function listInventory(
   market: MarketCode,
   filters: InventoryFilters = {},
@@ -64,6 +68,7 @@ export async function listInventory(
     // 'pending' still shows — a car under offer is social proof, and buyers
     // ask about it. 'draft', 'sold' and 'unlisted' never reach the public.
     or(eq(vehicles.status, "available"), eq(vehicles.status, "pending")),
+    or(eq(vehicles.listingKind, "sale"), eq(vehicles.listingKind, "both")),
     make ? eq(vehicles.make, make) : undefined,
     condition ? eq(vehicles.condition, condition) : undefined,
     transmission ? eq(vehicles.transmission, transmission) : undefined,

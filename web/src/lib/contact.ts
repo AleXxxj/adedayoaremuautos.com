@@ -82,6 +82,14 @@ export function whatsappUrl(market: MarketCode, message?: string): string | null
     : `https://wa.me/${wa}`;
 }
 
+/**
+ * An address in Google Maps, one tap from directions: the app on a phone that
+ * has it, the website otherwise. No API key required for this form.
+ */
+export function mapLinkUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 /** Google Maps embed for an address. No API key required for this form. */
 export function mapEmbedUrl(address: string): string {
   return `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;

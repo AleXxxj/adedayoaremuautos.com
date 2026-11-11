@@ -3576,63 +3576,6 @@
     color: var(--brand-400, #4e9d76);
 }
 
-/* ── Back to top ──────────────────────────────────────────────────────────
-   Phones only. On a wide screen the page is a third of the height and the
-   scrollbar already offers the same thing; the control would be noise. */
-
-.legacy-theme .back-to-top {
-    position: fixed;
-    left: 20px;
-    /* Level with the assistant launcher on the opposite side. */
-    bottom: 20px;
-    z-index: 900;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    padding: 0;
-    border: 1px solid rgba(78, 157, 118, 0.5);
-    border-radius: 999px;
-    background: linear-gradient(135deg, #1d4535 0%, #0f2a20 100%);
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    /* Faded out rather than removed, so it does not pop in and out of the
-       layout while the reader is mid-scroll. */
-    opacity: 0;
-    transform: translateY(8px);
-    pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease;
-}
-
-@media (max-width: 900px) {
-    .legacy-theme .back-to-top {
-        display: inline-flex;
-    }
-}
-
-.legacy-theme .back-to-top.is-shown {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
-/* Below the phone's own safe area on an iPhone, where the home indicator
-   sits over the bottom 34px of the viewport. */
-@supports (padding: env(safe-area-inset-bottom)) {
-    .legacy-theme .back-to-top {
-        bottom: calc(20px + env(safe-area-inset-bottom));
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .legacy-theme .back-to-top {
-        transition: none;
-    }
-}
-
 /* ── Notification opt-in ──────────────────────────────────────────────────
    Lives inside the newsletter band, under the privacy line. */
 
@@ -3823,8 +3766,9 @@
 
 .legacy-theme .notify-prompt-close:hover { color: var(--pearl, #f0f0f0); }
 
-/* On a phone it spans the width, and lifts clear of the back-to-top button
-   and the home indicator. */
+/* On a phone it spans the width, and lifts clear of the home indicator.
+   Where the tab bar shows, the tab bar's section at the end of this file
+   sets how high it sits instead. */
 @media (max-width: 600px) {
     .legacy-theme .notify-prompt {
         left: 12px;
@@ -3894,8 +3838,8 @@
 
 /* ── Toasts ───────────────────────────────────────────────────────────────
    A floating copy of a form's result, so it is never off-screen. Top-centre
-   and below the fixed header: the bottom corners already hold the assistant
-   launcher and the back-to-top button. */
+   and below the fixed header: the bottom already holds the assistant
+   launcher and, on a phone, the tab bar. */
 
 .toast-stack {
     position: fixed;
@@ -4134,7 +4078,7 @@
     }
 }
 
-@media (min-width: 1040px) and (max-width: 1280px) {
+@media (min-width: 1100px) and (max-width: 1280px) {
     .legacy-theme .nav-menu {
         gap: 18px;
     }
@@ -4158,14 +4102,16 @@
     }
 }
 
-/* Below 1040px eight links, the logo and the market switch cannot share a
-   row without the text shrinking past comfortable reading size — measured:
-   they need about 1,055px. The legacy sheet only switched to the menu button
-   at 900px, so between 901px and 1039px the header broke into two ragged
-   rows, with the market switch stranded alone under the logo. The menu
-   button now takes over from 1039px down, replicating the legacy 900px rules
-   so the open menu behaves exactly as it does on a phone. */
-@media (max-width: 1039px) {
+/* Below 1100px eight links, the logo and the market switch cannot share a
+   row without the text shrinking past comfortable reading size. The legacy
+   sheet only switched to the menu button at 900px, so between 901px and
+   1039px the header broke into two ragged rows, with the market switch
+   stranded alone under the logo. The menu button took over from 1039px
+   down; since the US header's "Blog" became "Check a Car" the row needs
+   1,090px (measured, November 2026), so it now takes over from 1099px down,
+   replicating the legacy 900px rules so the open menu behaves exactly as it
+   does on a phone. */
+@media (max-width: 1099px) {
     .legacy-theme .mobile-menu-btn {
         display: block;
     }
@@ -4405,3 +4351,144 @@ html:has(.legacy-theme .booking-form) { scroll-padding-top: 104px; }
 .legacy-theme .newsletter-section--compact { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
 .legacy-theme .rental-detail .rto-crumbs { margin-bottom: 12px; }
 .legacy-theme .rental-detail .rto-crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   The tab bar
+
+   Five tabs fixed to the bottom of a phone (components/TabBar.tsx): Home,
+   Rent, Buy, Check (Finance in Nigeria) and Earn. Shown at 900px and below,
+   where the header's links are behind the menu button. It replaced the
+   back-to-top button: the tab for the page you are on scrolls to its top.
+
+   The market layout sets viewport-fit=cover, so every page runs under an
+   iPhone's home indicator and, in landscape, its notch. The bar pads itself
+   clear of the indicator, and the page pads its sides by the insets, which
+   are 0 in portrait. The fixed header pads its own sides (23b, above).
+
+   Keep this section last in the file: it moves the floating buttons, and
+   their own rules are above.
+   ------------------------------------------------------------------------ */
+
+.legacy-theme {
+    --tabbar-h: 0px;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* The fixed header sets a width but no `left`, so it sits where the page's
+   content starts: once the page was padded by the insets it moved right by
+   one inset and ran off the screen by as much. Pinned to the edge, it pads
+   its own sides (23b). */
+.legacy-theme .header {
+    left: 0;
+}
+
+.legacy-theme .tabbar {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    /* The bar's whole height: 64px of tabs, the 1px line above them and the
+       home indicator's inset. The page ends above it, so the footer's last
+       line stays visible. */
+    .legacy-theme {
+        --tabbar-h: calc(65px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: var(--tabbar-h);
+    }
+
+    /* Above the page, below the open menu (the header is 1000) and the
+       assistant's sheet (901). */
+    .legacy-theme .tabbar {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 890;
+        padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+        background: rgba(10, 10, 10, 0.98);
+        border-top: 1px solid rgba(42, 92, 66, 0.35);
+    }
+
+    .legacy-theme .tabbar-list {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        list-style: none;
+    }
+
+    .legacy-theme .tabbar-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 64px;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.72);
+        text-decoration: none;
+    }
+
+    .legacy-theme .tabbar-tab i {
+        font-size: 19px;
+    }
+
+    .legacy-theme .tabbar-tab[aria-current="page"] {
+        color: #7cc3a0;
+    }
+
+    /* The floating buttons sit 12px above the bar. */
+    .legacy-theme .assistant-launcher:not(.is-open),
+    .legacy-theme .notify-prompt,
+    .legacy-theme .country-notification {
+        bottom: calc(var(--tabbar-h) + 12px);
+    }
+
+    /* The tab bar and the menu carry these links on a phone. */
+    .legacy-theme .footer-links {
+        display: none;
+    }
+
+    /* Out of the way while someone types or picks from a list: the keyboard
+       would carry it up over the field. Not for checkboxes, radios and file
+       pickers, which bring up no keyboard. */
+    .legacy-theme:has(:is(input:not([type="checkbox"], [type="radio"], [type="file"]), select, textarea):focus) .tabbar {
+        display: none;
+    }
+}
+
+/* The assistant's panel floats above the bar up to 900px; at 520px and
+   below it is a sheet from the bottom of the screen that covers the bar. */
+@media (min-width: 521px) and (max-width: 900px) {
+    .legacy-theme .assistant-launcher.is-open {
+        bottom: calc(var(--tabbar-h) + 12px);
+    }
+
+    .legacy-theme .assistant-panel {
+        bottom: calc(var(--tabbar-h) + 76px);
+        height: min(560px, calc(100dvh - 140px - var(--tabbar-h)));
+    }
+}
+
+@media print {
+    .legacy-theme .tabbar {
+        display: none;
+    }
+}
+
+/* No tab bar on a page with its own bar fixed to the bottom.
+   The rental booking form's .booking-bar (23b) is fixed to the bottom up to
+   1000px wide, at z-index 880, and the tab bar (890) would cover it. So on
+   any page that has one, the tab bar is hidden and takes no room:
+   --tabbar-h is 0, so the padding above comes to nothing (23b's own
+   padding, the bar's height, is more specific and wins anyway). Where the
+   booking bar is pinned, the floating buttons follow 23b's offsets, which
+   are more specific than the ones above; where it is not, they sit 12px
+   from the bottom. These two rules win by specificity, not by order. */
+.legacy-theme:has(.booking-bar) {
+    --tabbar-h: 0px;
+}
+
+.legacy-theme:has(.booking-bar) .tabbar {
+    display: none;
+}
