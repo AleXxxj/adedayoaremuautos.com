@@ -1,12 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode, type MarketConfig } from "@/lib/market";
 import { listFleet, type FleetVehicle } from "@/lib/repositories/rentals";
 import { formatMoney, money, toMajor } from "@/lib/money";
-import { RentalToolbar, type RentalFilterOptions } from "@/components/RentalToolbar";
-import { canResize } from "@/lib/photo";
+import { ListToolbar, type ListFilter } from "@/components/ListToolbar";
+import { CarRow } from "@/components/CarRow";
+import "@/styles/car-list.css";
 import "@/styles/rentals.css";
 
 export const dynamic = "force-dynamic";
@@ -75,13 +75,22 @@ export default async function RentalsPage({
   const all = await listFleet(code);
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
 
-  const options: RentalFilterOptions = {
-    types: [...new Set(all.map((v) => v.bodyStyle).filter((t): t is string => Boolean(t)))].sort(),
-    transmissions: [
-      ...new Set(all.map((v) => v.transmission).filter((t): t is string => Boolean(t))),
-    ].sort(),
-    priceBands: priceBands(market, all),
-  };
+  const each = (values: (string | null | undefined)[]) =>
+    [...new Set(values.filter((t): t is string => Boolean(t)))].sort().map((t) => ({ value: t, label: t }));
+  const filters: ListFilter[] = [
+    { key: "type", label: "Type", anyLabel: "Any type", options: each(all.map((v) => v.bodyStyle)) },
+    {
+      key: "duration",
+      label: "Rent by",
+      anyLabel: "Day, week or month",
+      options: [
+        { value: "weekly", label: "The week" },
+        { value: "monthly", label: "The month" },
+      ],
+    },
+    { key: "price", label: "Price a day", anyLabel: "Any price", options: priceBands(market, all) },
+    { key: "transmission", label: "Transmission", anyLabel: "Any", options: each(all.map((v) => v.transmission)) },
+  ];
 
   // Filtering in the route rather than the browser: the whole fleet is already
   // loaded here, and doing it server-side keeps every filtered view a real URL.
@@ -187,7 +196,18 @@ export default async function RentalsPage({
         )}
 
         {all.length > 0 && (
-          <RentalToolbar options={options} showing={fleet.length} total={all.length} />
+          <ListToolbar
+            count={fleet.length === all.length ? `${all.length} cars` : `${fleet.length} of ${all.length} cars`}
+            filters={filters}
+            sort={{
+              defaultValue: "price-low",
+              options: [
+                { value: "price-low", label: "Lowest price" },
+                { value: "price-high", label: "Highest price" },
+                { value: "name", label: "Name" },
+              ],
+            }}
+          />
         )}
 
         {fleet.length === 0 ? (
@@ -212,57 +232,25 @@ export default async function RentalsPage({
              card is the link, and it leads with the weekly price: most
              renters here rent by the week. The deposit, every rate and the
              open dates are on the car's own page, where they decide. */
-          <ul className="rent-list" id="rental-cars">
+          <ul className="cl-list" id="rental-cars">
             {fleet.map((v, i) => {
-              const title = name(v);
               const weekly = v.tariff.weeklyMinor;
               return (
-                <li key={v.id}>
-                  <Link href={`/${code}/rentals/${v.slug}`} className="rent-card">
-                    <span className="rent-card-photo">
-                      {v.image ? (
-                        // Sized to the slot it fills: about 112 pixels wide on a
-                        // phone, a third of the row on a wider screen. The first
-                        // is fetched early; it is usually the largest thing on
-                        // the first screen.
-                        <Image
-                          src={v.image}
-                          alt=""
-                          fill
-                          sizes="(min-width: 768px) 360px, 112px"
-                          preload={i === 0}
-                          unoptimized={!canResize(v.image)}
-                        />
-                      ) : (
-                        <span className="rent-card-nophoto">
-                          <i className="fas fa-car" aria-hidden="true" />
-                        </span>
-                      )}
-                    </span>
-                    <span className="rent-card-body">
-                      <h3 className="rent-card-name">{title}</h3>
-                      <span className="rent-card-price">
-                        <strong>{fmt(weekly ?? v.tariff.dailyMinor)}</strong>{" "}
-                        {weekly != null ? "a week" : "a day"}
-                      </span>
-                      <span className="rent-card-meta">
-                        {[
-                          weekly != null ? `or ${fmt(v.tariff.dailyMinor)} a day` : null,
-                          v.transmission,
-                          v.seats != null ? `${v.seats} seats` : null,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                      {v.tariff.withDriverAvailable && (
-                        <span className="rent-card-badge">Driver available</span>
-                      )}
-                    </span>
-                    <span className="rent-card-go" aria-hidden="true">
-                      <i className="fas fa-chevron-right" />
-                    </span>
-                  </Link>
-                </li>
+                <CarRow
+                  key={v.id}
+                  href={`/${code}/rentals/${v.slug}`}
+                  image={v.image}
+                  preload={i === 0}
+                  title={name(v)}
+                  price={fmt(weekly ?? v.tariff.dailyMinor)}
+                  unit={weekly != null ? "a week" : "a day"}
+                  details={[
+                    weekly != null && `or ${fmt(v.tariff.dailyMinor)} a day`,
+                    v.transmission,
+                    v.seats != null && `${v.seats} seats`,
+                  ]}
+                  badge={v.tariff.withDriverAvailable ? "Driver available" : null}
+                />
               );
             })}
           </ul>

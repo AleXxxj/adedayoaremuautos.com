@@ -6,10 +6,11 @@ import { MARKETS, isMarketCode, formatDistance } from "@/lib/market";
 import { listInventory, filterOptions, type SortKey } from "@/lib/repositories/vehicles";
 import { formatMoney, money, fromMajor } from "@/lib/money";
 import { mediaUrl } from "@/lib/media";
-import { LegacyFilters, ActiveFilters } from "@/components/LegacyFilters";
+import { ActiveFilters } from "@/components/ActiveFilters";
+import { ListToolbar } from "@/components/ListToolbar";
+import { CarRow } from "@/components/CarRow";
+import "@/styles/car-list.css";
 import { EmptyState } from "@/components/EmptyState";
-import Image from "next/image";
-import { canResize } from "@/lib/photo";
 
 export const dynamic = "force-dynamic";
 
@@ -130,34 +131,41 @@ export default async function InventoryPage({
         </p>
       </div>
 
-      <Suspense fallback={null}>
-        <LegacyFilters
-          options={{
-            makes: options.makes,
-            years: options.years,
-            conditions: market.conditions,
-            transmissions: options.transmissions,
-            fuels: options.fuels,
-            priceBands: priceBands(market),
-          }}
-        />
-      </Suspense>
-
-      <div className="featured">
+      <div className="featured featured--list">
         <div className="featured-container">
+          {/* Count, filters and sort in one row; the filters fold behind a
+              button. A count only when there is something to count: "no
+              vehicles match" above a panel explaining the market has no stock
+              yet says the same thing twice, and contradicts it. */}
+          {marketTotal > 0 && (
+            <Suspense fallback={null}>
+              <ListToolbar
+                // The total; the page numbers are under the list.
+                count={total === 0 ? "No matches" : `${total} car${total === 1 ? "" : "s"}`}
+                resetPage
+                filters={[
+                  { key: "make", label: "Make", anyLabel: "Any make", options: options.makes.map((m) => ({ value: m, label: m })) },
+                  { key: "year", label: "Year", anyLabel: "Any year", options: options.years.map((y) => ({ value: String(y), label: String(y) })) },
+                  { key: "price", label: "Price", anyLabel: "Any price", options: priceBands(market) },
+                  { key: "condition", label: "Condition", anyLabel: "Any", options: market.conditions.map((c) => ({ value: c, label: c })) },
+                  { key: "transmission", label: "Transmission", anyLabel: "Any", options: options.transmissions.map((t) => ({ value: t, label: t })) },
+                ]}
+                sort={{
+                  defaultValue: "newest",
+                  options: [
+                    { value: "newest", label: "Newest" },
+                    { value: "price_asc", label: "Lowest price" },
+                    { value: "price_desc", label: "Highest price" },
+                    { value: "year_desc", label: "Newest year" },
+                    { value: "mileage_asc", label: "Lowest miles" },
+                  ],
+                }}
+              />
+            </Suspense>
+          )}
           <Suspense fallback={null}>
             <ActiveFilters />
           </Suspense>
-
-          {/* A count is only worth showing when there is something to count.
-              "No vehicles match" sitting above a panel that explains the
-              market has no stock yet says the same thing twice, in a way that
-              contradicts it. */}
-          {total > 0 && (
-            <div className="results-count">
-              {`Showing ${(page - 1) * PER_PAGE + 1}–${Math.min(page * PER_PAGE, total)} of ${total} vehicle${total === 1 ? "" : "s"}`}
-            </div>
-          )}
 
           {vehicles.length === 0 ? (
             /* An empty filter and an empty market are different situations.
@@ -192,65 +200,26 @@ export default async function InventoryPage({
               />
             )
           ) : (
-            <div className="cars-grid">
-              {vehicles.map((v) => {
-                const name = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
-                return (
-                  <div className="car-card" key={v.id}>
-                    <div className="car-image">
-                      {v.primaryImage ? (
-                        <Image
-                          src={mediaUrl(v.primaryImage)}
-                          alt={name}
-                          width={760}
-                          height={570}
-                          sizes="(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw"
-                          unoptimized={!canResize(mediaUrl(v.primaryImage))}
-                        />
-                      ) : (
-                        <div className="car-image-placeholder">Photography coming soon</div>
-                      )}
-                      <span className="car-badge">{v.condition}</span>
-                    </div>
-                    <div className="car-details">
-                      <h3 className="car-title">{name}</h3>
-                      <div className="car-specs">
-                        <span>
-                          <i className="fas fa-calendar" /> {v.year}
-                        </span>
-                        {v.mileage != null && (
-                          <span>
-                            <i className="fas fa-tachometer-alt" />{" "}
-                            {formatDistance(v.mileage, market)}
-                          </span>
-                        )}
-                        {v.transmission && (
-                          <span>
-                            <i className="fas fa-cog" /> {v.transmission}
-                          </span>
-                        )}
-                      </div>
-                      <div className="car-price">
-                        {v.priceMinor != null
-                          ? formatMoney(money(v.priceMinor, market.currency), market.locale)
-                          : "Price on request"}
-                      </div>
-                      <div className="car-actions">
-                        <Link href={`/${code}/inventory/${v.slug}`} className="btn btn-primary">
-                          View
-                        </Link>
-                        <Link
-                          href={`/${code}/contact?vehicle=${v.slug}`}
-                          className="btn btn-outline"
-                        >
-                          <i className="fas fa-envelope" /> Inquire
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            /* One row per car on a phone, a grid on a wider screen; the whole
+               row opens the car, where the full details and "Inquire" are. */
+            <ul className="cl-list">
+              {vehicles.map((v, i) => (
+                <CarRow
+                  key={v.id}
+                  href={`/${code}/inventory/${v.slug}`}
+                  image={v.primaryImage ? mediaUrl(v.primaryImage) : null}
+                  preload={i === 0}
+                  title={[v.year, v.make, v.model, v.trim].filter(Boolean).join(" ")}
+                  price={
+                    v.priceMinor != null
+                      ? formatMoney(money(v.priceMinor, market.currency), market.locale)
+                      : "Price on request"
+                  }
+                  details={[v.mileage != null && formatDistance(v.mileage, market), v.transmission]}
+                  badge={v.condition}
+                />
+              ))}
+            </ul>
           )}
 
           {pages > 1 && (
