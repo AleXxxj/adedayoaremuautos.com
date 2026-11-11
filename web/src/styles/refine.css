@@ -4272,3 +4272,22 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/*
+ * No field under 16px on a phone.
+ *
+ * iOS Safari zooms the whole page when a field smaller than 16px gets focus,
+ * and leaves it zoomed afterwards, so the renter has to pinch back out in the
+ * middle of a form. Measured in November 2026: the booking form's fields were
+ * 15px, the newsletter's 14px, the rental list's sort menu 14px. The :not()s
+ * keep this off checkboxes, radios and buttons. !important because it is a
+ * floor every form must respect, not one more size to out-rank: the first
+ * version lost to the sort menu's own, more specific rule.
+ */
+@media (max-width: 768px) {
+    .legacy-theme input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+    .legacy-theme select,
+    .legacy-theme textarea {
+        font-size: 16px !important;
+    }
+}
