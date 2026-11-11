@@ -1522,7 +1522,12 @@ export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
 
 /* ── Rental payments ───────────────────────────────────────────────────── */
 
-export const paymentProvider = pgEnum("payment_provider", ["stripe", "paystack"]);
+/**
+ * Who took the money. "counter" is staff, in person (migration 0031) — cash
+ * or a card machine — recorded so the money the business actually takes is
+ * on file, and so a partner whose renter paid in person still earns.
+ */
+export const paymentProvider = pgEnum("payment_provider", ["stripe", "paystack", "counter"]);
 export const paymentStatus = pgEnum("payment_status", [
   "pending",
   "paid",
@@ -1561,6 +1566,16 @@ export const rentalPayments = pgTable(
     amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
     currency: currencyCode("currency").notNull(),
     status: paymentStatus("status").notNull().default("pending"),
+
+    /**
+     * Counter payments only: cash, a card machine, or "other" (a payment app
+     * named on the note). Never a card or account number — there is nowhere
+     * to put one. The database requires both of these on a counter payment
+     * and neither on an online one (rental_payments_counter_is_attributed).
+     */
+    method: paymentMethod("method"),
+    /** The member of staff who took the money. */
+    recordedBy: uuid("recorded_by").references(() => staff.id),
 
     paidAt: timestamp("paid_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

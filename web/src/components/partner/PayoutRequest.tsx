@@ -67,8 +67,8 @@ export function PayoutRequest({
   if (availableMinor <= 0) {
     return (
       <p className="mt-5 text-sm text-[#7d7d7d]">
-        Once a rental or sale you introduced has completed, what you have earned
-        appears here and you can request it.
+        Once a rental you introduced has finished, what you have earned appears
+        here and you can request it.
       </p>
     );
   }

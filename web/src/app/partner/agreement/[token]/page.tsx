@@ -6,6 +6,7 @@ import {
   formatBps,
   governingLaw,
   referralLink,
+  saleCommissionsOn,
 } from "@/lib/referral";
 import { siteUrl } from "@/lib/feeds/inventory";
 import { AgreementDecision } from "@/components/AgreementDecision";
@@ -125,15 +126,30 @@ export default async function PartnerAgreementPage({
         <Field label="Commission on rentals">
           {formatBps(partner.rentalCommissionBps)}
         </Field>
-        <Field label="Commission on a sale">
-          {formatBps(partner.commissionBps)}
-        </Field>
+        {/* Sales are paused in the US (saleCommissionsOn), so no sale rate
+            is offered there in writing. */}
+        {saleCommissionsOn(partner.marketCode) && (
+          <Field label="Commission on a sale">
+            {formatBps(partner.commissionBps)}
+          </Field>
+        )}
         <Field label="Your referral code">
           <code className="text-[#e8e8e8]">{partner.code}</code>
         </Field>
         <Field label="Governing law">{governingLaw(partner.marketCode)}</Field>
-        <Field label="Version">{partner.agreementVersion ?? PARTNER_TERMS_VERSION}</Field>
+        <Field label="Version">{PARTNER_TERMS_VERSION}</Field>
       </dl>
+
+      {/* Someone who accepted an earlier version, reopening their link: the
+          wording below is the current one, which is not what they agreed to.
+          They accept it from their partner page, where it is explained. */}
+      {already && partner.agreementVersion !== PARTNER_TERMS_VERSION && (
+        <p className="mt-4 rounded-lg border border-[#3a3320] bg-[#1a1710] p-4 text-sm leading-relaxed text-[#e2c463]">
+          You accepted an earlier version of this agreement
+          {partner.agreementVersion ? ` (${partner.agreementVersion})` : ""}. The current
+          version is below. Sign in to your partner page to accept it.
+        </p>
+      )}
 
       <ol className="mt-7 space-y-5">
         {clauses.map((c) => (
@@ -157,6 +173,7 @@ export default async function PartnerAgreementPage({
           link={referralLink(siteUrl(), partner.code)}
           accountLink={accountSetupLink(siteUrl(), token)}
           alreadyAccepted={already}
+          version={PARTNER_TERMS_VERSION}
         />
       </div>
     </Shell>

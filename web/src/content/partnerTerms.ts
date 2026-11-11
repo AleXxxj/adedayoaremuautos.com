@@ -17,7 +17,27 @@
  * where the programme starts for exactly that reason.
  */
 
-export const PARTNER_TERMS_VERSION = "2026-10-v1";
+/*
+ * v2 (Nov 2026): a partner keeps a renter they introduced — every later
+ * rental booked with the same phone number counts, for as long as they keep
+ * renting (clause 2) — must say they are paid when they share, and must not
+ * promise anyone earnings (clause 6, the FTC's rules on endorsements and
+ * earnings claims). Sales count only where we have said so in writing
+ * (clauses 1 and 3). Partners on v1 are asked to accept v2 from their
+ * partner page, and v1 keeps applying to them until they do (clause 10).
+ */
+export const PARTNER_TERMS_VERSION = "2026-11-v2";
+
+/** The first version under which a partner keeps a renter past the link's 90 days. */
+const KEEPS_RENTERS_SINCE = "2026-11-v2";
+
+/**
+ * Whether a partner who accepted this version keeps their renters (clause 2).
+ * Versions are "YYYY-MM-vN", so a later version sorts after an earlier one.
+ */
+export function keepsRenters(version: string | null | undefined): boolean {
+  return !!version && version >= KEEPS_RENTERS_SINCE;
+}
 
 export interface PartnerClause {
   heading: string;
@@ -31,11 +51,11 @@ export const PARTNER_CLAUSES: PartnerClause[] = [
   },
   {
     heading: "How a referral is recorded",
-    body: "A referral counts when the customer reaches us through your link or gives your code, and we can see it on our records. Your link records a customer for 90 days from the first time they use it. If two partners could claim the same customer, the earlier record stands.",
+    body: "A referral counts when the customer reaches us through your link or gives your code, and we can see it on our records. Your link records a customer for 90 days from the first time they use it. Once a customer you referred has rented from us, every later rental they book with the same phone number counts as yours too, for as long as they keep renting. If two partners could claim the same customer, the earlier record stands.",
   },
   {
     heading: "What you are paid",
-    body: "There are two rates and both are shown on your partner account: one for vehicle rental and a lower one for vehicle sales. Commission is calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the rental or sale has completed.",
+    body: "Your rate for vehicle rental is shown on your partner account. Where we have told you in writing that sales are included, a lower rate for vehicle sales is shown there too. Commission is calculated on the amount the customer actually pays us, excluding taxes, refundable deposits and any third-party charges. It is earned only when that money has cleared and the rental or sale has completed.",
   },
   {
     heading: "When you are paid",
@@ -43,11 +63,11 @@ export const PARTNER_CLAUSES: PartnerClause[] = [
   },
   {
     heading: "When commission is not due",
-    body: "No commission is due on a booking or sale that is cancelled, refunded or charged back, on a customer who was already in discussion with us before your introduction, or on a transaction involving yourself, your household, or a business you control. If commission has already been paid on something that is later refunded, we may set it against future earnings.",
+    body: "No commission is due on a booking or sale that is cancelled, refunded or charged back, on a customer who had already rented from us or was already in discussion with us before your introduction, or on a transaction involving yourself, your household, or a business you control. If commission has already been paid on something that is later refunded, we may set it against future earnings.",
   },
   {
     heading: "How you may promote us",
-    body: "Be truthful. Do not quote prices, availability or finance terms we have not published, do not describe yourself as our employee, branch or agent, and do not advertise using our name in paid search. No unsolicited bulk messaging of any kind — if a complaint is made about how you obtained a contact, we will suspend your account while we look into it.",
+    body: "Be truthful, and say that you are paid for referrals — for example, \"I get a referral fee if you rent through my link.\" The messages your partner page writes for you already say it; keep that line when you share. Do not promise anyone how much they could earn, do not quote prices, availability or finance terms we have not published, do not describe yourself as our employee, branch or agent, and do not advertise using our name in paid search. No unsolicited bulk messaging of any kind — if a complaint is made about how you obtained a contact, we will suspend your account while we look into it.",
   },
   {
     heading: "Customer information",

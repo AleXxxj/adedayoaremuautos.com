@@ -56,6 +56,43 @@ export function referralLink(base: string, code: string): string {
   return `${base.replace(/\/+$/, "")}/r/${code}`;
 }
 
+/**
+ * A partner's link straight to one car's rental page: /r/CODE/rentals/slug.
+ *
+ * Same attribution as the plain link, but the person lands on the car they
+ * were sent, not on the home page to hunt for it. The route only accepts a
+ * fixed set of destinations (src/app/r/[code]/[[...dest]]/route.ts), so a
+ * partner link can never be made to send someone off the site.
+ */
+export function rentalReferralLink(base: string, code: string, slug: string): string {
+  return `${referralLink(base, code)}/rentals/${slug}`;
+}
+
+/**
+ * The sentence every shared message carries.
+ *
+ * Somebody recommending a business they are paid by has to say so — the
+ * FTC's rule on endorsements — and the business is expected to see that its
+ * partners do. Writing it into the message the partner page prepares means a
+ * partner only has to not delete it.
+ */
+export const PAID_REFERRAL_DISCLOSURE =
+  "I get a referral fee if you rent through my link.";
+
+/**
+ * What a partner sends about one car: the car, the price, the link, the
+ * disclosure. Prices only as published; no promises about availability,
+ * because the hold and the booking form are what decide that.
+ */
+export function rentalShareMessage(
+  car: string,
+  price: string,
+  place: string,
+  link: string,
+): string {
+  return `${car} for rent in ${place}, ${price}. See it and reserve here: ${link}\n\n${PAID_REFERRAL_DISCLOSURE}`;
+}
+
 /** Where a partner reads and accepts their agreement. */
 export function agreementLink(base: string, token: string): string {
   return `${base.replace(/\/+$/, "")}/partner/agreement/${token}`;
@@ -79,6 +116,26 @@ export function governingLaw(market: "us" | "ng"): string {
     ? "the State of North Carolina, United States of America"
     : "the Federal Republic of Nigeria";
 }
+
+/**
+ * Whether partners in this market are paid on vehicle sales.
+ *
+ * Not in the US, for now. North Carolina restricts paying anyone who is not
+ * a licensed dealer or salesperson for bringing in a vehicle sale (G.S.
+ * 20-306), and the question is with a lawyer. Until it is answered, a US
+ * partner earns on rentals only: no sale commission is recorded, shown or
+ * promised anywhere, so the record can't run ahead of the advice.
+ */
+export function saleCommissionsOn(market: "us" | "ng"): boolean {
+  return market !== "us";
+}
+
+/**
+ * The rental rate a new partner starts on, in basis points: 5%.
+ * Mirrors the database default for rental_commission_bps (migration 0027);
+ * the public page quotes it, and a partner's own page shows their own rate.
+ */
+export const DEFAULT_RENTAL_COMMISSION_BPS = 500;
 
 /** 150 bps -> "1.5%", 500 -> "5%" */
 export function formatBps(bps: number): string {

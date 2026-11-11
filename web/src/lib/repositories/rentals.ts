@@ -200,6 +200,12 @@ export async function listBookings(markets: MarketCode[]) {
       model: vehicles.model,
       year: vehicles.year,
       slug: vehicles.slug,
+      // Everything cleared against the booking, online or at the counter.
+      // bigint arrives as a string from postgres.js; the page converts it.
+      paidMinor: sql<string>`(
+        select coalesce(sum(p.amount_minor), 0)::bigint from rental_payments p
+        where p.booking_id = ${rentalBookings.id} and p.status = 'paid'
+      )`,
     })
     .from(rentalBookings)
     .leftJoin(vehicles, eq(rentalBookings.vehicleId, vehicles.id))

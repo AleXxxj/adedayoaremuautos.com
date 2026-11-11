@@ -513,23 +513,21 @@ export default async function MarketHome({
                 Earn with <span>Our Referral Program</span>
               </h2>
               <p>
-                Know someone looking for a quality vehicle? Refer them to us and
-                earn a commission on every completed purchase or rental.
+                Know someone who needs a car? Send them our way and earn on
+                every week they rent.
               </p>
               <div className="highlight">
                 5% <small>on car rental</small>
               </div>
               <ul className="referral-features">
-                {/* "Track your referrals easily" was on this list for years
-                    with nothing behind it. It is now a partner account with
-                    live stock, every referral and what is owed — so the claim
-                    stays, and hire is added because a referred booking earns
-                    the same way a referred sale does. */}
-                <li><i className="fas fa-check-circle" /> 5% on every completed car rental you refer</li>
-                <li><i className="fas fa-check-circle" /> 1.5% on every completed vehicle sale</li>
-                <li><i className="fas fa-check-circle" /> No limits - refer as many customers as you want</li>
-                <li><i className="fas fa-check-circle" /> Payout requested from your own dashboard</li>
-                <li><i className="fas fa-check-circle" /> Track your referrals easily</li>
+                {/* Rentals only. Sale referrals are on hold while a North
+                    Carolina lawyer looks at G.S. 20-306, which limits paying
+                    unlicensed people for vehicle-sale referrals. */}
+                <li><i className="fas fa-check-circle" /> 5% of every rental your renter pays for</li>
+                <li><i className="fas fa-check-circle" /> Again every week they keep renting</li>
+                <li><i className="fas fa-check-circle" /> Cars to share, with messages ready to send</li>
+                <li><i className="fas fa-check-circle" /> Payout requested from your own partner page</li>
+                <li><i className="fas fa-check-circle" /> Free to join — no recruiting</li>
               </ul>
               <Link href={`/${code}/referral`} className="btn btn-primary">
                 Become a Partner
@@ -541,11 +539,11 @@ export default async function MarketHome({
               <div className="percent">
                 5% <small>on rentals</small>
               </div>
-              <p>Plus 1.5% on every completed vehicle sale through your referral</p>
+              <p>Every week a renter you sent keeps the car</p>
+              {/* The arithmetic, not a promise: real rates are on the
+                  referral page, from the cars actually for rent. */}
               <p style={{ color: "var(--illustration-gold)", fontWeight: 600, marginTop: 20 }}>
-                {code === "us"
-                  ? "Example: a $900 week's rental = $45. A $30,000 car = $450."
-                  : "Example: a ₦300,000 week's rental = ₦15,000. A ₦10M car = ₦150,000."}
+                Your friend rents for a week: you earn 5% of what they pay.
               </p>
               <Link href={`/${code}/referral`} className="btn btn-primary">
                 Start Referring

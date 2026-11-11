@@ -23,6 +23,7 @@ export function AgreementDecision({
   link,
   accountLink,
   alreadyAccepted,
+  version,
 }: {
   token: string;
   name: string;
@@ -30,6 +31,8 @@ export function AgreementDecision({
   link: string;
   accountLink: string;
   alreadyAccepted: boolean;
+  /** The version of the terms on screen: what accepting agrees to. */
+  version: string;
 }) {
   const [accepted, acceptAction, accepting] = useActionState(acceptAgreement, null);
   const [declined, declineAction, declining] = useActionState(declineAgreement, null);
@@ -107,6 +110,7 @@ export function AgreementDecision({
 
       <form action={acceptAction}>
         <input type="hidden" name="token" value={token} />
+        <input type="hidden" name="version" value={version} />
 
         <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-[#d4d4d4]">
           <input

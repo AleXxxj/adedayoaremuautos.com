@@ -12,6 +12,7 @@ import {
 import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 import { LicenceLink } from "./LicenceLink";
+import { CounterPayment } from "./CounterPayment";
 
 interface Booking {
   id: string;
@@ -40,6 +41,11 @@ interface Booking {
   total: string;
   deposit: string | null;
   createdAt: string;
+  /** Cleared so far, online or at the counter, formatted. */
+  paid: string;
+  /** Still owed, in major units, to prefill the counter payment. */
+  owedMajor: number;
+  currencySymbol: string;
 }
 
 /**
@@ -191,6 +197,15 @@ export function BookingRow({
 
       <HoldPanel booking={booking} />
       <DocumentCheck booking={booking} />
+      {booking.status !== "cancelled" && (
+        <CounterPayment
+          bookingId={booking.id}
+          paid={booking.paid}
+          total={booking.total}
+          owedMajor={booking.owedMajor}
+          currencySymbol={booking.currencySymbol}
+        />
+      )}
 
       {state?.error && (
         <p className="mt-3 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-3 py-2 text-sm text-[var(--danger)]">

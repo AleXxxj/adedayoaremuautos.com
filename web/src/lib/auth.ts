@@ -98,6 +98,8 @@ export interface PartnerSession {
   commissionBps: number;
   /** The hire rate, which is the higher of the two. */
   rentalCommissionBps: number;
+  /** The agreement version they accepted, to offer a newer one. */
+  agreementVersion: string | null;
 }
 
 /**
@@ -150,6 +152,7 @@ export async function requirePartner(): Promise<PartnerSession> {
     marketCode: record.marketCode,
     commissionBps: record.commissionBps,
     rentalCommissionBps: record.rentalCommissionBps,
+    agreementVersion: record.agreementVersion,
   };
 }
 

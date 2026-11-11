@@ -113,9 +113,13 @@ export async function sendAgreementToSign(o: {
   name: string;
   link: string;
   hireRate: string;
-  saleRate: string;
+  /** null where sale commissions are paused (saleCommissionsOn): never promised. */
+  saleRate: string | null;
 }): Promise<void> {
   const first = o.name.trim().split(/\s+/)[0] || "there";
+  const rates = o.saleRate
+    ? `${o.hireRate} on car rentals and ${o.saleRate} on a vehicle sale`
+    : `${o.hireRate} on car rentals`;
   const html = shell(
     "Your partner agreement",
     `<p style="margin:0 0 14px;font-size:16px;color:#111">Hello ${escapeHtml(first)},</p>
@@ -125,10 +129,8 @@ export async function sendAgreementToSign(o: {
        you should read it before you accept it.
      </p>
      <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#333">
-       Your commission is <strong>${escapeHtml(o.hireRate)}</strong> on car
-       rentals and <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale,
-       calculated on what the customer actually pays us, on completed deals you
-       introduce.
+       Your commission is <strong>${escapeHtml(rates)}</strong>, calculated on
+       what the customer actually pays us, on completed deals you introduce.
      </p>
      <p style="margin:0 0 18px">
        <a href="${escapeHtml(o.link)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:8px">Read and accept the agreement</a>
@@ -147,7 +149,7 @@ export async function sendAgreementToSign(o: {
     "",
     "Good news — we would like to take your application forward. The last step is the partner agreement. It is short, it is in plain English, and you should read it before you accept it.",
     "",
-    `Your commission is ${o.hireRate} on car rental and ${o.saleRate} on a vehicle sale, calculated on what the customer actually pays us, on completed deals you introduce.`,
+    `Your commission is ${rates}, calculated on what the customer actually pays us, on completed deals you introduce.`,
     "",
     "Read and accept the agreement:",
     o.link,
@@ -188,7 +190,7 @@ export async function sendApplicationDeclined(o: {
          : ""
      }
      <p style="margin:0;font-size:15px;line-height:1.6;color:#333">
-       This is not a judgement on you and it is not permanent — you are welcome
+       This is not a judgment on you and it is not permanent — you are welcome
        to apply again later, or to call us if you would like to talk it through.
      </p>`,
   );
@@ -198,7 +200,7 @@ export async function sendApplicationDeclined(o: {
     "Thank you for applying to our referral program. We are not taking your application forward at this time.",
     ...(reason ? ["", reason] : []),
     "",
-    "This is not a judgement on you and it is not permanent — you are welcome to apply again later, or to call us if you would like to talk it through.",
+    "This is not a judgment on you and it is not permanent — you are welcome to apply again later, or to call us if you would like to talk it through.",
     "",
     "Adedayo Aremu Autos",
   ].join("\n");
@@ -221,17 +223,19 @@ export async function sendPartnerWelcome(o: {
   link: string;
   accountLink: string;
   hireRate: string;
-  saleRate: string;
+  /** null where sale commissions are paused (saleCommissionsOn): never promised. */
+  saleRate: string | null;
 }): Promise<void> {
   const first = o.name.trim().split(/\s+/)[0] || "there";
+  const earn = o.saleRate
+    ? `Anyone who books or buys through your link is recorded against your name, and you earn ${o.hireRate} on car rentals or ${o.saleRate} on a vehicle sale.`
+    : `Anyone who rents through your link is recorded against your name, and you earn ${o.hireRate} on what they pay for each rental.`;
   const html = shell(
     "Welcome — you are a partner",
     `<p style="margin:0 0 14px;font-size:16px;color:#111">Congratulations ${escapeHtml(first)},</p>
      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#333">
        Your agreement is accepted and your referral code is live from now.
-       Anyone who books or buys through your link is recorded against your
-       name, and you earn <strong>${escapeHtml(o.hireRate)}</strong> on car
-       rentals or <strong>${escapeHtml(o.saleRate)}</strong> on a vehicle sale.
+       ${escapeHtml(earn)}
      </p>
 
      <div style="margin:0 0 20px;border:1px solid ${RULE};border-radius:10px;padding:18px;text-align:center">
@@ -242,8 +246,8 @@ export async function sendPartnerWelcome(o: {
      </div>
 
      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#333">
-       Set up your partner account to see live stock, every referral you have
-       made, what has completed, and what you are owed.
+       Set up your partner account to see the cars you can share, every
+       referral you have made, what has completed, and what you are owed.
      </p>
      <p style="margin:0 0 18px">
        <a href="${escapeHtml(o.accountLink)}" style="display:inline-block;background:${GREEN};color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:8px">Create my partner account</a>
@@ -256,12 +260,12 @@ export async function sendPartnerWelcome(o: {
   const text = [
     `Congratulations ${first},`,
     "",
-    `Your agreement is accepted and your referral code is live from now. Anyone who books or buys through your link is recorded against your name, and you earn ${o.hireRate} on car rental or ${o.saleRate} on a vehicle sale.`,
+    `Your agreement is accepted and your referral code is live from now. ${earn}`,
     "",
     `Your code: ${o.code}`,
     `Your link: ${o.link}`,
     "",
-    "Set up your partner account to see live stock, every referral you have made, what has completed, and what you are owed:",
+    "Set up your partner account to see the cars you can share, every referral you have made, what has completed, and what you are owed:",
     o.accountLink,
     "",
     "Adedayo Aremu Autos",

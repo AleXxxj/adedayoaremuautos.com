@@ -1,6 +1,5 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   partnerEarnings,
@@ -14,11 +13,24 @@ import { requirePartner } from "@/lib/auth";
 import { partnerTotals } from "@/lib/partnerEarnings";
 import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
-import { formatBps, referralLink } from "@/lib/referral";
+import {
+  formatBps,
+  referralLink,
+  rentalReferralLink,
+  rentalShareMessage,
+  commissionOn,
+  governingLaw,
+  saleCommissionsOn,
+} from "@/lib/referral";
 import { siteUrl } from "@/lib/feeds/inventory";
+import { listFleet } from "@/lib/repositories/rentals";
+import { listLocations } from "@/lib/repositories/locations";
+import { numberedPartnerClauses, PARTNER_TERMS_VERSION } from "@/content/partnerTerms";
 import { PartnerShell, Panel } from "@/components/partner/PartnerShell";
 import { PartnerHeader } from "@/components/partner/PartnerHeader";
 import { ShareLink } from "@/components/partner/ShareLink";
+import { ShareCar } from "@/components/partner/ShareCar";
+import { TermsUpdate } from "@/components/partner/TermsUpdate";
 import { PayoutRequest } from "@/components/partner/PayoutRequest";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +62,7 @@ export default async function PartnerDashboard() {
   const fmt = (minor: number) =>
     formatMoney(money(minor, market.currency), market.locale);
 
-  const [totals, earnings, payouts, introduced, bookings, sales, stock] =
+  const [totals, earnings, payouts, introduced, bookings, sales, fleet, sites] =
     await Promise.all([
       partnerTotals(partner.id),
 
@@ -115,31 +127,40 @@ export default async function PartnerDashboard() {
         .orderBy(desc(deals.createdAt))
         .limit(25),
 
-      db
-        .select({
-          id: vehicles.id,
-          slug: vehicles.slug,
-          make: vehicles.make,
-          model: vehicles.model,
-          year: vehicles.year,
-          priceMinor: vehicles.priceMinor,
-          currency: vehicles.currency,
-          listingKind: vehicles.listingKind,
-        })
-        .from(vehicles)
-        .where(
-          and(
-            eq(vehicles.marketCode, partner.marketCode),
-            eq(vehicles.status, "available"),
-          ),
-        )
-        .orderBy(desc(vehicles.isFeatured), desc(vehicles.updatedAt))
-        .limit(24),
+      // The cars a partner can actually send someone to rent, with rates.
+      listFleet(partner.marketCode),
+      listLocations(partner.marketCode),
     ]);
 
   const counts = introduced[0] ?? { total: 0, open: 0, won: 0 };
   const base = siteUrl();
   const link = referralLink(base, partner.code);
+  const site = sites[0];
+  const place = site ? [site.city, site.region].filter(Boolean).join(", ") : market.name;
+
+  /*
+   * Each car with its share message and what one rental earns.
+   *
+   * By the week where the car has a weekly rate — that is how the renters
+   * worth referring rent, and how the partner keeps earning — and by the day
+   * otherwise. The math, never a promise of income: what one week (or day)
+   * of this car pays them, at their own rate.
+   */
+  const toShare = fleet.map((v) => {
+    const car = [v.year, v.make, v.model].filter(Boolean).join(" ");
+    const weekly = v.tariff.weeklyMinor;
+    const unitMinor = weekly ?? v.tariff.dailyMinor;
+    const unit = weekly != null ? "week" : "day";
+    const price = `${fmt(unitMinor)} a ${unit}`;
+    return {
+      id: v.id,
+      car,
+      image: v.image,
+      price,
+      earn: `You earn ${fmt(commissionOn(unitMinor, partner.rentalCommissionBps))} for each ${unit} they rent it`,
+      message: rentalShareMessage(car, price, place, rentalReferralLink(base, partner.code, v.slug)),
+    };
+  });
 
   return (
     <PartnerShell wide>
@@ -147,11 +168,49 @@ export default async function PartnerDashboard() {
         name={partner.fullName}
         code={partner.code}
         hireRate={formatBps(partner.rentalCommissionBps)}
-        saleRate={formatBps(partner.commissionBps)}
+        saleRate={
+          saleCommissionsOn(partner.marketCode) ? formatBps(partner.commissionBps) : null
+        }
         market={market.name}
       />
 
       <div className="mt-6 space-y-5">
+        {partner.agreementVersion !== PARTNER_TERMS_VERSION && (
+          <TermsUpdate clauses={numberedPartnerClauses(governingLaw(partner.marketCode))} />
+        )}
+
+        {/* ── Cars to share ─────────────────────────────────────────────
+            First, because it is what a partner opens this page to do. Each
+            card's message carries the car, its price, a link to that car
+            with their code attached, and the line saying they are paid. */}
+        <Panel title="Cars to share">
+          {toShare.length === 0 ? (
+            <p className="text-sm text-[#9b9b9b]">
+              No cars are listed for rent right now. Your link still works:
+              anyone who rents through it later is recorded as yours.
+            </p>
+          ) : (
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {toShare.map((c) => (
+                <ShareCar
+                  key={c.id}
+                  car={c.car}
+                  image={c.image}
+                  price={c.price}
+                  earn={c.earn}
+                  message={c.message}
+                />
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-xs leading-relaxed text-[#9b9b9b]">
+            Once someone you referred rents, every later rental they book with the same
+            phone number is yours too: each week they keep a car earns you{" "}
+            {formatBps(partner.rentalCommissionBps)} of what they pay. Keep the line that
+            says you get a referral fee.
+          </p>
+        </Panel>
+
         {/* ── What you are owed ─────────────────────────────────────── */}
         <Panel title="Your earnings">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -353,54 +412,9 @@ export default async function PartnerDashboard() {
           </Panel>
         )}
 
-        {/* ── Live stock ────────────────────────────────────────────── */}
-        <Panel
-          title={`Available now in ${market.name}`}
-          action={
-            <Link
-              href={`/${partner.marketCode}/inventory`}
-              className="text-xs text-[#4e9d76] underline"
-            >
-              See the full inventory
-            </Link>
-          }
-        >
-          {stock.length === 0 ? (
-            <p className="text-sm text-[#9b9b9b]">
-              Nothing is listed as available right now.
-            </p>
-          ) : (
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {stock.map((v) => (
-                <li key={v.id}>
-                  <Link
-                    href={`/${partner.marketCode}/inventory/${v.slug}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-[#1f1f1f] px-3 py-2.5 text-sm hover:border-[#333]"
-                  >
-                    <span className="min-w-0 truncate text-[#d4d4d4]">
-                      {v.year} {v.make} {v.model}
-                      {v.listingKind === "rental" && (
-                        <span className="ml-2 text-xs text-[#7d7d7d]">rental</span>
-                      )}
-                    </span>
-                    <span className="shrink-0 tabular-nums text-[#9b9b9b]">
-                      {v.priceMinor
-                        ? formatMoney(
-                            money(Number(v.priceMinor), v.currency),
-                            market.locale,
-                          )
-                        : "POA"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="mt-3 text-xs leading-relaxed text-[#6f6f6f]">
-            This is the live list — what is here is what we can supply today.
-            Please do not quote prices or availability we have not published.
-          </p>
-        </Panel>
+        {/* The sale-stock list that was here is gone: the program is built
+            around rentals now ("Cars to share", above), and sale referrals
+            wait on a North Carolina lawyer's view of G.S. 20-306. */}
       </div>
     </PartnerShell>
   );

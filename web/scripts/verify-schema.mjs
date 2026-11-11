@@ -975,6 +975,55 @@ await allows(
    WHERE id = 'dddddddd-0000-0000-0000-00000000000a'`,
 );
 
+// ── Payments taken at the counter ──────────────────────────────────────────
+//
+// The money the business actually takes is paid in person. It has to be
+// recorded with how it was taken and by whom — that is what makes a partner's
+// commission on a cash rental defensible — and never as anything that would
+// need an account number.
+console.log("\nPayments taken at the counter");
+
+const counter = (ref, method, by = "'99999999-9999-4999-8999-999999999999'") => `
+  INSERT INTO rental_payments
+    (booking_id, market_code, provider, provider_ref, amount_minor, currency, status, paid_at, method, recorded_by)
+  VALUES ('aaaaaaaa-0000-0000-0000-000000000001','us','counter','${ref}',45000,'USD','paid',now(),
+    ${method === null ? "NULL" : `'${method}'`}, ${by});`;
+
+await allows(db, "records cash taken by a member of staff", counter("ck-cash-1", "cash"));
+await allows(db, "records a card machine payment", counter("ck-card-1", "card"));
+await rejects(
+  db,
+  "rejects a counter payment with no method",
+  counter("ck-nomethod", null),
+  "rental_payments_counter_is_attributed",
+);
+await rejects(
+  db,
+  "rejects a counter payment nobody took",
+  counter("ck-nobody", "cash", "NULL"),
+  "rental_payments_counter_is_attributed",
+);
+await rejects(
+  db,
+  "rejects a check recorded as money in hand",
+  counter("ck-cheque", "cheque"),
+  "rental_payments_counter_methods",
+);
+await rejects(
+  db,
+  "rejects the same counter payment recorded twice",
+  counter("ck-cash-1", "cash"),
+  "rental_payments_provider_ref_unique",
+);
+await rejects(
+  db,
+  "rejects a method on an online payment",
+  `INSERT INTO rental_payments
+     (booking_id, market_code, provider, provider_ref, amount_minor, currency, status, method)
+   VALUES ('aaaaaaaa-0000-0000-0000-000000000001','us','stripe','cs_test_method',45000,'USD','pending','cash');`,
+  "rental_payments_counter_is_attributed",
+);
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mSCHEMA NOT VERIFIED\x1b[0m\n" : "  \x1b[32mSchema verified.\x1b[0m\n"),

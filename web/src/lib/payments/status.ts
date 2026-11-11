@@ -26,13 +26,17 @@ export async function paymentStateFor(
   if (!row) return null;
 
   const cfg = MARKETS[row.b.marketCode as MarketCode];
+  // "paid" only once the whole rental is: a part payment taken at the
+  // counter is not the payment this page reports.
   const [paid] = await db
-    .select({ n: sql<number>`count(*)::int` })
+    .select({ total: sql<number>`coalesce(sum(${rentalPayments.amountMinor}), 0)::bigint` })
     .from(rentalPayments)
     .where(and(eq(rentalPayments.bookingId, bookingId), eq(rentalPayments.status, "paid")));
 
+  const paidMinor = Number(paid?.total ?? 0);
+
   return {
-    status: (paid?.n ?? 0) > 0 ? "paid" : row.b.status,
+    status: paidMinor > 0 && paidMinor >= row.b.totalMinor ? "paid" : row.b.status,
     reference: bookingId.slice(0, 8).toUpperCase(),
     amount: formatMoney(money(row.b.totalMinor, cfg.currency), cfg.locale),
   };

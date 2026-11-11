@@ -2104,6 +2104,38 @@
     color: var(--text-secondary, #b9b9b9);
 }
 
+/* Real cars and their weekly rates: the math of one rental, not a promise. */
+.legacy-theme .referral-cars {
+    margin: -22px 0 34px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.legacy-theme .referral-cars li {
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .referral-car {
+    font-weight: 600;
+    color: #fff;
+}
+
+.legacy-theme .referral-car-math {
+    font-size: 14px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .referral-car-math strong {
+    color: var(--brand-400, #4e9d76);
+}
+
 .legacy-theme .referral-steps {
     margin: 0 0 34px;
     padding: 0;

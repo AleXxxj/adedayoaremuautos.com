@@ -7,8 +7,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { referralPartners } from "@/db/schema";
-import { requireSection, assertMarketAccess } from "@/lib/auth";
+import { referralPartners, auditLog } from "@/db/schema";
+import { requireSection, requirePartner, assertMarketAccess } from "@/lib/auth";
 import {
   normaliseCode,
   suggestCode,
@@ -17,6 +17,7 @@ import {
   referralLink,
   agreementLink,
   accountSetupLink,
+  saleCommissionsOn,
 } from "@/lib/referral";
 import { partnerByAgreementToken } from "@/lib/partner";
 import { PARTNER_TERMS_VERSION } from "@/content/partnerTerms";
@@ -293,7 +294,7 @@ export async function approvePartner(
     name: partner.fullName,
     link: agreementLink(siteUrl(), token),
     hireRate: formatBps(hireBps),
-    saleRate: formatBps(saleBps),
+    saleRate: saleCommissionsOn(partner.marketCode) ? formatBps(saleBps) : null,
   });
 
   revalidatePath("/admin/referrals");
@@ -397,6 +398,20 @@ export async function acceptAgreement(
     };
   }
 
+  /*
+   * The version they read, which is the version on the page now — not the
+   * one stamped when they were approved. A partner approved before the
+   * terms changed reads the new wording, and must be recorded as agreeing
+   * to it. A page left open across a change is asked to reload instead, so
+   * nobody is recorded as accepting wording they never saw.
+   */
+  if (String(formData.get("version") ?? "") !== PARTNER_TERMS_VERSION) {
+    return {
+      ok: false,
+      error: "These terms were updated while this page was open. Please reload the page, read them again, then accept.",
+    };
+  }
+
   // Taken from the proxy header rather than the socket: every request here
   // arrives through Vercel's edge. Recorded for evidence, never displayed.
   const h = await headers();
@@ -408,7 +423,7 @@ export async function acceptAgreement(
     .set({
       status: "active",
       agreedAt: new Date(),
-      agreementVersion: partner.agreementVersion ?? PARTNER_TERMS_VERSION,
+      agreementVersion: PARTNER_TERMS_VERSION,
       agreementIp: ip,
       agreementDeclinedAt: null,
     })
@@ -428,7 +443,7 @@ export async function acceptAgreement(
       link: referralLink(base, partner.code),
       accountLink,
       hireRate: formatBps(partner.rentalCommissionBps),
-      saleRate: formatBps(partner.commissionBps),
+      saleRate: saleCommissionsOn(partner.marketCode) ? formatBps(partner.commissionBps) : null,
     }).catch((e) => console.error("[referral] welcome email failed", e));
   }
 
@@ -540,4 +555,71 @@ export async function updatePartner(
 
   revalidatePath("/admin/referrals");
   return { ok: true };
+}
+
+/**
+ * A signed-in partner accepts the current version of the agreement.
+ *
+ * The agreement says that when the terms change we ask the partner to
+ * accept the new version (clause 10), so a partner on an older version sees
+ * what changed on their page and accepts it there. Their earlier acceptance
+ * is written to the audit log first: the partner row holds only the latest,
+ * and when someone agreed to which wording is the record a dispute turns on.
+ */
+export async function acceptUpdatedTerms(): Promise<{
+  ok: boolean;
+  error?: string;
+  message?: string;
+}> {
+  const partner = await requirePartner();
+  if (partner.agreementVersion === PARTNER_TERMS_VERSION) {
+    return { ok: true, message: "You are already on the current terms." };
+  }
+
+  const h = await headers();
+  const ip =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
+
+  /*
+   * One transaction, with the partner's row locked: a second click arriving
+   * at the same moment waits, finds the new version and changes nothing, so
+   * there is one log entry per acceptance. And the log entry and the change
+   * are written together or not at all, so the log never records an
+   * acceptance that did not happen.
+   */
+  await db.transaction(async (tx) => {
+    const [before] = await tx
+      .select({
+        agreementVersion: referralPartners.agreementVersion,
+        agreedAt: referralPartners.agreedAt,
+        agreementIp: referralPartners.agreementIp,
+      })
+      .from(referralPartners)
+      .where(eq(referralPartners.id, partner.id))
+      .for("update")
+      .limit(1);
+    if (!before || before.agreementVersion === PARTNER_TERMS_VERSION) return;
+
+    await tx
+      .update(referralPartners)
+      .set({ agreementVersion: PARTNER_TERMS_VERSION, agreedAt: new Date(), agreementIp: ip })
+      .where(eq(referralPartners.id, partner.id));
+
+    await tx.insert(auditLog).values({
+      actorEmail: partner.email,
+      entity: "referral_partner",
+      entityId: partner.id,
+      action: "terms_accepted",
+      diff: {
+        from: before.agreementVersion ?? null,
+        fromAgreedAt: before.agreedAt?.toISOString() ?? null,
+        fromIp: before.agreementIp ?? null,
+        to: PARTNER_TERMS_VERSION,
+        toIp: ip,
+      } as never,
+    });
+  });
+
+  revalidatePath("/partner");
+  return { ok: true, message: "Thanks — you are on the updated terms." };
 }

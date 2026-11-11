@@ -94,7 +94,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li><strong style="color: var(--silver-classic);">Financial Partners:</strong> With banks or financing institutions to process loan and instalment payment applications, strictly under confidentiality agreements.</li>
                 <li><strong style="color: var(--silver-classic);">Legal Authorities:</strong> When required by law, court order, or regulation, or to protect the rights, property, or safety of Adedayo Aremu Autos, our customers, or others.</li>
                 <li><strong style="color: var(--silver-classic);">Service Providers:</strong> With trusted third-party service providers (e.g., logistics, insurance) who assist in delivering our services, bound by strict data processing agreements.</li>
-                <li><strong style="color: var(--silver-classic);">Referral Partners:</strong> With our referral partners only to the extent necessary to attribute and process a referral commission — no sensitive financial data is shared.</li>
+                <li><strong style="color: var(--silver-classic);">Referral Partners:</strong> With our referral partners only to the extent necessary to attribute and process a referral commission: for a booking recorded against a partner, they can see the vehicle, the total and the booking's status. Your name, contact details, documents and payment details are not shared with them.</li>
             </ul>
             <div class="warning-box">
                 <p><i class="fas fa-exclamation-triangle" style="color: var(--illustration-gold); margin-right: 8px;"></i> We will never sell your personal data to advertisers, data brokers, or any third party for commercial gain.</p>
@@ -216,11 +216,11 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                     </tr>
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Vehicle Financing</strong></td>
-                        <td>Flexible instalment payment plans for vehicle purchases, ranging from 6 to 24 months.</td>
+                        <td>Flexible installment payment plans for vehicle purchases, ranging from 6 to 24 months.</td>
                     </tr>
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Referral Program</strong></td>
-                        <td>Commission-based referral system for partners who introduce verified buyers.</td>
+                        <td>Commission-based referral program for partners who introduce rental customers.</td>
                     </tr>
                 </tbody>
             </table>
@@ -259,9 +259,9 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-users"></i> 5. Referral Program</h2>
             <p>Our referral program allows individuals ("Referrers") to earn a commission by introducing buyers and rental customers to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
             <ul>
-                <li>Commission is payable to the Referrer upon completion of a successful vehicle rental or purchase by the referred party, at <strong style="color: var(--silver-classic);">5% on vehicle rental</strong> and <strong style="color: var(--silver-classic);">1.5% on a vehicle sale</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
+                <li>Commission is payable to the Referrer upon completion of a successful vehicle rental or purchase by the referred party, at <strong style="color: var(--silver-classic);">5% on vehicle rental</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A vehicle sale earns commission only where a Referrer's partner agreement says in writing that sales are included; in the United States they are not included at present. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
                 <li>A referral is deemed successful only when that amount has been paid in full and the purchase or rental has been completed.</li>
-                <li>Referrers are issued a personal referral link and code on acceptance into the program. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us.</li>
+                <li>Referrers are issued a personal referral link and code on acceptance into the program. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us. Once a referred customer has rented from us, later rentals they book with the same phone number are also recorded against that Referrer, for as long as they keep renting. A Referrer can see the vehicle, total and status of the bookings recorded against them, but not the customer's contact details or documents.</li>
                 <li>Earnings appear on the Referrer's own partner account as they are confirmed. A payout may be requested at any time once earnings are available, and is paid on our next payment run. We do not hold funds on a Referrer's behalf and this website does not collect bank details; payment arrangements are made with each Referrer directly.</li>
                 <li>Referrers may not misrepresent our services, apply undue pressure on potential buyers, or engage in deceptive practices. Breach of this condition forfeits the referral commission.</li>
                 <li>We reserve the right to modify or terminate the referral program at any time with reasonable notice.</li>

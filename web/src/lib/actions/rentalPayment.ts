@@ -1,7 +1,7 @@
 "use server";
 
 import { violates } from "@/lib/dbError";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { releaseExpiredHolds, HOLD_MINUTES } from "@/lib/rentalHolds";
 import { holdAfterCheckout } from "@/lib/reservation";
@@ -66,6 +66,23 @@ export async function startRentalPayment(
     return { ok: false, error: "This booking can no longer be paid for online." };
   }
   if (!isMarketCode(b.marketCode)) return { ok: false, error: "Unknown market." };
+
+  /*
+   * Never a second charge. Money taken at the counter confirms a reservation,
+   * so a reservation with a payment on it is one whose payment could not
+   * confirm it — the dates clashed — and a person is already sorting it out.
+   * Charging the full price again would make it worse.
+   */
+  const [paidBefore] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(rentalPayments)
+    .where(and(eq(rentalPayments.bookingId, bookingId), eq(rentalPayments.status, "paid")));
+  if ((paidBefore?.n ?? 0) > 0) {
+    return {
+      ok: false,
+      error: "We already have a payment for this booking. Please call us and we will sort out the rest.",
+    };
+  }
 
   const market = b.marketCode as MarketCode;
   const provider = providerFor(market);

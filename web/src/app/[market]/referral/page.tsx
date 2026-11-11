@@ -1,6 +1,14 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
+import { formatMoney, money } from "@/lib/money";
+import { listFleet } from "@/lib/repositories/rentals";
+import {
+  DEFAULT_RENTAL_COMMISSION_BPS,
+  PAID_REFERRAL_DISCLOSURE,
+  commissionOn,
+  formatBps,
+} from "@/lib/referral";
 import { ReferralSignup } from "@/components/ReferralSignup";
 
 /**
@@ -15,6 +23,8 @@ import { ReferralSignup } from "@/components/ReferralSignup";
  */
 export const revalidate = 300;
 
+const RATE = formatBps(DEFAULT_RENTAL_COMMISSION_BPS);
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,9 +33,8 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Referral Program",
-    description:
-      "Refer customers to Adedayo Aremu Autos and earn 5% commission on every completed car rental and 1.5% on every vehicle sale. Apply in a couple of minutes and track your referrals from your own partner account.",
+    title: "Earn by Referring Renters",
+    description: `Send renters to Adedayo Aremu Autos and earn ${RATE} of every rental they pay for — every week they keep renting. Free to join, no recruiting.`,
     alternates: {
       canonical: `/${market}/referral`,
       languages: { "en-US": "/us/referral", "en-NG": "/ng/referral" },
@@ -34,51 +43,50 @@ export async function generateMetadata({
 }
 
 /*
- * The steps as they now actually are.
+ * The steps as they actually are.
  *
- * This list used to open with "Sign up and you are given a code and a link
- * immediately. Nothing to wait for." That was true of the old programme, where
- * a code only tagged an enquiry and anyone could mint one. It stopped being
- * true the moment partners started being owed commission under an agreement,
- * and a page promising an instant link in front of a form that opens a
- * one-working-day review is how an applicant decides the site is broken.
+ * Applying opens a review — there is no instant code — because a partner is
+ * owed money under an agreement, and the agreement comes before the code.
  */
 const STEPS = [
   {
     icon: "fas fa-file-pen",
     title: "Apply",
-    body: "Tell us who you are and how you plan to refer people. It takes a couple of minutes.",
+    body: "Tell us who you are and who you know that needs a car. It takes a couple of minutes.",
   },
   {
     icon: "fas fa-phone",
-    title: "We come back to you",
-    body: "Within one working day, by email or phone. We read every application properly.",
+    title: "We get back to you",
+    body: "Within one business day, by email or phone. We read every application.",
   },
   {
     icon: "fas fa-handshake",
-    title: "Agree the terms",
-    body: "We email you a short agreement in plain English. Your code goes live the moment you accept it.",
+    title: "Accept the agreement",
+    body: "A short agreement in plain English. Your code goes live as soon as you accept it.",
   },
   {
     icon: "fas fa-share-nodes",
-    title: "Share your link",
-    body: "Send the link, or just tell someone your code — we can enter it by hand when they call.",
+    title: "Share cars",
+    body: "Your partner page lists every car for rent, each with a message ready to send by WhatsApp or text.",
   },
   {
     icon: "fas fa-hand-holding-usd",
-    title: "You get paid",
-    body: "5% on every car rental you introduce and 1.5% on every vehicle sale, once it completes and the money has cleared.",
+    title: "Get paid, week after week",
+    body: `${RATE} of what your renter pays for each rental, once it is paid and the car is back — and again for every week they keep renting.`,
   },
 ];
 
 /**
- * The referral programme, made real.
+ * The referral program, built around rentals.
  *
- * The homepage has advertised commission and "track your referrals
- * easily" since the original site, and both CTAs pointed at a general contact
- * form — which did not even offer "referral" as an option, so every would-be
- * partner was filed as a car buyer. There was no code, no link and no
- * attribution: a commission could only ever be settled from memory.
+ * Rentals because that is where the business's repeat customers are — weekly
+ * drivers — and because paying an unlicensed person for referring vehicle
+ * *sales* is restricted in North Carolina (G.S. 20-306); sale referrals wait
+ * for a lawyer's answer.
+ *
+ * The examples are real cars and their published weekly rates, showing the
+ * arithmetic of one rental — never a promise of what anyone will earn, which
+ * the FTC treats as an earnings claim that has to be backed up.
  */
 export default async function ReferralPage({
   params,
@@ -89,26 +97,28 @@ export default async function ReferralPage({
   if (!isMarketCode(code)) notFound();
   const market = MARKETS[code];
 
-  const example =
-    code === "us"
-      ? { hire: "$900", hireEarn: "$45", car: "$30,000", carEarn: "$450" }
-      : {
-          hire: "₦300,000",
-          hireEarn: "₦15,000",
-          car: "₦10,000,000",
-          carEarn: "₦150,000",
-        };
+  const fleet = await listFleet(code);
+  const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
+  const examples = fleet
+    .filter((v) => v.tariff.weeklyMinor != null)
+    .slice(0, 3)
+    .map((v) => ({
+      id: v.id,
+      car: [v.year, v.make, v.model].filter(Boolean).join(" "),
+      week: fmt(v.tariff.weeklyMinor!),
+      earn: fmt(commissionOn(v.tariff.weeklyMinor!, DEFAULT_RENTAL_COMMISSION_BPS)),
+    }));
 
   return (
     <>
       <div className="page-header page-header--referral">
         <div className="page-header-content">
           <h1>
-            Referral <span>Program</span>
+            Send a renter. <span>Earn {RATE}.</span>
           </h1>
           <p>
-            Know someone looking for a vehicle? Send them our way and earn on
-            every completed sale and rental.
+            Know someone who needs a car? Send them our way and earn on every
+            week they rent.
           </p>
         </div>
       </div>
@@ -118,14 +128,24 @@ export default async function ReferralPage({
           <div className="referral-page-grid">
             <div className="referral-explain">
               <div className="referral-headline">
-                5% <small>of every car rental you refer</small>
+                {RATE} <small>of every rental your renter pays for — every week they rent</small>
               </div>
-              <p className="referral-example">
-                A {example.hire} week&rsquo;s rental earns you{" "}
-                <strong>{example.hireEarn}</strong>. And{" "}
-                <strong>1.5%</strong> on vehicle sales — a {example.car} car
-                earns you <strong>{example.carEarn}</strong>.
-              </p>
+
+              {examples.length > 0 && (
+                <>
+                  <p className="referral-example">What one week earns you, on cars for rent today:</p>
+                  <ul className="referral-cars">
+                    {examples.map((e) => (
+                      <li key={e.id}>
+                        <span className="referral-car">{e.car}</span>
+                        <span className="referral-car-math">
+                          Rents for {e.week} a week · <strong>you earn {e.earn}</strong>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
               <ol className="referral-steps">
                 {STEPS.map((s, i) => (
@@ -144,33 +164,35 @@ export default async function ReferralPage({
               </ol>
 
               <div className="referral-terms">
-                <h3>The rules, plainly</h3>
+                <h3>The rules</h3>
                 <ul>
                   <li>
-                    Attribution lasts <strong>90 days</strong> from the first
-                    time someone opens your link.
+                    <strong>Free to join.</strong> You never pay us anything.
                   </li>
                   <li>
-                    First link wins. If two partners refer the same buyer, it is
-                    credited to whoever introduced them first.
+                    <strong>Paid on completed rentals</strong> — once the renter has
+                    paid and the car is back. Not on inquiries, and not on anything
+                    canceled or refunded. Refundable deposits and taxes don&rsquo;t count.
                   </li>
                   <li>
-                    Commission is paid on <strong>completed</strong> rentals and
-                    sales only — not on inquiries, and not on anything cancelled
-                    or refunded.
+                    <strong>Your renter stays yours.</strong> Your link records someone
+                    for 90 days. Once they rent, every later rental they book with the same
+                    phone number counts for you. If two partners refer the same person, the
+                    first introduction wins. Someone who has rented from us before
+                    isn&rsquo;t a new referral.
                   </li>
                   <li>
-                    Car rental pays <strong>5%</strong> and vehicle sales pay{" "}
-                    <strong>1.5%</strong>, both calculated on what the customer
-                    actually pays us — not including deposits you get back or
-                    taxes.
+                    <strong>Say you&rsquo;re paid.</strong> Every message your partner page
+                    writes includes &ldquo;{PAID_REFERRAL_DISCLOSURE}&rdquo; Keep that line.
                   </li>
                   <li>
-                    You cannot refer yourself, and staff are not eligible.
+                    <strong>No recruiting.</strong> You earn only from renters you send,
+                    never from signing up other partners. You can&rsquo;t refer yourself or
+                    your household, and staff aren&rsquo;t eligible.
                   </li>
                   <li>
-                    We arrange payment with you directly. This website never
-                    collects bank details.
+                    <strong>No bank details here.</strong> We arrange payment with you
+                    directly. This website never asks for them.
                   </li>
                 </ul>
               </div>

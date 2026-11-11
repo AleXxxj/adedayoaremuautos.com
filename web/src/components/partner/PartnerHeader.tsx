@@ -10,7 +10,8 @@ export function PartnerHeader({
   name: string;
   code: string;
   hireRate: string;
-  saleRate: string;
+  /** null where sale commissions are paused (saleCommissionsOn). */
+  saleRate: string | null;
   market: string;
 }) {
   return (
@@ -28,13 +29,16 @@ export function PartnerHeader({
           </code>{" "}
           · {market}
         </p>
-        {/* Both rates, spelled out. One figure labelled "commission" is how a
-            partner works out their earnings on the wrong one and then asks why
-            the number on the screen disagrees with theirs. */}
+        {/* Each rate named for what it pays on. One figure labelled
+            "commission" is how a partner works out their earnings on the
+            wrong one and then asks why the number on the screen disagrees. */}
         <p className="mt-1 text-sm text-[#9b9b9b]">
-          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car rental ·{" "}
-          <strong className="text-[#d4d4d4]">{saleRate}</strong> on vehicle
-          sales
+          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car rental
+          {saleRate && (
+            <>
+              {" "}· <strong className="text-[#d4d4d4]">{saleRate}</strong> on vehicle sales
+            </>
+          )}
         </p>
       </div>
 

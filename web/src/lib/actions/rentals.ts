@@ -16,7 +16,7 @@ import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 import { storeLicence } from "@/lib/licence";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
-import { resolveReferralPartner } from "@/lib/partner";
+import { referralPartnerForRenter } from "@/lib/partner";
 import { releaseExpiredHolds, findOwnHold } from "@/lib/rentalHolds";
 import { sendReservation } from "@/lib/mail/reservation";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
@@ -28,7 +28,7 @@ import {
   holdRemaining,
   MAX_OPEN_RESERVATIONS,
 } from "@/lib/reservation";
-import { confirmRentalEarning, cancelEarningFor } from "@/lib/partnerEarnings";
+import { syncRentalEarning } from "@/lib/partnerEarnings";
 
 /**
  * Every public vehicle page, as a route pattern for revalidatePath(…, "page").
@@ -325,8 +325,17 @@ export async function requestRental(
    * dealership the booking. Until now this happened for enquiries only, so a
    * partner whose customer hired a car for a week earned nothing the system
    * could see — on the one path that actually takes money.
+   *
+   * By the renter's history first, then the link: a partner earns on every
+   * week their renter rents with the same phone number, long after the
+   * link's 90 days. The rules are in referralPartnerForRenter.
    */
-  const referralPartnerId = await resolveReferralPartner(f.marketCode);
+  let referralPartnerId: string | null = null;
+  try {
+    referralPartnerId = await referralPartnerForRenter(f.marketCode, f.phone);
+  } catch (e) {
+    console.error("[rentals] referral lookup failed; booking taken without a partner", e);
+  }
 
   /*
    * The reservation.
@@ -765,22 +774,20 @@ export async function updateBookingStatus(
   }
 
   /*
-   * A referred booking's commission follows its status.
+   * A referred booking's commission follows its status: confirmed once the
+   * car is back (the agreement's "the rental has completed"), written off
+   * with a reason if it is cancelled, and worked out again on any other
+   * change — so reopening a cancelled booking brings its commission back.
    *
-   * The agreement says a commission is earned when the money has cleared and
-   * the hire has completed, so "returned" is the moment it becomes genuinely
-   * owed — not the moment the card cleared, because a customer who pays on
-   * Monday and cancels on Tuesday is a refund rather than a payout.
-   *
-   * Cancelling writes it off with a reason the partner reads on their own
-   * dashboard. A commission that silently disappears from somebody's earnings
-   * is how a partner concludes they are being short-changed.
+   * The status has already changed by this point, so a problem here is
+   * logged rather than reported as a failed update; the next payment or
+   * status change works the commission out again.
    */
   if (booking.referralPartnerId) {
-    if (status === "returned") {
-      await confirmRentalEarning(id);
-    } else if (status === "cancelled") {
-      await cancelEarningFor({ bookingId: id }, "The rental was cancelled.");
+    try {
+      await syncRentalEarning(id, status);
+    } catch (e) {
+      console.error("[rentals] commission not updated for booking", id, e);
     }
   }
 

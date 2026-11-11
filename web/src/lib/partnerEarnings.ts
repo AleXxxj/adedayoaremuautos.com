@@ -1,6 +1,6 @@
 import { violates } from "@/lib/dbError";
 import "server-only";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   partnerEarnings,
@@ -11,7 +11,7 @@ import {
   deals,
   leads,
 } from "@/db/schema";
-import { commissionOn, rateFor } from "@/lib/referral";
+import { commissionOn, rateFor, saleCommissionsOn } from "@/lib/referral";
 import { chooseSettled } from "@/lib/payoutAllocation";
 
 /**
@@ -37,27 +37,40 @@ import { chooseSettled } from "@/lib/payoutAllocation";
 const LIVE_STATES = ["pending", "confirmed", "paid"] as const;
 
 /**
- * A referred rental has been paid for.
+ * Brings a referred rental's commission into line with the booking.
  *
- * The basis is what the customer actually paid us, read from the cleared
- * payments rather than from the booking total — the agreement says commission
- * excludes refundable deposits, and the deposit is taken at pickup and is not
- * ours to pay commission on.
+ * Called whenever money is recorded against the booking or its status
+ * changes, and safe to call any number of times: the commission it writes is
+ * worked out from scratch each time, from two things only.
  *
- * Written as `pending`, not `confirmed`. The agreement says a commission is
- * earned when the money has cleared *and* the hire has completed, and a
- * customer who pays on Monday and cancels on Tuesday is a refund. Confirming
- * it the moment the card clears would mean paying out on hires that never
- * happened; `confirmRentalEarning` promotes it when the car comes back.
+ * - What the customer actually paid us, from the cleared payments rather
+ *   than the booking total. The refundable deposit is taken at pickup and is
+ *   not ours to pay commission on.
+ * - Whether the car has come back. The agreement says a commission is earned
+ *   when the money has cleared *and* the rental has completed, so it is
+ *   `pending` until the booking is returned and `confirmed` from then on. A
+ *   customer who pays on Monday and cancels on Tuesday is a refund, not a
+ *   payout.
+ *
+ * Because it is worked out rather than added to, the order things happen in
+ * stops mattering: money taken after the car is marked returned, a booking
+ * reopened after a cancellation, a status corrected by hand. Each used to
+ * strand the commission at the wrong amount or the wrong state.
  */
-export async function recordRentalEarning(bookingId: string): Promise<void> {
-  const [booking] = await db
+export async function recordRentalEarning(
+  bookingId: string,
+  // A parameter so scripts/verify-referrals.mts can run this against a
+  // throwaway Postgres; the app always uses the default.
+  database: typeof db = db,
+): Promise<void> {
+  const [booking] = await database
     .select({
       id: rentalBookings.id,
       marketCode: rentalBookings.marketCode,
       currency: rentalBookings.currency,
       partnerId: rentalBookings.referralPartnerId,
       status: rentalBookings.status,
+      totalMinor: rentalBookings.totalMinor,
       injuryCoverTotalMinor: rentalBookings.injuryCoverTotalMinor,
     })
     .from(rentalBookings)
@@ -65,11 +78,14 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
     .limit(1);
 
   if (!booking?.partnerId) return;
+  // Written off by cancelEarningFor when the booking was cancelled; brought
+  // back by the next call after it is reopened.
+  if (booking.status === "cancelled") return;
 
   // The partner must still be in good standing. A suspended partner keeps
   // what they have already earned — the agreement says so — but does not
   // accrue more while the business is looking into them.
-  const [partner] = await db
+  const [partner] = await database
     .select({
       id: referralPartners.id,
       status: referralPartners.status,
@@ -82,7 +98,7 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
 
   if (!partner || partner.status !== "active") return;
 
-  const [paid] = await db
+  const [paid] = await database
     .select({
       // bigint comes back from postgres.js as a string, so the cast is not
       // decoration — a previous version of this comparison was wrong, not the
@@ -109,8 +125,12 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
    * Clamped at zero rather than trusted: a refund recorded oddly could in
    * principle leave the cover larger than the cleared total, and a negative
    * basis would turn a commission into a deduction.
+   *
+   * And never more than the booking costs. A customer who pays online while
+   * staff take cash for the same booking has paid twice; the second payment
+   * is a refund the business owes, not a rental to earn on.
    */
-  const clearedMinor = Number(paid?.total ?? 0);
+  const clearedMinor = Math.min(Number(paid?.total ?? 0), Number(booking.totalMinor));
   const coverMinor = Number(booking.injuryCoverTotalMinor ?? 0);
   const basisMinor = Math.max(0, clearedMinor - coverMinor);
   if (basisMinor <= 0) return;
@@ -120,43 +140,65 @@ export async function recordRentalEarning(bookingId: string): Promise<void> {
   // therefore the one a hire gets paid at by accident.
   const bps = rateFor(partner, "rental");
   const amountMinor = commissionOn(basisMinor, bps);
+  const returned = booking.status === "returned";
 
+  /*
+   * One commission per booking, rewritten to match.
+   *
+   * Every column that can be worked out is set again: the amount (a rental
+   * paid half at pickup and half at return earns on both halves), the state
+   * (earned once the car is back, whichever happened first), and the
+   * cancellation (cleared, because a booking that reaches this line is not
+   * cancelled any more).
+   *
+   * Except once the commission is in a payout. Then the money has moved, or
+   * is about to, and the row is the record of it; a later change is a
+   * conversation with the partner rather than an edit.
+   *
+   * The conflict target repeats the index's WHERE clause: the unique index is
+   * partial (rental_booking_id IS NOT NULL), and Postgres only matches a
+   * partial index when the predicate is spelled out.
+   */
   try {
-    await db.insert(partnerEarnings).values({
-      partnerId: partner.id,
-      marketCode: booking.marketCode,
-      source: "rental",
-      rentalBookingId: bookingId,
-      basisMinor,
-      commissionBps: bps,
-      amountMinor,
-      currency: booking.currency,
-      state: "pending",
-    });
+    await database
+      .insert(partnerEarnings)
+      .values({
+        partnerId: partner.id,
+        marketCode: booking.marketCode,
+        source: "rental",
+        rentalBookingId: bookingId,
+        basisMinor,
+        commissionBps: bps,
+        amountMinor,
+        currency: booking.currency,
+        state: returned ? "confirmed" : "pending",
+        confirmedAt: returned ? new Date() : null,
+      })
+      .onConflictDoUpdate({
+        target: partnerEarnings.rentalBookingId,
+        targetWhere: sql`${partnerEarnings.rentalBookingId} is not null`,
+        set: {
+          basisMinor,
+          commissionBps: bps,
+          amountMinor,
+          state: returned ? "confirmed" : "pending",
+          // The first time it was confirmed stays the time it was confirmed.
+          confirmedAt: returned ? sql`coalesce(${partnerEarnings.confirmedAt}, now())` : null,
+          cancelledAt: null,
+          note: null,
+          updatedAt: new Date(),
+        },
+        setWhere: sql`${partnerEarnings.state} in ('pending', 'confirmed', 'cancelled') and ${partnerEarnings.payoutId} is null`,
+      });
     console.log(
       `[partner] rental commission recorded for ${partner.id} on booking ${bookingId}`,
     );
   } catch (e) {
-    // The ordinary case: this webhook has been delivered before.
-    if (violates(e, "partner_earnings_booking_unique")) return;
     // Never allowed to fail the payment that triggered it. A commission the
     // business has to work out by hand is recoverable; a 500 back to Stripe
     // makes it retry a payment that was already recorded.
     console.error("[partner] could not record rental commission", e);
   }
-}
-
-/** The car came back. The commission is now genuinely earned. */
-export async function confirmRentalEarning(bookingId: string): Promise<void> {
-  await db
-    .update(partnerEarnings)
-    .set({ state: "confirmed", confirmedAt: new Date() })
-    .where(
-      and(
-        eq(partnerEarnings.rentalBookingId, bookingId),
-        eq(partnerEarnings.state, "pending"),
-      ),
-    );
 }
 
 /**
@@ -173,16 +215,43 @@ export async function confirmRentalEarning(bookingId: string): Promise<void> {
 export async function cancelEarningFor(
   ref: { bookingId: string } | { dealId: string },
   reason: string,
+  database: typeof db = db,
 ): Promise<void> {
   const where =
     "bookingId" in ref
       ? eq(partnerEarnings.rentalBookingId, ref.bookingId)
       : eq(partnerEarnings.dealId, ref.dealId);
 
-  await db
+  await database
     .update(partnerEarnings)
-    .set({ state: "cancelled", cancelledAt: new Date(), note: reason })
-    .where(and(where, inArray(partnerEarnings.state, ["pending", "confirmed"])));
+    .set({ state: "cancelled", cancelledAt: new Date(), note: reason, updatedAt: new Date() })
+    .where(
+      and(
+        where,
+        inArray(partnerEarnings.state, ["pending", "confirmed"]),
+        isNull(partnerEarnings.payoutId),
+      ),
+    );
+}
+
+/**
+ * A referred booking's status changed: its commission follows.
+ *
+ * Cancelled writes it off with a reason the partner reads on their own
+ * dashboard. Any other status works it out again — so "returned" confirms
+ * it, a correction back to "active" un-confirms it, and reopening a
+ * cancelled booking brings it back at whatever has been paid.
+ */
+export async function syncRentalEarning(
+  bookingId: string,
+  status: string,
+  database: typeof db = db,
+): Promise<void> {
+  if (status === "cancelled") {
+    await cancelEarningFor({ bookingId }, "The rental was cancelled.", database);
+  } else {
+    await recordRentalEarning(bookingId, database);
+  }
 }
 
 /**
@@ -195,10 +264,9 @@ export async function cancelEarningFor(
  * Confirmed immediately, because `delivered` means the keys are handed over:
  * unlike a hire there is no later moment at which the thing completes.
  *
- * Note for the business, not the partner: commission on a US vehicle sale to
- * an unlicensed introducer is restricted in several states, which is why the
- * programme is being offered on hire first. This function exists so that the
- * sale side is ready, and so the figures are recorded consistently either way.
+ * Nothing is recorded for a US sale while sale commissions are paused there
+ * (`saleCommissionsOn`): North Carolina restricts paying an unlicensed person
+ * for a vehicle-sale introduction, and the question is with a lawyer.
  */
 export async function recordSaleEarning(dealId: string): Promise<void> {
   const [deal] = await db
@@ -217,6 +285,8 @@ export async function recordSaleEarning(dealId: string): Promise<void> {
     .limit(1);
 
   if (!deal || deal.status !== "delivered") return;
+  // Paused where the law is still being checked; see saleCommissionsOn.
+  if (!saleCommissionsOn(deal.marketCode as "us" | "ng")) return;
 
   const partnerId = deal.dealPartnerId ?? deal.leadPartnerId;
   if (!partnerId) return;

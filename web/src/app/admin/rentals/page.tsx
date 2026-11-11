@@ -4,7 +4,7 @@ import { AdminChrome } from "../layout";
 import { listBookings } from "@/lib/repositories/rentals";
 import { MARKETS } from "@/lib/market";
 import { holdRemaining } from "@/lib/reservation";
-import { formatMoney, money } from "@/lib/money";
+import { formatMoney, money, toMajor } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
 import { PaymentCheck } from "@/components/admin/PaymentCheck";
@@ -89,8 +89,10 @@ export default async function AdminRentalsPage() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {sorted.map(({ booking, make, model, year, slug }) => {
+            {sorted.map(({ booking, make, model, year, slug, paidMinor }) => {
               const m = MARKETS[booking.marketCode];
+              const paid = Number(paidMinor ?? 0);
+              const owedMinor = Math.max(0, booking.totalMinor - paid);
               return (
                 <BookingRow
                   key={booking.id}
@@ -127,6 +129,9 @@ export default async function AdminRentalsPage() {
                       ? formatMoney(money(booking.depositMinor, m.currency), m.locale)
                       : null,
                     createdAt: booking.createdAt.toISOString(),
+                    paid: formatMoney(money(paid, m.currency), m.locale),
+                    owedMajor: toMajor(money(owedMinor, m.currency)),
+                    currencySymbol: m.currency === "USD" ? "$" : "₦",
                   }}
                   vehicle={make ? { label: `${year} ${make} ${model}`, slug: slug! } : null}
                   locale={m.locale}

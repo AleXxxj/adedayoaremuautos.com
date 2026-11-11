@@ -93,11 +93,15 @@ export default async function ReservedPage({
    * finished is not "confirmed" any more.
    */
   if (b.status !== "quote") {
+    // Added up, not counted: a part payment at the counter is a payment, but
+    // it doesn't make "nothing more to pay" true.
     const [paid] = await db
-      .select({ n: sql<number>`count(*)::int` })
+      .select({ total: sql<number>`coalesce(sum(${rentalPayments.amountMinor}), 0)::bigint` })
       .from(rentalPayments)
       .where(and(eq(rentalPayments.bookingId, b.id), eq(rentalPayments.status, "paid")));
-    const paidOnline = (paid?.n ?? 0) > 0;
+    const paidMinor = Number(paid?.total ?? 0);
+    const owedMinor = Math.max(0, b.totalMinor - paidMinor);
+    const owed = formatMoney(money(owedMinor, b.currency), market.locale);
     const what = `${vehicle}${dates ? `, ${dates}` : ""}.`;
 
     return (
@@ -116,9 +120,11 @@ export default async function ReservedPage({
             ? "Thank you for renting with us."
             : b.status === "active"
               ? "Call us if you need to keep the vehicle longer."
-              : paidOnline
-                ? "Nothing more to pay today — the refundable deposit is taken when you pick up the vehicle."
-                : `Pay the rental total of ${amount} and the refundable deposit when you pick up the vehicle.`}
+              : paidMinor > 0 && owedMinor === 0
+                ? "The rental is paid. The refundable deposit is taken when you pick up the vehicle."
+                : paidMinor > 0
+                  ? `Pay the rest of the rental, ${owed}, and the refundable deposit when you pick up the vehicle.`
+                  : `Pay the rental total of ${amount} and the refundable deposit when you pick up the vehicle.`}
         </p>
       </Shell>
     );

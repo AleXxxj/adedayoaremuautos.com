@@ -101,7 +101,7 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
             people your code — we can enter it by hand.
           </li>
           <li>
-            <i className="fas fa-receipt" /> We confirm every sale before paying
+            <i className="fas fa-receipt" /> We confirm every rental before paying
             out, so keep your own note of who you sent.
           </li>
           <li>
