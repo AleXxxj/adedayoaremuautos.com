@@ -5,6 +5,7 @@ import { useActionToast } from "@/components/Toast";
 import { useActionState, useEffect, useRef } from "react";
 import { joinReferralProgramme, type PartnerResult } from "@/lib/actions/referral";
 import type { MarketConfig } from "@/lib/market";
+import { useHydrated } from "@/lib/useHydrated";
 
 /**
  * Applying to become a referral partner.
@@ -32,12 +33,17 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
   // Mount time in a ref, stamped on at submit — the same shape the other
   // public forms use, so a script that posts instantly is recognised.
   const mountedAt = useRef(0);
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     return action(formData);
   };
 
@@ -131,8 +137,8 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
           style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
         >
           <label>
-            Website
-            <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+            Leave this empty
+            <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
 
@@ -227,7 +233,7 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
           {err("proposal") && <span className="field-error">{err("proposal")}</span>}
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={pending}>
+        <button type="submit" className="btn btn-primary" disabled={pending || !hydrated}>
           {pending ? "Sending…" : "Send my application"}{" "}
           <i className="fas fa-hand-holding-usd" />
         </button>

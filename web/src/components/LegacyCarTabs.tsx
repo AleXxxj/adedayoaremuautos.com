@@ -6,6 +6,7 @@ import { useActionState, useEffect, useState, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import { LegacyCalculator } from "@/components/LegacyCarDetail";
 import type { MarketConfig } from "@/lib/market";
+import { useHydrated } from "@/lib/useHydrated";
 
 export interface SpecRow {
   label: string;
@@ -139,12 +140,17 @@ export function LegacyTestDriveForm({
    * without re-rendering, and the action attaches it on the way out.
    */
   const mountedAt = useRef(0);
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     return action(formData);
   };
 
@@ -168,7 +174,7 @@ export function LegacyTestDriveForm({
         <input type="hidden" name="type" value="test_drive" />
         <input type="hidden" name="vehicleSlug" value={vehicleSlug} />
         <div aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </div>
 
         <input type="text" name="name" placeholder="Your Name" required />
@@ -183,7 +189,7 @@ export function LegacyTestDriveForm({
           </p>
         )}
 
-        <button type="submit" disabled={pending}>
+        <button type="submit" disabled={pending || !hydrated}>
           {pending ? "Sending…" : "Schedule Test Drive"}
         </button>
       </form>

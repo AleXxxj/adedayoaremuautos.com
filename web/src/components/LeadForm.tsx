@@ -5,6 +5,7 @@ import { useActionToast } from "@/components/Toast";
 import { useActionState, useEffect, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
+import { useHydrated } from "@/lib/useHydrated";
 
 const TYPE_LABELS: Record<string, string> = {
   contact: "General inquiry",
@@ -40,14 +41,19 @@ export function LeadForm({
    * without re-rendering, and the action attaches it on the way out.
    */
   const mountedAt = useRef(0);
+  const hydrated = useHydrated();
   const landingPath = useRef("");
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
     landingPath.current = window.location.pathname + window.location.search;
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     formData.set("landingPath", landingPath.current);
     return action(formData);
   };
@@ -86,8 +92,8 @@ export function LeadForm({
           some bots skip those; off-screen positioning catches more. */}
       <div aria-hidden className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
         <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          Leave this empty
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
@@ -175,7 +181,7 @@ export function LeadForm({
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || !hydrated}
         className="w-full rounded-lg bg-[var(--cta-bg)] py-3 font-semibold text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)] disabled:opacity-60 sm:w-auto sm:px-8"
       >
         {pending ? "Sending…" : "Send inquiry"}

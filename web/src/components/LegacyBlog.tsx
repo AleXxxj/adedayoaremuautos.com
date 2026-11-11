@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/blog";
 import type { MarketCode } from "@/lib/market";
 import { NotifyOptIn } from "@/components/NotifyOptIn";
+import { useHydrated } from "@/lib/useHydrated";
 
 /* ── Newsletter ────────────────────────────────────────────────────────── */
 
@@ -73,8 +74,8 @@ export function LegacyNewsletter({
                 style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
               >
                 <label>
-                  Website
-                  <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                  Leave this empty
+                  <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
                 </label>
               </div>
 
@@ -190,12 +191,18 @@ export function LegacyCommentForm({
   );
 
   const mountedAt = useRef(0);
+
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     return action(formData);
   };
 
@@ -219,8 +226,8 @@ export function LegacyCommentForm({
         style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
       >
         <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          Leave this empty
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
@@ -249,7 +256,7 @@ export function LegacyCommentForm({
         {err("body") && <span className="field-error">{err("body")}</span>}
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={pending}>
+      <button type="submit" className="btn btn-primary" disabled={pending || !hydrated}>
         {pending ? "Posting…" : "Post Comment"} <i className="fas fa-paper-plane" />
       </button>
 

@@ -58,7 +58,7 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
   const rows = [
     row("Reference", `<strong>${escapeHtml(d.reference)}</strong>`),
     row("Vehicle", escapeHtml(d.vehicle)),
-    row("Pick-up", escapeHtml(d.startLabel)),
+    row("Pickup", escapeHtml(d.startLabel)),
     row("Return", escapeHtml(d.endLabel)),
     row("Duration", escapeHtml(nights)),
     // Itemised rather than folded into the total. A customer who sees one
@@ -146,7 +146,7 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
     "",
     `Reference:   ${d.reference}`,
     `Vehicle:     ${d.vehicle}`,
-    `Pick-up:     ${d.startLabel}`,
+    `Pickup:      ${d.startLabel}`,
     `Return:      ${d.endLabel}`,
     `Duration:    ${nights}`,
     d.pickupLocation ? `Pick up at: ${d.pickupLocation}` : null,

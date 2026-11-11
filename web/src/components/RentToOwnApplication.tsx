@@ -5,6 +5,7 @@ import { useActionToast } from "@/components/Toast";
 import { useActionState, useEffect, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
+import { useHydrated } from "@/lib/useHydrated";
 
 /**
  * A rent-to-own application, rather than the general contact form.
@@ -56,8 +57,9 @@ export function RentToOwnApplication({
   // Measures how long the form was actually open, not when the page was
   // rendered on the server or served from cache.
   const mountedAt = useRef(0);
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
@@ -72,7 +74,11 @@ export function RentToOwnApplication({
     const notes = String(formData.get("notes") ?? "").trim();
     formData.set("message", [notes, answers.join(" · ")].filter(Boolean).join("\n\n"));
 
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     formData.set("landingPath", window.location.pathname + window.location.search);
     return action(formData);
   };
@@ -123,8 +129,8 @@ export function RentToOwnApplication({
           style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
         >
           <label>
-            Website
-            <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+            Leave this empty
+            <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
 
@@ -216,7 +222,7 @@ export function RentToOwnApplication({
           />
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={pending}>
+        <button type="submit" className="btn btn-primary" disabled={pending || !hydrated}>
           {pending ? "Sending…" : "Submit application"}{" "}
           <i className="fas fa-key" />
         </button>

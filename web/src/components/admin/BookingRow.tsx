@@ -13,6 +13,7 @@ import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 import { LicenceLink } from "./LicenceLink";
 import { CounterPayment } from "./CounterPayment";
+import { MARKETS, type MarketCode } from "@/lib/market";
 
 interface Booking {
   id: string;
@@ -100,7 +101,13 @@ export function BookingRow({
   // Derived from the dates, never stored. The status says what staff
   // recorded; this says what the calendar thinks, and the gap between them
   // is the part worth seeing.
-  const timing = timingLabel(bookingTiming(booking.period, booking.status));
+  const timing = timingLabel(
+    bookingTiming(
+      booking.period,
+      booking.status,
+      MARKETS[booking.marketCode as MarketCode]?.timezone ?? "America/New_York",
+    ),
+  );
 
   return (
     <li className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)] p-5">

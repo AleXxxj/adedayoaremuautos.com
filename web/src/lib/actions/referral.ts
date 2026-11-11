@@ -64,8 +64,13 @@ const joinSchema = z.object({
     .min(20, "Tell us a little about how you plan to refer customers")
     .max(2000),
   applicantSite: z.string().trim().max(200).optional(),
-  website: z.string().max(0, "Rejected").optional(),
+  // The honeypot is "leave_empty": any value means a bot, answered as if it
+  // worked. "website" (the old name, which browsers autofill) is ignored.
+  website: z.string().optional(),
+  leave_empty: z.string().optional(),
+  // How long the form was open, measured on the phone alone (see the  // booking form). renderedAt is still accepted from pages opened earlier.
   renderedAt: z.coerce.number().optional(),
+  elapsedMs: z.coerce.number().int().min(0).optional(),
 });
 
 /**
@@ -91,7 +96,7 @@ export async function joinReferralProgramme(
   const raw = Object.fromEntries(formData.entries());
   const parsed = joinSchema.safeParse(
     Object.fromEntries(
-      Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
+      Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
     ),
   );
 
@@ -105,8 +110,8 @@ export async function joinReferralProgramme(
   const v = parsed.data;
   // Honeypot, and a submission faster than a person can read the form.
   // Answered as though it worked so a bot learns nothing.
-  if (v.website) return { ok: true, code: "PENDING" };
-  if (v.renderedAt && Date.now() - v.renderedAt < 2000) return { ok: true, code: "PENDING" };
+  if (v.leave_empty) return { ok: true, code: "PENDING" };
+  if (v.elapsedMs !== undefined && v.elapsedMs < 2000) return { ok: true, code: "PENDING" };
 
   /*
    * Same number applying twice: one reply, whatever the status.

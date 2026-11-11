@@ -16,8 +16,30 @@
  */
 export const RESERVATION_HOURS = 48;
 
+import { endOfLocalDay } from "@/lib/localDate";
+
 /**
- * The hold always ends by the time the hire starts.
+ * Whether a request for this pickup date is held, and until when.
+ *
+ * Through the pickup day, where the business is: the renter comes in some
+ * time that day, and the car has to be there when they do. Never longer than
+ * the two days, and not at all in the last hour of the pickup day.
+ *
+ * It used to be held until the start of the pickup date in UTC — 7 PM the
+ * evening before in Greensboro — so a next-day pickup booked at 3 PM was
+ * held for four hours, one booked after 6 PM not at all, and a same-day
+ * pickup never.
+ */
+export function holdForPickup(pickupDate: string, timeZone: string, now = new Date()): Date | null {
+  // A minute before midnight, so the email and the admin screen say "until
+  // Thursday at 11:59 PM" rather than "until Friday at 12:00 AM", which reads
+  // as a day longer than the hold really lasts.
+  const dayEnds = new Date(endOfLocalDay(pickupDate, timeZone).getTime() - 60_000);
+  return canReserve(dayEnds, now) ? reservationExpiry(dayEnds, now) : null;
+}
+
+/**
+ * The hold always ends by the time the rental is over its pickup day.
  *
  * Holding a car for 48 hours when the customer is collecting it tomorrow
  * morning is nonsense twice over: it outlasts the thing it protects, and it

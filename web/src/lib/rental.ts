@@ -87,10 +87,10 @@ export function quoteRental(
     throw new RentalError("Choose at least one day.");
   }
   if (days < tariff.minDays) {
-    throw new RentalError(`Minimum hire is ${tariff.minDays} day${tariff.minDays === 1 ? "" : "s"}.`);
+    throw new RentalError(`The shortest rental is ${tariff.minDays} day${tariff.minDays === 1 ? "" : "s"}.`);
   }
   if (tariff.maxDays && days > tariff.maxDays) {
-    throw new RentalError(`Maximum hire is ${tariff.maxDays} days.`);
+    throw new RentalError(`The longest rental is ${tariff.maxDays} days.`);
   }
   if (opts.withDriver && !tariff.withDriverAvailable) {
     throw new RentalError("A driver is not available for this vehicle.");

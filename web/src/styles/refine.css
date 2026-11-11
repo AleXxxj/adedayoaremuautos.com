@@ -4291,3 +4291,13 @@
         font-size: 16px !important;
     }
 }
+
+/* The booking confirmation is scrolled into view when it appears; this keeps
+   its top clear of the fixed header. */
+.legacy-theme .booking-done {
+    scroll-margin-top: 96px;
+}
+
+.legacy-theme .booking-done:focus {
+    outline: none;
+}

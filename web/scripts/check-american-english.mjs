@@ -33,6 +33,9 @@ const TARGETS = [
   "src/content/partnerTerms.ts",
   "src/content/legal.ts",
   "src/content/rentalPolicyUs.ts",
+  // Pricing and reservation rules: their errors are shown to renters.
+  "src/lib/rental.ts",
+  "src/lib/reservation.ts",
 ];
 
 /** [pattern, the American form] — word-bounded, case-insensitive. */
@@ -48,6 +51,8 @@ const RULES = [
   [/\bcheques?\b/i, "check"],
   [/\bwhilst\b/i, "while"],
   [/\binstalments?\b/i, "installment"],
+  // The noun is "pickup"; the verb is "pick up". "Pick-up" is neither.
+  [/\bpick-ups?\b/i, "pickup (noun) or pick up (verb)"],
   [/\btravell(ed|ing|er)\b/i, "traveled / traveling"],
   [/\bcollect(ing|ion)? (the|your) (vehicle|car)\b|\bcollection time\b|\bwhen you collect\b/i, "pick up / pickup"],
 ];

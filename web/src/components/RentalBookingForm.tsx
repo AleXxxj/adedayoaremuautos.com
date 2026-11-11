@@ -20,6 +20,7 @@ import type { MarketConfig } from "@/lib/market";
 import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rentalTerms";
 import { RentalPayButton } from "@/components/RentalPayButton";
 import { RESERVATION_HOURS } from "@/lib/reservation";
+import { todayIn } from "@/lib/localDate";
 import {
   shrinkPhoto,
   megabytes,
@@ -27,8 +28,6 @@ import {
   UPLOAD_LIMIT_BYTES,
   UPLOAD_LIMIT_LABEL,
 } from "@/lib/shrinkPhoto";
-
-const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * "daily" -> "day" / "days".
@@ -88,6 +87,9 @@ export function RentalBookingForm({
   // The showroom line as people write it, or null when none is on file. The
   // messages below only offer a text or a call when there is a number.
   const phoneLabel = displayPhone(contactPhone, market.code);
+  // Today where the business is. In UTC, Greensboro's "today" became
+  // tomorrow at 7 PM, and today's date could no longer be picked.
+  const today = () => todayIn(market.timezone);
   const unconfirmedMessage = phoneLabel
     ? `We couldn't confirm that your request reached us. Your details are still here. Try again, or text or call us at ${phoneLabel} and we'll check.`
     : "We couldn't confirm that your request reached us. Your details are still here. Try again, or contact us and we'll check.";
@@ -114,7 +116,14 @@ export function RentalBookingForm({
   const [state, action, pending] = useActionState<FormState, FormData>(
     async (_prev, formData) => {
       try {
-        return await requestRental(null, formData);
+        const result = await requestRental(null, formData);
+        // "—" is the quiet answer a bot gets: nothing was saved. A person
+        // should never see it, but if the bot checks ever mistake one for a
+        // bot, they get the text-or-call fallback rather than silence.
+        if (result.ok && result.reference === "—") {
+          return { ok: false, sendFailed: "unconfirmed", error: unconfirmedMessage };
+        }
+        return result;
       } catch (e) {
         // After a release the action's id changes, and every retry from a
         // page opened before it fails the same way until it is reloaded.
@@ -127,7 +136,9 @@ export function RentalBookingForm({
     },
     null,
   );
-  useActionToast(state);
+  // Failures only: a successful booking has its own panel, and a "Saved."
+  // toast on top of it read oddly after reserving a car.
+  useActionToast(state?.ok ? null : state);
 
   /*
    * Reserve stays disabled until the page has hydrated.
@@ -256,19 +267,37 @@ export function RentalBookingForm({
     pushToast("error", message);
   }
   /*
-   * Mount time, kept in a ref and stamped on at submit.
+   * When the form came alive, kept in a ref; the time since then goes with
+   * the request, as the bot check.
    *
-   * It was state written inside an effect, which React now rejects: that
-   * causes a second render for a value nothing displays. A ref carries it
-   * without re-rendering, and the action attaches it on the way out.
+   * Sent as a duration, measured on this phone's clock alone. It used to be
+   * the phone's clock reading, compared with the server's: a phone whose
+   * clock ran fast looked like a bot, and its booking was quietly dropped
+   * while the renter was told it had been saved.
    */
   const mountedAt = useRef(0);
+
+  /*
+   * The confirmation replaces the form from the top, which on a phone is
+   * well above the Reserve button just pressed: without this the screen
+   * seemed not to change at all. Brought into view and focused, so it is
+   * seen, and read out by a screen reader.
+   */
+  const done = useRef<HTMLDivElement>(null);
+  const isDone = Boolean(state?.ok && state.reference && state.reference !== "—");
   useEffect(() => {
-    mountedAt.current = Date.now();
+    if (!isDone || !done.current) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    done.current.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
+    done.current.focus({ preventScroll: true });
+  }, [isDone]);
+  useEffect(() => {
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // A monotonic clock: the wall clock can jump while the form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
 
     /*
      * The documents come from state, not from the inputs.
@@ -369,7 +398,7 @@ export function RentalBookingForm({
   if (state?.ok && state.reference && state.reference !== "—") {
     const payable = state.canPay && state.bookingId && state.amount;
     return (
-      <div className="booking-done">
+      <div className="booking-done" ref={done} tabIndex={-1}>
         <i className="fas fa-circle-check" aria-hidden="true" />
         <p className="booking-done-title">
           {state.heldFor ? "Reserved for you" : "Request received"}
@@ -406,14 +435,16 @@ export function RentalBookingForm({
               : "Pay now to confirm these dates right away, or we'll call you to confirm."
             : state.heldFor
               ? "Come and see the vehicle, and pay when you pick it up. We'll call you to confirm."
-              : "We'll contact you shortly to confirm availability and the deposit."}
+              : tariff.depositMinor > 0
+                ? "We'll contact you shortly to confirm availability and the deposit."
+                : "We'll contact you shortly to confirm availability."}
         </p>
 
         {/* No email was given, so the link the customer needs to pay later
             would otherwise exist nowhere they can reach. Shown here, once,
             to the person who just made the booking — and saying so, because
             this page is the only copy they will get. */}
-        {payable && state.heldFor && !state.emailed && state.reservationUrl && (
+        {state.heldFor && !state.emailed && state.reservationUrl && (
           <p className="booking-done-link">
             <strong>Save this link</strong> — it&rsquo;s the only copy, because no
             email was provided:
@@ -467,9 +498,11 @@ export function RentalBookingForm({
         aria-hidden
         style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
       >
+        {/* Only a bot fills this in. Not called "website": browsers autofill
+            a field by that name, and a renter's booking was refused for it. */}
         <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          Leave this empty
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
@@ -880,6 +913,13 @@ export function RentalBookingForm({
             </strong>{" "}
             {state.error}
           </p>
+          {state.sendFailed === "reload" && (
+            <div className="booking-fallback-actions">
+              <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
+                <i className="fas fa-rotate-right" aria-hidden="true" /> Reload the page
+              </button>
+            </div>
+          )}
           {state.sendFailed === "unconfirmed" && (
             <div className="booking-fallback-actions">
               {smsHref && telHref ? (
@@ -911,7 +951,8 @@ export function RentalBookingForm({
 
       <button
         type="submit"
-        disabled={!hydrated || pending || stillPreparing}
+        // A page the server no longer recognizes can only fail again.
+        disabled={!hydrated || pending || stillPreparing || state?.sendFailed === "reload"}
         className="btn btn-primary booking-submit"
       >
         {pending
@@ -929,8 +970,8 @@ export function RentalBookingForm({
         you reserve.{" "}
         {payOnline
           ? "Pay online right away, or come see it first and pay when you pick it up."
-          : "Come see it first, and pay when you pick it up."}{" "}
-        The refundable deposit is taken at pickup.
+          : "Come see it first, and pay when you pick it up."}
+        {tariff.depositMinor > 0 && " The refundable deposit is taken at pickup."}
       </p>
     </form>
   );

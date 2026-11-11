@@ -41,8 +41,13 @@ const schema = z
     /** Which rent-to-own category is being applied for. */
     tierSlug: z.string().trim().max(80).optional(),
     // Anti-spam. Not user-facing.
-    website: z.string().max(0, "Rejected").optional(),
+    // The honeypot is "leave_empty": any value means a bot, answered as if it
+    // worked. "website" (the old name, which browsers autofill) is ignored.
+    website: z.string().optional(),
+    leave_empty: z.string().optional(),
+    // How long the form was open, measured on the phone alone (see the    // booking form). renderedAt is still accepted from pages opened earlier.
     renderedAt: z.coerce.number().optional(),
+    elapsedMs: z.coerce.number().int().min(0).optional(),
   })
   .refine((v) => v.preferredContact !== "email" || Boolean(v.email), {
     message: "Add an email address, or choose phone or WhatsApp instead.",
@@ -62,7 +67,7 @@ export async function submitLead(
 ): Promise<LeadResult> {
   const raw = Object.fromEntries(formData.entries());
   const cleaned = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
+    Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
   );
 
   const parsed = schema.safeParse(cleaned);
@@ -78,9 +83,9 @@ export async function submitLead(
   // ── Anti-spam ───────────────────────────────────────────────────────────
   // Honeypot: a field hidden from humans. Anything in it is a bot. Fail
   // silently with a success response so the bot does not learn it was caught.
-  if (v.website) return { ok: true };
+  if (v.leave_empty) return { ok: true };
 
-  if (v.renderedAt && Date.now() - v.renderedAt < MIN_FILL_MS) {
+  if (v.elapsedMs !== undefined && v.elapsedMs < MIN_FILL_MS) {
     return { ok: true };
   }
 

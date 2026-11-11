@@ -15,6 +15,7 @@ import {
   monthlyPayment,
   type CurrencyCode,
 } from "@/lib/money";
+import { useHydrated } from "@/lib/useHydrated";
 
 /* ── Calculator ─────────────────────────────────────────────────────────── */
 
@@ -225,12 +226,18 @@ export function LegacyFinanceApplication({
   useActionToast(state);
 
   const mountedAt = useRef(0);
+
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     formData.set("landingPath", window.location.pathname + window.location.search);
     return action(formData);
   };
@@ -268,8 +275,8 @@ export function LegacyFinanceApplication({
         style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}
       >
         <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          Leave this empty
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
@@ -413,7 +420,7 @@ export function LegacyFinanceApplication({
         {err("consent") && <span className="field-error">{err("consent")}</span>}
       </div>
 
-      <button type="submit" className="btn" disabled={pending}>
+      <button type="submit" className="btn" disabled={pending || !hydrated}>
         {pending ? "Submitting…" : "Submit Application"}{" "}
         <i className="fas fa-arrow-right" />
       </button>

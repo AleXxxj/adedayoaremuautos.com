@@ -38,7 +38,10 @@ const subscribeSchema = z.object({
    */
   birthDay: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(31).optional()),
   birthMonth: z.preprocess(blankToUndefined, z.coerce.number().int().min(1).max(12).optional()),
-  website: z.string().max(0, "Rejected").optional(),
+  // The honeypot is "leave_empty": any value means a bot, answered as if it
+  // worked. "website" (the old name, which browsers autofill) is ignored.
+  website: z.string().optional(),
+  leave_empty: z.string().optional(),
 }).refine((v) => (v.birthDay == null) === (v.birthMonth == null), {
   message: "Choose both a day and a month, or leave the birthday blank.",
   path: ["birthDay"],
@@ -94,7 +97,7 @@ export async function subscribeToNewsletter(
   }
 
   const v = parsed.data;
-  if (v.website) return { ok: true };
+  if (v.leave_empty) return { ok: true };
 
   const h = await headers();
   const ip =
@@ -150,8 +153,13 @@ const commentSchema = z.object({
     .trim()
     .min(4, "Please write a little more")
     .max(3000, "That is longer than we can accept"),
-  website: z.string().max(0, "Rejected").optional(),
+  // The honeypot is "leave_empty": any value means a bot, answered as if it
+  // worked. "website" (the old name, which browsers autofill) is ignored.
+  website: z.string().optional(),
+  leave_empty: z.string().optional(),
+  // How long the form was open, measured on the phone alone (see the  // booking form). renderedAt is still accepted from pages opened earlier.
   renderedAt: z.coerce.number().optional(),
+  elapsedMs: z.coerce.number().int().min(0).optional(),
 });
 
 const COMMENT_MIN_FILL_MS = 3000;
@@ -173,7 +181,7 @@ export async function submitComment(
 ): Promise<BlogResult> {
   const raw = Object.fromEntries(formData.entries());
   const cleaned = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
+    Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
   );
 
   const parsed = commentSchema.safeParse(cleaned);
@@ -185,8 +193,8 @@ export async function submitComment(
   }
 
   const v = parsed.data;
-  if (v.website) return { ok: true };
-  if (v.renderedAt && Date.now() - v.renderedAt < COMMENT_MIN_FILL_MS) {
+  if (v.leave_empty) return { ok: true };
+  if (v.elapsedMs !== undefined && v.elapsedMs < COMMENT_MIN_FILL_MS) {
     return { ok: true };
   }
 

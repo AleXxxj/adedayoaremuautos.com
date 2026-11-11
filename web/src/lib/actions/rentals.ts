@@ -3,9 +3,10 @@
 import { violates } from "@/lib/dbError";
 import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { and, eq, gt, isNotNull, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { rentalBookings, leads, vehicles, rentalRates } from "@/db/schema";
 import { MARKETS, isMarketCode } from "@/lib/market";
@@ -13,7 +14,8 @@ import { quoteRental, rentalDays, RentalError } from "@/lib/rental";
 import { notifyStaffOfLead } from "@/lib/notify";
 import { parseTstzRange } from "@/lib/pgRange";
 import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
-import { storeLicence } from "@/lib/licence";
+import { storeLicence, removeLicences } from "@/lib/licence";
+import { todayIn } from "@/lib/localDate";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
 import { referralPartnerForRenter } from "@/lib/partner";
@@ -23,8 +25,7 @@ import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { phoneDigitsKey, phoneKeySql } from "@/lib/phoneKey";
 import { siteUrl } from "@/lib/siteUrl";
 import {
-  canReserve,
-  reservationExpiry,
+  holdForPickup,
   holdRemaining,
   MAX_OPEN_RESERVATIONS,
 } from "@/lib/reservation";
@@ -68,7 +69,7 @@ export interface RentalResult {
 const schema = z.object({
   marketCode: z.enum(["us", "ng"]),
   vehicleSlug: z.string().trim().min(1),
-  from: z.string({ message: "Choose a pick-up date" }).min(1, "Choose a pick-up date"),
+  from: z.string({ message: "Choose a pickup date" }).min(1, "Choose a pickup date"),
   to: z.string({ message: "Choose a return date" }).min(1, "Choose a return date"),
   withDriver: z.coerce.boolean().default(false),
   name: z
@@ -79,8 +80,10 @@ const schema = z.object({
   phone: z
     .string({ message: "Please enter a reachable phone number" })
     .trim()
-    .min(7, "Please enter a reachable phone number")
-    .max(40),
+    .max(40)
+    // Ten digits at least: a US number with its area code, or a Nigerian one.
+    // Holds and retries are matched on the last ten, so fewer can't be matched.
+    .refine((v) => v.replace(/\D/g, "").length >= 10, "Please enter your full phone number, with the area code"),
   email: z.string().trim().email("That email does not look right").optional().or(z.literal("")),
   licenceNo: z.string().trim().max(60).optional(),
 
@@ -110,8 +113,24 @@ const schema = z.object({
     message: "Please confirm you meet the rental requirements",
   }),
   note: z.string().trim().max(2000).optional(),
-  website: z.string().max(0).optional(),
-  renderedAt: z.coerce.number().optional(),
+  /*
+   * The honeypot: any value in "leave_empty" means a bot, answered with a
+   * quiet "success" so it learns nothing. Never a validation error.
+   *
+   * "website", the old name, is accepted and ignored. Browsers autofill a
+   * field by that name, so it was never a reliable signal: a renter was
+   * refused for it, and treating it as a bot would hand a page opened before
+   * this change a false "success" instead.
+   */
+  website: z.string().optional(),
+  leave_empty: z.string().optional(),
+  /**
+   * How long the form was open, by the phone's own clock. A bot submits in
+   * well under a second and a person can't. Measured on one clock, so a
+   * phone whose clock is wrong is not mistaken for a bot — comparing the
+   * phone's time with the server's dropped real bookings without a word.
+   */
+  elapsedMs: z.coerce.number().int().min(0).optional(),
   /**
    * Refused rather than defaulted. A booking that proceeds without this is a
    * booking nobody can later show the terms were put to — and clause 4, the
@@ -145,7 +164,7 @@ export async function requestRental(
   delete (raw as Record<string, unknown>).licenceFile;
   delete (raw as Record<string, unknown>).insuranceFile;
   const cleaned = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
+    Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
   );
 
   const parsed = schema.safeParse(cleaned);
@@ -157,9 +176,10 @@ export async function requestRental(
   }
   const f = parsed.data;
 
-  // Bots fill the honeypot; fail silently so they learn nothing.
-  if (f.website) return { ok: true, reference: "—" };
-  if (f.renderedAt && Date.now() - f.renderedAt < 1500) return { ok: true, reference: "—" };
+  // Bots fill the honeypot, or submit faster than anyone can type; both are
+  // answered as if it worked, so they learn nothing.
+  if (f.leave_empty) return { ok: true, reference: "—" };
+  if (f.elapsedMs !== undefined && f.elapsedMs < 1500) return { ok: true, reference: "—" };
 
   if (!isMarketCode(f.marketCode)) return { ok: false, error: "Unknown market." };
   const market = MARKETS[f.marketCode];
@@ -170,22 +190,31 @@ export async function requestRental(
     return { ok: false, error: "Those dates could not be read." };
   }
 
-  const startOfToday = new Date();
-  startOfToday.setUTCHours(0, 0, 0, 0);
-  if (from < startOfToday) {
-    return { ok: false, fieldErrors: { from: ["Pick-up cannot be in the past"] } };
+  // Today where the business is: in UTC, "today" became tomorrow at 7 PM in
+  // Greensboro. Dates are YYYY-MM-DD, so they compare as strings.
+  if (f.from < todayIn(market.timezone)) {
+    return { ok: false, fieldErrors: { from: ["Pickup can't be in the past"] } };
   }
 
   const days = rentalDays(from, to);
   if (days <= 0) {
-    return { ok: false, fieldErrors: { to: ["Return must be after pick-up"] } };
+    return { ok: false, fieldErrors: { to: ["Return must be after pickup"] } };
   }
 
   const [row] = await db
     .select({ v: vehicles, r: rentalRates })
     .from(vehicles)
     .innerJoin(rentalRates, eq(rentalRates.vehicleId, vehicles.id))
-    .where(and(eq(vehicles.marketCode, f.marketCode), eq(vehicles.slug, f.vehicleSlug)))
+    .where(
+      and(
+        eq(vehicles.marketCode, f.marketCode),
+        eq(vehicles.slug, f.vehicleSlug),
+        // The same test the rental list uses: a car that has been sold, or
+        // taken off rental, can't be booked from a page someone kept open.
+        or(eq(vehicles.listingKind, "rental"), eq(vehicles.listingKind, "both")),
+        or(eq(vehicles.status, "available"), eq(vehicles.status, "pending")),
+      ),
+    )
     .limit(1);
 
   if (!row) return { ok: false, error: "That vehicle is not available to rent." };
@@ -247,6 +276,88 @@ export async function requestRental(
   const phoneKey = phoneDigitsKey(f.phone);
 
   /*
+   * Everything that can refuse the request without its documents, before
+   * any are stored. A refusal after the upload used to leave a license photo
+   * in storage with no booking to explain it, and nothing ever removed it.
+   */
+  await releaseExpiredHolds();
+
+  /*
+   * Dates someone else already has.
+   *
+   * The database refuses an overlap at the insert, but only for bookings that
+   * hold the car, and only after the renter's documents were uploaded. Asked
+   * here first, so the answer comes before the upload, and so a request too
+   * late in the pickup day to be held is still not taken for dates that are
+   * confirmed to someone else.
+   */
+  const [clash] = await db
+    .select({ id: rentalBookings.id })
+    .from(rentalBookings)
+    .where(
+      and(
+        eq(rentalBookings.vehicleId, row.v.id),
+        sql`${rentalBookings.period} && ${period}::tstzrange`,
+        or(
+          inArray(rentalBookings.status, ["confirmed", "active"]),
+          and(eq(rentalBookings.status, "quote"), gt(rentalBookings.paymentHoldUntil, new Date())),
+        ),
+      ),
+    )
+    .limit(1);
+  if (clash) {
+    return {
+      ok: false,
+      error: "That vehicle is already booked for some of those dates. Please choose different dates.",
+    };
+  }
+
+  /*
+   * The hold lasts through the pickup day, where the business is.
+   *
+   * It used to end at the UTC midnight that starts the pickup date — 7 PM the
+   * evening before, in Greensboro. A next-day pickup booked at 3 PM was held
+   * for four hours, one booked after 6 PM was not held at all, and a same-day
+   * pickup never was: the cars most likely to be taken were the ones left
+   * unprotected.
+   */
+  const now = new Date();
+  const reservedUntil = holdForPickup(f.from, market.timezone, now);
+  const reserving = reservedUntil !== null;
+
+  if (reserving) {
+    /*
+     * One person cannot hold the forecourt.
+     *
+     * The expiry does most of the work, but nothing otherwise stops somebody
+     * reserving every car for two days from one phone. Counted on the number
+     * rather than the email because the number is the one field this form has
+     * always required — and on its digits rather than as typed, so writing it
+     * differently does not make a new person.
+     */
+    const [open] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(rentalBookings)
+      .where(
+        and(
+          phoneKey
+            ? sql`${phoneKeySql(rentalBookings.customerPhone)} = ${phoneKey}`
+            : eq(rentalBookings.customerPhone, f.phone),
+          eq(rentalBookings.status, "quote"),
+          isNotNull(rentalBookings.paymentHoldUntil),
+          gt(rentalBookings.paymentHoldUntil, now),
+        ),
+      );
+
+    if ((open?.n ?? 0) >= MAX_OPEN_RESERVATIONS) {
+      return {
+        ok: false,
+        error: `You're already holding ${MAX_OPEN_RESERVATIONS} cars. Let one of those holds end before reserving another, or call us and we'll help.`,
+      };
+    }
+  }
+
+  /*
    * Documents, stored before the booking row.
    *
    * A rejected file stops the request with a message the visitor can act on,
@@ -262,6 +373,16 @@ export async function requestRental(
       ok: false,
       fieldErrors: {
         licenceFile: ["Please attach a photo of your driver's license."],
+      },
+    };
+  }
+
+  // Checked before anything is stored, so a missing document leaves nothing behind.
+  if (f.insuranceChoice === "own" && !(insuranceFile instanceof File && insuranceFile.size > 0)) {
+    return {
+      ok: false,
+      fieldErrors: {
+        insuranceFile: ["Please attach proof of insurance, or choose a different option above."],
       },
     };
   }
@@ -288,20 +409,11 @@ export async function requestRental(
    * was never really asked.
    */
   let insuranceKey: string | null = null;
-  if (f.insuranceChoice === "own") {
-    if (!(insuranceFile instanceof File) || insuranceFile.size === 0) {
-      return {
-        ok: false,
-        fieldErrors: {
-          insuranceFile: [
-            "Please attach proof of insurance, or choose a different option above.",
-          ],
-        },
-      };
-    }
-
+  if (f.insuranceChoice === "own" && insuranceFile instanceof File) {
     const storedInsurance = await storeLicence(insuranceFile, "insurance");
     if (!storedInsurance.ok) {
+      // The license went in a moment ago; nothing will refer to it now.
+      await removeLicences([licenceKey]);
       return {
         ok: false,
         fieldErrors: {
@@ -343,50 +455,9 @@ export async function requestRental(
    * Every request now holds the car, not just one that reaches a checkout.
    * Before this a quote held nothing, so a customer told "we have it" could
    * drive over and find it gone — and plenty of people will not pay for a car
-   * they have not seen, which made the unpaid path the common one.
-   *
-   * Swept first: an expired hold that nobody has cleared would otherwise make
-   * the constraint refuse dates that are in fact free. The sweep is lazy and
-   * this is one of the two places it matters.
+   * they have not seen, which made the unpaid path the common one. Whether it
+   * is held, and until when, was settled above, before the documents.
    */
-  await releaseExpiredHolds();
-
-  const now = new Date();
-  const reserving = canReserve(from, now);
-  const reservedUntil = reserving ? reservationExpiry(from, now) : null;
-
-  if (reserving) {
-    /*
-     * One person cannot hold the forecourt.
-     *
-     * The expiry does most of the work, but nothing otherwise stops somebody
-     * reserving every car for two days from one phone. Counted on the number
-     * rather than the email because the number is the one field this form has
-     * always required — and on its digits rather than as typed, so writing it
-     * differently does not make a new person.
-     */
-    const [open] = await db
-      .select({ n: sql<number>`count(*)::int` })
-      .from(rentalBookings)
-      .where(
-        and(
-          phoneKey
-            ? sql`${phoneKeySql(rentalBookings.customerPhone)} = ${phoneKey}`
-            : eq(rentalBookings.customerPhone, f.phone),
-          eq(rentalBookings.status, "quote"),
-          isNotNull(rentalBookings.paymentHoldUntil),
-          gt(rentalBookings.paymentHoldUntil, now),
-        ),
-      );
-
-    if ((open?.n ?? 0) >= MAX_OPEN_RESERVATIONS) {
-      return {
-        ok: false,
-        error: `You are already holding ${MAX_OPEN_RESERVATIONS} vehicles. Please pay for one or let a hold run out before reserving another, or call us and we'll help.`,
-      };
-    }
-  }
-
   const reservationToken = reserving
     ? randomBytes(24).toString("base64url")
     : null;
@@ -444,13 +515,21 @@ export async function requestRental(
       .returning({ id: rentalBookings.id });
     bookingId = booking.id;
   } catch (e) {
+    /*
+     * The documents go only when the database refused the row: then nothing
+     * was written and nothing will refer to them. Any other failure (a
+     * connection dropped after the insert, say) may have saved the booking,
+     * so they stay with it rather than leave a booking without its license.
+     */
     if (violates(e, "rental_bookings_no_overlap")) {
+      await removeLicences([licenceKey, insuranceKey]);
       return {
         ok: false,
         error: "That vehicle has just been booked for those dates. Please choose different dates.",
       };
     }
     if (violates(e, "rental_bookings_period")) {
+      await removeLicences([licenceKey, insuranceKey]);
       return { ok: false, error: "Those dates are not a valid rental period." };
     }
     console.error("[rental] insert failed", e);
@@ -463,11 +542,13 @@ export async function requestRental(
   /*
    * Tell the customer their car is held, and how to pay for it later.
    *
-   * Fire-and-forget. The reservation exists in the database whatever the mail
-   * does, and failing a booking over a mail server would be the worse
-   * outcome by far — but this is the email that makes "come and see it, pay
-   * when you are happy" possible at all, because the link in it is the only
-   * way back to an unpaid booking once the tab is closed.
+   * After the reply, never before it: the reservation exists in the database
+   * whatever the mail does, and failing a booking over a mail server would be
+   * the worse outcome by far. But through after(), not a promise left
+   * running: on a serverless host a function can be frozen once its reply is
+   * sent, and this is the email that makes "come and see it, pay when you
+   * are happy" possible at all — the link in it is the only way back to an
+   * unpaid booking once the tab is closed.
    */
   if (reservedUntil && reservationToken && f.email) {
     const payUrl = `${siteUrl()}/${f.marketCode}/rentals/reserved/${reservationToken}`;
@@ -481,7 +562,7 @@ export async function requestRental(
     } catch (e) {
       console.error("[rental] showroom phone lookup failed", e);
     }
-    void sendReservation({
+    const reservation = {
       to: f.email,
       name: f.name,
       vehicle: [row.v.year, row.v.make, row.v.model].filter(Boolean).join(" "),
@@ -503,7 +584,8 @@ export async function requestRental(
       payUrl,
       businessPhone,
       payOnline: providerConfigured(providerFor(f.marketCode)),
-    }).catch((e) => console.error("[rental] reservation email failed", e));
+    };
+    after(() => sendReservation(reservation).catch((e) => console.error("[rental] reservation email failed", e)));
   }
 
   // Mirror it into the lead pipeline so rental enquiries appear alongside
@@ -623,15 +705,17 @@ export async function adjustHold(
   }
 
   const range = parseTstzRange(booking.period as unknown as string);
-  const now = new Date();
-  if (range && !canReserve(range.start, now)) {
+  if (!range) return { ok: false, error: "Could not read those dates." };
+  // The same rule as a new request: through the pickup day, where the
+  // business is. The period starts at the UTC midnight of the pickup date.
+  const market = MARKETS[booking.marketCode as keyof typeof MARKETS];
+  const until = holdForPickup(range.start.toISOString().slice(0, 10), market.timezone, new Date());
+  if (!until) {
     return {
       ok: false,
-      error: "The rental starts too soon to hold it any longer.",
+      error: "The pickup day is nearly over, so the hold can't be extended.",
     };
   }
-  const until = range ? reservationExpiry(range.start, now) : null;
-  if (!until) return { ok: false, error: "Could not read those dates." };
 
   try {
     await db

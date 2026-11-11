@@ -16,7 +16,10 @@ import {
   canReserve,
   holdRemaining,
   holdAfterCheckout,
+  holdForPickup,
 } from "../src/lib/reservation";
+import { todayIn, endOfLocalDay } from "../src/lib/localDate";
+import { bookingTiming, timingLabel } from "../src/lib/bookingTiming";
 import { phoneDigitsKey } from "../src/lib/phoneKey";
 
 let passed = 0;
@@ -392,6 +395,69 @@ console.log("\nPhone keys");
   eq("Nigeria, local 0", phoneDigitsKey("0801 234 5678"), ng);
   eq("Nigeria, +234", phoneDigitsKey("+234 801 234 5678"), ng);
   eq("too short to be a number matches nothing", phoneDigitsKey("12345"), null);
+}
+
+console.log("\nDays where the business is (src/lib/localDate.ts)");
+{
+  const ny = "America/New_York";
+  const iso = (d: Date | null) => (d ? d.toISOString() : null);
+  eq("a Greensboro day ends at 5 AM UTC in winter", iso(endOfLocalDay("2026-11-12", ny)), "2026-11-13T05:00:00.000Z");
+  eq("and at 4 AM UTC in summer", iso(endOfLocalDay("2026-07-04", ny)), "2026-07-05T04:00:00.000Z");
+  eq("the day the clocks go forward", iso(endOfLocalDay("2026-03-08", ny)), "2026-03-09T04:00:00.000Z");
+  eq("the day the clocks go back", iso(endOfLocalDay("2026-11-01", ny)), "2026-11-02T05:00:00.000Z");
+  eq("a Lagos day ends at 11 PM UTC", iso(endOfLocalDay("2026-11-12", "Africa/Lagos")), "2026-11-12T23:00:00.000Z");
+  eq("8 PM in Greensboro is still today there", todayIn(ny, new Date("2026-11-12T01:00:00Z")), "2026-11-11");
+}
+
+console.log("\nHow long a request holds the car");
+{
+  const ny = "America/New_York";
+  const iso = (d: Date | null) => (d ? d.toISOString() : null);
+  // Each of these was wrong when the hold ended at the UTC start of the pickup date.
+  eq(
+    "next-day pickup booked at 3 PM: held through the pickup day, not until 7 PM tonight",
+    iso(holdForPickup("2026-11-12", ny, new Date("2026-11-11T20:00:00Z"))),
+    "2026-11-13T04:59:00.000Z",
+  );
+  eq(
+    "next-day pickup booked at 8 PM: held, where it used to be refused a hold",
+    iso(holdForPickup("2026-11-12", ny, new Date("2026-11-12T01:00:00Z"))),
+    "2026-11-13T04:59:00.000Z",
+  );
+  eq(
+    "same-day pickup booked at 9 AM: held until the day ends",
+    iso(holdForPickup("2026-11-12", ny, new Date("2026-11-12T14:00:00Z"))),
+    "2026-11-13T04:59:00.000Z",
+  );
+  eq(
+    "and the email can say so: 11:59 PM on the pickup day, not 12:00 AM the day after",
+    new Intl.DateTimeFormat("en-US", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: ny }).format(
+      holdForPickup("2026-11-12", ny, new Date("2026-11-11T20:00:00Z"))!,
+    ),
+    "Thursday 11:59 PM",
+  );
+  eq(
+    "same-day pickup at 11:30 PM: too late to hold",
+    holdForPickup("2026-11-12", ny, new Date("2026-11-13T04:30:00Z")),
+    null,
+  );
+  eq(
+    "a pickup next week: two days, as promised",
+    iso(holdForPickup("2026-11-20", ny, new Date("2026-11-11T20:00:00Z"))),
+    "2026-11-13T20:00:00.000Z",
+  );
+}
+
+console.log("\nWhat the admin list says about a booking's dates (src/lib/bookingTiming.ts)");
+{
+  const ny = "America/New_York";
+  // As Postgres returns the period: calendar days at UTC midnight.
+  const week = '["2026-11-12 00:00:00+00","2026-11-19 00:00:00+00")';
+  const say = (status: string, at: string) => timingLabel(bookingTiming(week, status, ny, new Date(at)))?.text;
+  eq("8 PM on the pickup day: goes out today, not 'not collected'", say("confirmed", "2026-11-13T01:00:00Z"), "Goes out today");
+  eq("the next morning it is late", say("confirmed", "2026-11-13T15:00:00Z"), "Not collected — due out 1 day ago");
+  eq("8 PM on the return day: due back today, not overdue", say("active", "2026-11-20T01:00:00Z"), "Due back today");
+  eq("the next morning it is overdue", say("active", "2026-11-20T15:00:00Z"), "Overdue by 1 day");
 }
 
 console.log(

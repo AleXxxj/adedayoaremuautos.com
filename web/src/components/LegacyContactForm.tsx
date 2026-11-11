@@ -5,6 +5,7 @@ import { useActionToast } from "@/components/Toast";
 import { useActionState, useEffect, useRef } from "react";
 import { submitLead } from "@/lib/actions/leads";
 import type { MarketCode } from "@/lib/market";
+import { useHydrated } from "@/lib/useHydrated";
 
 /**
  * The original "Send us a Message" form, in the original markup — but wired to
@@ -25,12 +26,17 @@ export function LegacyContactForm({ market }: { market: MarketCode }) {
    * it on the way out — the same shape the comment form already used.
    */
   const mountedAt = useRef(0);
+  const hydrated = useHydrated();
   useEffect(() => {
-    mountedAt.current = Date.now();
+    mountedAt.current = performance.now();
   }, []);
 
   const submit = (formData: FormData) => {
-    formData.set("renderedAt", String(mountedAt.current));
+    // How long the form was open, by this phone's clock alone: comparing
+    // the phone's clock with the server's dropped real messages from phones
+    // whose clocks ran fast.
+    // A monotonic clock: the wall clock can jump while a form is open.
+    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
     return action(formData);
   };
 
@@ -56,8 +62,8 @@ export function LegacyContactForm({ market }: { market: MarketCode }) {
       {/* Honeypot — hidden from people, irresistible to bots. */}
       <div aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
         <label>
-          Website
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          Leave this empty
+          <input type="text" name="leave_empty" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
@@ -90,7 +96,7 @@ export function LegacyContactForm({ market }: { market: MarketCode }) {
         <textarea name="message" rows={5} placeholder="How can we help you?" />
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={pending} style={{ width: "100%" }}>
+      <button type="submit" className="btn btn-primary" disabled={pending || !hydrated} style={{ width: "100%" }}>
         {pending ? "SENDING…" : "SEND MESSAGE"} <i className="fas fa-paper-plane" />
       </button>
     </form>

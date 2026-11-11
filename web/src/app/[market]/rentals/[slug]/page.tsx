@@ -180,25 +180,41 @@ export default async function RentalDetailPage({
 
           <aside className="rental-book">
             <div className="rental-book-card">
-              <h2>
-                Reserve this <span>vehicle</span>
-              </h2>
-              {/* This used to say the booking did not hold until a deposit was
-                  taken — true before reservations existed, and the first
-                  thing a customer read on the card afterwards. */}
-              <p className="rental-book-lead">
-                Pick your dates to see the price. Reserving holds the vehicle
-                for you for up to {RESERVATION_HOURS / 24} days, so you can see
-                it before you pay.
-              </p>
-              <RentalBookingForm
-                market={market}
-                vehicleSlug={v.slug}
-                vehicleTitle={title}
-                contactPhone={contactPhone}
-                payOnline={providerConfigured(providerFor(code))}
-                tariff={v.tariff}
-              />
+              {v.bookable ? (
+                <>
+                  <h2>
+                    Reserve this <span>vehicle</span>
+                  </h2>
+                  {/* This used to say the booking did not hold until a deposit was
+                      taken — true before reservations existed, and the first
+                      thing a customer read on the card afterwards. */}
+                  <p className="rental-book-lead">
+                    Pick your dates to see the price. Reserving holds the vehicle
+                    for you for up to {RESERVATION_HOURS / 24} days, so you can see
+                    it before you pay.
+                  </p>
+                  <RentalBookingForm
+                    market={market}
+                    vehicleSlug={v.slug}
+                    vehicleTitle={title}
+                    contactPhone={contactPhone}
+                    payOnline={providerConfigured(providerFor(code))}
+                    tariff={v.tariff}
+                  />
+                </>
+              ) : (
+                // Sold or taken off rental since the link was shared: said
+                // plainly, with the way to the cars that can be booked.
+                <>
+                  <h2>
+                    Not available <span>to rent</span>
+                  </h2>
+                  <p className="rental-book-lead">This car isn&rsquo;t available to rent right now.</p>
+                  <Link href={`/${code}/rentals`} className="btn btn-primary">
+                    See cars you can rent
+                  </Link>
+                </>
+              )}
             </div>
           </aside>
         </div>

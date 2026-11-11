@@ -2,12 +2,15 @@ import Link from "next/link";
 import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { listBookings } from "@/lib/repositories/rentals";
-import { MARKETS } from "@/lib/market";
+import { MARKETS, type MarketCode } from "@/lib/market";
 import { holdRemaining } from "@/lib/reservation";
 import { formatMoney, money, toMajor } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
 import { PaymentCheck } from "@/components/admin/PaymentCheck";
+
+/** The time zone a booking's dates are counted in: its own market's. */
+const zoneOf = (market: string) => MARKETS[market as MarketCode]?.timezone ?? "America/New_York";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +25,13 @@ export default async function AdminRentalsPage() {
   // the most expensive thing on this screen and should never be below the fold.
   const sorted = [...rows].sort(
     (a, b) =>
-      urgencyOf(a.booking.period as unknown as string, a.booking.status) -
-      urgencyOf(b.booking.period as unknown as string, b.booking.status),
+      urgencyOf(a.booking.period as unknown as string, a.booking.status, zoneOf(a.booking.marketCode)) -
+      urgencyOf(b.booking.period as unknown as string, b.booking.status, zoneOf(b.booking.marketCode)),
   );
 
   const needsAttention = rows.filter((r) => {
     const l = timingLabel(
-      bookingTiming(r.booking.period as unknown as string, r.booking.status),
+      bookingTiming(r.booking.period as unknown as string, r.booking.status, zoneOf(r.booking.marketCode)),
     );
     return l != null && l.urgency === 0;
   }).length;

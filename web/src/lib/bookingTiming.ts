@@ -1,4 +1,5 @@
 import { parseTstzRange } from "@/lib/pgRange";
+import { todayIn } from "@/lib/localDate";
 
 /**
  * What the dates say about a booking, separately from what its status says.
@@ -26,15 +27,25 @@ export type Timing =
   | { kind: "done" }
   | { kind: "none" };
 
-/** Whole days between two dates, counted on UTC calendar days. */
-function dayDiff(a: Date, b: Date): number {
-  const day = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-  return Math.round((day(a) - day(b)) / 86_400_000);
+/** Whole days from one calendar date ("2026-11-12") to another. */
+function dayDiff(a: string, b: string): number {
+  const at = (d: string) => {
+    const [y, m, day] = d.split("-").map(Number);
+    return Date.UTC(y, m - 1, day);
+  };
+  return Math.round((at(a) - at(b)) / 86_400_000);
 }
 
+/**
+ * `timeZone` is the booking's market's. The dates are calendar days (stored
+ * as UTC midnights), and "today" has to be the business's: counted in UTC,
+ * at 8 PM in Greensboro a car going out that day read "Not collected — due
+ * out 1 day ago".
+ */
 export function bookingTiming(
   period: string,
   status: string,
+  timeZone: string,
   now: Date = new Date(),
 ): Timing {
   if (status === "cancelled" || status === "returned") return { kind: "done" };
@@ -42,8 +53,9 @@ export function bookingTiming(
   const range = parseTstzRange(period);
   if (!range) return { kind: "none" };
 
-  const startsIn = dayDiff(range.start, now);
-  const endsIn = dayDiff(range.end, now);
+  const today = todayIn(timeZone, now);
+  const startsIn = dayDiff(range.start.toISOString().slice(0, 10), today);
+  const endsIn = dayDiff(range.end.toISOString().slice(0, 10), today);
 
   if (status === "active") {
     if (endsIn < 0) return { kind: "overdue", days: -endsIn };
@@ -87,7 +99,7 @@ export function timingLabel(t: Timing): TimingLabel | null {
 }
 
 /** Lowest first: overdue at the top of the list, finished at the bottom. */
-export function urgencyOf(period: string, status: string, now?: Date): number {
-  const label = timingLabel(bookingTiming(period, status, now));
+export function urgencyOf(period: string, status: string, timeZone: string, now?: Date): number {
+  const label = timingLabel(bookingTiming(period, status, timeZone, now));
   return label ? label.urgency : 4;
 }

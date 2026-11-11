@@ -125,6 +125,26 @@ export async function storeLicence(
 }
 
 /**
+ * Deletes documents that never became part of a booking.
+ *
+ * A request can still fail after its documents are stored — the dates are
+ * taken in the moment between the check and the insert, say — and an
+ * identity document with no booking behind it has no reason to be kept.
+ * Best effort: a failure is logged, and the booking's own error is what the
+ * renter sees.
+ */
+export async function removeLicences(keys: (string | null | undefined)[]): Promise<void> {
+  const present = keys.filter((k): k is string => !!k);
+  if (present.length === 0) return;
+  try {
+    const { error } = await supabaseAdmin.storage.from(LICENCE_BUCKET).remove(present);
+    if (error) console.error("[licence] could not remove unused documents", error.message);
+  } catch (e) {
+    console.error("[licence] could not remove unused documents", e instanceof Error ? e.message : e);
+  }
+}
+
+/**
  * A link a member of staff can open, valid for a few minutes.
  *
  * Deliberately short. A signed URL is a bearer token for someone's identity

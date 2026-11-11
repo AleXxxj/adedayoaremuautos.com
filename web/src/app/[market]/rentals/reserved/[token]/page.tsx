@@ -74,6 +74,8 @@ export default async function ReservedPage({
     ? `${fmtDate(range.start, market.locale)} → ${fmtDate(range.end, market.locale)}`
     : null;
   const amount = formatMoney(money(b.totalMinor, b.currency), market.locale);
+  // Some cars take no deposit; nothing below may promise one for them.
+  const dep = b.depositMinor > 0;
 
   if (b.status === "cancelled") {
     return (
@@ -121,10 +123,10 @@ export default async function ReservedPage({
             : b.status === "active"
               ? "Call us if you need to keep the vehicle longer."
               : paidMinor > 0 && owedMinor === 0
-                ? "The rental is paid. The refundable deposit is taken when you pick up the vehicle."
+                ? `The rental is paid.${dep ? " The refundable deposit is taken when you pick up the vehicle." : ""}`
                 : paidMinor > 0
-                  ? `Pay the rest of the rental, ${owed}, and the refundable deposit when you pick up the vehicle.`
-                  : `Pay the rental total of ${amount} and the refundable deposit when you pick up the vehicle.`}
+                  ? `Pay the rest of the rental, ${owed}${dep ? ", and the refundable deposit," : ""} when you pick up the vehicle.`
+                  : `Pay the rental total of ${amount}${dep ? " and the refundable deposit" : ""} when you pick up the vehicle.`}
         </p>
       </Shell>
     );
@@ -172,15 +174,15 @@ export default async function ReservedPage({
                 <RentalPayButton bookingId={b.id} amount={amount} />
               </div>
               <p className="resv-note">
-                Come and see the vehicle first if you would rather — you can
-                pay from this page on your phone when you are happy with it.
-                The deposit is taken at pickup, not now.
+                Come see the vehicle first if you&rsquo;d like. You can pay from this
+                page on your phone when you&rsquo;re ready.
+                {dep && " The deposit is taken at pickup, not now."}
               </p>
             </>
           ) : (
             <p className="resv-note">
-              Come and see the vehicle, and pay when you pick it up. The
-              refundable deposit is taken then too.
+              Come see the vehicle, and pay when you pick it up.
+              {dep && " The refundable deposit is taken then too."}
             </p>
           )}
         </>

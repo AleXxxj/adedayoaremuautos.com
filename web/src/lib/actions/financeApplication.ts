@@ -58,8 +58,13 @@ const schema = z.object({
   preferredCar: z.string().trim().max(200).optional(),
   // Explicit, unticked by default. Nothing is submitted without it.
   consent: z.literal("yes", { message: "Please confirm to continue" }),
-  website: z.string().max(0, "Rejected").optional(),
+  // The honeypot is "leave_empty": any value means a bot, answered as if it
+  // worked. "website" (the old name, which browsers autofill) is ignored.
+  website: z.string().optional(),
+  leave_empty: z.string().optional(),
+  // How long the form was open, measured on the phone alone (see the  // booking form). renderedAt is still accepted from pages opened earlier.
   renderedAt: z.coerce.number().optional(),
+  elapsedMs: z.coerce.number().int().min(0).optional(),
 });
 
 const MIN_FILL_MS = 2500;
@@ -83,7 +88,7 @@ export async function submitFinanceApplication(
 ): Promise<ApplicationResult> {
   const raw = Object.fromEntries(formData.entries());
   const cleaned = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, v === "" && k !== "website" ? undefined : v]),
+    Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
   );
 
   const parsed = schema.safeParse(cleaned);
@@ -96,8 +101,8 @@ export async function submitFinanceApplication(
 
   const v = parsed.data;
 
-  if (v.website) return { ok: true };
-  if (v.renderedAt && Date.now() - v.renderedAt < MIN_FILL_MS) return { ok: true };
+  if (v.leave_empty) return { ok: true };
+  if (v.elapsedMs !== undefined && v.elapsedMs < MIN_FILL_MS) return { ok: true };
 
   const h = await headers();
   const ipCountry = h.get("x-vercel-ip-country") ?? h.get("cf-ipcountry") ?? null;
