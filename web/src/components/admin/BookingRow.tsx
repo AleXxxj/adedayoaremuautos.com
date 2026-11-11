@@ -476,7 +476,7 @@ function InsuranceBadge({ choice }: { choice: string | null }) {
 function HoldPanel({
   booking,
 }: {
-  booking: Pick<Booking, "id" | "status" | "reservedUntil" | "heldFor">;
+  booking: Pick<Booking, "id" | "status" | "reservedUntil" | "heldFor" | "marketCode">;
 }) {
   const [state, action, pending] = useActionState(adjustHold, null);
   useActionToast(state);
@@ -491,6 +491,10 @@ function HoldPanel({
 
   const until = new Date(booking.reservedUntil);
   const left = booking.heldFor;
+  // In the booking's own market, labeled: a Greensboro hold ends at 11:59 PM
+  // Greensboro time, whichever city the person reading this is in. The fixed
+  // locale also makes the server's HTML and the browser's render agree.
+  const market = MARKETS[booking.marketCode as MarketCode] ?? MARKETS.us;
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-[var(--border-subtle)] pt-3">
@@ -500,12 +504,14 @@ function HoldPanel({
       </span>
       <span className="text-xs text-[var(--text-muted)]">
         until{" "}
-        {until.toLocaleString(undefined, {
+        {until.toLocaleString(market.locale, {
           weekday: "short",
           day: "numeric",
           month: "short",
           hour: "numeric",
           minute: "2-digit",
+          timeZone: market.timezone,
+          timeZoneName: "short",
         })}
       </span>
 

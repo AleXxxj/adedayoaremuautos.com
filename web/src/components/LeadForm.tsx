@@ -5,7 +5,7 @@ import { useActionToast } from "@/components/Toast";
 import { useActionState, useEffect, useRef } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 const TYPE_LABELS: Record<string, string> = {
   contact: "General inquiry",
@@ -33,27 +33,15 @@ export function LeadForm({
     null,
   );
   useActionToast(state);
-  /*
-   * Mount time, kept in a ref and stamped on at submit.
-   *
-   * It was state written inside an effect, which React now rejects: that
-   * causes a second render for a value nothing displays. A ref carries it
-   * without re-rendering, and the action attaches it on the way out.
-   */
-  const mountedAt = useRef(0);
-  const hydrated = useHydrated();
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
   const landingPath = useRef("");
   useEffect(() => {
-    mountedAt.current = performance.now();
     landingPath.current = window.location.pathname + window.location.search;
   }, []);
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     formData.set("landingPath", landingPath.current);
     return action(formData);
   };

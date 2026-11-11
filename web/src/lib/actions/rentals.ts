@@ -1,6 +1,6 @@
 "use server";
 
-import { violates } from "@/lib/dbError";
+import { refusedBy, violates } from "@/lib/dbError";
 import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { after } from "next/server";
@@ -15,7 +15,7 @@ import { notifyStaffOfLead } from "@/lib/notify";
 import { parseTstzRange } from "@/lib/pgRange";
 import { RENTAL_TERMS_VERSION } from "@/content/rentalTerms";
 import { storeLicence, removeLicences } from "@/lib/licence";
-import { todayIn } from "@/lib/localDate";
+import { endOfLocalDay, todayIn } from "@/lib/localDate";
 import { formatMoney, money } from "@/lib/money";
 import { providerFor, providerConfigured } from "@/lib/payments/provider";
 import { referralPartnerForRenter } from "@/lib/partner";
@@ -163,8 +163,14 @@ export async function requestRental(
   // schema; it is validated separately by its own bytes.
   delete (raw as Record<string, unknown>).licenceFile;
   delete (raw as Record<string, unknown>).insuranceFile;
+  // No NUL characters: Postgres can't store one in text, so a note with one
+  // made the insert fail after the documents were uploaded, leaving them with
+  // no booking, as often as anyone cared to send it.
   const cleaned = Object.fromEntries(
-    Object.entries(raw).map(([k, v]) => [k, v === "" ? undefined : v]),
+    Object.entries(raw).map(([k, v]) => {
+      const s = typeof v === "string" ? v.replace(/\u0000/g, "") : v;
+      return [k, s === "" ? undefined : s];
+    }),
   );
 
   const parsed = schema.safeParse(cleaned);
@@ -520,15 +526,17 @@ export async function requestRental(
      * was written and nothing will refer to them. Any other failure (a
      * connection dropped after the insert, say) may have saved the booking,
      * so they stay with it rather than leave a booking without its license.
+     * Decided by the error's constraint field alone (refusedBy), never by
+     * its text, which repeats what the renter typed.
      */
-    if (violates(e, "rental_bookings_no_overlap")) {
+    if (refusedBy(e, "rental_bookings_no_overlap")) {
       await removeLicences([licenceKey, insuranceKey]);
       return {
         ok: false,
         error: "That vehicle has just been booked for those dates. Please choose different dates.",
       };
     }
-    if (violates(e, "rental_bookings_period")) {
+    if (refusedBy(e, "rental_bookings_period_not_empty")) {
       await removeLicences([licenceKey, insuranceKey]);
       return { ok: false, error: "Those dates are not a valid rental period." };
     }
@@ -709,11 +717,16 @@ export async function adjustHold(
   // The same rule as a new request: through the pickup day, where the
   // business is. The period starts at the UTC midnight of the pickup date.
   const market = MARKETS[booking.marketCode as keyof typeof MARKETS];
-  const until = holdForPickup(range.start.toISOString().slice(0, 10), market.timezone, new Date());
+  const pickup = range.start.toISOString().slice(0, 10);
+  const now = new Date();
+  const until = holdForPickup(pickup, market.timezone, now);
   if (!until) {
     return {
       ok: false,
-      error: "The pickup day is nearly over, so the hold can't be extended.",
+      error:
+        endOfLocalDay(pickup, market.timezone) <= now
+          ? "The pickup day has passed, so this request can't be held again."
+          : "The pickup day is nearly over, so the hold can't be extended.",
     };
   }
 

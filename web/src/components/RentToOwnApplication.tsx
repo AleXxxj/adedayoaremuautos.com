@@ -2,10 +2,10 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 /**
  * A rent-to-own application, rather than the general contact form.
@@ -54,13 +54,8 @@ export function RentToOwnApplication({
   );
   useActionToast(state);
 
-  // Measures how long the form was actually open, not when the page was
-  // rendered on the server or served from cache.
-  const mountedAt = useRef(0);
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
     // The three application questions are folded into the message the
@@ -74,11 +69,7 @@ export function RentToOwnApplication({
     const notes = String(formData.get("notes") ?? "").trim();
     formData.set("message", [notes, answers.join(" · ")].filter(Boolean).join("\n\n"));
 
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     formData.set("landingPath", window.location.pathname + window.location.search);
     return action(formData);
   };

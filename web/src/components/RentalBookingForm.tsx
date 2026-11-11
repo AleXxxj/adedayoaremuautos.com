@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionToast, pushToast } from "@/components/Toast";
+import { useActionToast, pushToast, dismissErrorToasts } from "@/components/Toast";
 
 import {
   startTransition,
@@ -9,7 +9,6 @@ import {
   useMemo,
   useState,
   useRef,
-  useSyncExternalStore,
 } from "react";
 import { unstable_isUnrecognizedActionError } from "next/navigation";
 import { requestRental, type RentalResult } from "@/lib/actions/rentals";
@@ -21,6 +20,7 @@ import { RENTAL_CLAUSES, RENTAL_TERMS_VERSION, fillClause } from "@/content/rent
 import { RentalPayButton } from "@/components/RentalPayButton";
 import { RESERVATION_HOURS } from "@/lib/reservation";
 import { todayIn } from "@/lib/localDate";
+import { useFormTimer } from "@/lib/useFormTimer";
 import {
   shrinkPhoto,
   megabytes,
@@ -62,9 +62,6 @@ type FormState =
   | null;
 
 type Doc = "licence" | "insurance";
-
-/** Never changes; lets useSyncExternalStore answer "has this page hydrated?". */
-const subscribeNothing = () => () => {};
 
 export function RentalBookingForm({
   market,
@@ -149,11 +146,7 @@ export function RentalBookingForm({
    * the server logs. The form now says method="post" as well, but nothing
    * should be submitted before the code that checks and sends it is there.
    */
-  const hydrated = useSyncExternalStore(
-    subscribeNothing,
-    () => true,
-    () => false,
-  );
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -266,16 +259,6 @@ export function RentalBookingForm({
     setDocErrors((e) => ({ ...e, submit: message }));
     pushToast("error", message);
   }
-  /*
-   * When the form came alive, kept in a ref; the time since then goes with
-   * the request, as the bot check.
-   *
-   * Sent as a duration, measured on this phone's clock alone. It used to be
-   * the phone's clock reading, compared with the server's: a phone whose
-   * clock ran fast looked like a bot, and its booking was quietly dropped
-   * while the renter was told it had been saved.
-   */
-  const mountedAt = useRef(0);
 
   /*
    * The confirmation replaces the form from the top, which on a phone is
@@ -283,21 +266,21 @@ export function RentalBookingForm({
    * seemed not to change at all. Brought into view and focused, so it is
    * seen, and read out by a screen reader.
    */
-  const done = useRef<HTMLDivElement>(null);
+  const done = useRef<HTMLElement>(null);
   const isDone = Boolean(state?.ok && state.reference && state.reference !== "—");
   useEffect(() => {
     if (!isDone || !done.current) return;
+    // An earlier "couldn't confirm" would otherwise sit over the reference
+    // for the rest of its time on screen.
+    dismissErrorToasts();
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     done.current.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
     done.current.focus({ preventScroll: true });
   }, [isDone]);
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
 
   const submit = (formData: FormData) => {
-    // A monotonic clock: the wall clock can jump while the form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    // How long the form has been on screen, as the bot check (useFormTimer).
+    formData.set("elapsedMs", String(elapsedMs()));
 
     /*
      * The documents come from state, not from the inputs.
@@ -398,9 +381,10 @@ export function RentalBookingForm({
   if (state?.ok && state.reference && state.reference !== "—") {
     const payable = state.canPay && state.bookingId && state.amount;
     return (
-      <div className="booking-done" ref={done} tabIndex={-1}>
+      // A named region, so focus landing on it reads "Reserved for you".
+      <section className="booking-done" ref={done} tabIndex={-1} aria-labelledby="booking-done-title">
         <i className="fas fa-circle-check" aria-hidden="true" />
-        <p className="booking-done-title">
+        <p className="booking-done-title" id="booking-done-title">
           {state.heldFor ? "Reserved for you" : "Request received"}
         </p>
         <p className="booking-done-body">
@@ -456,9 +440,9 @@ export function RentalBookingForm({
         {/* Offered after the request is safely recorded, never instead of it:
             somebody who abandons the checkout has still made an enquiry. */}
         {payable && (
-          <RentalPayButton bookingId={state.bookingId!} amount={state.amount!} />
+          <RentalPayButton bookingId={state.bookingId!} amount={state.amount!} deposit={tariff.depositMinor > 0} />
         )}
-      </div>
+      </section>
     );
   }
 

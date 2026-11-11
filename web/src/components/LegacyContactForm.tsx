@@ -2,10 +2,10 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { submitLead } from "@/lib/actions/leads";
 import type { MarketCode } from "@/lib/market";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 /**
  * The original "Send us a Message" form, in the original markup — but wired to
@@ -17,26 +17,11 @@ import { useHydrated } from "@/lib/useHydrated";
 export function LegacyContactForm({ market }: { market: MarketCode }) {
   const [state, action, pending] = useActionState(submitLead, null);
   useActionToast(state);
-  /*
-   * Mount time, kept in a ref and attached at submit.
-   *
-   * It was state set inside an effect, which React now rejects: a state update
-   * in an effect body causes a second render for a value that is never
-   * displayed. A ref holds it without re-rendering, and the form action stamps
-   * it on the way out — the same shape the comment form already used.
-   */
-  const mountedAt = useRef(0);
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     return action(formData);
   };
 

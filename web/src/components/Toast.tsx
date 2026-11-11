@@ -52,6 +52,17 @@ export function dismissToast(id: number) {
 }
 
 /**
+ * Clears every error message on screen, for when a later success has made
+ * them untrue: "We couldn't confirm that your request reached us" must not
+ * sit over "Reserved for you".
+ */
+export function dismissErrorToasts() {
+  if (!toasts.some((t) => t.tone === "error")) return;
+  toasts = toasts.filter((t) => t.tone !== "error");
+  emit();
+}
+
+/**
  * Shows a message. Safe to call from anywhere on the client.
  *
  * An identical message already on screen is not repeated — pressing save twice

@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useActionState, useId } from "react";
 import {
   subscribeToNewsletter,
   submitComment,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/actions/blog";
 import type { MarketCode } from "@/lib/market";
 import { NotifyOptIn } from "@/components/NotifyOptIn";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 /* ── Newsletter ────────────────────────────────────────────────────────── */
 
@@ -190,19 +190,11 @@ export function LegacyCommentForm({
     null,
   );
 
-  const mountedAt = useRef(0);
-
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     return action(formData);
   };
 

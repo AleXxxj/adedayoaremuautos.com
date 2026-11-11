@@ -33,6 +33,14 @@ export async function generateMetadata({
   const v = await getFleetVehicle(market, slug);
   if (!v) return {};
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
+  // A car no longer offered keeps its page for old links, out of search
+  // results: "Rent a … Live availability" would be untrue there.
+  if (!v.bookable) {
+    return {
+      title: `${title}: not available to rent`,
+      robots: { index: false, follow: true },
+    };
+  }
   return {
     title: `Rent a ${title}`,
     description: `Rent a ${title} by the day, week or month. Live availability, transparent rates, no hidden charges.`,

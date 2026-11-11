@@ -2,11 +2,11 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useState, useRef } from "react";
+import { useActionState, useState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import { LegacyCalculator } from "@/components/LegacyCarDetail";
 import type { MarketConfig } from "@/lib/market";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 export interface SpecRow {
   label: string;
@@ -132,25 +132,11 @@ export function LegacyTestDriveForm({
     null,
   );
   useActionToast(state);
-  /*
-   * Mount time, kept in a ref and stamped on at submit.
-   *
-   * It was state written inside an effect, which React now rejects: that
-   * causes a second render for a value nothing displays. A ref carries it
-   * without re-rendering, and the action attaches it on the way out.
-   */
-  const mountedAt = useRef(0);
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     return action(formData);
   };
 

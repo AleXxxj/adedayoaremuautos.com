@@ -125,7 +125,7 @@ export default async function ReservedPage({
               : paidMinor > 0 && owedMinor === 0
                 ? `The rental is paid.${dep ? " The refundable deposit is taken when you pick up the vehicle." : ""}`
                 : paidMinor > 0
-                  ? `Pay the rest of the rental, ${owed}${dep ? ", and the refundable deposit," : ""} when you pick up the vehicle.`
+                  ? `Pay the rest of the rental, ${owed}${dep ? ", and the refundable deposit," : ","} when you pick up the vehicle.`
                   : `Pay the rental total of ${amount}${dep ? " and the refundable deposit" : ""} when you pick up the vehicle.`}
         </p>
       </Shell>
@@ -171,12 +171,11 @@ export default async function ReservedPage({
           {payOnline ? (
             <>
               <div className="resv-pay">
-                <RentalPayButton bookingId={b.id} amount={amount} />
+                <RentalPayButton bookingId={b.id} amount={amount} deposit={dep} />
               </div>
               <p className="resv-note">
                 Come see the vehicle first if you&rsquo;d like. You can pay from this
                 page on your phone when you&rsquo;re ready.
-                {dep && " The deposit is taken at pickup, not now."}
               </p>
             </>
           ) : (
@@ -199,7 +198,7 @@ export default async function ReservedPage({
           </p>
           {payOnline && (
             <div className="resv-pay">
-              <RentalPayButton bookingId={b.id} amount={amount} />
+              <RentalPayButton bookingId={b.id} amount={amount} deposit={dep} />
             </div>
           )}
         </>

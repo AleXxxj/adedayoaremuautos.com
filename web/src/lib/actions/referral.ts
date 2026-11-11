@@ -68,8 +68,8 @@ const joinSchema = z.object({
   // worked. "website" (the old name, which browsers autofill) is ignored.
   website: z.string().optional(),
   leave_empty: z.string().optional(),
-  // How long the form was open, measured on the phone alone (see the  // booking form). renderedAt is still accepted from pages opened earlier.
-  renderedAt: z.coerce.number().optional(),
+  // How long the form was on screen, by the phone's own clock (useFormTimer).
+  // Pages opened before it existed send none and are not timed.
   elapsedMs: z.coerce.number().int().min(0).optional(),
 });
 

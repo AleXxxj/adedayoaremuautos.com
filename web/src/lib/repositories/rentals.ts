@@ -87,11 +87,12 @@ export async function listFleet(market: MarketCode): Promise<FleetVehicle[]> {
 /**
  * One car's rental page.
  *
- * A car sold for sale only has no rental page. A rental car that is no longer
- * offered (sold, or taken off rental) keeps its page — a partner's link to it
- * still lands somewhere — but `bookable` is false, so the page says so
- * instead of showing a form the booking would refuse: the same test as the
- * rental list and requestRental.
+ * A car never offered for rent has no rental page: it has no rates, so the
+ * join finds nothing. A car that was offered and no longer is (sold, or taken
+ * off rental, which keeps its rates) keeps its page — a partner's link or a
+ * bookmark still lands somewhere — but `bookable` is false, so the page says
+ * so instead of showing a form the booking would refuse: the same test as
+ * the rental list and requestRental.
  */
 export async function getFleetVehicle(
   market: MarketCode,
@@ -106,7 +107,6 @@ export async function getFleetVehicle(
 
   if (!row) return null;
   if (row.v.status === "draft" || row.v.status === "unlisted") return null;
-  if (row.v.listingKind !== "rental" && row.v.listingKind !== "both") return null;
 
   const images = await db
     .select()
@@ -127,7 +127,9 @@ export async function getFleetVehicle(
     seats: row.v.seats,
     image: images[0] ? mediaUrl(images[0].storageKey) : null,
     tariff: toTariff(row.r),
-    bookable: row.v.status === "available" || row.v.status === "pending",
+    bookable:
+      (row.v.listingKind === "rental" || row.v.listingKind === "both") &&
+      (row.v.status === "available" || row.v.status === "pending"),
   };
 }
 

@@ -232,6 +232,60 @@ console.log("\nRecognizing a retry of the same reservation");
   );
 }
 
+// A refused booking deletes the renter's uploaded documents, so "refused" is
+// read from the database's own constraint field, never from message text,
+// which repeats whatever the renter typed.
+console.log("\nTelling a refused booking from a lost reply");
+{
+  const { refusedBy, violates } = await import("../src/lib/dbError");
+  const real = drizzle(pg, { schema });
+  const car = "11111111-1111-1111-1111-111111111111";
+  const week = (n: number) => {
+    const from = new Date(Date.UTC(2028, 0, 1 + n * 10));
+    return `[${from.toISOString()},${new Date(from.getTime() + 7 * 86_400_000).toISOString()})`;
+  };
+  const insert = (period: string, note = "") =>
+    real.insert(schema.rentalBookings).values({
+      vehicleId: car,
+      marketCode: "us",
+      period: period as never,
+      customerName: "Test Renter",
+      customerPhone: "+13365550100",
+      status: "confirmed",
+      totalMinor: 50000,
+      currency: "USD",
+      notes: note || null,
+    } as never);
+
+  await insert(week(1));
+  let clash: unknown = null;
+  try {
+    await insert(week(1));
+  } catch (e) {
+    clash = e;
+  }
+  check("a booked week is refused by the no-overlap constraint", refusedBy(clash, "rental_bookings_no_overlap"), String(clash));
+
+  let empty: unknown = null;
+  const day = new Date(Date.UTC(2028, 5, 1)).toISOString();
+  try {
+    await insert(`[${day},${day})`);
+  } catch (e) {
+    empty = e;
+  }
+  check("an empty period is refused by its own constraint", refusedBy(empty, "rental_bookings_period_not_empty"), String(empty));
+
+  // What Drizzle throws when the connection drops after the row was saved:
+  // its message repeats the query's parameters, here a note that happens to
+  // name the constraint, and its cause has no constraint field.
+  const lostReply = Object.assign(
+    new Error('Failed query: insert into "rental_bookings" ... params: rental_bookings_no_overlap,Test Renter'),
+    { cause: Object.assign(new Error("write CONNECTION_CLOSED"), { code: "CONNECTION_CLOSED" }) },
+  );
+  check("a lost reply is never taken for a refusal", !refusedBy(lostReply, "rental_bookings_no_overlap"));
+  check("(text matching would have been fooled)", violates(lostReply, "rental_bookings_no_overlap"));
+}
+
 console.log(
   `\n${passed} passed, ${failed} failed.` +
     (failed ? "  \x1b[31mHOLDS WRONG\x1b[0m\n" : "  \x1b[32mHolds verified.\x1b[0m\n"),

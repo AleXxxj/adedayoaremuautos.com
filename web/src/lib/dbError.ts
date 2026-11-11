@@ -27,7 +27,10 @@
 
 /** Postgres error fields that survive onto the driver's error object. */
 interface PgErrorish {
+  /** postgres.js. */
   constraint_name?: unknown;
+  /** node-postgres's protocol errors, which PGlite uses too. */
+  constraint?: unknown;
   message?: unknown;
   cause?: unknown;
 }
@@ -41,6 +44,9 @@ export function constraintName(error: unknown): string | null {
     const e = current as PgErrorish;
     if (typeof e.constraint_name === "string" && e.constraint_name) {
       return e.constraint_name;
+    }
+    if (typeof e.constraint === "string" && e.constraint) {
+      return e.constraint;
     }
     current = e.cause;
   }
@@ -66,6 +72,20 @@ export function violates(error: unknown, constraint: string): boolean {
     current = e.cause;
   }
   return false;
+}
+
+/**
+ * Whether the database refused the write with this constraint, by the error's
+ * own fields only — never by its text.
+ *
+ * For decisions that destroy something. Drizzle's error message repeats the
+ * query's parameters, which include whatever a customer typed, so text
+ * matching can be fooled: a booking note naming a constraint, plus a
+ * connection that dropped after the row was saved, would read as "refused"
+ * and delete the documents of a booking that exists.
+ */
+export function refusedBy(error: unknown, constraint: string): boolean {
+  return constraintName(error) === constraint;
 }
 
 /** Whether the error is any one of several constraints. */

@@ -16,7 +16,7 @@ import { formatMoney, money } from "@/lib/money";
  */
 export async function paymentStateFor(
   bookingId: string,
-): Promise<{ status: string; reference: string; amount: string } | null> {
+): Promise<{ status: string; reference: string; amount: string; deposit: boolean } | null> {
   if (!bookingId) return null;
   const [row] = await db
     .select({ b: rentalBookings })
@@ -39,5 +39,7 @@ export async function paymentStateFor(
     status: paidMinor > 0 && paidMinor >= row.b.totalMinor ? "paid" : row.b.status,
     reference: bookingId.slice(0, 8).toUpperCase(),
     amount: formatMoney(money(row.b.totalMinor, cfg.currency), cfg.locale),
+    // Some cars take no deposit; the page must not promise one for them.
+    deposit: row.b.depositMinor > 0,
   };
 }

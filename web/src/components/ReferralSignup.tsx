@@ -2,10 +2,10 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { joinReferralProgramme, type PartnerResult } from "@/lib/actions/referral";
 import type { MarketConfig } from "@/lib/market";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 /**
  * Applying to become a referral partner.
@@ -30,20 +30,11 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
   // Save, and the announcement is what a screen reader reads out.
   useActionToast(state, "Application sent — check your email.");
 
-  // Mount time in a ref, stamped on at submit — the same shape the other
-  // public forms use, so a script that posts instantly is recognised.
-  const mountedAt = useRef(0);
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     return action(formData);
   };
 

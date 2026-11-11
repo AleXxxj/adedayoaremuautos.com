@@ -2,7 +2,7 @@
 
 import { useActionToast } from "@/components/Toast";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import {
   submitFinanceApplication,
   type ApplicationResult,
@@ -15,7 +15,7 @@ import {
   monthlyPayment,
   type CurrencyCode,
 } from "@/lib/money";
-import { useHydrated } from "@/lib/useHydrated";
+import { useFormTimer } from "@/lib/useFormTimer";
 
 /* ── Calculator ─────────────────────────────────────────────────────────── */
 
@@ -225,19 +225,11 @@ export function LegacyFinanceApplication({
   );
   useActionToast(state);
 
-  const mountedAt = useRef(0);
-
-  const hydrated = useHydrated();
-  useEffect(() => {
-    mountedAt.current = performance.now();
-  }, []);
+  // How long the form has been on screen goes with it, as the bot check.
+  const { hydrated, elapsedMs } = useFormTimer();
 
   const submit = (formData: FormData) => {
-    // How long the form was open, by this phone's clock alone: comparing
-    // the phone's clock with the server's dropped real messages from phones
-    // whose clocks ran fast.
-    // A monotonic clock: the wall clock can jump while a form is open.
-    formData.set("elapsedMs", String(Math.round(performance.now() - mountedAt.current)));
+    formData.set("elapsedMs", String(elapsedMs()));
     formData.set("landingPath", window.location.pathname + window.location.search);
     return action(formData);
   };

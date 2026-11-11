@@ -13,16 +13,19 @@ import { startRentalPayment, type StartPaymentResult } from "@/lib/actions/renta
  * which is the whole reason paying is a second step rather than part of the
  * form.
  *
- * The amount is the hire charge only. The refundable deposit is taken at
- * pickup, where damage can actually be looked at — and where a disagreement is
- * a conversation rather than a card chargeback.
+ * The amount is the rental charge only. A refundable deposit, for the cars
+ * that take one, is taken at pickup, where damage can actually be looked at —
+ * and where a disagreement is a conversation rather than a card chargeback.
  */
 export function RentalPayButton({
   bookingId,
   amount,
+  deposit,
 }: {
   bookingId: string;
   amount: string;
+  /** Whether this car takes a deposit at all: nothing may promise one for a car that doesn't. */
+  deposit: boolean;
 }) {
   const [state, action, pending] = useActionState<StartPaymentResult | null, FormData>(
     startRentalPayment,
@@ -53,8 +56,8 @@ export function RentalPayButton({
 
       <p className="booking-pay-note">
         Paying confirms the dates straight away. Card details are handled by our
-        payment provider and never reach this website. The refundable deposit is
-        taken at pickup, not now.
+        payment provider and never reach this website.
+        {deposit && " The refundable deposit is taken at pickup, not now."}
       </p>
     </form>
   );
