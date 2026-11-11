@@ -29,6 +29,8 @@ import {
   index,
   uniqueIndex,
   customType,
+  date,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -1588,3 +1590,26 @@ export const rentalPayments = pgTable(
 );
 
 export type RentalPayment = typeof rentalPayments.$inferSelect;
+
+/**
+ * How many free car checks one visitor has run today.
+ *
+ * The check is free and open to anyone, and every lookup asks NHTSA's public
+ * servers for a model's recalls, complaints and crash ratings. A daily
+ * allowance per visitor keeps one script from running thousands of them
+ * through this site.
+ *
+ * Holds no VIN and no address. `visitor` is a keyed hash of the IP address
+ * whose key changes every month (src/lib/vin/usage.ts): enough to recognize a
+ * repeat visitor today, useless for recovering the address or for following
+ * anyone from one month to the next. Old days are deleted as new ones arrive.
+ */
+export const vinCheckUsage = pgTable(
+  "vin_check_usage",
+  {
+    visitor: text("visitor").notNull(),
+    day: date("day").notNull(),
+    lookups: integer("lookups").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.visitor, t.day] })],
+);

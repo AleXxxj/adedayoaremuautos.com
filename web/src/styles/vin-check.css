@@ -1,0 +1,336 @@
+/*
+ * Check any car (/us/check).
+ *
+ * In the legacy theme's vocabulary rather than Tailwind utilities: inside the
+ * market layout the legacy reset (.legacy-theme :where(…)) zeroes margins and
+ * padding at the same specificity as a utility and loads after them, which is
+ * how the rental page once lost its whole layout. Prefixed .legacy-theme so
+ * these win over the reset; phone-first, with one column throughout.
+ */
+
+.legacy-theme .vc-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 56px) 16px clamp(48px, 6vw, 84px);
+}
+
+.legacy-theme .vc-results {
+    display: grid;
+    gap: 14px;
+}
+
+.legacy-theme .vc-card {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.legacy-theme .vc-eyebrow {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-car {
+    margin: 0;
+    font-size: clamp(22px, 5.5vw, 30px);
+    line-height: 1.15;
+    color: #fff;
+}
+
+.legacy-theme .vc-h {
+    margin: 0;
+    font-size: 17px;
+    color: #fff;
+}
+
+.legacy-theme .vc-facts,
+.legacy-theme .vc-card > p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .vc-facts code {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+.legacy-theme .vc-card a {
+    color: var(--brand-400, #4e9d76);
+}
+
+/* The VIN box: big enough to type on a phone, capitals as people read them. */
+.legacy-theme .vc-label {
+    display: grid;
+    gap: 2px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.legacy-theme .vc-label span {
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-input {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px;
+    border: 1px solid var(--border, #333);
+    border-radius: 10px;
+    background: #0d0d0d;
+    color: #fff;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.legacy-theme .vc-input::placeholder {
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #5f5f5f;
+}
+
+.legacy-theme .vc-primary {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+}
+
+.legacy-theme .vc-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.legacy-theme .vc-actions .btn {
+    justify-content: center;
+    min-height: 48px;
+}
+
+.legacy-theme .vc-error,
+.legacy-theme .vc-warn {
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.legacy-theme .vc-error {
+    border: 1px solid rgba(217, 83, 79, 0.4);
+    background: rgba(217, 83, 79, 0.1);
+    color: #f3a6a3;
+}
+
+.legacy-theme .vc-warn {
+    border: 1px solid rgba(201, 162, 39, 0.4);
+    background: rgba(201, 162, 39, 0.1);
+    color: #e2c463;
+}
+
+.legacy-theme .vc-help summary {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .vc-help p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+/* A count people take in at a glance. */
+.legacy-theme .vc-big {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+}
+
+.legacy-theme .vc-big span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .vc-note,
+.legacy-theme .vc-muted {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-parts,
+.legacy-theme .vc-recalls,
+.legacy-theme .vc-out {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .vc-parts li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border, #1f1f1f);
+    font-size: 14px;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .vc-parts strong {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .vc-recalls details {
+    padding: 10px 12px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+}
+
+.legacy-theme .vc-recalls summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+}
+
+/* A recall opens to its summary and fix; the arrow says so (the flex
+   layout above removes the browser's own marker). */
+.legacy-theme .vc-recalls summary {
+    list-style: none;
+}
+
+.legacy-theme .vc-recalls summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-theme .vc-recalls summary span {
+    margin-right: auto;
+}
+
+.legacy-theme .vc-recalls summary::after {
+    content: "\25B8";
+    flex-shrink: 0;
+    color: var(--brand-400, #4e9d76);
+}
+
+.legacy-theme .vc-recalls details[open] > summary::after {
+    content: "\25BE";
+}
+
+.legacy-theme .vc-recalls summary small {
+    flex-shrink: 0;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-recalls details p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary, #b9b9b9);
+}
+
+.legacy-theme .vc-stars {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+    gap: 10px;
+}
+
+.legacy-theme .vc-stars div {
+    padding: 10px 12px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+}
+
+.legacy-theme .vc-stars dt {
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-stars dd {
+    margin: 2px 0 0;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--gold, #c9a227);
+}
+
+.legacy-theme .vc-star-off {
+    color: #3a3a3a;
+}
+
+.legacy-theme .vc-out a {
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px;
+    border: 1px solid var(--border, #262626);
+    border-radius: 10px;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.legacy-theme .vc-out a span {
+    font-size: 13px;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-link-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 14px;
+    color: var(--brand-400, #4e9d76);
+    cursor: pointer;
+}
+
+.legacy-theme .vc-copy,
+.legacy-theme .vc-again {
+    justify-content: center;
+    min-height: 44px;
+}
+
+.legacy-theme .vc-footnote {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-muted, #8f8f8f);
+}
+
+.legacy-theme .vc-footnote a {
+    color: var(--brand-400, #4e9d76);
+}
+
+/* Crash-test versions that differ: each one's name, then its own stars. */
+.legacy-theme .vc-versions {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 12px;
+}
+
+.legacy-theme .vc-version-name {
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}

@@ -73,12 +73,15 @@ export async function GET(
  *   /r/CODE                  → the market's home page
  *   /r/CODE/rentals          → the rentals list
  *   /r/CODE/rentals/{slug}   → one car's rental page
+ *   /r/CODE/check            → the free car check (US only: it reads US
+ *                              government data, so Nigeria has no such page)
  *
  * Anything else falls back to the home page. A slug is letters, digits and
  * hyphens only, so nothing in it can turn the path into another address.
  */
 function destination(market: string, dest: string[] | undefined): string {
   if (!dest || dest.length === 0) return `/${market}`;
+  if (dest.length === 1 && dest[0] === "check" && market === "us") return "/us/check";
   if (dest[0] === "rentals") {
     if (dest.length === 1) return `/${market}/rentals`;
     if (dest.length === 2 && /^[a-z0-9-]{1,120}$/.test(dest[1])) {
