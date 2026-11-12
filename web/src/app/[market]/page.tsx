@@ -392,13 +392,16 @@ export default async function MarketHome({
           ) : null
         }
       >
-        {/* Three cards, each with its own color: the green one is Buy. */}
+        {/* Three cards, each with its own color: the green one is Buy. The
+            hidden comma makes a screen reader say "Buy, 16 cars". */}
         <div className="hh-actions">
           <Link href={forSale > 0 ? href("/inventory") : href("/contact")} className="hh-btn" data-tint="buy">
             <span className="hh-btn-chip">
               <i className="fas fa-car" aria-hidden="true" />
             </span>
-            <span className="hh-btn-label">Buy</span>
+            <span className="hh-btn-label">
+              Buy<span className="home-sr">, </span>
+            </span>
             <span className="hh-btn-sub">{forSale > 0 ? carsLabel(forSale) : "Ask us"}</span>
           </Link>
           {/* No offer is promised: the business makes one only for a car it wants. */}
@@ -406,7 +409,9 @@ export default async function MarketHome({
             <span className="hh-btn-chip">
               <i className="fas fa-tag" aria-hidden="true" />
             </span>
-            <span className="hh-btn-label">Sell</span>
+            <span className="hh-btn-label">
+              Sell<span className="home-sr">, </span>
+            </span>
             <span className="hh-btn-sub">Tell us about it</span>
           </Link>
           <Link
@@ -417,7 +422,9 @@ export default async function MarketHome({
             <span className="hh-btn-chip">
               <i className="fas fa-key" aria-hidden="true" />
             </span>
-            <span className="hh-btn-label">Rent</span>
+            <span className="hh-btn-label">
+              Rent<span className="home-sr">, </span>
+            </span>
             <span className="hh-btn-sub">{rentFrom ? `From ${rentFrom}` : "Ask us"}</span>
           </Link>
         </div>

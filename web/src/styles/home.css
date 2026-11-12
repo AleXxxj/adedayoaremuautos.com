@@ -1694,7 +1694,10 @@
 /* ── Less motion ──────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-    .legacy-theme .hh-photo,
+    /* As specific as the rule that starts the zoom: `.hh-photo` alone lost to
+       it, and the zoom stayed on the photo, only ever paused by the script. */
+    .legacy-theme .hh-photo.is-current,
+    .legacy-theme .hh-photo.is-previous,
     .legacy-theme .home-tiles > li {
         animation: none;
     }
