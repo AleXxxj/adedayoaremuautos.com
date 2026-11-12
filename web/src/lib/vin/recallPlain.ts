@@ -193,9 +193,15 @@ async function summarizeLive(r: ModelRecall, make: string): Promise<RecallWords>
 /** The same request without the cache, for scripts — the cache needs Next's runtime. */
 export const summarizeUncached = (r: ModelRecall, make: string) => summarizeLive(r, make);
 
-/** One answer per campaign, kept 30 days; a failure throws, so it is asked again next time. */
+/**
+ * One answer per campaign and make, kept 30 days; a failure throws, so it is
+ * asked again next time. The make is part of the key because one campaign
+ * can cover several makes (20V682000 is both Toyota's and Lexus's), and
+ * Claude is told the make: an answer written for a Toyota must not be shown
+ * to someone checking a Lexus.
+ */
 function cachedSummary(r: ModelRecall, make: string): Promise<RecallWords> {
-  return unstable_cache(() => summarizeLive(r, make), ["recall-plain-v1", r.campaign], {
+  return unstable_cache(() => summarizeLive(r, make), ["recall-plain-v1", r.campaign, make.toUpperCase()], {
     revalidate: 30 * DAY,
   })();
 }
@@ -214,7 +220,9 @@ const aiAvailable = () => summarizer !== null || Boolean(process.env.ANTHROPIC_A
 const inFlight = new Map<string, Promise<RecallWords | null>>();
 
 function summary(r: ModelRecall, make: string): Promise<RecallWords | null> {
-  const running = inFlight.get(r.campaign);
+  // Per campaign and make, like the cache: one campaign can cover two makes.
+  const key = `${r.campaign}|${make.toUpperCase()}`;
+  const running = inFlight.get(key);
   if (running) return running;
   const p = (summarizer ?? cachedSummary)(r, make)
     .then(
@@ -233,8 +241,8 @@ function summary(r: ModelRecall, make: string): Promise<RecallWords | null> {
         return null;
       },
     )
-    .finally(() => inFlight.delete(r.campaign));
-  inFlight.set(r.campaign, p);
+    .finally(() => inFlight.delete(key));
+  inFlight.set(key, p);
   return p;
 }
 
