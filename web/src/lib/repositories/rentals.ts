@@ -124,11 +124,14 @@ export function fromPrices(fleet: FleetVehicle[]) {
  * bookmark still lands somewhere — but `bookable` is false, so the page says
  * so instead of showing a form the booking would refuse: the same test as
  * the rental list and requestRental.
+ *
+ * `images` is every photo, the main one first, for the page's gallery; a
+ * list only ever needs `image`.
  */
 export async function getFleetVehicle(
   market: MarketCode,
   slug: string,
-): Promise<(FleetVehicle & { bookable: boolean }) | null> {
+): Promise<(FleetVehicle & { bookable: boolean; images: string[] }) | null> {
   const [row] = await db
     .select({ v: vehicles, r: rentalRates })
     .from(vehicles)
@@ -157,6 +160,7 @@ export async function getFleetVehicle(
     fuelType: row.v.fuelType,
     seats: row.v.seats,
     image: images[0] ? mediaUrl(images[0].storageKey) : null,
+    images: images.map((i) => mediaUrl(i.storageKey)),
     tariff: toTariff(row.r),
     bookable:
       (row.v.listingKind === "rental" || row.v.listingKind === "both") &&

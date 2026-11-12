@@ -1,44 +1,45 @@
-"use client";
+import Link from "next/link";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+export interface ActiveFilter {
+  /** "Toyota", "Up to $10,000", "Search: camry". */
+  label: string;
+  /** The list without this filter. */
+  href: string;
+}
 
 /**
- * Chips for whatever filters are applied on the sale list, with a clear-all.
- * The filters themselves are folded behind one button (ListToolbar), so these
- * are what show, at a glance, that the list is narrowed.
+ * The filters in force on a list, each a chip that takes itself off, with
+ * one link that clears them all. Plain links, so they work before the page's
+ * scripts arrive and without them.
+ *
+ * The page builds the chips from the address it was asked for, so a filter
+ * from an older link (a year, a transmission) shows here and can be removed
+ * even though the menus no longer offer it.
  */
-export function ActiveFilters() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
-
-  const labels: Record<string, string> = {
-    make: "Brand", year: "Year", price: "Price",
-    condition: "Condition", transmission: "Transmission", q: "Search",
-  };
-
-  const active = [...params.entries()].filter(([k]) => k in labels);
-  if (active.length === 0) return null;
-
-  const remove = (key: string) => {
-    const next = new URLSearchParams(params.toString());
-    next.delete(key);
-    router.push(`${pathname}?${next.toString()}`, { scroll: false });
-  };
-
+export function ActiveFilters({
+  filters,
+  clearHref,
+}: {
+  filters: ActiveFilter[];
+  clearHref: string;
+}) {
+  if (filters.length === 0) return null;
   return (
-    <div className="active-filters">
-      {active.map(([k, v]) => (
-        <span className="filter-tag" key={k}>
-          {labels[k]}: {v}
-          <button type="button" onClick={() => remove(k)} aria-label={`Remove ${labels[k]} filter`}>
-            <i className="fas fa-times" />
-          </button>
-        </span>
+    <ul className="cl-active" aria-label="Filters in use">
+      {filters.map((f) => (
+        <li key={f.label}>
+          <Link href={f.href} scroll={false} className="cl-active-chip">
+            <span className="cl-sr">Remove filter: </span>
+            {f.label}
+            <i className="fas fa-xmark" aria-hidden="true" />
+          </Link>
+        </li>
       ))}
-      <button type="button" className="clear-filters" onClick={() => router.push(pathname)}>
-        Clear All
-      </button>
-    </div>
+      <li>
+        <Link href={clearHref} scroll={false} className="cl-active-clear">
+          Clear filters
+        </Link>
+      </li>
+    </ul>
   );
 }

@@ -9,8 +9,23 @@ import {
   type FleetVehicle,
 } from "@/lib/repositories/rentals";
 import { formatMoney, money, toMajor } from "@/lib/money";
-import { ListToolbar, type ListFilter } from "@/components/ListToolbar";
-import { CarRow } from "@/components/CarRow";
+import { ActiveFilters, type ActiveFilter } from "@/components/ActiveFilters";
+import { ListToolbar } from "@/components/ListToolbar";
+import { CarCard } from "@/components/cars/CarCard";
+import { BodyChips, ListHead } from "@/components/cars/ListChrome";
+import { SavedCars, SavedCount } from "@/components/cars/Saved";
+import {
+  bodyCounts,
+  bodyTypeOf,
+  cardFor,
+  isBodyKey,
+  makeMatches,
+  makeOptions,
+  parseBand,
+  priceCuts,
+  type BodyKey,
+} from "@/components/cars/carData";
+import "@/styles/cars.css";
 import "@/styles/car-list.css";
 import "@/styles/rentals.css";
 
@@ -35,42 +50,48 @@ export async function generateMetadata({
   };
 }
 
-/** Price bands in whole currency units, wide enough to be useful in both markets. */
-function priceBands(market: MarketConfig, fleet: FleetVehicle[]) {
-  if (fleet.length === 0) return [];
+/** How a band on the daily rate reads, its ends in minor units: "$180 – $290 a day". */
+function bandLabel(market: MarketConfig, lo: number, hi: number | null) {
   const fmt = (minor: number) =>
     formatMoney(money(minor, market.currency), market.locale, { compact: true });
-
-  const dailies = fleet.map((v) => v.tariff.dailyMinor).sort((a, b) => a - b);
-  const min = dailies[0];
-  const max = dailies.at(-1)!;
-  if (min === max) return [];
-
-  // Three bands across the actual range, so every band has something in it —
-  // the original's fixed ₦30k/₦50k/₦80k steps were empty or all-inclusive
-  // depending on what happened to be in the fleet.
-  const step = Math.ceil((max - min) / 3);
-  const cuts = [min + step, min + step * 2];
-
-  return [
-    { label: `Under ${fmt(cuts[0])}`, value: `0-${cuts[0]}` },
-    { label: `${fmt(cuts[0])} – ${fmt(cuts[1])}`, value: `${cuts[0]}-${cuts[1]}` },
-    { label: `Above ${fmt(cuts[1])}`, value: `${cuts[1]}-` },
-  ];
+  if (hi == null) return `Above ${fmt(lo)} a day`;
+  return lo > 0 ? `${fmt(lo)} – ${fmt(hi)} a day` : `Under ${fmt(hi)} a day`;
 }
 
+/**
+ * Price bands on the daily rate, in minor units.
+ *
+ * Up to three bands across the actual range, cut at round figures, so every
+ * band has something in it — the original's fixed ₦30k/₦50k/₦80k steps were
+ * empty or all-inclusive depending on what happened to be in the fleet.
+ */
+function priceBands(market: MarketConfig, fleet: FleetVehicle[]) {
+  const cuts = priceCuts(fleet.map((v) => v.tariff.dailyMinor));
+  if (cuts.length === 0) return [];
+  return [0, ...cuts].map((lo, i) => {
+    const hi = cuts[i] ?? null;
+    return { label: bandLabel(market, lo, hi), value: `${lo}-${hi ?? ""}` };
+  });
+}
+
+const SORTS = ["price-low", "price-high", "name"] as const;
+const FILTER_KEYS = ["type", "make", "price", "duration", "transmission"] as const;
+
+/**
+ * The cars to rent.
+ *
+ * The same shape as the sale list: a short header, tap chips for body type,
+ * menus for make, price and sort, then one photo card per car, leading with
+ * what a week costs. `type`, `make`, `price` (a band on the daily rate, in
+ * minor units), `duration`, `transmission` and `sort` are all in the
+ * address, and `saved=1` shows the cars this browser has saved.
+ */
 export default async function RentalsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ market: string }>;
-  searchParams: Promise<{
-    type?: string;
-    duration?: string;
-    price?: string;
-    transmission?: string;
-    sort?: string;
-  }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { market: code } = await params;
   if (!isMarketCode(code)) notFound();
@@ -79,44 +100,44 @@ export default async function RentalsPage({
 
   const all = await listFleet(code);
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
+  const bands = priceBands(market, all);
+  const showSaved = q.saved === "1";
 
-  const each = (values: (string | null | undefined)[]) =>
-    [...new Set(values.filter((t): t is string => Boolean(t)))].sort().map((t) => ({ value: t, label: t }));
-  const filters: ListFilter[] = [
-    { key: "type", label: "Type", anyLabel: "Any type", options: each(all.map((v) => v.bodyStyle)) },
-    {
-      key: "duration",
-      label: "Rent by",
-      anyLabel: "Day, week or month",
-      options: [
-        { value: "weekly", label: "The week" },
-        { value: "monthly", label: "The month" },
-      ],
-    },
-    { key: "price", label: "Price a day", anyLabel: "Any price", options: priceBands(market, all) },
-    { key: "transmission", label: "Transmission", anyLabel: "Any", options: each(all.map((v) => v.transmission)) },
-  ];
+  // A chip sends a body type ("suv"). An older link sent the body style as it
+  // was typed ("Suv"): read as a type when it is one, matched exactly if not.
+  const body: BodyKey | null = isBodyKey(q.type)
+    ? q.type
+    : q.type
+      ? bodyTypeOf({ bodyStyle: q.type })
+      : null;
+  const typedBody = q.type && !body ? q.type : null;
+  const sort = SORTS.find((s) => s === q.sort) ?? "price-low";
 
   // Filtering in the route rather than the browser: the whole fleet is already
   // loaded here, and doing it server-side keeps every filtered view a real URL.
-  let fleet = all;
-  if (q.type) fleet = fleet.filter((v) => v.bodyStyle === q.type);
-  if (q.transmission) fleet = fleet.filter((v) => v.transmission === q.transmission);
-  if (q.duration === "weekly") fleet = fleet.filter((v) => v.tariff.weeklyMinor != null);
-  if (q.duration === "monthly") fleet = fleet.filter((v) => v.tariff.monthlyMinor != null);
+  let others = all;
+  if (q.make) others = others.filter((v) => makeMatches(v.make, q.make!));
+  if (q.transmission) others = others.filter((v) => v.transmission === q.transmission);
+  if (q.duration === "weekly") others = others.filter((v) => v.tariff.weeklyMinor != null);
+  if (q.duration === "monthly") others = others.filter((v) => v.tariff.monthlyMinor != null);
   if (q.price) {
     const [lo, hi] = q.price.split("-");
     const min = Number(lo) || 0;
     const max = hi ? Number(hi) : Infinity;
-    fleet = fleet.filter((v) => v.tariff.dailyMinor >= min && v.tariff.dailyMinor <= max);
+    others = others.filter((v) => v.tariff.dailyMinor >= min && v.tariff.dailyMinor <= max);
   }
+  // The chips count what each would show with the other filters as they are.
+  const types = bodyCounts(others, body);
+  let fleet = others;
+  if (body) fleet = fleet.filter((v) => bodyTypeOf(v) === body);
+  if (typedBody) fleet = fleet.filter((v) => v.bodyStyle === typedBody);
 
   const name = (v: FleetVehicle) =>
     [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
 
   // Sorted on what a week costs, the price each card leads with (weekCost).
   fleet = [...fleet].sort((a, b) => {
-    switch (q.sort) {
+    switch (sort) {
       case "price-high":
         return byWeekCost(b, a);
       case "name":
@@ -128,7 +149,7 @@ export default async function RentalsPage({
   });
 
   // From the whole fleet, not the filtered list: where the prices start.
-  const { fromDaily, fromWeekly, fromMonthly } = fromPrices(all);
+  const { fromDaily, fromWeekly } = fromPrices(all);
 
   const deposits = all.map((v) => v.tariff.depositMinor).filter((d) => d > 0);
   const minDays = all.length ? Math.min(...all.map((v) => v.tariff.minDays)) : null;
@@ -154,99 +175,189 @@ export default async function RentalsPage({
       : {}),
   };
 
+  // ── Addresses ───────────────────────────────────────────────────────────
+  const path = `/${code}/rentals`;
+  const kept = [...FILTER_KEYS, "sort"] as const;
+  /** This list with some parameters changed; null removes one. */
+  const hrefWith = (changes: Record<string, string | null>) => {
+    const next = new URLSearchParams();
+    for (const key of kept) if (q[key]) next.set(key, q[key]!);
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    const query = next.toString();
+    return query ? `${path}?${query}` : path;
+  };
+
+  const hasFilters = FILTER_KEYS.some((key) => Boolean(q[key]));
+  // A price from an older link may not be one of today's bands: it still
+  // filters, so it is named from its own two ends.
+  const chosenBand = parseBand(q.price);
+  const priceText =
+    bands.find((b) => b.value === q.price)?.label ??
+    (chosenBand ? bandLabel(market, chosenBand.lo, chosenBand.hi) : "Price");
+  const priceOptions =
+    q.price && !bands.some((b) => b.value === q.price)
+      ? [{ value: q.price, label: priceText }, ...bands]
+      : bands;
+  const active: ActiveFilter[] = [
+    q.make && { key: "make", label: q.make },
+    q.price && { key: "price", label: priceText },
+    q.duration === "weekly" && { key: "duration", label: "By the week" },
+    q.duration === "monthly" && { key: "duration", label: "By the month" },
+    q.transmission && { key: "transmission", label: q.transmission },
+    typedBody && { key: "type", label: typedBody },
+  ]
+    .filter((f): f is { key: string; label: string } => Boolean(f))
+    .map((f) => ({ label: f.label, href: hrefWith({ [f.key]: null }) }));
+
+  // The header's one line: how many, and where a week starts (a day, where
+  // no car has a weekly rate). Each card shows its own prices.
+  const fromLine =
+    fromWeekly != null
+      ? `from ${fmt(fromWeekly)} a week`
+      : fromDaily != null
+        ? `from ${fmt(fromDaily)} a day`
+        : null;
+  const count = showSaved ? (
+    <SavedCount market={code} />
+  ) : hasFilters ? (
+    `${fleet.length} of ${all.length} ${all.length === 1 ? "car" : "cars"}`
+  ) : (
+    [`${all.length} ${all.length === 1 ? "car" : "cars"}`, all.length > 0 && fromLine]
+      .filter(Boolean)
+      .join(" · ")
+  );
+
   return (
-    <>
+    <div className="cl-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="page-header page-header--rentals">
-        <div className="page-header-content">
-          <h1>
-            Rent a <span>car</span>
-          </h1>
-          <p>By the day, the week or the month. Tap a car to see open dates and book.</p>
-        </div>
-      </div>
-
-      <div className="rent-page">
-        {/* One line instead of three cards: each car shows its own prices,
-            so all this needs to say is where they start. */}
-        {all.length > 0 && fromDaily != null && (
-          <p className="rent-from">
-            From <strong>{fmt(fromDaily)}</strong> a day
-            {fromWeekly != null && (
-              <>
-                {" "}· <strong>{fmt(fromWeekly)}</strong> a week
-              </>
-            )}
-            {fromMonthly != null && (
-              <>
-                {" "}· <strong>{fmt(fromMonthly)}</strong> a month
-              </>
-            )}
-          </p>
-        )}
+      <div className="cl-wrap">
+        <ListHead
+          eyebrow={code === "us" ? "Greensboro, NC" : "Nigeria"}
+          title="Rent a car"
+          count={count}
+        />
 
         {all.length > 0 && (
-          <ListToolbar
-            count={fleet.length === all.length ? `${all.length} cars` : `${fleet.length} of ${all.length} cars`}
-            filters={filters}
-            sort={{
-              defaultValue: "price-low",
-              options: [
-                { value: "price-low", label: "Lowest price" },
-                { value: "price-high", label: "Highest price" },
-                { value: "name", label: "Name" },
-              ],
-            }}
-          />
+          <>
+            <BodyChips
+              market={code}
+              types={types}
+              total={others.length}
+              chosen={body}
+              saved={showSaved}
+              hrefFor={(key) => hrefWith({ type: key })}
+              savedHref={`${path}?saved=1`}
+            />
+            {!showSaved && (
+              <>
+                <ListToolbar
+                  action={path}
+                  selects={[
+                    {
+                      key: "make",
+                      label: "Make",
+                      anyLabel: "Any make",
+                      options: makeOptions(all).map((m) => ({ value: m, label: m })),
+                    },
+                    { key: "price", label: "Price a day", anyLabel: "Any price", options: priceOptions },
+                  ]}
+                  sort={{
+                    defaultValue: "price-low",
+                    options: [
+                      { value: "price-low", label: "Lowest price" },
+                      { value: "price-high", label: "Highest price" },
+                      { value: "name", label: "Name" },
+                    ],
+                  }}
+                  values={{
+                    make: q.make,
+                    price: q.price,
+                    sort: sort !== "price-low" ? sort : undefined,
+                  }}
+                  carry={{
+                    type: q.type,
+                    duration: q.duration,
+                    transmission: q.transmission,
+                  }}
+                />
+                <ActiveFilters filters={active} clearHref={path} />
+              </>
+            )}
+          </>
         )}
 
-        {fleet.length === 0 ? (
-          <div className="no-results">
-            <i className="fas fa-car" />
-            <h3>{all.length === 0 ? "No cars to rent right now" : "No cars match those filters"}</h3>
-            <p>
-              {all.length === 0
-                ? "Tell us what you need and for how long, and we will let you know what we can arrange."
-                : "Clear a filter or two to see more."}
-            </p>
-            <Link
-              href={all.length === 0 ? `/${code}/contact?type=rental` : `/${code}/rentals`}
-              className="btn btn-primary"
-              style={{ marginTop: 20, display: "inline-flex", width: "auto" }}
-            >
-              {all.length === 0 ? "Ask about a rental" : "See all cars"}
-            </Link>
-          </div>
+        {showSaved ? (
+          <SavedCars market={code} kind="rent" allHref={path} />
+        ) : fleet.length === 0 ? (
+          all.length === 0 ? (
+            <div className="cl-empty">
+              <i className="fas fa-key" aria-hidden="true" />
+              <h2>No cars to rent right now</h2>
+              <p>Tell us what you need and for how long. We will tell you what we can arrange.</p>
+              <Link href={`/${code}/contact?type=rental`} className="cl-btn cl-btn--primary">
+                Ask about a rental
+              </Link>
+            </div>
+          ) : (
+            <div className="cl-empty">
+              <i className="fas fa-filter-circle-xmark" aria-hidden="true" />
+              <h2>No cars match</h2>
+              <p>
+                {all.length} {all.length === 1 ? "car is" : "cars are"} ready to rent. Clear the
+                filters to see {all.length === 1 ? "it" : "them all"}.
+              </p>
+              <Link href={path} className="cl-btn cl-btn--primary">
+                Clear filters
+              </Link>
+            </div>
+          )
         ) : (
-          /* One row per car on a phone, a grid on a wider screen. The whole
-             card is the link, and it leads with the weekly price: most
-             renters here rent by the week. The deposit, every rate and the
-             open dates are on the car's own page, where they decide. */
-          <ul className="cl-list" id="rental-cars">
-            {fleet.map((v, i) => {
-              const weekly = v.tariff.weeklyMinor;
-              return (
-                <CarRow
-                  key={v.id}
-                  href={`/${code}/rentals/${v.slug}`}
-                  image={v.image}
-                  preload={i === 0}
-                  title={name(v)}
-                  price={fmt(weekly ?? v.tariff.dailyMinor)}
-                  unit={weekly != null ? "a week" : "a day"}
-                  details={[
-                    weekly != null && `or ${fmt(v.tariff.dailyMinor)} a day`,
-                    v.transmission,
-                    v.seats != null && `${v.seats} seats`,
-                  ]}
-                  badge={v.tariff.withDriverAvailable ? "Driver available" : null}
-                />
-              );
-            })}
+          /* One photo card per car on a phone, two across from 700px, three
+             from 1100px. The whole card is the link, and it leads with the
+             weekly price: most renters here rent by the week. The deposit,
+             every rate and the open dates are on the car's own page. */
+          <ul className="cc-grid" id="rental-cars">
+            {fleet.map((v, i) => (
+              <CarCard
+                key={v.id}
+                market={code}
+                heading="h2"
+                eager={i === 0}
+                card={cardFor(
+                  {
+                    slug: v.slug,
+                    year: v.year,
+                    make: v.make,
+                    model: v.model,
+                    trim: v.trim,
+                    bodyStyle: v.bodyStyle,
+                    mileage: null,
+                    transmission: v.transmission,
+                    fuelType: v.fuelType,
+                    drivetrain: null,
+                    seats: v.seats,
+                    image: v.image,
+                    pending: false,
+                    justIn: false,
+                    sale: null,
+                    rent: {
+                      dailyMinor: v.tariff.dailyMinor,
+                      weeklyMinor: v.tariff.weeklyMinor,
+                      driver: v.tariff.withDriverAvailable,
+                    },
+                  },
+                  market,
+                  "rent",
+                )}
+              />
+            ))}
           </ul>
         )}
 
@@ -303,12 +414,12 @@ export default async function RentalsPage({
             </div>
           </dl>
           {code === "us" && (
-            <p style={{ marginTop: 12 }}>
+            <p className="rent-terms-more">
               <Link href={`/${code}/rental-policy`}>Read the full rental policy</Link>
             </p>
           )}
         </details>
       </div>
-    </>
+    </div>
   );
 }
