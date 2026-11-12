@@ -116,7 +116,7 @@ export function WeeksTool({
                       {cost.lines.map((l) => `${l.quantity} × ${fmt(l.unitMinor)} ${PER[l.tier]}`).join(" + ")}
                     </span>
                     {cost.depositMinor > 0 && (
-                      <span className="gt-row-deposit">+ {fmt(cost.depositMinor)} refundable deposit</span>
+                      <span className="gt-row-deposit">+ {fmt(cost.depositMinor)} deposit</span>
                     )}
                   </>
                 ) : (

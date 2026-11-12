@@ -540,6 +540,18 @@
     font-size: 12px;
 }
 
+/* The narrowest phones: a smaller photo, so the words keep their room. */
+@media (max-width: 359px) {
+    .legacy-theme .gt-row {
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+
+    .legacy-theme .gt-row-total {
+        font-size: 16px;
+    }
+}
+
 /* ── Tool: rent, buy or rent to own ───────────────────────────────────── */
 
 .legacy-theme .gt-three {
@@ -553,7 +565,7 @@
     align-content: start;
     gap: 4px;
     min-width: 0;
-    padding: 12px 8px;
+    padding: 12px 6px;
     border: 1px solid var(--border-subtle);
     border-radius: 14px;
     background: var(--surface-0);
@@ -579,9 +591,11 @@
     color: var(--text-muted);
 }
 
+/* Sized to the box: "$29,345" stays on one line in the 69px a third of a
+   320px phone leaves it. A longer figure may still wrap rather than spill. */
 .legacy-theme .gt-way-figure {
     font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
-    font-size: clamp(17px, 5.4vw, 28px);
+    font-size: clamp(14px, 4.5vw, 28px);
     font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1.1;
