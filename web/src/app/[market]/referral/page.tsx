@@ -1,7 +1,10 @@
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
+import { canResize } from "@/lib/photo";
 import { listFleet } from "@/lib/repositories/rentals";
 import {
   DEFAULT_RENTAL_COMMISSION_BPS,
@@ -10,6 +13,7 @@ import {
   weeklyExamples,
 } from "@/lib/referral";
 import { ReferralSignup } from "@/components/ReferralSignup";
+import "@/styles/referral.css";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -43,36 +47,93 @@ export async function generateMetadata({
 }
 
 /*
- * The steps as they actually are.
+ * The steps as they actually are, three to a phone screen.
  *
  * Applying opens a review — there is no instant code — because a partner is
  * owed money under an agreement, and the agreement comes before the code.
  */
 const STEPS = [
   {
-    icon: "fas fa-file-pen",
-    title: "Apply",
-    body: "Tell us who you are and who you know that needs a car. It takes a couple of minutes.",
+    icon: "fa-file-pen",
+    title: "Apply in 2 minutes",
+    body: "Tell us who you are. We reply within 1 business day.",
   },
   {
-    icon: "fas fa-phone",
-    title: "We get back to you",
-    body: "Within one business day, by email or phone. We read every application.",
-  },
-  {
-    icon: "fas fa-handshake",
+    icon: "fa-handshake",
     title: "Accept the agreement",
-    body: "A short agreement in plain English. Your code goes live as soon as you accept it.",
+    body: "Short and in plain English. Your code goes live when you accept.",
   },
   {
-    icon: "fas fa-share-nodes",
-    title: "Share cars",
-    body: "Your partner page lists every car for rent, each with a message ready to send by WhatsApp or text.",
+    icon: "fa-share-nodes",
+    title: "Share cars, get paid",
+    body: `Send cars by WhatsApp or text. Earn ${RATE} of each week your renter pays for.`,
+  },
+];
+
+/*
+ * The rules, word for word as they were written, each under its own title.
+ *
+ * Folded to their titles so a phone shows all six at once; each opens to its
+ * full wording, and nothing is left off the page. The first two start open:
+ * they are what a new partner asks first. "Your renter stays yours" is not
+ * titled "for 90 days": the 90 days are the link's, and a renter who has
+ * rented stays the partner's for as long as they keep renting.
+ */
+const RULES: { title: React.ReactNode; body: React.ReactNode; open?: boolean }[] = [
+  {
+    title: "Free to join",
+    body: <>You never pay us anything.</>,
+    open: true,
   },
   {
-    icon: "fas fa-hand-holding-usd",
-    title: "Get paid, week after week",
-    body: `${RATE} of what your renter pays for each rental, once it is paid and the car is back — and again for every week they keep renting.`,
+    title: "Paid on completed rentals",
+    body: (
+      <>
+        Once the renter has paid and the car is back. Not on inquiries, and not
+        on anything canceled or refunded. Refundable deposits and taxes
+        don&rsquo;t count.
+      </>
+    ),
+    open: true,
+  },
+  {
+    title: "Your renter stays yours",
+    body: (
+      <>
+        Your link records someone for 90 days. Once they rent, every later
+        rental they book with the same phone number counts for you. If two
+        partners refer the same person, the first introduction wins. Someone
+        who has rented from us before isn&rsquo;t a new referral.
+      </>
+    ),
+  },
+  {
+    title: <>Say you&rsquo;re paid</>,
+    body: (
+      <>
+        Every message your partner page writes includes &ldquo;
+        {PAID_REFERRAL_DISCLOSURE}&rdquo; Keep that line.
+      </>
+    ),
+  },
+  {
+    title: "No recruiting",
+    body: (
+      <>
+        You earn only from renters you send, never from signing up other
+        partners. You can&rsquo;t refer yourself or your household, and staff
+        aren&rsquo;t eligible.
+      </>
+    ),
+  },
+  {
+    title: "No bank details here",
+    body: (
+      <>
+        We arrange payment with you directly. This website never asks for
+        them.
+      </>
+    ),
   },
 ];
 
@@ -87,6 +148,10 @@ const STEPS = [
  * The examples are real cars and their published weekly rates, showing the
  * arithmetic of one rental — never a promise of what anyone will earn, which
  * the FTC treats as an earnings claim that has to be backed up.
+ *
+ * Built for a phone (styles/referral.css): the hero's two buttons go to the
+ * form and to the partner log in, the examples are a row to swipe, and the
+ * form asks for its four required fields first.
  */
 export default async function ReferralPage({
   params,
@@ -100,100 +165,142 @@ export default async function ReferralPage({
   const fleet = await listFleet(code);
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
   const examples = weeklyExamples(fleet, 3);
+  // The examples carry the car's id; its photo comes from the same list.
+  const photo = new Map(fleet.map((v) => [v.id, v.image]));
 
   return (
-    <>
-      <div className="page-header page-header--referral">
-        <div className="page-header-content">
-          <h1>
+    <div className="rf">
+      <section className="rf-hero" aria-labelledby="rf-title">
+        {/* Under the words on a phone, beside them on a wide screen; the
+            scrim in referral.css keeps the text readable on either. */}
+        <div className="rf-hero-photo" aria-hidden="true">
+          <Image
+            src="/img/hero-nissan.png"
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 58vw, 100vw"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </div>
+        <div className="rf-wrap">
+          <p className="rf-eyebrow">Referral program</p>
+          <h1 id="rf-title" className="rf-title">
             Send a renter. <span>Earn {RATE}.</span>
           </h1>
-          <p>
-            Know someone who needs a car? Send them our way and earn on every
-            week they rent.
+          <p className="rf-lead">
+            You get {RATE} of what they pay, every week they keep renting.
           </p>
-        </div>
-      </div>
-
-      <div className="referral-page">
-        <div className="referral-page-container">
-          <div className="referral-page-grid">
-            <div className="referral-explain">
-              <div className="referral-headline">
-                {RATE} <small>of every rental your renter pays for — every week they rent</small>
-              </div>
-
-              {examples.length > 0 && (
-                <>
-                  <p className="referral-example">What one week earns you, on cars for rent today:</p>
-                  <ul className="referral-cars">
-                    {examples.map((e) => (
-                      <li key={e.id}>
-                        <span className="referral-car">{e.car}</span>
-                        <span className="referral-car-math">
-                          Rents for {fmt(e.weekMinor)} a week · <strong>you earn {fmt(e.earnMinor)}</strong>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-
-              <ol className="referral-steps">
-                {STEPS.map((s, i) => (
-                  <li key={s.title}>
-                    <span className="referral-step-index">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3>
-                        <i className={s.icon} /> {s.title}
-                      </h3>
-                      <p>{s.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-
-              <div className="referral-terms">
-                <h3>The rules</h3>
-                <ul>
-                  <li>
-                    <strong>Free to join.</strong> You never pay us anything.
-                  </li>
-                  <li>
-                    <strong>Paid on completed rentals</strong> — once the renter has
-                    paid and the car is back. Not on inquiries, and not on anything
-                    canceled or refunded. Refundable deposits and taxes don&rsquo;t count.
-                  </li>
-                  <li>
-                    <strong>Your renter stays yours.</strong> Your link records someone
-                    for 90 days. Once they rent, every later rental they book with the same
-                    phone number counts for you. If two partners refer the same person, the
-                    first introduction wins. Someone who has rented from us before
-                    isn&rsquo;t a new referral.
-                  </li>
-                  <li>
-                    <strong>Say you&rsquo;re paid.</strong> Every message your partner page
-                    writes includes &ldquo;{PAID_REFERRAL_DISCLOSURE}&rdquo; Keep that line.
-                  </li>
-                  <li>
-                    <strong>No recruiting.</strong> You earn only from renters you send,
-                    never from signing up other partners. You can&rsquo;t refer yourself or
-                    your household, and staff aren&rsquo;t eligible.
-                  </li>
-                  <li>
-                    <strong>No bank details here.</strong> We arrange payment with you
-                    directly. This website never asks for them.
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <ReferralSignup market={market} />
+          <div className="rf-actions">
+            <a href="#apply" className="rf-btn rf-btn--primary">
+              Apply now
+            </a>
+            <Link href="/partner/login" className="rf-btn rf-btn--ghost">
+              Partner log in
+            </Link>
           </div>
         </div>
+      </section>
+
+      {examples.length > 0 && (
+        <section className="rf-section" aria-labelledby="rf-examples">
+          <div className="rf-wrap">
+            <p className="rf-eyebrow">Real cars, real rates</p>
+            <h2 id="rf-examples" className="rf-h2">
+              What one week earns you
+            </h2>
+            <p className="rf-sub">
+              On cars for rent today: the math on one week, not a promise of
+              what you will earn.
+            </p>
+            <div
+              className="rf-cars-scroll"
+              role="region"
+              aria-label="Examples on cars for rent today"
+              tabIndex={0}
+            >
+              <ul className="rf-cars">
+                {examples.map((e) => {
+                  const image = photo.get(e.id) ?? null;
+                  return (
+                    <li key={e.id} className="rf-car">
+                      <span className="rf-car-photo">
+                        {image ? (
+                          // About 250 pixels wide on a phone, a third of the
+                          // row on a wide screen.
+                          <Image
+                            src={image}
+                            alt=""
+                            fill
+                            sizes="(min-width: 768px) 384px, 250px"
+                            unoptimized={!canResize(image)}
+                          />
+                        ) : (
+                          <span className="rf-car-nophoto">
+                            <i className="fas fa-car" aria-hidden="true" />
+                          </span>
+                        )}
+                      </span>
+                      <span className="rf-car-body">
+                        <h3 className="rf-car-name">{e.car}</h3>
+                        <span className="rf-car-rate">
+                          Rents for {fmt(e.weekMinor)} a week
+                        </span>
+                        <span className="rf-car-earn">You earn {fmt(e.earnMinor)}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="rf-section" aria-labelledby="rf-how">
+        <div className="rf-wrap">
+          <h2 id="rf-how" className="rf-h2">
+            How it works
+          </h2>
+          <ol className="rf-steps">
+            {STEPS.map((s) => (
+              <li key={s.title} className="rf-step">
+                <span className="rf-step-icon">
+                  <i className={`fas ${s.icon}`} aria-hidden="true" />
+                </span>
+                <h3 className="rf-step-title">{s.title}</h3>
+                <p className="rf-step-text">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <div className="rf-section rf-end">
+        <div className="rf-wrap rf-split">
+          {/* The rules stated before signing up, not after a dispute. */}
+          <section aria-labelledby="rf-rules">
+            <h2 id="rf-rules" className="rf-h2">
+              The rules
+            </h2>
+            <div className="rf-rules">
+              {RULES.map((r, i) => (
+                <details key={i} className="rf-rule" open={r.open}>
+                  <summary>
+                    <span>{r.title}</span>
+                    <i className="fas fa-chevron-down" aria-hidden="true" />
+                  </summary>
+                  <p>{r.body}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          <section id="apply" className="rf-apply" aria-labelledby="rf-apply-title">
+            <ReferralSignup market={market} />
+          </section>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
