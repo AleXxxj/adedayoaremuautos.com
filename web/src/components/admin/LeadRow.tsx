@@ -7,6 +7,8 @@ import Link from "next/link";
 import { LeadReply } from "./LeadReply";
 import { useActionState } from "react";
 import { updateLeadStatus } from "@/lib/actions/leads";
+import { contactLabel, leadTypeLabel } from "@/lib/leadLabels";
+import { SELL_SOURCE, carFromSellMessage, sellReference } from "@/components/sellSteps";
 
 interface Lead {
   id: string;
@@ -55,6 +57,11 @@ export function LeadRow({
 
   const waiting = lead.status === "new" && !lead.firstResponseAt;
   const age = elapsed(lead.createdAt, lead.firstResponseAt);
+  // A car someone wants to sell us isn't one of ours, so it has no vehicle
+  // record: its reference (what the owner was given) and its name come from
+  // the request itself.
+  const sell = lead.source === SELL_SOURCE;
+  const sellCar = sell ? carFromSellMessage(lead.message) : null;
 
   return (
     <li
@@ -69,8 +76,13 @@ export function LeadRow({
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-semibold">{lead.name}</span>
             <span className="rounded bg-[var(--surface-3)] px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
-              {lead.type.replace(/_/g, " ")}
+              {leadTypeLabel(lead.type)}
             </span>
+            {sell && (
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                Ref {sellReference(lead.id)}
+              </span>
+            )}
             <span className="text-xs uppercase text-[var(--text-muted)]">
               {lead.marketCode}
             </span>
@@ -94,7 +106,7 @@ export function LeadRow({
             )}
             {lead.preferredContact && (
               <span className="text-[var(--text-muted)]">
-                prefers {lead.preferredContact}
+                prefers {contactLabel(lead.preferredContact)}
               </span>
             )}
           </div>
@@ -106,7 +118,7 @@ export function LeadRow({
             phone={lead.phone}
             email={lead.email}
             marketCode={lead.marketCode}
-            vehicle={vehicle?.label}
+            vehicle={vehicle?.label ?? sellCar}
             preferred={lead.preferredContact}
           />
 

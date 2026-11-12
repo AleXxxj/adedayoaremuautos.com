@@ -98,7 +98,7 @@ export function LeadReply({
       )}
 
       {sms && (
-        <a href={sms} className="lead-reply-btn lead-reply--sms">
+        <a href={sms} className={`lead-reply-btn lead-reply--sms${isPreferred("sms")}`}>
           <i className="fas fa-comment-sms" aria-hidden="true" /> Text
         </a>
       )}
