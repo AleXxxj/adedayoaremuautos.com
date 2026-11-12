@@ -34,7 +34,9 @@ export async function buildBusinessContext(market: MarketCode): Promise<string> 
       .select()
       .from(vehicles)
       .where(and(eq(vehicles.marketCode, market), eq(vehicles.status, "available")))
-      .orderBy(asc(vehicles.priceMinor))
+      // A tie-break on id keeps the order, and so the cached prompt, the same
+      // from one message to the next (lib/ai/request.ts).
+      .orderBy(asc(vehicles.priceMinor), asc(vehicles.id))
       .limit(MAX_VEHICLES),
     db
       .select({ v: vehicles, r: rentalRates })
@@ -47,6 +49,7 @@ export async function buildBusinessContext(market: MarketCode): Promise<string> 
           inArray(vehicles.status, ["available", "pending"]),
         ),
       )
+      .orderBy(asc(rentalRates.dailyMinor), asc(vehicles.id))
       .limit(MAX_VEHICLES),
     listTiers(market),
     listLocations(market),
@@ -106,7 +109,7 @@ export async function buildBusinessContext(market: MarketCode): Promise<string> 
       );
     }
     lines.push(
-      "  Longer hires are automatically priced on the cheapest combination of " +
+      "  Longer rentals are automatically priced on the cheapest combination of " +
         "daily, weekly and monthly rates. Nobody pays more than the daily rate times the days.",
     );
   }
@@ -127,8 +130,8 @@ export async function buildBusinessContext(market: MarketCode): Promise<string> 
         `- ${t.name}: ${rates.join(", ")}` +
           (t.ownershipThresholdMinor != null
             ? `. The car becomes theirs once ${fmt(t.ownershipThresholdMinor)} of rent has been paid` +
-              (path ? ` — about ${path.days} days of continuous hire` : "")
-            : ". Hire only — this plan does not lead to ownership") +
+              (path ? ` — about ${path.days} days of renting without a break` : "")
+            : ". Rental only — this plan does not lead to ownership") +
           `. Page: /${market}/rent-to-own/${t.slug}`,
       );
     }

@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import type { MarketCode } from "@/lib/market";
+import { MARKETS, type MarketCode } from "@/lib/market";
+import { formatMoney, money } from "@/lib/money";
+import {
+  PERSONA,
+  QUICK_BUDGET_MINOR,
+  assistantPage,
+  greeting,
+  quickReplies,
+} from "@/lib/ai/persona";
+import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from "@/lib/openAssistant";
 import { linkify } from "./assistantText";
 
 interface Msg {
@@ -10,33 +19,100 @@ interface Msg {
   content: string;
 }
 
-const GREETING =
-  "Hi — I can help with anything on the site: cars we have in stock, rental rates, or how rent to own works. What are you after?";
+/** Set once the nudge has shown, or the chat has been opened, this session. */
+const NUDGE_KEY = "aaa_ayo_nudge";
+const NUDGE_AFTER_MS = 8000;
+const NUDGE_FOR_MS = 10000;
+
+function nudgedThisSession(): boolean {
+  try {
+    return window.sessionStorage.getItem(NUDGE_KEY) !== null;
+  } catch {
+    // Storage blocked: treat it as already shown rather than risk repeating.
+    return true;
+  }
+}
+
+function rememberNudged(): void {
+  try {
+    window.sessionStorage.setItem(NUDGE_KEY, "1");
+  } catch {
+    /* Nothing to do. */
+  }
+}
 
 /**
- * The website assistant.
+ * Ayo's face: a smile on the brand green. Drawn, not a photo, because Ayo is
+ * not a person and should never look like one.
+ */
+export function AyoAvatar({ size, online = false }: { size: number; online?: boolean }) {
+  return (
+    <span className="ayo-avatar" style={{ width: size, height: size }} aria-hidden="true">
+      <svg viewBox="0 0 40 40" width={size} height={size} focusable="false">
+        <ellipse cx="14.6" cy="17.2" rx="2.3" ry="2.9" fill="currentColor" />
+        <ellipse cx="25.4" cy="17.2" rx="2.3" ry="2.9" fill="currentColor" />
+        <path
+          d="M13 24.2c1.9 2.6 4.3 3.9 7 3.9s5.1-1.3 7-3.9"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+        />
+      </svg>
+      {online && <span className="ayo-avatar-dot" />}
+    </span>
+  );
+}
+
+/**
+ * Ayo, the website assistant.
  *
- * Deliberately not opened automatically. A panel that springs open over the
- * page on arrival is the single most disliked pattern on a dealership site,
- * and someone who wants to ask a question will find a button that is always
- * in the same corner.
+ * Never opened automatically. A panel that springs open over the page on
+ * arrival is the most disliked pattern on a dealership site. The most it does
+ * uninvited is one small "Hi, I'm Ayo" beside its button, once per visit, on
+ * the home page only, and it takes that back after ten seconds.
+ *
+ * It says what it is in its own header, for as long as the panel is open:
+ * a virtual assistant. Its name and greetings come from lib/ai/persona.ts.
  *
  * The conversation id lives in sessionStorage rather than localStorage: it
  * should survive clicking through to a vehicle page and back, and it should
  * not still be sitting there next week attached to a conversation nobody
  * remembers having.
+ *
+ * Other parts of the page open it with openAssistant() (lib/openAssistant.ts).
  */
-export function Assistant({ market }: { market: MarketCode }) {
+export function Assistant({
+  market,
+  phone,
+  phoneLabel,
+}: {
+  market: MarketCode;
+  /** The showroom's number for the call button, as dialed; null hides it. */
+  phone: string | null;
+  phoneLabel: string | null;
+}) {
   const pathname = usePathname();
+  const page = assistantPage(pathname);
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nudge, setNudge] = useState(false);
+  // The visitor's hour, read when the panel first opens: never on the server,
+  // whose clock is in another time zone and would greet the wrong way.
+  const [hour, setHour] = useState<number | null>(null);
 
   const convId = useRef<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<HTMLElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  // Where focus goes when the panel opens: the message box when there is
+  // something in it to send, or on a desktop; otherwise the panel's title, so
+  // a phone's keyboard does not rise over the greeting and its suggestions.
+  const focusInput = useRef(false);
 
   useEffect(() => {
     convId.current = sessionStorage.getItem("aaa_assistant") ?? null;
@@ -45,21 +121,73 @@ export function Assistant({ market }: { market: MarketCode }) {
   // Follow the conversation as it grows, including while a reply streams in.
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
-  }, [msgs, busy]);
+  }, [msgs, busy, hour]);
+
+  const openPanel = useCallback((prefill?: string) => {
+    setOpen(true);
+    setNudge(false);
+    rememberNudged();
+    setHour((h) => h ?? new Date().getHours());
+    if (prefill) setInput(prefill);
+    focusInput.current =
+      Boolean(prefill) || window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  }, []);
+
+  // Set when the panel closes with focus inside it, so focus goes back to the
+  // launcher once it is shown again (on a phone it is hidden while open).
+  const returnFocus = useRef(false);
+
+  const closePanel = useCallback(() => {
+    returnFocus.current = Boolean(document.activeElement?.closest("#assistant-panel"));
+    setOpen(false);
+  }, []);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (!open) {
+      if (returnFocus.current) launcherRef.current?.focus();
+      returnFocus.current = false;
+      return;
+    }
+    if (focusInput.current) inputRef.current?.focus();
+    else titleRef.current?.focus();
   }, [open]);
 
   // Escape closes, matching every other dismissible panel on the site.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closePanel();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, closePanel]);
+
+  // openAssistant() from anywhere on the page.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      openPanel((e as CustomEvent<OpenAssistantDetail>).detail?.text);
+    };
+    window.addEventListener(OPEN_ASSISTANT_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, onOpen);
+  }, [openPanel]);
+
+  // The nudge: home page only, once per session, never over another card.
+  useEffect(() => {
+    if (page !== "home" || nudgedThisSession()) return;
+    let hide: number | undefined;
+    const show = window.setTimeout(() => {
+      // Opened in the meantime, or another card is on screen.
+      if (nudgedThisSession()) return;
+      if (document.querySelector(".notify-prompt, .country-notification")) return;
+      rememberNudged();
+      setNudge(true);
+      hide = window.setTimeout(() => setNudge(false), NUDGE_FOR_MS);
+    }, NUDGE_AFTER_MS);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hide);
+    };
+  }, [page]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -84,7 +212,7 @@ export function Assistant({ market }: { market: MarketCode }) {
 
       if (!res.ok || !res.body) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error ?? "The assistant is unavailable right now.");
+        throw new Error(body?.error ?? `${PERSONA.name} is unavailable right now.`);
       }
 
       // Newline-delimited JSON. Chunks split anywhere, so the tail of an
@@ -92,6 +220,16 @@ export function Assistant({ market }: { market: MarketCode }) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+
+      const setLast = (content: (prev: string) => string) =>
+        setMsgs((m) => {
+          const next = [...m];
+          next[next.length - 1] = {
+            role: "assistant",
+            content: content(next[next.length - 1].content),
+          };
+          return next;
+        });
 
       for (;;) {
         const { done, value } = await reader.read();
@@ -115,80 +253,153 @@ export function Assistant({ market }: { market: MarketCode }) {
             sessionStorage.setItem("aaa_assistant", event.conversationId);
           } else if (event.type === "text" && event.text) {
             const chunk = event.text;
-            setMsgs((m) => {
-              const next = [...m];
-              next[next.length - 1] = {
-                role: "assistant",
-                content: next[next.length - 1].content + chunk,
-              };
-              return next;
-            });
+            setLast((prev) => prev + chunk);
+          } else if (event.type === "replace" && event.text) {
+            // The reply was declined partway: what showed is taken back.
+            const whole = event.text;
+            setLast(() => whole);
           } else if (event.type === "error") {
             setError(event.error ?? "Something went wrong.");
           }
         }
       }
     } catch (e) {
-      // Drop the empty assistant bubble — leaving a blank one behind looks
-      // like the assistant simply ignored them.
-      setMsgs((m) => (m[m.length - 1]?.content === "" ? m.slice(0, -1) : m));
-      setError(e instanceof Error ? e.message : "The assistant is unavailable right now.");
+      setError(e instanceof Error ? e.message : `${PERSONA.name} is unavailable right now.`);
     } finally {
+      // Drop an empty reply bubble: a blank one looks like being ignored.
+      setMsgs((m) => (m[m.length - 1]?.content === "" ? m.slice(0, -1) : m));
       setBusy(false);
     }
   }
 
+  const cfg = MARKETS[market];
+  const budgetMinor = QUICK_BUDGET_MINOR[market];
+  const budget = budgetMinor == null ? null : formatMoney(money(budgetMinor, cfg.currency), cfg.locale);
+  const [hello, opener] = hour == null ? ["", ""] : greeting(hour, page);
+  const name = PERSONA.name;
+
   return (
     <>
+      {nudge && !open && (
+        <div className="ayo-nudge">
+          <button type="button" className="ayo-nudge-open" onClick={() => openPanel()}>
+            Hi, I&rsquo;m {name}. Need help finding a car?
+          </button>
+          <button
+            type="button"
+            className="ayo-nudge-close"
+            onClick={() => setNudge(false)}
+            aria-label="Dismiss"
+          >
+            <i className="fas fa-times" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       <button
+        ref={launcherRef}
         type="button"
         className={`assistant-launcher${open ? " is-open" : ""}`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? closePanel() : openPanel())}
         aria-expanded={open}
         aria-controls="assistant-panel"
-        aria-label={open ? "Close the assistant" : "Ask a question"}
+        // Starts with the visible label ("Ask Ayo"), so a voice command that
+        // reads the button aloud finds it.
+        aria-label={open ? "Close the chat" : `Ask ${name}: chat with our virtual assistant`}
       >
-        <i className={open ? "fas fa-times" : "fas fa-comment-dots"} aria-hidden="true" />
-        {!open && <span>Ask us</span>}
+        {open ? (
+          <span className="ayo-launcher-close">
+            <i className="fas fa-times" aria-hidden="true" />
+          </span>
+        ) : (
+          <>
+            <span className="ayo-launcher-label" aria-hidden="true">
+              Ask {name}
+            </span>
+            <AyoAvatar size={56} online />
+          </>
+        )}
       </button>
 
       <div
         id="assistant-panel"
         className={`assistant-panel${open ? " is-open" : ""}`}
         role="dialog"
-        aria-label="Website assistant"
+        aria-labelledby="ayo-title ayo-subtitle"
         aria-modal="false"
       >
         <div className="assistant-head">
-          <div>
-            <strong>Adedayo Aremu Autos</strong>
-            {/* Stated plainly and permanently. Someone should never have to
-                work out whether they are talking to a person. */}
-            <span>Automated assistant — a person can call you back</span>
+          <AyoAvatar size={40} online />
+          <div className="ayo-head-text">
+            <strong id="ayo-title" ref={titleRef} tabIndex={-1}>
+              {name}
+            </strong>
+            {/* Stated plainly and for as long as the panel is open. Nobody
+                should have to work out whether they are talking to a person. */}
+            <span id="ayo-subtitle">Virtual assistant · Replies in seconds</span>
           </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="Close">
+          {phone && (
+            <a
+              href={`tel:${phone}`}
+              className="ayo-head-btn"
+              aria-label={phoneLabel ? `Call us at ${phoneLabel}` : "Call us"}
+            >
+              <i className="fas fa-phone" aria-hidden="true" />
+            </a>
+          )}
+          <button type="button" className="ayo-head-btn" onClick={closePanel} aria-label="Close the chat">
             <i className="fas fa-times" aria-hidden="true" />
           </button>
         </div>
 
         <div className="assistant-log" ref={scroller}>
-          <div className="assistant-msg assistant-msg--bot">{GREETING}</div>
+          {hour != null && (
+            <>
+              <div className="ayo-row">
+                <AyoAvatar size={28} />
+                <div className="assistant-msg assistant-msg--bot">{hello}</div>
+              </div>
+              <div className="ayo-row">
+                <AyoAvatar size={28} />
+                <div className="assistant-msg assistant-msg--bot">{opener}</div>
+              </div>
+            </>
+          )}
 
-          {msgs.map((m, i) => (
-            <div
-              key={i}
-              className={`assistant-msg assistant-msg--${m.role === "user" ? "you" : "bot"}`}
-            >
-              {m.content ? (
-                // Only the assistant's own words are linkified. Doing it to the
-                // visitor's message would turn whatever they typed into a
-                // clickable link inside our own interface.
-                m.role === "assistant" ? linkify(m.content) : m.content
-              ) : (
-                <span className="assistant-typing" aria-label="Typing" />
-              )}
+          {hour != null && msgs.length === 0 && (
+            <div className="ayo-quick" role="group" aria-label="Suggested questions">
+              {quickReplies(page, budget).map((q) => (
+                <button key={q} type="button" className="ayo-quick-chip" onClick={() => void send(q)}>
+                  {q}
+                </button>
+              ))}
             </div>
-          ))}
+          )}
+
+          {msgs.map((m, i) =>
+            m.role === "user" ? (
+              <div key={i} className="assistant-msg assistant-msg--you">
+                {m.content}
+              </div>
+            ) : (
+              <div key={i} className="ayo-row">
+                <AyoAvatar size={28} />
+                <div className="assistant-msg assistant-msg--bot">
+                  {m.content ? (
+                    // Only Ayo's own words are linkified. Doing it to the
+                    // visitor's message would turn whatever they typed into a
+                    // clickable link inside our own interface.
+                    linkify(m.content)
+                  ) : (
+                    <span role="status">
+                      <span className="assistant-typing" aria-hidden="true" />
+                      <span className="ayo-sr">{name} is typing</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            ),
+          )}
 
           {error && (
             <p className="assistant-error" role="alert">
@@ -216,10 +427,10 @@ export function Assistant({ market }: { market: MarketCode }) {
                 void send(input);
               }
             }}
-            placeholder="Ask about a car, a rental, or rent to own…"
+            placeholder={`Message ${name}`}
             rows={1}
             maxLength={2000}
-            aria-label="Your message"
+            aria-label={`Your message to ${name}`}
           />
           <button type="submit" disabled={busy || !input.trim()} aria-label="Send">
             <i className="fas fa-paper-plane" aria-hidden="true" />
@@ -228,7 +439,7 @@ export function Assistant({ market }: { market: MarketCode }) {
 
         <p className="assistant-foot">
           Prices and stock come from our live listings. We never ask for bank
-          details, SSN or BVN here.
+          details or your {market === "us" ? "SSN" : "BVN"} here.
         </p>
       </div>
     </>

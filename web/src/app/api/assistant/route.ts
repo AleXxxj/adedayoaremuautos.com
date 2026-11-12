@@ -1,12 +1,21 @@
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
+import type { BetaMessageStream } from "@anthropic-ai/sdk/lib/BetaMessageStream";
+import type { MessageStream } from "@anthropic-ai/sdk/lib/MessageStream";
 import { NextResponse, type NextRequest } from "next/server";
 import { and, asc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { assistantConversations, assistantMessages } from "@/db/schema";
 import { isMarketCode, type MarketCode } from "@/lib/market";
 import { buildBusinessContext } from "@/lib/ai/context";
-import { systemPrompt } from "@/lib/ai/prompt";
+import { pageNote, systemPrompt } from "@/lib/ai/prompt";
+import {
+  DEFAULT_ASSISTANT_MODEL,
+  REFUSAL_REPLY,
+  assistantRequest,
+  legacyRequest,
+  type AssistantTurn,
+} from "@/lib/ai/request";
 import { summariseConversation } from "@/lib/ai/summarise";
 
 /**
@@ -25,7 +34,10 @@ const RATE_WINDOW_MS = 60 * 60 * 1000;
 const MAX_INPUT = 2000;
 
 /** The model is configurable so cost and quality can be traded without a deploy. */
-const MODEL = process.env.ASSISTANT_MODEL ?? "claude-sonnet-5";
+const MODEL = process.env.ASSISTANT_MODEL || DEFAULT_ASSISTANT_MODEL;
+
+const STREAM_ERROR =
+  "Something went wrong on our side. Please call us and we will help right away.";
 
 function hashIp(ip: string | null): string | null {
   if (!ip) return null;
@@ -149,51 +161,69 @@ export async function POST(request: NextRequest) {
 
   // ── Ask the model ───────────────────────────────────────────────────────
   const context = await buildBusinessContext(market as MarketCode);
+  const instructions = systemPrompt(market as MarketCode, context);
+  const page = pageNote(body.path);
+  const thread: AssistantTurn[] = [...history, { role: "user", content: message }];
   const anthropic = new Anthropic({ apiKey: key });
-
-  const stream = anthropic.messages.stream({
-    model: MODEL,
-    max_tokens: 700,
-    system: systemPrompt(
-      market as MarketCode,
-      context,
-      typeof body.path === "string" ? body.path : null,
-    ),
-    messages: [...history, { role: "user", content: message }],
-  });
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      const emit = (event: Record<string, unknown>) =>
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+
       // The id goes first so the widget can keep the thread even if the
       // connection drops halfway through the answer.
-      controller.enqueue(
-        encoder.encode(`${JSON.stringify({ type: "id", conversationId: convId })}\n`),
-      );
+      emit({ type: "id", conversationId: convId });
 
-      let full = "";
-      try {
+      // What the visitor has been shown, which is also what is saved.
+      const reply = { text: "", sent: false };
+
+      // Passes on the words of a reply as they arrive. Thinking and fallback
+      // blocks are not words for the visitor and are skipped. Resolves with
+      // the reason the reply stopped.
+      const relay = async (stream: BetaMessageStream<unknown> | MessageStream<unknown>) => {
         for await (const event of stream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            full += event.delta.text;
-            controller.enqueue(
-              encoder.encode(`${JSON.stringify({ type: "text", text: event.delta.text })}\n`),
-            );
+          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+            reply.text += event.delta.text;
+            reply.sent = true;
+            emit({ type: "text", text: event.delta.text });
           }
+        }
+        return (await stream.finalMessage()).stop_reason;
+      };
+
+      try {
+        let stopReason: string | null;
+        try {
+          stopReason = await relay(
+            anthropic.beta.messages.stream(
+              assistantRequest({ model: MODEL, instructions, page, messages: thread }),
+            ),
+          );
+        } catch (e) {
+          // A request the API turns down as malformed (a field this model
+          // does not take, say) is sent once more in the old plain shape, but
+          // only if nothing has gone out yet: a second answer after half of a
+          // first would be worse than an error.
+          if (!(e instanceof Anthropic.BadRequestError) || reply.sent) throw e;
+          console.error("[assistant] request rejected; retrying the plain request", e);
+          stopReason = await relay(
+            anthropic.messages.stream(legacyRequest({ instructions, page, messages: thread })),
+          );
+        }
+
+        if (stopReason === "refusal") {
+          // Declined by the model and by its fallback. A part-reply streamed
+          // before the decline is replaced rather than left as half an answer.
+          emit({ type: reply.sent ? "replace" : "text", text: REFUSAL_REPLY });
+          reply.text = REFUSAL_REPLY;
+        } else if (!reply.text) {
+          emit({ type: "error", error: STREAM_ERROR });
         }
       } catch (e) {
         console.error("[assistant] stream failed", e);
-        controller.enqueue(
-          encoder.encode(
-            `${JSON.stringify({
-              type: "error",
-              error: "Something went wrong on our side. Please call us and we will help right away.",
-            })}\n`,
-          ),
-        );
+        emit({ type: "error", error: STREAM_ERROR });
       }
 
       controller.close();
@@ -204,7 +234,7 @@ export async function POST(request: NextRequest) {
       try {
         await db.insert(assistantMessages).values([
           { conversationId: convId, role: "user", content: message },
-          { conversationId: convId, role: "assistant", content: full },
+          { conversationId: convId, role: "assistant", content: reply.text },
         ]);
         await db
           .update(assistantConversations)
