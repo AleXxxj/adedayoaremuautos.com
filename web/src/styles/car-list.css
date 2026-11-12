@@ -1,271 +1,461 @@
 /*
- * A list of cars on a phone: count, filter and sort in one row, then one
- * tappable row per car. Shared by the rental list and the sale list
- * (components/ListToolbar.tsx, components/CarRow.tsx).
+ * The two car lists, phone first: /[market]/inventory and /[market]/rentals.
  *
- * Prefixed .legacy-theme so these beat the legacy reset (.legacy-theme
- * :where(…)), which zeroes margins and padding at the same specificity and
- * loads later.
+ * A short header, a row of tap chips, three menus, then the cars. The cards
+ * themselves are in styles/cars.css, shared with the car pages.
+ * (components/cars/ListChrome.tsx, components/ListToolbar.tsx,
+ * components/ActiveFilters.tsx, components/cars/Saved.tsx)
  *
- * On a phone a car is one row — photo, name, price — and the whole row is
- * the link: a dozen cars fit in about two screens instead of nine.
+ * Every selector starts `.legacy-theme .…` so it beats the legacy reset
+ * (`.legacy-theme :where(…)`, which zeroes margins and padding) whatever
+ * order the sheets load in. Colors are the design tokens: the page on
+ * --surface-0, controls on --surface-1. Green is the eyebrow and nothing
+ * else on these screens; what is chosen is shown in white.
  */
 
-/* A shorter title band on a phone, so the cars start on the first screen. */
-@media (max-width: 640px) {
-    .legacy-theme .page-header.page-header--rentals,
-    .legacy-theme .page-header.page-header--inventory {
-        padding: 28px 16px 22px;
-    }
-    .legacy-theme .page-header--rentals h1,
-    .legacy-theme .page-header--inventory h1 {
-        font-size: 30px;
-    }
-    .legacy-theme .page-header--rentals p,
-    .legacy-theme .page-header--inventory p {
-        margin-top: 6px;
-        font-size: 15px;
-    }
+.legacy-theme .cl-page {
+    /* Clears the fixed header (74px on a phone, 90px wide). */
+    padding-top: 98px;
+    padding-bottom: 56px;
+    background: var(--surface-0);
+    color: var(--text-primary);
 }
 
-/* ── Count, filter, sort ─────────────────────────────────────────────── */
+.legacy-theme .cl-wrap {
+    max-width: 1232px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
 
-.legacy-theme .cl-tools {
+/* For a screen reader only. */
+.legacy-theme .cl-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+
+.legacy-theme .cl-eyebrow {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 14px 0 12px;
+    gap: 10px;
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-300);
 }
 
-/* The sale list's section, without the home page's large top padding. */
-@media (max-width: 640px) {
-    .legacy-theme .featured.featured--list {
-        padding-top: 8px;
-    }
+.legacy-theme .cl-eyebrow::before {
+    content: "";
+    flex: none;
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+}
+
+.legacy-theme .cl-title {
+    margin: 0;
+    font-size: clamp(34px, 10vw, 60px);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
 }
 
 .legacy-theme .cl-count {
-    white-space: nowrap;
-    margin: 0 auto 0 0;
-    font-size: 14px;
-    color: var(--text-muted, #8f8f8f);
+    margin: 8px 0 0;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
-.legacy-theme .cl-filter {
-    position: relative;
+/* ── Body-type chips ──────────────────────────────────────────────────── */
+
+/* One row that slides sideways under a thumb, out to the screen's edges. */
+.legacy-theme .cl-chips {
+    margin: 18px -16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
-.legacy-theme .cl-sort {
-    min-width: 0;
-    max-width: 11.5rem;
-}
-
-.legacy-theme .cl-filter summary,
-.legacy-theme .cl-sort {
-    min-height: 44px;
-    padding: 10px 14px;
-    border: 1px solid var(--border, #333);
-    border-radius: 10px;
-    background: #0d0d0d;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.legacy-theme .cl-filter summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    list-style: none;
-}
-
-.legacy-theme .cl-filter summary::-webkit-details-marker {
+.legacy-theme .cl-chips::-webkit-scrollbar {
     display: none;
 }
 
-.legacy-theme .cl-filter[open] summary {
-    border-color: var(--brand-400, #4e9d76);
-}
-
-.legacy-theme .cl-filter-n {
-    min-width: 20px;
-    padding: 1px 6px;
-    border-radius: 999px;
-    background: var(--brand-400, #4e9d76);
-    color: #0a0a0a;
-    font-size: 12px;
-    font-weight: 700;
-    text-align: center;
-}
-
-.legacy-theme .cl-filter-panel {
-    position: absolute;
-    z-index: 30;
-    top: calc(100% + 8px);
-    left: 0;
-    width: min(86vw, 320px);
-    display: grid;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid var(--border, #333);
-    border-radius: 12px;
-    background: #111;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
-}
-
-.legacy-theme .cl-filter-panel label {
-    display: grid;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--text-muted, #8f8f8f);
-}
-
-.legacy-theme .cl-filter-panel select {
-    min-height: 44px;
-    padding: 10px 12px;
-    border: 1px solid var(--border, #333);
-    border-radius: 10px;
-    background: #0d0d0d;
-    color: #fff;
-    font-size: 16px; /* 16px or iOS zooms the page when the list opens */
-}
-
-.legacy-theme .cl-filter-clear {
-    min-height: 44px;
-    border: 0;
-    background: none;
-    color: var(--brand-400, #4e9d76);
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* ── The cars ────────────────────────────────────────────────────────── */
-
-.legacy-theme .cl-list {
+.legacy-theme .cl-chips ul {
+    display: flex;
+    gap: 8px;
+    width: max-content;
     margin: 0;
-    padding: 0;
+    padding: 2px 16px;
     list-style: none;
-    display: grid;
-    gap: 10px;
 }
 
-.legacy-theme .cl-card {
-    display: grid;
-    grid-template-columns: 112px minmax(0, 1fr) auto;
+.legacy-theme .cl-chip {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px;
-    border: 1px solid var(--border, #262626);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.02);
-    color: inherit;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
     text-decoration: none;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition:
+        background-color 180ms ease-out,
+        border-color 180ms ease-out,
+        color 180ms ease-out;
 }
 
-.legacy-theme .cl-card:hover,
-.legacy-theme .cl-card:focus-visible {
-    border-color: var(--brand-400, #4e9d76);
-    background: rgba(255, 255, 255, 0.04);
+.legacy-theme .cl-chip-n {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
-.legacy-theme .cl-card-photo {
-    position: relative; /* next/image fills it */
-    display: block;
-    width: 112px;
-    aspect-ratio: 4 / 3;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #1a1a1a;
+.legacy-theme .cl-chip i {
+    font-size: 14px;
 }
 
-.legacy-theme .cl-card-photo img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+@media (hover: hover) {
+    .legacy-theme .cl-chip:hover {
+        border-color: var(--border-strong);
+    }
 }
 
-.legacy-theme .cl-card-nophoto {
+/* The chosen chip is the light one. */
+.legacy-theme .cl-chip[aria-current="true"] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--surface-0);
+}
+
+.legacy-theme .cl-chip[aria-current="true"] .cl-chip-n {
+    color: var(--surface-3);
+}
+
+/* ── Make, price, sort, search ────────────────────────────────────────── */
+
+.legacy-theme .cl-tools {
     display: grid;
-    place-items: center;
-    height: 100%;
-    color: #555;
-    font-size: 22px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin: 12px 0 0;
 }
 
-.legacy-theme .cl-card-body {
-    display: grid;
-    gap: 3px;
+.legacy-theme .cl-select {
+    position: relative;
+    display: block;
     min-width: 0;
 }
 
-.legacy-theme .cl-card-name {
-    margin: 0;
+/* An odd number of controls: the last has its row to itself. */
+.legacy-theme .cl-tools--odd .cl-tools-last {
+    grid-column: 1 / -1;
+}
+
+.legacy-theme .cl-select select,
+.legacy-theme .cl-search-btn,
+.legacy-theme .cl-search input {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 16px; /* 16px or iOS zooms the page when the menu opens */
+    font-weight: 500;
+}
+
+/* The phone's own picker opens; only the closed menu is drawn here. A long
+   make is cut off inside its box instead of widening the page. */
+.legacy-theme .cl-select select {
+    padding: 0 38px 0 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23BDCCC4' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px 8px;
+    cursor: pointer;
+}
+
+.legacy-theme .cl-search-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.legacy-theme .cl-search-btn i {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .cl-search-btn[aria-expanded="true"] {
+    border-color: var(--text-primary);
+}
+
+.legacy-theme .cl-search {
+    display: none;
+    grid-column: 1 / -1;
+    gap: 8px;
+}
+
+.legacy-theme .cl-search[data-open="true"] {
+    display: flex;
+}
+
+.legacy-theme .cl-search input {
+    flex: 1 1 auto;
+    padding: 0 14px;
+}
+
+.legacy-theme .cl-search input::placeholder {
+    color: var(--text-muted);
+}
+
+.legacy-theme .cl-search-go {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--text-primary);
+    color: var(--surface-0);
     font-size: 16px;
+    cursor: pointer;
+}
+
+/* Shown only without scripts (ListToolbar's <noscript> rule). */
+.legacy-theme .cl-apply {
+    display: none;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Focus rings keep each control's own shape: refine.css rounds every
+   focused control to 6px and tints its border green. */
+.legacy-theme :is(.cl-select select, .cl-search input):focus {
+    border-color: var(--text-primary);
+    box-shadow: none;
+}
+
+.legacy-theme :is(.cl-select select, .cl-search-btn, .cl-search input, .cl-search-go):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 14px;
+}
+
+.legacy-theme :is(.cl-chip, .cl-active-chip, .cl-active-clear, .cl-page-link, .cl-btn, .cl-apply):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+/* ── Filters in force ─────────────────────────────────────────────────── */
+
+.legacy-theme .cl-active {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.legacy-theme .cl-active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 0 14px 0 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 14px;
     font-weight: 600;
-    line-height: 1.25;
-    color: #fff;
+    text-decoration: none;
     overflow-wrap: anywhere;
 }
 
-.legacy-theme .cl-card-price {
-    margin: 0;
-    font-size: 14px;
-    color: var(--text-secondary, #b9b9b9);
-}
-
-.legacy-theme .cl-card-price strong {
-    font-size: 18px;
-    color: #fff;
-}
-
-.legacy-theme .cl-card-meta {
-    margin: 0;
+.legacy-theme .cl-active-chip i {
     font-size: 13px;
-    line-height: 1.4;
-    color: var(--text-muted, #8f8f8f);
+    color: var(--text-secondary);
 }
 
-.legacy-theme .cl-card-badge {
-    justify-self: start;
-    margin-top: 3px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(78, 157, 118, 0.15);
-    color: #7cc3a0;
-    font-size: 12px;
+.legacy-theme .cl-active-clear {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 4px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
-.legacy-theme .cl-card-go {
-    color: var(--text-muted, #8f8f8f);
+/* ── The cars, and what stands in for them ────────────────────────────── */
+
+.legacy-theme .cl-page .cc-grid {
+    margin-top: 20px;
+}
+
+.legacy-theme .cl-note {
+    margin: 0;
+    padding: 32px 0;
     font-size: 16px;
+    color: var(--text-secondary);
 }
 
-@media (min-width: 768px) {
-    .legacy-theme .cl-list {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 18px;
+.legacy-theme .cl-empty {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 40px 20px;
+    border: 1px dashed var(--border-default);
+    border-radius: 20px;
+    text-align: center;
+}
+
+.legacy-theme .cl-empty > i {
+    font-size: 28px;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cl-empty h2 {
+    margin: 4px 0 0;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cl-empty p {
+    max-width: 34ch;
+    margin: 0 0 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .cl-empty .cl-btn {
+    width: 100%;
+    max-width: 320px;
+}
+
+/* The sale list's "stock is being prepared" panel sits on this page's color. */
+.legacy-theme .cl-page .empty-state {
+    margin-top: 20px;
+}
+
+/* ── Pages ────────────────────────────────────────────────────────────── */
+
+.legacy-theme .cl-pages {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+}
+
+.legacy-theme .cl-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 48px;
+    padding: 0 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+}
+
+.legacy-theme .cl-page-link[aria-current="page"] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--surface-0);
+}
+
+/* ── Wider screens ────────────────────────────────────────────────────── */
+
+@media (min-width: 700px) {
+    .legacy-theme .cl-page {
+        padding-top: 122px;
+        padding-bottom: 80px;
     }
 
-    .legacy-theme .cl-card {
-        grid-template-columns: 1fr;
-        align-items: start;
-        padding: 0 0 16px;
-        overflow: hidden;
+    .legacy-theme .cl-wrap {
+        padding: 0 24px;
     }
 
-    .legacy-theme .cl-card-photo {
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        border-radius: 0;
+    .legacy-theme .cl-chips {
+        margin-right: -24px;
+        margin-left: -24px;
     }
 
-    .legacy-theme .cl-card-body {
-        padding: 4px 16px 0;
+    .legacy-theme .cl-chips ul {
+        padding-right: 24px;
+        padding-left: 24px;
     }
 
-    .legacy-theme .cl-card-go {
-        display: none;
+    /* One row: the menus at a comfortable width, search at the end. */
+    .legacy-theme .cl-tools {
+        grid-template-columns: repeat(3, minmax(0, 220px)) minmax(0, 160px);
+    }
+
+    .legacy-theme .cl-tools--odd .cl-tools-last {
+        grid-column: auto;
+    }
+
+    .legacy-theme .cl-search {
+        max-width: 480px;
+    }
+
+    .legacy-theme .cl-page .cc-grid {
+        margin-top: 28px;
+    }
+
+    .legacy-theme .cl-empty {
+        padding: 64px 24px;
     }
 }

@@ -3,12 +3,26 @@ import { formatRange, parseTstzRange } from "@/lib/pgRange";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
-import { getFleetVehicle, bookedWindows } from "@/lib/repositories/rentals";
+import { getFleetVehicle, bookedWindows, listFleet, weekCost } from "@/lib/repositories/rentals";
 import { listLocations } from "@/lib/repositories/locations";
 import { RentalBookingForm } from "@/components/RentalBookingForm";
 import type { TakenWindow } from "@/components/rentalBookingSteps";
 import { formatMoney, money } from "@/lib/money";
 import { providerConfigured, providerFor } from "@/lib/payments/provider";
+import { CarCard } from "@/components/cars/CarCard";
+import { Gallery } from "@/components/cars/Gallery";
+import { RecentlyViewed } from "@/components/cars/RecentlyViewed";
+import { SaveButton } from "@/components/cars/SaveButton";
+import {
+  bodyLabel,
+  bodyTypeOf,
+  cardFor,
+  shortFuel,
+  shortTransmission,
+  similarCars,
+  splitName,
+} from "@/components/cars/carData";
+import "@/styles/cars.css";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -53,16 +67,18 @@ export async function generateMetadata({
 }
 
 /**
- * One vehicle, and the form that books it.
+ * One car to rent, and the form that books it.
  *
- * Rebuilt out of Tailwind utilities. The legacy reset — `.legacy-theme
- * :where(…)` setting margin and padding to zero — carries the same 0,1,0
- * specificity as a utility class and loads after them, so every `px-`, `mt-`
- * and `mx-auto` on this page was being silently stripped: the content sat
- * flush against the left edge of the window with no container at all. It was
- * not that the page needed decorating; it had no layout. Written in the same
- * vocabulary as every other public page, it cannot drift out of the theme
- * again.
+ * The same top as a car for sale: the name, three facts, what a week costs,
+ * then the photos. Under them the rates, compact, and the booking form
+ * exactly as it was: its steps, its fields and its legal text are
+ * RentalBookingForm's and are not touched here. The form brings its own bar
+ * pinned to the bottom of a phone ("$350 a week … Pick dates"), so this page
+ * adds none. Similar rentals and the cars looked at before come last.
+ *
+ * On a wide screen the booking card stays beside the photos, as before: it
+ * keeps the `rental-book` and `rental-book-card` classes the form measures
+ * and the stylesheet positions (refine.css).
  */
 export default async function RentalDetailPage({
   params,
@@ -76,13 +92,15 @@ export default async function RentalDetailPage({
   const v = await getFleetVehicle(code, slug);
   if (!v) notFound();
 
-  const [taken, sites] = await Promise.all([
+  const [taken, sites, fleet] = await Promise.all([
     bookedWindows(v.id, new Date()),
     listLocations(code),
+    listFleet(code),
   ]);
   // The showroom line, for "Text us" if a booking cannot be sent.
   const contactPhone = sites.find((s) => s.phone)?.phone ?? null;
   const title = [v.year, v.make, v.model, v.trim].filter(Boolean).join(" ");
+  const name = splitName(v);
   const fmt = (minor: number) => formatMoney(money(minor, market.currency), market.locale);
   const payOnline = providerConfigured(providerFor(code));
 
@@ -109,99 +127,118 @@ export default async function RentalDetailPage({
       : [];
   });
 
-  // Only what this vehicle actually has. A spec grid padded with "—" reads as
+  // Three facts, from whatever this car has. A row padded with "—" reads as
   // missing data rather than a car that simply has no third row of seats.
-  const specs = [
-    v.seats && { icon: "fas fa-user-group", label: "Seats", value: String(v.seats) },
-    v.transmission && { icon: "fas fa-cog", label: "Transmission", value: v.transmission },
-    v.fuelType && { icon: "fas fa-gas-pump", label: "Fuel", value: v.fuelType },
-    v.bodyStyle && { icon: "fas fa-car-side", label: "Body", value: v.bodyStyle },
-    {
-      icon: "fas fa-calendar-day",
-      label: "Min. rental",
-      value: `${v.tariff.minDays} day${v.tariff.minDays === 1 ? "" : "s"}`,
-    },
-    v.tariff.maxDays && {
-      icon: "fas fa-calendar-week",
-      label: "Max. rental",
-      value: `${v.tariff.maxDays} days`,
-    },
-  ].filter(Boolean) as { icon: string; label: string; value: string }[];
+  const body = bodyTypeOf(v);
+  const facts = (
+    [
+      shortTransmission(v.transmission) && { icon: "fa-gears", text: shortTransmission(v.transmission)! },
+      shortFuel(v.fuelType, market) && { icon: "fa-gas-pump", text: shortFuel(v.fuelType, market)! },
+      v.seats != null && { icon: "fa-user-group", text: `${v.seats} seats` },
+      body && { icon: "fa-car-side", text: bodyLabel(body) },
+    ] as (false | null | { icon: string; text: string })[]
+  )
+    .filter((f): f is { icon: string; text: string } => Boolean(f))
+    .slice(0, 3);
 
+  const weekly = v.tariff.weeklyMinor;
+
+  // Every rate on file, then the terms that belong with them.
   const rates = [
-    { label: "Daily", value: fmt(v.tariff.dailyMinor) },
-    v.tariff.weeklyMinor != null && { label: "Weekly", value: fmt(v.tariff.weeklyMinor) },
-    v.tariff.monthlyMinor != null && { label: "Monthly", value: fmt(v.tariff.monthlyMinor) },
+    { label: "A day", value: fmt(v.tariff.dailyMinor) },
+    weekly != null && { label: "A week", value: fmt(weekly) },
+    v.tariff.monthlyMinor != null && { label: "A month", value: fmt(v.tariff.monthlyMinor) },
     v.tariff.withDriverAvailable &&
       v.tariff.driverDailyMinor != null && {
-        label: "Driver, per day",
+        label: "Driver, a day",
         value: fmt(v.tariff.driverDailyMinor),
       },
+    v.tariff.depositMinor > 0 && {
+      label: "Deposit (refundable)",
+      value: fmt(v.tariff.depositMinor),
+    },
+    {
+      label: "Shortest rental",
+      value: `${v.tariff.minDays} day${v.tariff.minDays === 1 ? "" : "s"}`,
+    },
+    v.tariff.maxDays && { label: "Longest rental", value: `${v.tariff.maxDays} days` },
   ].filter(Boolean) as { label: string; value: string }[];
 
+  // Similar rentals: the same body type first, then the nearest weekly cost.
+  const similar = v.bookable ? similarCars(v, weekCost(v), fleet, weekCost, 3) : [];
+
   return (
-    <div className="rental-detail page-top">
-      <div className="rental-detail-container">
-        <nav className="rto-crumbs">
-          <Link href={`/${code}/rentals`}>← All rentals</Link>
+    <div className="cd-page">
+      <div className="cd-wrap">
+        <nav className="cd-back" aria-label="Back">
+          <Link href={`/${code}/rentals`}>
+            <i className="fas fa-arrow-left" aria-hidden="true" />
+            All rentals
+          </Link>
         </nav>
 
-        <div className="rental-detail-grid">
-          <div className="rental-detail-main">
-            <div className="rental-gallery">
-              {v.image ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={v.image}
-                  alt={title}
-                  /* The largest element above the fold, so it is fetched at
-                     high priority rather than queued behind the icon font. */
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              ) : (
-                <div className="rental-gallery-empty">
-                  <i className="fas fa-camera" aria-hidden="true" />
-                  <span>Photography coming soon</span>
-                </div>
-              )}
+        <div className="cd-grid cd-grid--rental">
+          <section className="cd-top" aria-label="This car">
+            <div className="cd-head">
+              <h1 className="cd-title">
+                <span className="cd-kicker">{name.kicker}</span> {name.name}
+                {name.detail && <span className="cd-title-detail"> {name.detail}</span>}
+              </h1>
+              {v.bookable && <SaveButton market={code} slug={v.slug} name={title} variant="pill" />}
             </div>
 
-            <h1 className="rental-title">{title}</h1>
+            {(facts.length > 0 || v.tariff.withDriverAvailable) && (
+              <ul className="cd-facts">
+                {facts.map((f) => (
+                  <li key={f.icon}>
+                    <i className={`fas ${f.icon}`} aria-hidden="true" />
+                    {f.text}
+                  </li>
+                ))}
+                {v.tariff.withDriverAvailable && (
+                  <li>
+                    <i className="fas fa-id-badge" aria-hidden="true" />
+                    Driver available
+                  </li>
+                )}
+              </ul>
+            )}
 
-            <dl className="rental-specs">
-              {specs.map((s) => (
-                <div className="rental-spec" key={s.label}>
-                  <dt>
-                    <i className={s.icon} aria-hidden="true" /> {s.label}
-                  </dt>
-                  <dd>{s.value}</dd>
-                </div>
-              ))}
-            </dl>
+            {v.bookable && (
+              <p className="cd-price">
+                <span>
+                  <strong>{fmt(weekly ?? v.tariff.dailyMinor)}</strong>{" "}
+                  <span className="cd-price-unit">{weekly != null ? "a week" : "a day"}</span>
+                </span>
+                {weekly != null && (
+                  <span className="cd-price-sub">or {fmt(v.tariff.dailyMinor)} a day</span>
+                )}
+              </p>
+            )}
+          </section>
 
-            <section className="rental-block">
-              <h2>Rates</h2>
-              <dl className="rental-rates">
+          <div className="cd-gallery">
+            <Gallery images={v.images} name={title} />
+          </div>
+
+          <div className="cd-body">
+            <section className="cd-section" aria-labelledby="cd-rates">
+              <h2 className="cd-h" id="cd-rates">
+                Rates
+              </h2>
+              <dl className="cd-specs">
                 {rates.map((r) => (
-                  <div className="rental-rate" key={r.label}>
+                  <div key={r.label}>
                     <dt>{r.label}</dt>
                     <dd>{r.value}</dd>
                   </div>
                 ))}
-                {v.tariff.depositMinor > 0 && (
-                  <div className="rental-rate rental-rate--muted">
-                    <dt>Deposit (refundable)</dt>
-                    <dd>{fmt(v.tariff.depositMinor)}</dd>
-                  </div>
-                )}
               </dl>
               {/* One sentence. The second, "never more than the daily rate
                   times the days", stopped being true once a driver or added
                   insurance is chosen. */}
-              <p className="rental-note">
-                <i className="fas fa-circle-info" aria-hidden="true" /> Longer
-                rentals get the cheapest mix of these rates automatically.
+              <p className="cd-rates-note">
+                Longer rentals get the cheapest mix of these rates automatically.
               </p>
             </section>
           </div>
@@ -210,9 +247,7 @@ export default async function RentalDetailPage({
             <div className="rental-book-card">
               {v.bookable ? (
                 <>
-                  <h2>
-                    Reserve this <span>vehicle</span>
-                  </h2>
+                  <h2>Reserve this car</h2>
                   {/* What reserving costs, first. The hold and how long it
                       lasts are said once, in the form's fine print beside
                       Reserve, where the decision is made. */}
@@ -235,11 +270,9 @@ export default async function RentalDetailPage({
                 // Sold or taken off rental since the link was shared: said
                 // plainly, with the way to the cars that can be booked.
                 <>
-                  <h2>
-                    Not available <span>to rent</span>
-                  </h2>
+                  <h2>Not available to rent</h2>
                   <p className="rental-book-lead">This car isn&rsquo;t available to rent right now.</p>
-                  <Link href={`/${code}/rentals`} className="btn btn-primary">
+                  <Link href={`/${code}/rentals`} className="cd-btn cd-btn--primary">
                     See cars you can rent
                   </Link>
                 </>
@@ -247,6 +280,51 @@ export default async function RentalDetailPage({
             </div>
           </aside>
         </div>
+
+        {similar.length > 0 && (
+          <section className="cd-section" aria-labelledby="cd-similar">
+            <h2 className="cd-h" id="cd-similar">
+              Similar rentals
+            </h2>
+            <ul className="cc-row">
+              {similar.map((r) => (
+                <CarCard
+                  key={r.id}
+                  market={code}
+                  sizes="(min-width: 700px) 33vw, 78vw"
+                  card={cardFor(
+                    {
+                      slug: r.slug,
+                      year: r.year,
+                      make: r.make,
+                      model: r.model,
+                      trim: r.trim,
+                      bodyStyle: r.bodyStyle,
+                      mileage: null,
+                      transmission: r.transmission,
+                      fuelType: r.fuelType,
+                      drivetrain: null,
+                      seats: r.seats,
+                      image: r.image,
+                      pending: false,
+                      justIn: false,
+                      sale: null,
+                      rent: {
+                        dailyMinor: r.tariff.dailyMinor,
+                        weeklyMinor: r.tariff.weeklyMinor,
+                        driver: r.tariff.withDriverAvailable,
+                      },
+                    },
+                    market,
+                    "rent",
+                  )}
+                />
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {v.bookable && <RecentlyViewed market={code} slug={v.slug} kind="rent" />}
       </div>
     </div>
   );

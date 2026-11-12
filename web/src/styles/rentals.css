@@ -1,63 +1,66 @@
 /*
- * The rental list (/[market]/rentals), phone first.
- *
- * What only the rental list has: where prices start, and the folded terms.
- * The toolbar and the car rows are shared with the sale list
- * (styles/car-list.css). Prefixed .legacy-theme to beat the legacy reset.
+ * The rental list (/[market]/rentals): what only it has, the folded terms
+ * under the cars. The header, chips and menus are shared with the sale list
+ * (styles/car-list.css) and the cards with every car page (styles/cars.css).
+ * Prefixed .legacy-theme to beat the legacy reset.
  */
 
-.legacy-theme .rent-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 16px 48px;
-}
-
-.legacy-theme .rent-from {
-    margin: 18px 0 0;
-    font-size: 15px;
-    line-height: 1.5;
-    color: var(--text-secondary, #b9b9b9);
-}
-
-.legacy-theme .rent-from strong {
-    color: #fff;
-}
-
-/* ── Terms, folded ───────────────────────────────────────────────────── */
-
 .legacy-theme .rent-terms {
-    margin: 28px 0 0;
-    padding: 14px 16px;
-    border: 1px solid var(--border, #262626);
-    border-radius: 12px;
+    margin: 32px 0 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    background: var(--surface-1);
 }
 
 .legacy-theme .rent-terms summary {
-    min-height: 32px;
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 8px 16px;
     cursor: pointer;
-    font-weight: 600;
-    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.legacy-theme .rent-terms summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 20px;
 }
 
 .legacy-theme .rent-terms dl {
-    margin: 12px 0 0;
     display: grid;
-    gap: 12px;
+    gap: 14px;
+    margin: 0;
+    padding: 4px 16px 16px;
 }
 
 .legacy-theme .rent-terms dt {
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
 }
 
 .legacy-theme .rent-terms dd {
     margin: 2px 0 0;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.5;
-    color: var(--text-secondary, #b9b9b9);
+    color: var(--text-secondary);
+}
+
+.legacy-theme .rent-terms-more {
+    margin: 0;
+    padding: 0 16px 12px;
 }
 
 .legacy-theme .rent-terms a {
-    color: var(--brand-400, #4e9d76);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 4px;
 }
