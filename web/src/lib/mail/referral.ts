@@ -60,7 +60,7 @@ async function send(to: string, subject: string, html: string, text: string): Pr
  *
  * Sent the instant it is submitted, because the alternative is somebody
  * refreshing their inbox wondering whether the form worked. It promises a
- * reply within one working day and says nothing about the outcome — an
+ * reply within one business day and says nothing about the outcome — an
  * acknowledgement that sounds like an acceptance is worse than silence.
  */
 export async function sendApplicationReceived(o: { to: string; name: string }): Promise<void> {
@@ -73,7 +73,7 @@ export async function sendApplicationReceived(o: { to: string; name: string }): 
        application and someone will read it properly.
      </p>
      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#333">
-       You will hear from us <strong>within one working day</strong>, either
+       You will hear from us <strong>within one business day</strong>, either
        by email or by phone. If we go ahead, the next step is a short
        agreement to read and accept — nothing is owed by you at any point.
      </p>
@@ -86,7 +86,7 @@ export async function sendApplicationReceived(o: { to: string; name: string }): 
     "",
     "Thank you for applying to our referral program. We have your application and someone will read it properly.",
     "",
-    "You will hear from us within one working day, either by email or by phone. If we go ahead, the next step is a short agreement to read and accept — nothing is owed by you at any point.",
+    "You will hear from us within one business day, either by email or by phone. If we go ahead, the next step is a short agreement to read and accept — nothing is owed by you at any point.",
     "",
     "There is nothing to do in the meantime.",
     "",
@@ -166,7 +166,7 @@ export async function sendAgreementToSign(o: {
  * "Not this time."
  *
  * Sent because the alternative is an applicant who was told to expect an
- * answer within a working day and never hears one, and then phones to ask.
+ * answer within a business day and never hears one, and then phones to ask.
  * The reason is whatever the reviewer typed; where they typed nothing, the
  * email says plainly that no reason was given rather than inventing one.
  */
@@ -301,7 +301,7 @@ export async function notifyStaffOfApplication(o: {
        <a href="${escapeHtml(admin)}" style="display:inline-block;border:1px solid ${RULE};color:#111;text-decoration:none;font-size:14px;font-weight:600;padding:11px 20px;border-radius:8px">Review the application</a>
      </p>
      <p style="margin:16px 0 0;font-size:13px;color:${MUTED}">
-       They have been told to expect an answer within one working day.
+       They have been told to expect an answer within one business day.
      </p>`,
   );
   const text = [
@@ -316,7 +316,7 @@ export async function notifyStaffOfApplication(o: {
     o.proposal,
     "",
     `Review: ${admin}`,
-    "They have been told to expect an answer within one working day.",
+    "They have been told to expect an answer within one business day.",
   ].join("\n");
 
   await send(to, `Referral application — ${o.name}`, html, text);

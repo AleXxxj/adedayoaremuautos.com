@@ -227,8 +227,8 @@ export function ReferralSignup({ market }: { market: MarketConfig }) {
           />
           {errorFor("rp-phone", "phone")}
           <span id="rp-phone-hint" className="rf-hint">
-            This identifies you. Sign up twice with the same number and you keep
-            the same code.
+            This is how we know it&rsquo;s you. One application per phone
+            number.
           </span>
         </div>
 

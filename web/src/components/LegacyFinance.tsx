@@ -243,7 +243,7 @@ export function LegacyFinanceApplication({
         <h3>Application received</h3>
         <p>
           Thank you. We will review it and come back to you — usually within one
-          working day
+          business day
           {phone ? (
             <>
               {" "}

@@ -43,7 +43,7 @@ export default async function AdminReferralsPage() {
    * completely different things done to them, and a single list sorted by date
    * buries the first among the second. Pending comes first and in the order it
    * arrived — oldest at the top, because everyone who applies has been told to
-   * expect an answer within one working day and the one who has waited longest
+   * expect an answer within one business day and the one who has waited longest
    * is the one closest to being let down.
    */
   const pending = everyone
@@ -137,7 +137,7 @@ export default async function AdminReferralsPage() {
             </h2>
             <p className="mb-3 text-sm text-[var(--text-muted)]">
               Each of these people was told to expect an answer within one
-              working day. Approving sends them the agreement to read and
+              business day. Approving sends them the agreement to read and
               accept; their code does nothing until they have.
             </p>
             <ul className="space-y-3">

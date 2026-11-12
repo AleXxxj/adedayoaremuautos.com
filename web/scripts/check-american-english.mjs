@@ -55,6 +55,7 @@ const RULES = [
   [/\bpick-ups?\b/i, "pickup (noun) or pick up (verb)"],
   [/\btravell(ed|ing|er)\b/i, "traveled / traveling"],
   [/\banalys(e|es|ed|ing)\b/i, "analyze"],
+  [/\bworking days?\b/i, "business day"],
   [/\bcollect(ing|ion)? (the|your) (vehicle|car)\b|\bcollection time\b|\bwhen you collect\b/i, "pick up / pickup"],
 ];
 

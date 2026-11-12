@@ -179,7 +179,7 @@ export const FINANCE_STEPS: Step[] = [
   },
   {
     title: "Get a decision",
-    body: "A member of our finance team reviews your application personally and contacts you, normally within one working day, to talk through the options available to you and answer any questions.",
+    body: "A member of our finance team reviews your application personally and contacts you, normally within one business day, to talk through the options available to you and answer any questions.",
   },
   {
     title: "Drive",

@@ -123,7 +123,7 @@ export async function sendPayoutPaid(o: {
      </div>
      <p style="margin:0;font-size:15px;line-height:1.6;color:#333">
        It is marked as paid on your partner dashboard. If it has not reached
-       you within a few working days, reply to this email and we will chase it.
+       you within a few business days, reply to this email and we will look into it.
      </p>`,
     "Sent because you are a referral partner of Adedayo Aremu Autos.",
   );
@@ -135,7 +135,7 @@ export async function sendPayoutPaid(o: {
     `Amount: ${o.amount}`,
     ...(o.reference ? [`Reference: ${o.reference}`] : []),
     "",
-    "It is marked as paid on your partner dashboard. If it has not reached you within a few working days, reply to this email and we will chase it.",
+    "It is marked as paid on your partner dashboard. If it has not reached you within a few business days, reply to this email and we will look into it.",
     "",
     "Adedayo Aremu Autos",
   ].join("\n");

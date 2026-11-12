@@ -137,7 +137,7 @@ export async function joinReferralProgramme(
     return {
       ok: false,
       error:
-        "We already have an application for this phone number. If you're already a partner, sign in to your partner page to see your code and link. Otherwise, we'll be in touch by email.",
+        "We already have an application for this phone number. If you're already a partner, log in to your partner page to see your code and link. Otherwise, we'll be in touch by email.",
     };
   }
 
@@ -314,7 +314,7 @@ const declineSchema = reviewSchema.extend({
  * Turns an application down, and says so.
  *
  * The email is the point. Everyone who applies has been told to expect an
- * answer within one working day, and a decline that is never sent is how an
+ * answer within one business day, and a decline that is never sent is how an
  * applicant ends up phoning the showroom to ask.
  */
 export async function declinePartner(

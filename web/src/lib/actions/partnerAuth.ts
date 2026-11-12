@@ -51,7 +51,7 @@ export async function createPartnerAccount(
   }
   if (partner.userId) {
     return {
-      error: "You already have an account. Sign in with your email and password.",
+      error: "You already have an account. Log in with your email and password.",
     };
   }
 
