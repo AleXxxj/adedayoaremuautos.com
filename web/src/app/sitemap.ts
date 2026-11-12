@@ -5,6 +5,21 @@ import { siteUrl } from "@/lib/feeds/inventory";
 
 export const dynamic = "force-dynamic";
 
+const SECTIONS: {
+  path: string;
+  changeFrequency: "daily" | "weekly" | "monthly";
+  priority: number;
+  only?: (typeof MARKET_CODES)[number];
+}[] = [
+  { path: "rentals", changeFrequency: "daily", priority: 0.9 },
+  { path: "sell", changeFrequency: "monthly", priority: 0.7 },
+  { path: "rent-to-own", changeFrequency: "weekly", priority: 0.7 },
+  { path: "financing", changeFrequency: "monthly", priority: 0.6 },
+  { path: "check", changeFrequency: "monthly", priority: 0.6, only: "us" },
+  { path: "referral", changeFrequency: "monthly", priority: 0.5 },
+  { path: "about", changeFrequency: "monthly", priority: 0.5 },
+];
+
 /**
  * Sitemap covering both markets.
  *
@@ -44,6 +59,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     },
+    // The section pages. Rentals is the US site's main business and was not
+    // listed at all. The car check exists only in the United States, where
+    // cars go by VIN; every other page exists in both markets.
+    ...SECTIONS.filter((s) => !s.only || s.only === code).map((s) => ({
+      url: `${base}/${code}/${s.path}`,
+      changeFrequency: s.changeFrequency,
+      priority: s.priority,
+      ...(s.only
+        ? {}
+        : {
+            alternates: {
+              languages: Object.fromEntries(
+                MARKET_CODES.map((c) => [MARKETS[c].locale, `${base}/${c}/${s.path}`]),
+              ),
+            },
+          }),
+    })),
   ]);
 
   const vehicleEntries = (
