@@ -20,6 +20,7 @@ import { FindCar, type FindChip } from "@/components/home/FindCar";
 import { BudgetFinder, type FinderCar, type FinderSide } from "@/components/home/BudgetFinder";
 import { AskAyo } from "@/components/home/AskAyo";
 import { HomeCarCard } from "@/components/home/HomeCarCard";
+import { HomeGuides } from "@/components/guides/HomeGuides";
 import {
   carsLabel,
   priceCeilings,
@@ -672,6 +673,11 @@ export default async function MarketHome({
         </Link>
       </section>
       </div>
+
+      {/* ── Guides ─────────────────────────────────────────────────────────
+          Three of the US guides, each a tool with today's numbers. Written
+          for Greensboro, so not on the Nigeria site. */}
+      {us && <HomeGuides />}
 
       {/* ── Visit or call ──────────────────────────────────────────────────
           Every line from the location record, and nothing without one: with

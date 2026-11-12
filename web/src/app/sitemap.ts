@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { MARKET_CODES, MARKETS } from "@/lib/market";
 import { allListedSlugs } from "@/lib/repositories/vehicles";
 import { siteUrl } from "@/lib/feeds/inventory";
+import { GUIDES } from "@/content/guides";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,8 @@ const SECTIONS: {
   changeFrequency: "daily" | "weekly" | "monthly";
   priority: number;
   only?: (typeof MARKET_CODES)[number];
+  /** When the page's words last changed, where that is known. */
+  lastModified?: string;
 }[] = [
   { path: "rentals", changeFrequency: "daily", priority: 0.9 },
   { path: "sell", changeFrequency: "monthly", priority: 0.7 },
@@ -18,6 +21,19 @@ const SECTIONS: {
   { path: "check", changeFrequency: "monthly", priority: 0.6, only: "us" },
   { path: "referral", changeFrequency: "monthly", priority: 0.5 },
   { path: "about", changeFrequency: "monthly", priority: 0.5 },
+  // The bare compare page only. A link with cars in it (?cars=a,b) is one of
+  // countless pairs and is marked noindex.
+  { path: "compare", changeFrequency: "daily", priority: 0.5 },
+  // The guides are written for Greensboro and exist on the US site only.
+  // Their numbers are today's stock, so they change as often as the lists.
+  { path: "guides", changeFrequency: "daily", priority: 0.7, only: "us" },
+  ...GUIDES.map((g) => ({
+    path: `guides/${g.meta.slug}`,
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+    only: "us" as const,
+    lastModified: g.meta.updated,
+  })),
 ];
 
 /**
@@ -60,12 +76,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     // The section pages. Rentals is the US site's main business and was not
-    // listed at all. The car check exists only in the United States, where
-    // cars go by VIN; every other page exists in both markets.
+    // listed at all. The car check and the guides exist only in the United
+    // States; every other page exists in both markets.
     ...SECTIONS.filter((s) => !s.only || s.only === code).map((s) => ({
       url: `${base}/${code}/${s.path}`,
       changeFrequency: s.changeFrequency,
       priority: s.priority,
+      ...(s.lastModified ? { lastModified: s.lastModified } : {}),
       ...(s.only
         ? {}
         : {
