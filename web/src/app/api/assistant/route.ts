@@ -206,7 +206,9 @@ export async function POST(request: NextRequest) {
           // does not take, say) is sent once more in the old plain shape, but
           // only if nothing has gone out yet: a second answer after half of a
           // first would be worse than an error.
-          if (!(e instanceof Anthropic.BadRequestError) || reply.sent) throw e;
+          // A model id this account can't use (404) is retried the same way.
+          const rejected = e instanceof Anthropic.BadRequestError || e instanceof Anthropic.NotFoundError;
+          if (!rejected || reply.sent) throw e;
           console.error("[assistant] request rejected; retrying the plain request", e);
           stopReason = await relay(
             anthropic.messages.stream(legacyRequest({ instructions, page, messages: thread })),

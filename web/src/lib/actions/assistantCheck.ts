@@ -1,6 +1,7 @@
 "use server";
 
 import Anthropic from "@anthropic-ai/sdk";
+import { assistantRequest, DEFAULT_ASSISTANT_MODEL, LEGACY_ASSISTANT_MODEL } from "@/lib/ai/request";
 import { requireStaff } from "@/lib/auth";
 
 export interface AssistantCheckResult {
@@ -35,7 +36,8 @@ export async function checkAssistant(): Promise<AssistantCheckResult> {
   }
 
   const key = process.env.ANTHROPIC_API_KEY;
-  const model = process.env.ASSISTANT_MODEL ?? "claude-sonnet-5";
+  // The model the chat route uses, so this checks what visitors actually get.
+  const model = process.env.ASSISTANT_MODEL ?? DEFAULT_ASSISTANT_MODEL;
 
   if (!key) {
     return {
@@ -51,11 +53,20 @@ export async function checkAssistant(): Promise<AssistantCheckResult> {
 
   try {
     const anthropic = new Anthropic({ apiKey: key });
-    const response = await anthropic.messages.create({
-      model,
-      max_tokens: 32,
-      messages: [{ role: "user", content: "Reply with the single word: ready" }],
-    });
+    // The chat's own request shape (effort, fallbacks, cached instructions),
+    // so a field the model refuses shows up here rather than in a visitor's
+    // chat window. Thinking counts toward max_tokens on current models, which
+    // is why the old 32-token limit would have cut the answer off.
+    const response = await anthropic.beta.messages
+      .stream(
+        assistantRequest({
+          model,
+          instructions: "This is a connection test from the website's admin page.",
+          page: "Reply with the single word: ready",
+          messages: [{ role: "user", content: "Reply with the single word: ready" }],
+        }),
+      )
+      .finalMessage();
     const reply = response.content
       .map((b) => (b.type === "text" ? b.text : ""))
       .join("")
@@ -72,8 +83,10 @@ export async function checkAssistant(): Promise<AssistantCheckResult> {
     if (status === 401 || /authentication|invalid x-api-key|api key/i.test(message)) {
       remedy =
         "The key is being rejected. It has most likely expired or been revoked — create a new one at console.anthropic.com, update ANTHROPIC_API_KEY in Vercel, and redeploy.";
-    } else if (status === 400 && /model/i.test(message)) {
-      remedy = `The model name "${model}" was not accepted. Clear ASSISTANT_MODEL in Vercel to fall back to the default, then redeploy.`;
+    } else if ((status === 400 || status === 404) && /model/i.test(message)) {
+      remedy = `The model name "${model}" was not accepted. Clear ASSISTANT_MODEL in Vercel to fall back to the default, then redeploy. Until then the chat retries each message on ${LEGACY_ASSISTANT_MODEL}.`;
+    } else if (status === 400) {
+      remedy = `The request was refused. The chat retries each message in its old form on ${LEGACY_ASSISTANT_MODEL}, so visitors still get answers; the provider's message above says which field to fix.`;
     } else if (
       status === 402 ||
       /credit|balance|quota|billing|insufficient/i.test(message)
