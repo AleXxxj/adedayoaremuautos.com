@@ -1,0 +1,67 @@
+{
+ "Count": 4,
+ "Message": "Results returned successfully",
+ "results": [
+  {
+   "Manufacturer": "Fujian Wanda Automobile Glass Industry C",
+   "NHTSACampaignNumber": "18E107000",
+   "ReportReceivedDate": "27/11/2018",
+   "Component": "ELECTRICAL SYSTEM",
+   "Summary": "Fujian Wanda Automobile Glass Industry (Wanda) is recalling certain aftermarket Replacement Windshields sold for use in 2014-2018 Toyota Highlander vehicles.  The windshields have an attached wire harness that water may leak into, possibly causing damage to the vehicle's Engine Control Module (ECM).",
+   "Consequence": "The ECM damage may result in the engine stalling, increasing the risk of a crash.",
+   "Remedy": "Wanda will notify owners, and service centers will replace the windshields, and inspect the ECM for damage, having it replaced, as necessary, free of charge.  The recall began January 29, 2019.  Owners may contact Wanda customer service at 1-864-281-2760.",
+   "Notes": "Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.safercar.gov.",
+   "ModelYear": "2017",
+   "Make": "TOYOTA",
+   "Model": "HIGHLANDER"
+  },
+  {
+   "Manufacturer": "Gulf States Toyota, Inc.",
+   "NHTSACampaignNumber": "17V520000",
+   "parkIt": false,
+   "parkOutSide": false,
+   "overTheAirUpdate": false,
+   "ReportReceivedDate": "23/08/2017",
+   "Component": "EQUIPMENT",
+   "Summary": "Gulf States Toyota, Inc. (GST) is recalling certain 2017 Toyota Highlander and Highlander Hybrid vehicles equipped with accessory roof rail cross bars.  The fasteners for the roof rails may not be torqued properly.",
+   "Consequence": "The roof rails may loosen and possibly detach from the vehicle, becoming a road hazard and increasing the risk of a crash.",
+   "Remedy": "GST will notify owners, and dealers will inspect and properly torque the fasteners, free of charge.  The recall began September 29, 2017.  Owners may contact GST customer service at 1-800-444-1074.  GST's number for this recall is 17R3.",
+   "Notes": "Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.safercar.gov.",
+   "ModelYear": "2017",
+   "Make": "TOYOTA",
+   "Model": "HIGHLANDER"
+  },
+  {
+   "Manufacturer": "Gulf States Toyota, Inc.",
+   "NHTSACampaignNumber": "17V295000",
+   "parkIt": false,
+   "parkOutSide": false,
+   "overTheAirUpdate": false,
+   "ReportReceivedDate": "02/05/2017",
+   "Component": "TIRES:TEMPORARY/EMERGENCY SPARE TIRE",
+   "Summary": "Gulf States Toyota, Inc. (Gulf States) is recalling certain 2017 4Runner , 86, Avalon, Camry, Camry Hybrid, Corolla, Corolla iM, Highlander, Highlander Hybrid, Prius, Prius C, RAV4, RAV4 Hybrid, Sienna  and Yaris vehicles.  The spare tire air pressure was not adjusted to the proper pressure as stated on the Tire Pressure Label.",
+   "Consequence": "A spare tire that is not inflated to the proper value may not perform as intended, increasing the risk of a crash.",
+   "Remedy": "Gulf States will notify owners, and dealers will inspect the spare tires, adjusting their pressure as necessary, free of charge.  The recall began June 15, 2017.  Owners may contact Gulf States customer service at 1-800-444-1074.  Toyota's number for this recall is 17R2.",
+   "Notes": "Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.safercar.gov.",
+   "ModelYear": "2017",
+   "Make": "TOYOTA",
+   "Model": "HIGHLANDER"
+  },
+  {
+   "Manufacturer": "Toyota Motor Engineering & Manufacturing",
+   "NHTSACampaignNumber": "20V682000",
+   "parkIt": false,
+   "parkOutSide": false,
+   "overTheAirUpdate": false,
+   "ReportReceivedDate": "04/11/2020",
+   "Component": "FUEL SYSTEM, GASOLINE:DELIVERY:FUEL PUMP",
+   "Summary": "Toyota Motor Engineering & Manufacturing (Toyota) is recalling certain 2018-2019 4Runner, 2019-2020 Avalon, 2019 Corolla Hatchback, 2017-2019 Highlander, 2018-2020 Camry, 2020 Corolla, 2018-2019 Land Cruiser, 2017-2020 Tacoma, 2019-2020 RAV4, 2019-2020 Sequoia, 2017-2020 Sienna, 2019-2020 Tundra, 2018-2020 Lexus ES350, 2017 Lexus GS200t, 2017-2019 Lexus GS350, 2019 Lexus GS300, 2018-2020 Lexus LC500h, 2019-2020 Lexus LS500, 2018-2019 Lexus GX460, 2017 Lexus IS200t, 2019 Lexus IS300, 2019 Lexus IS350, 2018-2020 Lexus LC500, 2018 Lexus LS500, 2019 Lexus LS500h, 2018-2019 Lexus LX570, 2017 Lexus RC200t, 2019 Lexus RC300, RC350, 2017 and 2019-2020 Lexus RX350, 2018-2020 RX350L, 2019 Lexus UX200, 2018-2019 Lexus NX300 vehicles.  The low-pressure fuel pump inside the fuel tank may fail.",
+   "Consequence": "If the fuel pump fails, the engine can stall while driving, increasing the risk of a crash.",
+   "Remedy": "Toyota will notify owners, and dealers will replace the fuel pump assembly with an improved one, free of charge.  Owners of specific models were notified that remedy parts were available starting January 21, 2021.  Owners of other models will be notified as remedy parts become available.  Remedy parts should be available for all affected vehicles by late March 2021.  Owners may contact Toyota customer service at 1-888-270-9371 or Lexus customer service at 1-800-255-3987.  Note: This recall is an expansion of recall 20V-012.  Toyota's number for this recall is 20TA02.  Lexus' number for this recall is 20LA01.",
+   "Notes": "Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.safercar.gov.",
+   "ModelYear": "2017",
+   "Make": "TOYOTA",
+   "Model": "HIGHLANDER"
+  }
+ ]
+}

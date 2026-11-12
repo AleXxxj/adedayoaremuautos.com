@@ -17,17 +17,40 @@ const nextConfig: NextConfig = {
    * "no-cache", which would otherwise make every visit download them again.
    */
   images: {
-    remotePatterns: supabase
-      ? [
-          {
-            protocol: "https",
-            hostname: new URL(supabase).hostname,
-            port: "",
-            pathname: "/storage/v1/object/public/vehicles/**",
-            search: "",
-          },
-        ]
-      : [],
+    remotePatterns: [
+      ...(supabase
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: new URL(supabase).hostname,
+              port: "",
+              pathname: "/storage/v1/object/public/vehicles/**",
+              search: "",
+            },
+          ]
+        : []),
+      /*
+       * The car check's photo of a model, from Wikimedia Commons
+       * (src/lib/vin/photo.ts): 960-pixel thumbnails, and an original when
+       * it is smaller than that. Resized here, so a visitor's browser never
+       * contacts Wikimedia. No query strings, so nothing else on those hosts
+       * can be pulled through the resizer.
+       */
+      {
+        protocol: "https",
+        hostname: "thumb.wikimedia.org",
+        port: "",
+        pathname: "/wikipedia/commons/thumb/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "upload.wikimedia.org",
+        port: "",
+        pathname: "/wikipedia/commons/**",
+        search: "",
+      },
+    ],
     minimumCacheTTL: 2678400,
   },
   experimental: {

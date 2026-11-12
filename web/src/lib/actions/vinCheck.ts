@@ -13,6 +13,8 @@ import {
   type ComplaintSummary,
   type CrashRatings,
 } from "@/lib/vin/nhtsa";
+import { carPhoto, type CarPhoto } from "@/lib/vin/photo";
+import { recallTexts, settleWithin, warmRecallTexts, type RecallText } from "@/lib/vin/recallPlain";
 
 /**
  * The free "Check any car" tool: two public actions, on purpose.
@@ -24,7 +26,17 @@ import {
  *
  * Each costs one of the visitor's daily lookups (src/lib/vin/usage.ts), so
  * the site can't be used to run thousands of checks against NHTSA.
+ *
+ * Two other services see the car's year, make and model, never its VIN:
+ * Wikimedia Commons, for a photo of the model (src/lib/vin/photo.ts), and,
+ * when ANTHROPIC_API_KEY is set, Anthropic, which is given NHTSA's public
+ * recall notices to put in plain words (src/lib/vin/recallPlain.ts).
  */
+
+/** How long "Is this the car?" waits for a photo before showing the drawing instead. */
+const PHOTO_ON_CONFIRM_MS = 1_500;
+/** How long a check waits for the photo and the AI recall summaries; the rest are NHTSA's words. */
+const CHECK_BUDGET_MS = 4_500;
 
 const USED_UP =
   "You've checked a lot of cars today. Please come back tomorrow, or call us and we'll check one for you.";
@@ -39,6 +51,8 @@ export interface LookUpResult {
   car?: DecodedVin;
   /** A check-digit or decoding warning to show beside the car, if any. */
   warning?: string | null;
+  /** A photo of the model, if one was ready in time; the page draws the body shape otherwise. */
+  photo?: CarPhoto | null;
 }
 
 /** Step one: what the car is, for "Is this the car?". */
@@ -76,19 +90,27 @@ export async function lookUpVin(
    */
   const { year, make, names, fit } = car;
   const want = { power: fit.power, cab: fit.cab, words: fit.words };
-  after(() =>
-    Promise.allSettled([
-      recallsForModel(year, make, names, want),
-      complaintsForModel(year, make, names, want),
-      crashRatings(year, make, names, fit),
-    ]),
-  );
+  // Started now rather than in the after() callback, so it runs while the
+  // photo is awaited below. The recalls' plain-English summaries are warmed
+  // as soon as the recalls are known.
+  const prefetch = Promise.allSettled([
+    recallsForModel(year, make, names, want).then((r) => (r ? warmRecallTexts(r.list, make) : null)),
+    complaintsForModel(year, make, names, want),
+    crashRatings(year, make, names, fit),
+  ]);
+  // The photo helps the visitor say "yes, that's the car", but is worth only
+  // a short wait: if it isn't ready, the drawing shows here and the photo on
+  // the results. Either way it carries on into the cache.
+  const photoLookup = carPhoto(car);
+  after(() => Promise.allSettled([prefetch, photoLookup]));
+  const [photo] = await settleWithin([photoLookup], PHOTO_ON_CONFIRM_MS);
 
   return {
     ok: true,
     vin: check.vin,
     car,
     warning: check.checkDigitOk ? (car.warnings[0] ?? null) : check.message,
+    photo: photo ?? null,
   };
 }
 
@@ -103,6 +125,9 @@ export interface CheckResult {
   ratings?: CrashRatings | null;
   /** The oldest of the answers' dates, for "NHTSA data as of". */
   asOf?: string | null;
+  photo?: CarPhoto | null;
+  /** Each recall in plain words, by campaign number: Claude's or NHTSA's own (RecallText.source). */
+  recallText?: Record<string, RecallText>;
 }
 
 /** Step two: everything free that is known about this model. */
@@ -121,12 +146,25 @@ export async function checkCar(
   if (!car.year || !car.make || !car.model) return { ok: false, error: NOT_DECODED };
 
   // The same arguments as the prefetch in lookUpVin, so its answers are the ones found here.
+  const { year, make } = car;
   const want = { power: car.fit.power, cab: car.fit.cab, words: car.fit.words };
-  const [recalls, complaints, ratings] = await Promise.all([
-    recallsForModel(car.year, car.make, car.names, want),
-    complaintsForModel(car.year, car.make, car.names, want),
-    crashRatings(car.year, car.make, car.names, car.fit),
+  const photoLookup = carPhoto(car);
+  const [recalled, complaints, ratings, [photo]] = await Promise.all([
+    // The summaries start as soon as the recalls are known, not after the
+    // complaints, which can take several seconds to download.
+    recallsForModel(year, make, car.names, want).then(async (recalls) => {
+      if (!recalls || recalls.list.length === 0) return { recalls, recallText: {} };
+      const { texts, rest } = await recallTexts(recalls.list, make, CHECK_BUDGET_MS);
+      // Late summaries finish after the reply, so the next visitor gets them.
+      after(() => rest);
+      return { recalls, recallText: texts };
+    }),
+    complaintsForModel(year, make, car.names, want),
+    crashRatings(year, make, car.names, car.fit),
+    settleWithin([photoLookup], CHECK_BUDGET_MS),
   ]);
+  after(() => photoLookup);
+  const { recalls, recallText } = recalled;
 
   const dates = [recalls?.fetchedAt, complaints?.fetchedAt, ratings?.fetchedAt].filter(
     (d): d is string => !!d,
@@ -140,5 +178,7 @@ export async function checkCar(
     complaints,
     ratings,
     asOf: dates.length ? dates.sort()[0] : null,
+    photo: photo ?? null,
+    recallText,
   };
 }
