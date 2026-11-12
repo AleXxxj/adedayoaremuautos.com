@@ -2,6 +2,14 @@
 
 import { useActionState, useState } from "react";
 import { acceptAgreement, declineAgreement } from "@/lib/actions/referral";
+import {
+  btnPrimary,
+  btnSecondary,
+  card,
+  cardTitle,
+  errorBox,
+  fine,
+} from "@/components/partner/ui";
 
 /**
  * Accept or decline, and the result on the same screen.
@@ -15,6 +23,10 @@ import { acceptAgreement, declineAgreement } from "@/lib/actions/referral";
  * written on acceptance is what the business would rely on if a commission
  * were ever disputed, and "they must have clicked something" is not the claim
  * anyone wants to be making.
+ *
+ * It sits straight after the last clause (components/partner/AgreementView),
+ * so the box is ticked under the whole agreement, never beside a summary.
+ * The whole sentence is the box's label, a target far larger than a thumb.
  */
 export function AgreementDecision({
   token,
@@ -44,11 +56,9 @@ export function AgreementDecision({
 
   if (declined?.declined) {
     return (
-      <div className="rounded-xl border border-[#2f2f2f] bg-[#141414] p-6">
-        <h2 className="text-base font-semibold text-white">
-          Understood — nothing further will happen
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#9b9b9b]">
+      <div role="status" className={`${card} p-5 sm:p-6`}>
+        <h2 className={cardTitle}>Understood — nothing further will happen</h2>
+        <p className="mt-2 text-base leading-relaxed text-text-secondary">
           We have recorded that you did not accept, and your referral code has
           not been activated. If you change your mind, or if you declined by
           mistake, call us and we will reopen it.
@@ -59,24 +69,24 @@ export function AgreementDecision({
 
   if (done) {
     return (
-      <div className="rounded-xl border border-[#2a5c42] bg-[#112018] p-6">
-        <h2 className="text-base font-semibold text-white">
-          Accepted — your code is live
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#b4b4b4]">
+      <div role="status" className="rounded-[20px] border border-brand-300/50 bg-brand-500/10 p-5 sm:p-6">
+        <h2 className={cardTitle}>Accepted — your code is live</h2>
+        <p className="mt-2 text-base leading-relaxed text-text-secondary">
           Thank you, {name.split(/\s+/)[0]}. From now on, anyone who books or
           buys through your link is recorded against your name.
         </p>
 
-        <div className="mt-4 rounded-lg border border-[#262626] bg-[#0d0d0d] p-4 text-center">
-          <div className="text-[11px] uppercase tracking-[0.14em] text-[#7d7d7d]">
+        <div className="mt-4 rounded-[14px] border border-border-default bg-surface-0 p-4 text-center">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
             Your code
           </div>
-          <div className="mt-1 text-2xl font-bold tracking-wide text-white">
+          <div className="mt-1 break-all font-mono text-2xl font-bold tracking-wide text-text-primary">
             {code}
           </div>
-          <div className="mt-3 text-xs text-[#7d7d7d]">Your link</div>
-          <div className="mt-0.5 break-all text-sm text-[#4e9d76]">{link}</div>
+          <div className="mt-3 text-sm text-text-muted">Your link</div>
+          <div className="mt-0.5 select-all break-all font-mono text-[15px] text-brand-300">
+            {link}
+          </div>
         </div>
 
         {/* Offered here as well as emailed, and on a reload too — the link is
@@ -84,13 +94,10 @@ export function AgreementDecision({
             The welcome email is the durable copy, but somebody who has just
             accepted is on this page now and should not be sent to find an
             inbox in order to carry on. */}
-        <a
-          href={accountLink}
-          className="mt-5 block rounded-xl bg-[#2a5c42] px-5 py-3.5 text-center text-sm font-bold text-white"
-        >
+        <a href={accountLink} className={`${btnPrimary} mt-5 w-full`}>
           Create my partner account
         </a>
-        <p className="mt-3 text-xs leading-relaxed text-[#7d7d7d]">
+        <p className={`mt-3 ${fine}`}>
           The same link is in your email, so you can come back to this later.
         </p>
       </div>
@@ -98,12 +105,9 @@ export function AgreementDecision({
   }
 
   return (
-    <>
+    <div className={`${card} p-5 sm:p-6`}>
       {(accepted?.error || declined?.error) && (
-        <p
-          className="mb-4 rounded-lg border border-[#7f3030] bg-[#2a1515] px-4 py-3 text-sm text-[#f0a0a0]"
-          aria-live="polite"
-        >
+        <p className={`mb-4 ${errorBox}`} role="alert">
           {accepted?.error || declined?.error}
         </p>
       )}
@@ -112,12 +116,12 @@ export function AgreementDecision({
         <input type="hidden" name="token" value={token} />
         <input type="hidden" name="version" value={version} />
 
-        <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-[#d4d4d4]">
+        <label className="-m-2 flex min-h-[44px] cursor-pointer items-start gap-3.5 rounded-[14px] p-2 text-base leading-relaxed text-text-primary has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus">
           <input
             type="checkbox"
             checked={ticked}
             onChange={(e) => setTicked(e.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-[#2a5c42]"
+            className="mt-0.5 h-6 w-6 shrink-0 cursor-pointer accent-[var(--brand-500)] focus-visible:outline-none"
           />
           <span>
             I have read the agreement above and I accept it. I am applying as an
@@ -129,31 +133,31 @@ export function AgreementDecision({
         <button
           type="submit"
           disabled={!ticked || busy}
-          className="mt-5 w-full rounded-xl bg-[#2a5c42] px-5 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-45"
+          className={`${btnPrimary} mt-5 w-full`}
         >
           {accepting ? "Recording…" : "I agree — activate my code"}
         </button>
       </form>
 
-      <div className="mt-4 text-center">
+      <div className="mt-3 text-center">
         {confirmingDecline ? (
-          <form action={declineAction}>
+          <form action={declineAction} className="pt-2">
             <input type="hidden" name="token" value={token} />
-            <p className="text-sm text-[#9b9b9b]">
+            <p className="text-base text-text-secondary">
               Decline the agreement? Your code will not be activated.
             </p>
-            <div className="mt-3 flex justify-center gap-2">
+            <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2.5">
               <button
                 type="submit"
                 disabled={busy}
-                className="rounded-lg border border-[#7f3030] px-4 py-2 text-sm text-[#f0a0a0] disabled:opacity-50"
+                className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-danger/60 px-6 text-base font-bold text-danger transition-colors duration-200 ease-out hover:border-danger disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
               >
                 {declining ? "Recording…" : "Yes, decline"}
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingDecline(false)}
-                className="rounded-lg border border-[#3a3a3a] px-4 py-2 text-sm text-[#d4d4d4]"
+                className={btnSecondary}
               >
                 Go back
               </button>
@@ -163,17 +167,17 @@ export function AgreementDecision({
           <button
             type="button"
             onClick={() => setConfirmingDecline(true)}
-            className="text-sm text-[#8a8a8a] underline"
+            className="inline-flex min-h-[44px] items-center px-2 text-[15px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
           >
             I do not agree to these terms
           </button>
         )}
       </div>
 
-      <p className="mt-6 text-xs leading-relaxed text-[#6f6f6f]">
+      <p className={`mt-4 ${fine}`}>
         Nothing is owed by you at any point, and there is no charge to be a
         partner. You can end this arrangement whenever you like.
       </p>
-    </>
+    </div>
   );
 }

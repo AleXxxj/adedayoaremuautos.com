@@ -1,11 +1,20 @@
 import { partnerSignOut } from "@/lib/actions/partnerAuth";
+import { PartnerBrand } from "./PartnerShell";
+import { eyebrow, pageTitle } from "./ui";
 
+/**
+ * Who is logged in, their code and rate, and Log out.
+ *
+ * Log out sits in the top corner, where people look for it, and is quieter
+ * than everything a partner came to do.
+ */
 export function PartnerHeader({
   name,
   code,
   hireRate,
   saleRate,
   market,
+  home,
 }: {
   name: string;
   code: string;
@@ -13,45 +22,50 @@ export function PartnerHeader({
   /** null where sale commissions are paused (saleCommissionsOn). */
   saleRate: string | null;
   market: string;
+  /** The public site for the partner's market. */
+  home: string;
 }) {
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-[#7d7d7d]">
-          Adedayo Aremu Autos · Partner
-        </div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
-          {name}
-        </h1>
-        <p className="mt-1 text-sm text-[#9b9b9b]">
-          <code className="rounded bg-[#1a1a1a] px-1.5 py-0.5 text-[#d4d4d4]">
-            {code}
-          </code>{" "}
-          · {market}
-        </p>
+    <header>
+      <div className="flex items-center justify-between gap-3">
+        <PartnerBrand href={home} compact />
+
+        {/* A plain form, so logging out works without JavaScript — and cannot
+            be triggered by a prefetch, which a link would be. */}
+        <form action={partnerSignOut} className="shrink-0">
+          <button
+            type="submit"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border-default px-4 text-sm font-semibold text-text-secondary transition-colors duration-200 ease-out hover:border-border-strong hover:text-text-primary motion-reduce:transition-none"
+          >
+            <i className="fas fa-arrow-right-from-bracket" aria-hidden="true" />
+            Log out
+          </button>
+        </form>
+      </div>
+
+      <div className="mt-7">
+        <p className={eyebrow}>Logged in as</p>
+        <h1 className={`${pageTitle} mt-3 break-words`}>{name}</h1>
         {/* Each rate named for what it pays on. One figure labelled
             "commission" is how a partner works out their earnings on the
             wrong one and then asks why the number on the screen disagrees. */}
-        <p className="mt-1 text-sm text-[#9b9b9b]">
-          <strong className="text-[#d4d4d4]">{hireRate}</strong> on car rental
+        <p className="mt-3 text-[15px] text-text-secondary">
+          Code{" "}
+          <code className="rounded-md bg-surface-2 px-2 py-0.5 font-bold tracking-wide text-text-primary">
+            {code}
+          </code>
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed text-text-secondary">
+          <strong className="text-text-primary">{hireRate}</strong> on car rentals
           {saleRate && (
             <>
-              {" "}· <strong className="text-[#d4d4d4]">{saleRate}</strong> on vehicle sales
+              &nbsp;· <strong className="text-text-primary">{saleRate}</strong> on vehicle
+              sales
             </>
           )}
+          &nbsp;· {market}
         </p>
       </div>
-
-      {/* A plain form, so signing out works without JavaScript — and cannot
-          be triggered by a prefetch, which a link would be. */}
-      <form action={partnerSignOut}>
-        <button
-          type="submit"
-          className="rounded-lg border border-[#333] px-3 py-1.5 text-xs text-[#b4b4b4]"
-        >
-          Sign out
-        </button>
-      </form>
     </header>
   );
 }

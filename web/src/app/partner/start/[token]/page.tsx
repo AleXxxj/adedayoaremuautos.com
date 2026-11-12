@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { partnerByAgreementToken } from "@/lib/partner";
-import { PartnerShell } from "@/components/partner/PartnerShell";
-import { PartnerAccountForm } from "@/components/partner/PartnerAccountForm";
+import { CONTACT_EMAIL } from "@/lib/contact";
+import { PartnerNotice } from "@/components/partner/AgreementView";
+import { StartView } from "@/components/partner/StartView";
+import { btnPrimary, link } from "@/components/partner/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -29,72 +31,45 @@ export default async function PartnerStartPage({
 
   if (!partner) {
     return (
-      <PartnerShell narrow>
-        <h1 className="text-xl font-bold text-white">This link is not valid</h1>
-        <p className="mt-3 text-sm leading-relaxed text-[#9b9b9b]">
-          It may have been used already — in which case you have an account and
-          can{" "}
-          <Link href="/partner/login" className="text-[#4e9d76] underline">
-            sign in
-          </Link>
-          . If not, email{" "}
-          <a
-            href="mailto:info@adedayoaremuautos.com"
-            className="text-[#4e9d76] underline"
-          >
-            info@adedayoaremuautos.com
-          </a>{" "}
-          and we will send you a fresh one.
-        </p>
-      </PartnerShell>
+      <PartnerNotice title="This link is not valid">
+        It may have been used already — in which case you have an account and
+        can{" "}
+        <Link href="/partner/login" className={link}>
+          log in
+        </Link>
+        . If not, email{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} className={`${link} [overflow-wrap:anywhere]`}>
+          {CONTACT_EMAIL}
+        </a>{" "}
+        and we will send you a fresh one.
+      </PartnerNotice>
     );
   }
 
   if (partner.status !== "active" || !partner.agreedAt) {
     return (
-      <PartnerShell narrow>
-        <h1 className="text-xl font-bold text-white">
-          The agreement comes first
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-[#9b9b9b]">
-          Your account opens once you have read and accepted the partner
-          agreement. The link to it is in your email.
-        </p>
-      </PartnerShell>
+      <PartnerNotice title="The agreement comes first">
+        Your account opens once you have read and accepted the partner
+        agreement. The link to it is in your email.
+      </PartnerNotice>
     );
   }
 
   if (partner.userId) {
     return (
-      <PartnerShell narrow>
-        <h1 className="text-xl font-bold text-white">You already have an account</h1>
-        <p className="mt-3 text-sm leading-relaxed text-[#9b9b9b]">
-          Sign in with {partner.email} and the password you chose.
-        </p>
-        <Link
-          href="/partner/login"
-          className="mt-5 block rounded-xl bg-[#2a5c42] px-5 py-3.5 text-center text-sm font-bold text-white"
-        >
-          Sign in
-        </Link>
-      </PartnerShell>
+      <PartnerNotice
+        title="You already have an account"
+        action={
+          <Link href="/partner/login" className={`${btnPrimary} w-full`}>
+            Log in
+          </Link>
+        }
+      >
+        Log in with <strong className="text-text-primary [overflow-wrap:anywhere]">{partner.email}</strong>{" "}
+        and the password you chose.
+      </PartnerNotice>
     );
   }
 
-  return (
-    <PartnerShell narrow>
-      <div className="text-[11px] uppercase tracking-[0.16em] text-[#7d7d7d]">
-        Adedayo Aremu Autos
-      </div>
-      <h1 className="mt-2 text-xl font-bold text-white">
-        Create your partner account
-      </h1>
-      <p className="mt-2 text-sm leading-relaxed text-[#9b9b9b]">
-        Choose a password and your dashboard is ready. You will sign in with{" "}
-        <strong className="text-[#d4d4d4]">{partner.email}</strong>.
-      </p>
-
-      <PartnerAccountForm token={token} />
-    </PartnerShell>
-  );
+  return <StartView email={partner.email ?? ""} token={token} />;
 }
