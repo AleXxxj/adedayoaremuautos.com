@@ -21,9 +21,9 @@ export async function generateMetadata({
   const { market } = await params;
   if (!isMarketCode(market)) return {};
   return {
-    title: "Sell or Trade In Your Car",
+    title: "Sell Us Your Car",
     description:
-      "Tell us about your car in 2 minutes, and we'll call you, see the car and make you an offer to buy it or take it in trade.",
+      "Tell us about your car in 2 minutes. If it's a car we want, we'll call you with an offer to buy it or take it in trade.",
     alternates: {
       canonical: `/${market}/sell`,
       languages: { "en-US": "/us/sell", "en-NG": "/ng/sell" },
@@ -32,8 +32,9 @@ export async function generateMetadata({
 }
 
 /**
- * Sell your car: the owner tells us about it, we call, see the car and make
- * an offer. Filed as a trade_in lead in the staff inbox
+ * Sell us your car: the owner tells us about it, we look at the details,
+ * and if it is a car the business wants, we call with an offer. Nobody is
+ * promised an offer. Filed as a trade_in lead in the staff inbox
  * (lib/actions/sell.ts). There is no instant value: that needs a paid
  * market-data feed, and a number nobody has stood behind is worse than none.
  */

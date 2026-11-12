@@ -14,7 +14,8 @@ import { mediaUrl } from "@/lib/media";
 import { canResize } from "@/lib/photo";
 import { DEFAULT_RENTAL_COMMISSION_BPS, formatBps, weeklyExamples } from "@/lib/referral";
 import { CONTACT_EMAIL, mapLinkUrl, whatsappUrl } from "@/lib/contact";
-import { HeroSlides, type HeroSlide } from "@/components/home/HeroSlides";
+import { HeroSlides } from "@/components/home/HeroSlides";
+import { heroDeck, type HeroSlide } from "@/components/home/heroDeck";
 import { FindCar, type FindChip } from "@/components/home/FindCar";
 import { BudgetFinder, type FinderCar, type FinderSide } from "@/components/home/BudgetFinder";
 import { AskAyo } from "@/components/home/AskAyo";
@@ -114,6 +115,8 @@ const SALE_READ = 120;
 /** The hero shows the newest cars that have a photo, from the first twelve. */
 const HERO_FROM = 12;
 const HERO_SLIDES = 6;
+/** Rental cars whose photos the hero's rent-to-own slides use, in turn. */
+const HERO_OWN_PHOTOS = 3;
 /** Cars in each swipe row; the rest are a tap away on their lists. */
 const ROW = 8;
 /** Cars handed to the budget finder for display (the counts use them all). */
@@ -181,20 +184,38 @@ export default async function MarketHome({
   const saleCars = sale.vehicles;
   const priced = saleCars.filter((v): v is typeof v & { priceMinor: number } => v.priceMinor != null);
   const fromSale = priced.length ? Math.min(...priced.map((v) => v.priceMinor)) : null;
-  const slides: HeroSlide[] = saleCars
+  const saleSlides: HeroSlide[] = saleCars
     .slice(0, HERO_FROM)
     .filter((v) => v.primaryImage)
     .slice(0, HERO_SLIDES)
     .map((v) => ({
+      kind: "car",
       src: mediaUrl(v.primaryImage!),
       name: carName(v),
-      price: v.priceMinor != null ? fmt(v.priceMinor) : null,
+      note: v.priceMinor != null ? fmt(v.priceMinor) : null,
       href: href(`/inventory/${v.slug}`),
     }));
 
   // ── Cars for rent ───────────────────────────────────────────────────────
   // The rental list's order, so the row's first cars are the list's.
   const rentRows = [...fleet].sort(byWeekCost);
+  // Rent to own is offered in the US only. Its hero slides sit over real
+  // rental cars, named as cars for rent and with no price: rent to own is
+  // priced by category, not by the car in the photo.
+  const ownSlides: HeroSlide[] = us
+    ? rentRows
+        .filter((v) => v.image)
+        .slice(0, HERO_OWN_PHOTOS)
+        .map((v) => ({
+          kind: "own",
+          src: v.image!,
+          name: carName(v),
+          note: "for rent",
+          href: href(`/rentals/${v.slug}`),
+        }))
+    : [];
+  const slides = heroDeck(saleSlides, ownSlides);
+  const ownSlideShown = slides.some((s) => s.kind === "own");
   const { fromDaily, fromWeekly } = fromPrices(fleet);
   const rentFrom =
     fromWeekly != null ? `${fmt(fromWeekly)}/wk` : fromDaily != null ? `${fmt(fromDaily)}/day` : null;
@@ -335,28 +356,67 @@ export default async function MarketHome({
       />
 
       {/* ── Hero ───────────────────────────────────────────────────────────
-          The cars for sale, one after another, behind three big buttons. */}
-      <HeroSlides slides={slides} fallback="/img/hero-benz.png">
-        <p className="home-eyebrow">{us ? "Car dealer in Greensboro, NC" : "Car dealer in Nigeria"}</p>
-        <h2 className="hh-title">
-          Buy it. Rent it.
-          <span>Or sell us yours.</span>
-        </h2>
-        {heroLine && <p className="hh-line">{heroLine}</p>}
-
+          The cars for sale, one after another, above three buttons, with a
+          rent-to-own slide after every second car (US only). The slide's
+          line is the rent-to-own disclosure, with the facts of the
+          `home-terms` paragraph below and no claim it doesn't make. */}
+      <HeroSlides
+        slides={slides}
+        fallback="/img/hero-benz.png"
+        head={
+          <>
+            <p className="home-eyebrow">{us ? "Car dealer in Greensboro, NC" : "Car dealer in Nigeria"}</p>
+            <h2 className="hh-title">
+              Buy it. Rent it.
+              <span>Or sell us yours.</span>
+            </h2>
+            {heroLine && <p className="hh-line">{heroLine}</p>}
+          </>
+        }
+        ownHead={
+          ownSlideShown ? (
+            <>
+              <p className="home-eyebrow">Rent to own</p>
+              <h2 className="hh-title">
+                Rent it.
+                <span>Then own it.</span>
+              </h2>
+              <p className="hh-line hh-line--terms">
+                Once your rent reaches the total for your car&rsquo;s category, it&rsquo;s yours.
+                Deposits don&rsquo;t count. Rent already paid isn&rsquo;t refunded.{" "}
+                <Link href={href("/rent-to-own")} className="hh-more">
+                  See how it works
+                </Link>
+              </p>
+            </>
+          ) : null
+        }
+      >
+        {/* Three cards, each with its own color: the green one is Buy. */}
         <div className="hh-actions">
-          <Link href={forSale > 0 ? href("/inventory") : href("/contact")} className="hh-btn hh-btn--primary">
-            <i className="fas fa-car" aria-hidden="true" />
+          <Link href={forSale > 0 ? href("/inventory") : href("/contact")} className="hh-btn" data-tint="buy">
+            <span className="hh-btn-chip">
+              <i className="fas fa-car" aria-hidden="true" />
+            </span>
             <span className="hh-btn-label">Buy</span>
             <span className="hh-btn-sub">{forSale > 0 ? carsLabel(forSale) : "Ask us"}</span>
           </Link>
-          <Link href={href("/sell")} className="hh-btn">
-            <i className="fas fa-tag" aria-hidden="true" />
+          {/* No offer is promised: the business makes one only for a car it wants. */}
+          <Link href={href("/sell")} className="hh-btn" data-tint="sell">
+            <span className="hh-btn-chip">
+              <i className="fas fa-tag" aria-hidden="true" />
+            </span>
             <span className="hh-btn-label">Sell</span>
-            <span className="hh-btn-sub">Get an offer</span>
+            <span className="hh-btn-sub">Tell us about it</span>
           </Link>
-          <Link href={fleet.length > 0 ? href("/rentals") : href("/contact?type=rental")} className="hh-btn">
-            <i className="fas fa-key" aria-hidden="true" />
+          <Link
+            href={fleet.length > 0 ? href("/rentals") : href("/contact?type=rental")}
+            className="hh-btn"
+            data-tint="rent"
+          >
+            <span className="hh-btn-chip">
+              <i className="fas fa-key" aria-hidden="true" />
+            </span>
             <span className="hh-btn-label">Rent</span>
             <span className="hh-btn-sub">{rentFrom ? `From ${rentFrom}` : "Ask us"}</span>
           </Link>

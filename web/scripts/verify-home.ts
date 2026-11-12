@@ -23,6 +23,7 @@ import {
   topBrands,
   weeklyBudgets,
 } from "../src/components/home/homeData";
+import { heroDeck, type HeroSlide } from "../src/components/home/heroDeck";
 import {
   PERSONA,
   QUICK_BUDGET_MINOR,
@@ -158,6 +159,22 @@ eq("a single-rate fleet still gets its chip", weeklyBudgets([500], [500, 500], 4
 eq("spread keeps the ends", spread([1, 2, 3, 4, 5, 6, 7], 3), [1, 4, 7]);
 eq("cars label", [carsLabel(1), carsLabel(11)], ["1 car", "11 cars"]);
 
+// ── The hero's slides ─────────────────────────────────────────────────────
+console.log("\nHero slides");
+{
+  const slide = (kind: HeroSlide["kind"], name: string): HeroSlide => ({ kind, src: `/${name}.jpg`, name, note: null, href: `/${name}` });
+  const cars = ["c1", "c2", "c3", "c4", "c5", "c6"].map((n) => slide("car", n));
+  const own = ["r1", "r2", "r3"].map((n) => slide("own", n));
+  const names = (deck: HeroSlide[]) => deck.map((s) => s.name).join(" ");
+  eq("a rent-to-own slide after every second car", names(heroDeck(cars, own)), "c1 c2 r1 c3 c4 r2 c5 c6 r3");
+  eq("an odd car out ends the show", names(heroDeck(cars.slice(0, 5), own)), "c1 c2 r1 c3 c4 r2 c5");
+  eq("one rental photo is used again", names(heroDeck(cars, own.slice(0, 1))), "c1 c2 r1 c3 c4 r1 c5 c6 r1");
+  eq("one car alone gets no rent-to-own slide", names(heroDeck(cars.slice(0, 1), own)), "c1");
+  eq("no rental photo, no rent-to-own slide (Nigeria passes none)", names(heroDeck(cars, [])), "c1 c2 c3 c4 c5 c6");
+  eq("no cars, no slides", heroDeck([], own), []);
+  ok("the first slide is always a car", heroDeck(cars, own)[0].kind === "car");
+}
+
 // ── Ayo ───────────────────────────────────────────────────────────────────
 console.log("\nAyo");
 eq("home", assistantPage("/us"), "home");
@@ -180,7 +197,7 @@ eq("times of day", [5, 11, 12, 16, 17, 23, 0, 4].map(timeOfDay), [
 ]);
 eq("the greeting", greeting(9, "home"), [
   "Good morning. I'm Miles, the virtual assistant at Adedayo Aremu Autos.",
-  "I can help you rent a car this week, find one to buy, or get an offer on yours. What brings you in?",
+  "I can help you rent a car this week, find one to buy, or tell us about one you want to sell. What brings you in?",
 ]);
 eq("home quick replies", quickReplies("home", "$10,000"), [
   "Rent a car this week",
@@ -203,6 +220,13 @@ ok("never pretends to book or hold", usPrompt.includes("You can't book, hold, pr
 ok("keeps the financing rule", usPrompt.includes("NEVER say anything about whether someone will qualify for financing"));
 ok("keeps the ID rule", usPrompt.includes("NEVER ask for or accept a bank account number, card number, SSN, BVN, or a photo of an ID"));
 ok("knows the sell page", usPrompt.includes("/us/sell") && ngPrompt.includes("/ng/sell"));
+// The business makes an offer only for a car it wants to buy.
+ok(
+  "an offer only if it is a car we want",
+  usPrompt.includes("If it is a car we want to buy, we call them with an offer. Never promise an offer or a call") &&
+    usPrompt.includes("NEVER say we will make an offer") &&
+    !usPrompt.includes("we call them with an offer. We never charge"),
+);
 ok("knows the partner log in", usPrompt.includes("/partner/login"));
 ok("the car check is for the US only", usPrompt.includes("/us/check") && !ngPrompt.includes("/check"));
 ok("the referral rate is the constant's", usPrompt.includes("Partners earn 5% of what their renter pays"));

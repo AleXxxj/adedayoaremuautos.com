@@ -10,11 +10,16 @@
  *
  * Colors are the design tokens (styles/tokens.css): the page on --surface-0,
  * cards on --surface-1, --brand-300 for emphasis, the --cta-* pair for the
- * primary button, gold only for money.
+ * primary button, gold only for money. Green is for one thing per screen:
+ * in the hero it is the headline's second line, and everything else there
+ * is white, silver or dark glass.
  *
- * Contrast over photographs is guaranteed by the shading, not by the photo:
- * every line of text in the hero sits on at least 82% of the page color,
- * which keeps even --brand-300 at 12px above 4.5:1 on a white photograph.
+ * Contrast over photographs is guaranteed by the shading, not by the photo.
+ * On a phone the hero's words sit under the photo, on the page's own color;
+ * the one line on the photo (the car's name) sits on at least 62% of the
+ * page color, which keeps white at 14px above 4.5:1 on a white photograph.
+ * On a wide screen the words lie over the photo's left half, on at least
+ * 82% of the page color.
  */
 
 /* ── Shared ───────────────────────────────────────────────────────────── */
@@ -134,7 +139,7 @@
 
 /* Pills keep their shape when focused: refine.css §5 rounds every focused
    link to 6px, which squares off a pill. */
-.legacy-theme :is(.hh-btn, .hh-now, .hh-pause, .hh-link, .find-chip, .find-go, .bf-chip, .bf-toggle-btn, .bf-all, .home-btn, .home-row-all, .home-founder):focus-visible {
+.legacy-theme :is(.hh-pause, .hh-link, .find-chip, .find-go, .bf-chip, .bf-toggle-btn, .bf-all, .home-btn, .home-row-all, .home-founder):focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 3px;
     border-radius: 999px;
@@ -146,6 +151,20 @@
     border-radius: 20px;
 }
 
+/* The hero's three cards keep their own corners. */
+.legacy-theme .hh-btn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 16px;
+}
+
+/* Text links on the photo and in the rent-to-own line. */
+.legacy-theme :is(.hh-now, .hh-more):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
 .legacy-theme .hh-seg:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: -2px;
@@ -154,29 +173,38 @@
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 
-/* Runs under the fixed header from the top of the page; the words sit at
-   the bottom, clear of the phone's tab bar. */
+/* Two rows on a phone: the photo, then the words. The hero runs under the
+   fixed header from the top of the page, so the photo's row is sized by the
+   screen's height: enough of it to see the car whole, and short enough that
+   the three buttons are on the first screen. Wide screens lay the words
+   over the photo instead (below). */
 .legacy-theme .hh {
+    --hh-stage: 320px;
     position: relative;
     isolation: isolate;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(var(--hh-stage), 1fr) auto;
     overflow: hidden;
-    min-height: 640px;
-    min-height: max(560px, min(88svh, 760px));
-    background: var(--surface-1);
+    min-height: 560px;
+    background: var(--surface-0);
 }
 
-/* On a phone the photo fills the top of the hero and fades out under the
-   words, so the car is seen whole above them rather than dimmed behind
-   them. Wide screens give it the whole hero (below). */
+@supports (height: 1svh) {
+    .legacy-theme .hh {
+        --hh-stage: clamp(248px, 44svh, 420px);
+        min-height: max(560px, min(88svh, 760px));
+    }
+}
+
+/* The photo has the top row to itself: no words and no panel lie on the
+   car. Only its bottom edge is shaded (::after), where the slideshow's
+   strip sits. */
 .legacy-theme .hh-photos {
-    position: absolute;
-    inset: 0 0 auto;
+    position: relative;
     z-index: 0;
-    height: max(380px, 60%);
-    -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
-    mask-image: linear-gradient(to bottom, #000 70%, transparent);
+    grid-area: 1 / 1;
+    overflow: hidden;
 }
 
 .legacy-theme .hh-photo {
@@ -193,10 +221,11 @@
 
 .legacy-theme .hh-photo img {
     object-fit: cover;
-    object-position: center 45%;
+    object-position: center 55%;
 }
 
-/* The slow zoom: 1 to 1.06 over the car's six seconds. The car going out
+/* The slow zoom: 1 to 1.06 over the slide's time (set on the element by
+   HeroSlides.tsx: a rent-to-own slide stays longer). The slide going out
    keeps the same animation, so it does not jump back while it fades. */
 .legacy-theme .hh-photo.is-current,
 .legacy-theme .hh-photo.is-previous {
@@ -206,6 +235,26 @@
 @keyframes hh-zoom {
     from { transform: scale(1); }
     to { transform: scale(1.06); }
+}
+
+/* The shade along the photo's bottom edge. The car's name sits in its lowest
+   46px, where it is at least 62% of the page color: white text on a white
+   car is then above 4.5:1. Above 124px the photo is clear. */
+.legacy-theme .hh-photos::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 1;
+    height: 124px;
+    background: linear-gradient(
+        to top,
+        var(--surface-0) 0,
+        rgba(7, 12, 10, 0.86) 20px,
+        rgba(7, 12, 10, 0.62) 46px,
+        rgba(7, 12, 10, 0.26) 84px,
+        rgba(7, 12, 10, 0) 124px
+    );
+    pointer-events: none;
 }
 
 /* A shade under the header, so the photo meets it softly. */
@@ -219,28 +268,51 @@
     pointer-events: none;
 }
 
-/* The shading travels with the words: it fades in over the first 96px of
-   this block and is at least 82% from there down, whatever the height of
-   the screen. Above it, the photo is clear. */
+/* The words, on the page's own color: nothing here depends on the photo
+   for its contrast. */
 .legacy-theme .hh-body {
     position: relative;
     z-index: 2;
-    margin-top: auto;
-    padding: 96px 0 44px;
-    background: linear-gradient(
-        to bottom,
-        rgba(7, 12, 10, 0) 0,
-        rgba(7, 12, 10, 0.6) 48px,
-        rgba(7, 12, 10, 0.82) 96px,
-        rgba(7, 12, 10, 0.9) 60%,
-        var(--surface-0) 100%
-    );
+    grid-area: 2 / 1;
+    padding: 26px 0 44px;
+    background: var(--surface-0);
 }
 
 .legacy-theme .hh-inner {
     max-width: 1232px;
     margin: 0 auto;
     padding: 0 16px;
+}
+
+/* The standing words and the rent-to-own slide's words lie in one cell, so
+   the cell is as tall as the taller of them at any width, and the buttons
+   under it stay put when one gives way to the other. The shorter sits at
+   the bottom, next to the buttons. */
+.legacy-theme .hh-heads {
+    display: grid;
+    align-items: end;
+}
+
+.legacy-theme .hh-head {
+    grid-area: 1 / 1;
+    min-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 280ms ease-out,
+        visibility 0s linear 280ms;
+}
+
+.legacy-theme .hh-head.is-on {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+/* Silver, not green: the one green thing on the first screen is the
+   headline's second line. */
+.legacy-theme .hh .home-eyebrow {
+    color: var(--text-secondary);
 }
 
 .legacy-theme .hh-title {
@@ -264,7 +336,27 @@
     color: var(--text-secondary);
 }
 
-/* Buy · Sell · Rent: equal width in one row, the icon over the word. */
+/* The rent-to-own disclosure: three short sentences, a size down. */
+.legacy-theme .hh-line--terms {
+    max-width: 46ch;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* "See how it works", in the line. The padding makes it 45px tall to press
+   without moving the lines around it. */
+.legacy-theme .hh-more {
+    padding: 12px 0;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+}
+
+/* Buy · Sell · Rent: three dark glass cards in one row. Each has its own
+   color on its icon only (green for Buy, gold for Sell, silver for Rent), a
+   white word and a silver caption. None is filled with green. */
 .legacy-theme .hh-actions {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -273,18 +365,18 @@
 }
 
 .legacy-theme .hh-btn {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    justify-content: center;
-    gap: 1px;
-    min-height: 68px;
-    padding: 8px 6px;
-    border: 1px solid var(--border-strong);
-    border-radius: 999px;
-    background: rgba(7, 12, 10, 0.6);
-    color: var(--text-primary);
-    text-align: center;
+    gap: 10px 9px;
+    min-height: 84px;
+    padding: 12px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: #fff;
     text-decoration: none;
     touch-action: manipulation;
     transition:
@@ -293,44 +385,48 @@
         border-color 180ms ease-out;
 }
 
-.legacy-theme .hh-btn i {
-    margin-bottom: 2px;
-    font-size: 16px;
+.legacy-theme .hh-btn-chip {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.legacy-theme .hh-btn[data-tint="buy"] .hh-btn-chip {
+    border-color: rgba(95, 199, 145, 0.42);
+    background: rgba(95, 199, 145, 0.16);
     color: var(--brand-300);
 }
 
+.legacy-theme .hh-btn[data-tint="sell"] .hh-btn-chip {
+    border-color: rgba(255, 201, 77, 0.4);
+    background: rgba(255, 201, 77, 0.14);
+    color: var(--accent-400);
+}
+
 .legacy-theme .hh-btn-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
 }
 
 .legacy-theme .hh-btn-sub {
+    grid-column: 1 / -1;
     font-size: 12px;
     line-height: 1.3;
     color: var(--text-secondary);
     white-space: nowrap;
 }
 
-.legacy-theme .hh-btn--primary {
-    border-color: var(--cta-bg);
-    background: var(--cta-bg);
-    color: var(--cta-fg);
-}
-
-.legacy-theme .hh-btn--primary i,
-.legacy-theme .hh-btn--primary .hh-btn-sub {
-    color: var(--cta-fg);
-}
-
 .legacy-theme .hh-btn:hover {
-    border-color: var(--text-secondary);
-    background: rgba(7, 12, 10, 0.8);
-}
-
-.legacy-theme .hh-btn--primary:hover {
-    border-color: var(--cta-bg-hover);
-    background: var(--cta-bg-hover);
+    border-color: rgba(255, 255, 255, 0.34);
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .legacy-theme .hh-btn:active {
@@ -342,7 +438,8 @@
     margin-top: 10px;
 }
 
-/* "Ask Ayo" is a button and "Earn 5%" a link; they look the same. */
+/* "Ask Miles" is a button and "Earn 5%" a link; they look the same: silver
+   words, the part to press in white and underlined. */
 .legacy-theme .hh-link {
     display: flex;
     align-items: center;
@@ -365,89 +462,97 @@
     width: 18px;
     font-size: 15px;
     text-align: center;
-    color: var(--brand-300);
+    color: var(--text-muted);
 }
 
 .legacy-theme .hh-link strong {
     font-weight: 700;
-    color: var(--brand-300);
-}
-
-.legacy-theme .hh-link:hover strong {
+    color: #fff;
     text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.55);
     text-underline-offset: 3px;
 }
 
-/* "Now showing", the segments and the pause button: over the top of the
-   photo on a phone, just under the header, like a story's progress bar.
-   First in the hero's column but last in the page's order (the keyboard
-   reaches the buttons first); in the flow, so on a short screen the hero
-   grows rather than the controls landing on the words. */
+.legacy-theme .hh-link:hover strong {
+    text-decoration-color: #fff;
+}
+
+/* The slideshow's controls: one quiet strip along the bottom edge of the
+   photo, and above its start the name of the car in the photo. Nothing else
+   is on the photo. Last in the page's order (the keyboard reaches the
+   buttons first) but placed in the photo's row, at its foot; the strip is
+   44px tall to press and hangs half below the photo's edge, so its 3px line
+   lies on the edge itself. */
 .legacy-theme .hh-dock {
     position: relative;
     z-index: 3;
-    order: -1;
-    margin-top: 82px;
+    grid-area: 1 / 1;
+    align-self: end;
+    margin-bottom: -20px;
 }
 
 .legacy-theme .hh-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
     max-width: 1232px;
     margin: 0 auto;
     padding: 0 16px;
 }
 
+/* No pill: white words with a soft shadow, on the photo's shaded edge. */
 .legacy-theme .hh-now {
     display: inline-flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 5px;
     max-width: 100%;
     min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid var(--border-default);
-    border-radius: 999px;
-    background: rgba(7, 12, 10, 0.78);
-    color: var(--text-primary);
+    margin-bottom: -8px;
+    padding-bottom: 8px;
+    color: #fff;
     font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
     text-decoration: none;
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.75),
+        0 0 14px rgba(0, 0, 0, 0.6);
 }
 
-.legacy-theme .hh-now-label {
-    flex: none;
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
+/* A long name is cut short with "…"; the price after it never is. */
 .legacy-theme .hh-now-car {
     min-width: 0;
     overflow: hidden;
-    font-weight: 600;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.legacy-theme .hh-now-note {
+    flex: none;
     white-space: nowrap;
 }
 
 .legacy-theme .hh-now i {
     flex: none;
-    font-size: 13px;
-    color: var(--brand-300);
+    margin: 0 0 2px 3px;
+    font-size: 12px;
 }
 
-/* On its own dark glass, so the segments read over a bright photo. */
+.legacy-theme .hh-now:hover .hh-now-car {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .legacy-theme .hh-track {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-top: 8px;
-    padding-left: 10px;
-    border: 1px solid var(--border-default);
-    border-radius: 999px;
-    background: rgba(7, 12, 10, 0.72);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    width: 100%;
 }
 
 .legacy-theme .hh-segments {
     display: flex;
     flex: 1;
+    gap: 4px;
     min-width: 0;
 }
 
@@ -458,7 +563,7 @@
     align-items: center;
     min-width: 0;
     height: 44px;
-    padding: 0 3px;
+    padding: 0;
     border: 0;
     background: none;
     cursor: pointer;
@@ -472,7 +577,7 @@
     height: 3px;
     overflow: hidden;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.36);
 }
 
 .legacy-theme .hh-seg.is-done .hh-seg-bar {
@@ -486,7 +591,7 @@
     transform-origin: left center;
 }
 
-/* Fills over the car's time; its end moves the show on (HeroSlides.tsx). */
+/* Fills over the slide's time; its end moves the show on (HeroSlides.tsx). */
 .legacy-theme .hh-seg-fill.is-timed {
     animation-name: hh-fill;
     animation-timing-function: linear;
@@ -498,15 +603,17 @@
     to { transform: scaleX(1); }
 }
 
+/* A small glyph in a 44px target, at the strip's end. */
 .legacy-theme .hh-pause {
     flex: none;
     width: 44px;
     height: 44px;
+    margin-right: -14px;
     border: 0;
     border-radius: 999px;
     background: none;
-    color: var(--text-primary);
-    font-size: 14px;
+    color: #fff;
+    font-size: 11px;
     cursor: pointer;
 }
 
@@ -1330,7 +1437,8 @@
 
 /* ── The narrowest phones ─────────────────────────────────────────────── */
 
-/* Three buttons of about 90px: "From $350/wk" still fits on its line. */
+/* Three cards of about 90px: "Tell us about it" and "From $350/wk" still
+   fit on their lines. */
 @media (max-width: 359px) {
     .legacy-theme .home-eyebrow {
         letter-spacing: 0.1em;
@@ -1341,12 +1449,23 @@
     }
 
     .legacy-theme .hh-btn {
-        padding: 8px 2px;
+        gap: 9px 7px;
+        padding: 10px 7px;
+    }
+
+    .legacy-theme .hh-btn-chip {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+    }
+
+    .legacy-theme .hh-btn-label {
+        font-size: 17px;
     }
 
     .legacy-theme .hh-btn-sub {
         font-size: 11px;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.02em;
     }
 }
 
@@ -1369,7 +1488,8 @@
 
 @media (min-width: 768px) {
     .legacy-theme .home-wrap,
-    .legacy-theme .hh-inner {
+    .legacy-theme .hh-inner,
+    .legacy-theme .hh-controls {
         padding-left: 24px;
         padding-right: 24px;
     }
@@ -1399,11 +1519,14 @@
     }
 }
 
-/* The hero: words bottom-left over a shade that clears toward the car on
-   the right, and the slideshow's controls bottom-right. The darkest part of
-   the shade runs under the words, which end at about half the width. */
+/* The hero: the photo fills it, with the words bottom-left over a shade
+   that clears toward the car on the right, and the slideshow's strip at the
+   bottom right, under the car. The darkest part of the shade runs under the
+   words, which end at about half the width; along the bottom it is at least
+   62% of the page color up to 130px, which covers the car's name. */
 @media (min-width: 1024px) {
     .legacy-theme .hh {
+        grid-template-rows: minmax(680px, auto);
         min-height: 680px;
     }
 
@@ -1421,18 +1544,27 @@
                 rgba(7, 12, 10, 0.3) 72%,
                 rgba(7, 12, 10, 0.1) 88%
             ),
-            linear-gradient(to top, rgba(7, 12, 10, 0.92) 0, rgba(7, 12, 10, 0) 220px);
+            linear-gradient(
+                to top,
+                rgba(7, 12, 10, 0.94) 0,
+                rgba(7, 12, 10, 0.62) 130px,
+                rgba(7, 12, 10, 0) 260px
+            );
         pointer-events: none;
     }
 
-    .legacy-theme .hh-photos {
-        inset: 0;
-        height: auto;
-        -webkit-mask-image: none;
-        mask-image: none;
+    /* The phone's shade along the photo's edge gives way to the one above. */
+    .legacy-theme .hh-photos::after {
+        content: none;
+    }
+
+    .legacy-theme .hh-photo img {
+        object-position: center 45%;
     }
 
     .legacy-theme .hh-body {
+        grid-area: 1 / 1;
+        align-self: end;
         padding: 120px 0 72px;
         background: none;
     }
@@ -1442,30 +1574,40 @@
     }
 
     .legacy-theme .hh-actions {
-        grid-template-columns: repeat(3, minmax(0, 168px));
+        grid-template-columns: repeat(3, minmax(0, 176px));
         gap: 10px;
     }
 
-    /* Level with the words' last line, at the right edge of the content. */
+    .legacy-theme .hh-btn {
+        min-height: 92px;
+        padding: 14px;
+    }
+
+    .legacy-theme .hh-line--terms {
+        font-size: 15px;
+    }
+
+    /* Under the car, at the right edge of the content, clear of the search
+       card that overlaps the hero's foot. */
     .legacy-theme .hh-dock {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 72px;
-        margin: 0;
+        margin: 0 0 50px;
         pointer-events: none;
     }
 
+    /* One 380px column at the right: the strip fills it, and the car's name
+       starts at its left end, only as wide as its words. */
     .legacy-theme .hh-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
+        grid-template-columns: minmax(0, 380px);
+        justify-content: end;
         padding: 0 24px;
     }
 
     .legacy-theme .hh-controls > * {
-        width: 380px;
         pointer-events: auto;
+    }
+
+    .legacy-theme .hh-pause {
+        margin-right: -10px;
     }
 
     .legacy-theme .home-find {
@@ -1557,7 +1699,13 @@
         animation: none;
     }
 
-    .legacy-theme .hh-photo {
+    .legacy-theme .hh-photo,
+    .legacy-theme .hh-head,
+    .legacy-theme .hh-btn {
         transition: none;
+    }
+
+    .legacy-theme .hh-btn:active {
+        transform: none;
     }
 }

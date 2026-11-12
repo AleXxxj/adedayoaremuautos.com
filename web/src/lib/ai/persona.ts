@@ -70,7 +70,7 @@ export function timeOfDay(hour: number): string {
 }
 
 const OPENERS: Record<AssistantPage, string> = {
-  home: "I can help you rent a car this week, find one to buy, or get an offer on yours. What brings you in?",
+  home: "I can help you rent a car this week, find one to buy, or tell us about one you want to sell. What brings you in?",
   rental:
     "Looking at this car? I can tell you what it costs for your dates and what you need to pick it up.",
   inventory: "Shopping for a car? Tell me your budget and I'll show you what fits.",
@@ -78,7 +78,7 @@ const OPENERS: Record<AssistantPage, string> = {
   sell: "Thinking of selling? I can tell you how it works.",
   referral: "Want to earn by sending renters our way? Ask me how it works.",
   other:
-    "I can help you rent a car this week, find one to buy, or get an offer on yours. What brings you in?",
+    "I can help you rent a car this week, find one to buy, or tell us about one you want to sell. What brings you in?",
 };
 
 /** The two bubbles Ayo opens with: who it is, then what it can do here. */
