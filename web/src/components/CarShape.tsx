@@ -1,10 +1,15 @@
 import type { Shape } from "@/lib/vin/features";
 
 /**
- * A plain drawing of a car's body shape, for when Wikimedia has no photo of
- * the model: side views facing right, in the brand's greens, drawn from a
- * few points each and rounded here. The wheel arches are cut in the panel's
- * own color (.vc-shape-arch), so the drawing sits on that panel.
+ * A plain outline of a car's body shape, for when Wikimedia has no photo of
+ * the model. A placeholder, not a picture: one thin line in the border's own
+ * gray, nothing filled, small wheels, and the words "No photo of this model
+ * yet" under it (VinCheck.tsx). Side views facing right, drawn from a few
+ * points each and rounded here.
+ *
+ * The wheel arches and wheels are filled with the panel's own color
+ * (.vc-shape-cut), only to hide the body's line where it would run through
+ * them.
  */
 
 type Pt = [number, number];
@@ -14,7 +19,7 @@ interface Drawing {
   parts?: Pt[][];
   glass: Pt[][];
   wheels: [number, number];
-  /** Tire radius; an SUV's wheels are bigger. */
+  /** Wheel radius; an SUV's wheels are a little bigger. */
   r?: number;
 }
 
@@ -36,13 +41,13 @@ const DRAWINGS: Record<Shape, Drawing> = {
       [[154, 60], [154, 39], [182, 38], [212, 60]],
     ],
     wheels: [76, 252],
-    r: 22,
+    r: 18,
   },
   pickup: {
     body: [[16, 106], [12, 94], [14, 70], [146, 70], [150, 44], [160, 34], [208, 34], [240, 60], [292, 66], [306, 80], [304, 106]],
     glass: [[[162, 60], [164, 42], [202, 41], [230, 60]]],
     wheels: [72, 254],
-    r: 22,
+    r: 18,
   },
   // The tallest roof, running long, and a short sloping nose.
   van: {
@@ -120,8 +125,13 @@ function rounded(points: Pt[], r: number): string {
   return `${d} Z`;
 }
 
-/** The top half of a circle: a wheel arch cut above the axle line. */
-const arch = (cx: number, r: number) => `M${cx - r} 114 A${r} ${r} 0 0 1 ${cx + r} 114 Z`;
+/** The axle line: every wheel sits on it, whatever the body's height. */
+const AXLE = 114;
+
+/** The top half of a circle above the axle line: the arch's line. */
+const archLine = (cx: number, r: number) => `M${cx - r} ${AXLE} A${r} ${r} 0 0 1 ${cx + r} ${AXLE}`;
+/** The same half circle, closed a little under the axle: hides the body's line inside the arch. */
+const archCut = (cx: number, r: number) => `${archLine(cx, r)} L${cx + r} ${AXLE + 3} L${cx - r} ${AXLE + 3} Z`;
 
 /** Paths built once, the same on the server and in the browser. */
 const PATHS = Object.fromEntries(
@@ -133,40 +143,29 @@ const PATHS = Object.fromEntries(
         body: [d.body, ...(d.parts ?? [])].map((pts) => rounded(pts, 10)),
         glass: d.glass.map((pts) => rounded(pts, 5)),
         wheels: d.wheels,
-        r: d.r ?? 20,
+        r: d.r ?? 16,
       },
     ];
   }),
 ) as Record<Shape, { body: string[]; glass: string[]; wheels: [number, number]; r: number }>;
 
-const NAMES: Record<Shape, string> = {
-  sedan: "a sedan",
-  suv: "an SUV",
-  pickup: "a pickup truck",
-  van: "a van",
-  hatchback: "a hatchback",
-  coupe: "a coupe",
-  convertible: "a convertible",
-  wagon: "a wagon",
-  car: "a car",
-};
-
 export function CarShape({ shape }: { shape: Shape }) {
   const p = PATHS[shape] ?? PATHS.car;
   return (
-    <svg className="vc-shape" viewBox="0 0 320 146" role="img" aria-label={`Drawing of ${NAMES[shape] ?? NAMES.car}`}>
-      <ellipse className="vc-shape-shadow" cx="160" cy="135" rx="146" ry="6" />
+    // Decorative: the caption under it says what it stands for.
+    <svg className="vc-shape" viewBox="6 18 308 118" aria-hidden="true" focusable="false">
       {p.body.map((d, i) => (
-        <path key={`b${i}`} className="vc-shape-body" d={d} />
+        <path key={`b${i}`} className="vc-shape-line" d={d} />
       ))}
       {p.glass.map((d, i) => (
-        <path key={`g${i}`} className="vc-shape-glass" d={d} />
+        <path key={`g${i}`} className="vc-shape-line vc-shape-line--soft" d={d} />
       ))}
       {p.wheels.map((cx) => (
         <g key={cx}>
-          <path className="vc-shape-arch" d={arch(cx, p.r + 5)} />
-          <circle className="vc-shape-tire" cx={cx} cy="114" r={p.r} />
-          <circle className="vc-shape-hub" cx={cx} cy="114" r={p.r * 0.4} />
+          <path className="vc-shape-cut" d={archCut(cx, p.r + 5)} />
+          <path className="vc-shape-line" d={archLine(cx, p.r + 5)} />
+          <circle className="vc-shape-line vc-shape-cut" cx={cx} cy={AXLE} r={p.r} />
+          <circle className="vc-shape-line vc-shape-line--soft" cx={cx} cy={AXLE} r={p.r * 0.34} />
         </g>
       ))}
     </svg>

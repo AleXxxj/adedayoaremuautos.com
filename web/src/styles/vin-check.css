@@ -64,6 +64,8 @@
 
 /* ── Type ──────────────────────────────────────────────────────────────── */
 
+/* Silver: on "Is this the car?" the one green thing is the button that
+   answers it. */
 .legacy-theme .vc-eyebrow {
     display: flex;
     align-items: center;
@@ -73,7 +75,7 @@
     line-height: 1.4;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--brand-300);
+    color: var(--text-secondary);
 }
 
 .legacy-theme .vc-eyebrow::before {
@@ -325,7 +327,7 @@
     transform: translateY(2px) rotate(225deg);
 }
 
-/* ── The photo, or the drawing ─────────────────────────────────────────── */
+/* ── The photo, or the placeholder ─────────────────────────────────────── */
 
 /* Edge to edge across the top of its card. */
 .legacy-theme .vc-photo {
@@ -354,48 +356,50 @@
     color: var(--text-secondary);
 }
 
-.legacy-theme .vc-photo--drawn {
+/* No photo: a low panel with a small outline of the body shape and a line
+   saying so. It reads as an empty photo slot, not as a picture: one thin
+   gray line, nothing filled, about half as tall as the drawing it replaced. */
+.legacy-theme .vc-photo--none {
     display: grid;
-    place-items: center;
-    padding: 28px 16px 12px;
+    justify-items: center;
+    gap: 6px;
+    padding: 22px 16px 14px;
     border-radius: 19px 19px 0 0;
     background: var(--surface-2);
 }
 
 .legacy-theme .vc-shape {
     display: block;
-    width: min(100%, 440px);
+    width: min(56%, 200px);
     height: auto;
+    overflow: visible;
 }
 
-.legacy-theme .vc-shape-body {
-    fill: var(--brand-700);
-    stroke: var(--brand-300);
-    stroke-width: 2;
+/* The same width at any size, so the line never thickens with the drawing. */
+.legacy-theme .vc-shape-line {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+    stroke-linecap: round;
     stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
 }
 
-.legacy-theme .vc-shape-glass {
-    fill: var(--surface-0);
+.legacy-theme .vc-shape-line--soft {
+    stroke: var(--border-default);
+    stroke-width: 1;
 }
 
-/* The panel's own color, so the arch reads as a cut in the body. */
-.legacy-theme .vc-shape-arch {
+/* The panel's own color, after the line's "no fill": it hides the body's
+   line where it would run through an arch or a wheel. */
+.legacy-theme .vc-shape-cut {
     fill: var(--surface-2);
 }
 
-.legacy-theme .vc-shape-tire {
-    fill: var(--surface-0);
-    stroke: var(--border-strong);
-    stroke-width: 3;
-}
-
-.legacy-theme .vc-shape-hub {
-    fill: var(--surface-4);
-}
-
-.legacy-theme .vc-shape-shadow {
-    fill: rgb(0 0 0 / 0.45);
+.legacy-theme .vc-nophoto {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-muted);
 }
 
 /* ── The car ───────────────────────────────────────────────────────────── */
@@ -468,6 +472,42 @@
     .legacy-theme .vc-factgrid li:last-child:nth-child(odd) {
         grid-column: 1 / -1;
     }
+}
+
+/* On "Is this the car?": the same list, closer together, with no rule over
+   it, and two to a row at every width. */
+.legacy-theme .vc-factgrid--compact {
+    gap: 12px;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.legacy-theme .vc-factgrid--compact .vc-fact-label i {
+    color: var(--text-secondary);
+}
+
+.legacy-theme .vc-factgrid--compact li:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+/* What a word means, in a line or two under its heading. */
+.legacy-theme .vc-explain {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    background: var(--surface-0);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.legacy-theme .vc-explain i {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 
 /* ── At a glance ───────────────────────────────────────────────────────── */
@@ -1043,6 +1083,16 @@
 
     .legacy-theme .vc-factgrid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* "Is this the car?" keeps two to a row. */
+    .legacy-theme .vc-factgrid--compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 20px;
+    }
+
+    .legacy-theme .vc-photo--none {
+        padding: 28px 24px 16px;
     }
 
     .legacy-theme .vc-checks {

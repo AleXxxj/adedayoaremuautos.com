@@ -157,6 +157,91 @@ function countryName(raw: string | null): string | null {
   return name ? titleCase(name) : null;
 }
 
+/**
+ * The state of a U.S. car plant, by its city.
+ *
+ * vPIC often gives a plant's city and leaves its state out: a 2013 ML350
+ * decodes as built in "VANCE" with no state, while a 2015 C-Class from the
+ * same plant decodes as "VANCE", "ALABAMA" (both live, Nov 2026). "Built in
+ * Vance" tells a buyer nothing. This is not a guess: each city here has had
+ * one car assembly plant district, in one state, and the lookup is used only
+ * when vPIC says the country is the United States. A city it doesn't list
+ * stays a city alone. Kansas City is left out on purpose: Ford's plant is in
+ * Missouri and GM's in Kansas.
+ */
+const US_PLANT_STATE: Record<string, string> = {
+  // Alabama
+  VANCE: "Alabama",
+  TUSCALOOSA: "Alabama",
+  LINCOLN: "Alabama",
+  MONTGOMERY: "Alabama",
+  HUNTSVILLE: "Alabama",
+  // California
+  FREMONT: "California",
+  // Georgia
+  "WEST POINT": "Georgia",
+  // Illinois
+  NORMAL: "Illinois",
+  BELVIDERE: "Illinois",
+  CHICAGO: "Illinois",
+  // Indiana
+  PRINCETON: "Indiana",
+  LAFAYETTE: "Indiana",
+  GREENSBURG: "Indiana",
+  "FORT WAYNE": "Indiana",
+  ROANOKE: "Indiana",
+  MISHAWAKA: "Indiana",
+  // Kentucky
+  GEORGETOWN: "Kentucky",
+  LOUISVILLE: "Kentucky",
+  "BOWLING GREEN": "Kentucky",
+  // Michigan
+  DETROIT: "Michigan",
+  DEARBORN: "Michigan",
+  "FLAT ROCK": "Michigan",
+  WAYNE: "Michigan",
+  "STERLING HEIGHTS": "Michigan",
+  WARREN: "Michigan",
+  FLINT: "Michigan",
+  LANSING: "Michigan",
+  HAMTRAMCK: "Michigan",
+  "LAKE ORION": "Michigan",
+  ORION: "Michigan",
+  // Mississippi
+  CANTON: "Mississippi",
+  "BLUE SPRINGS": "Mississippi",
+  // Missouri
+  WENTZVILLE: "Missouri",
+  CLAYCOMO: "Missouri",
+  // Ohio
+  MARYSVILLE: "Ohio",
+  "EAST LIBERTY": "Ohio",
+  TOLEDO: "Ohio",
+  LORDSTOWN: "Ohio",
+  "AVON LAKE": "Ohio",
+  // South Carolina
+  SPARTANBURG: "South Carolina",
+  GREER: "South Carolina",
+  LADSON: "South Carolina",
+  "NORTH CHARLESTON": "South Carolina",
+  RIDGEVILLE: "South Carolina",
+  // Tennessee
+  SMYRNA: "Tennessee",
+  CHATTANOOGA: "Tennessee",
+  "SPRING HILL": "Tennessee",
+  // Texas
+  "SAN ANTONIO": "Texas",
+  ARLINGTON: "Texas",
+  AUSTIN: "Texas",
+};
+
+/** The plant's state: vPIC's own, or the one its U.S. city is in; null when neither is known. */
+function plantState(plant: CarDetails["plant"]): string | null {
+  if (plant.state) return plant.state;
+  if (plant.country !== "United States" || !plant.city) return null;
+  return US_PLANT_STATE[plant.city.toUpperCase().replace(/\s+/g, " ").trim()] ?? null;
+}
+
 /** A trim name, not a chassis code like "ZRE172L". */
 const isTrimName = (t: string) => t.length > 0 && t.length <= 24 && !/^[A-Z]{2,4}\d{2,3}[A-Z]$/.test(t);
 
@@ -310,8 +395,14 @@ function gearboxLine(d: CarDetails): string | null {
   }
 }
 
+/**
+ * "Vance, Alabama"; "Toyota, Japan"; the country alone when that is all
+ * there is. The state is worked out here, not when the decode is read, so a
+ * decode already in the cache gets it too.
+ */
 function builtLine(d: CarDetails): string | null {
-  const { city, state, country } = d.plant;
+  const { city, country } = d.plant;
+  const state = plantState(d.plant);
   const abroad = country && country !== "United States" ? country : null;
   const parts = [city, state, abroad].filter((p): p is string => !!p);
   if (parts.length > 0) return [...new Set(parts)].join(", ");
@@ -368,10 +459,26 @@ export function factLines(car: CarFacts, locale = "en-US"): Fact[] {
   return out;
 }
 
+/** The facts that tell one car from another at a glance, in the page's order. */
+const CONFIRM_KEYS: Fact["key"][] = ["body", "seats", "engine", "transmission", "drive", "fuel", "built"];
+
 /**
- * One line under the car's name on "Is this the car?", in the same words as
- * the facts on the results: "SUV · 3.5L V6 · 4-wheel drive · Built in
- * Princeton, Indiana". Null without details, so the page can fall back.
+ * The short list on "Is this the car?": the results' own facts (factLines),
+ * so the two steps can't say different things, without the ones that don't
+ * help someone recognize a car (its trims and its price when new). Gas is
+ * left out next to an engine, which already says as much; a hybrid, a diesel
+ * or an electric car is named.
+ */
+export function confirmFacts(car: CarFacts, locale = "en-US"): Fact[] {
+  const facts = factLines(car, locale).filter((f) => CONFIRM_KEYS.includes(f.key));
+  const engine = facts.some((f) => f.key === "engine");
+  return facts.filter((f) => f.key !== "fuel" || !engine || car.details?.fuel !== "gas");
+}
+
+/**
+ * The same facts as one line, for a decode with too few of them for a list:
+ * "SUV · 3.5L V6 · 4-wheel drive · Built in Princeton, Indiana". Null
+ * without details, so the page can fall back.
  */
 export function summaryLine(car: CarFacts): string | null {
   const d = car.details;
@@ -428,11 +535,11 @@ export function airBagsLine(d: CarDetails | null | undefined): string | null {
   return `Air bags: ${joinAnd(d.airBags.map((a) => AIR_BAG_WORDS[a]))}`;
 }
 
-/* ── The drawing shown when there is no photo ──────────────────────────── */
+/* ── The outline shown when there is no photo ──────────────────────────── */
 
 export type Shape = "sedan" | "suv" | "pickup" | "van" | "hatchback" | "coupe" | "convertible" | "wagon" | "car";
 
-/** The body shape to draw, from the decoded body ("closed" is a sedan or a coupe). */
+/** The body shape to outline, from the decoded body ("closed" is a sedan or a coupe). */
 export function bodyShape(car: CarFacts): Shape {
   switch (car.fit.body) {
     case "convertible":
