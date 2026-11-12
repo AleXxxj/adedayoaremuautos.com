@@ -1,6 +1,7 @@
 import "server-only";
 import { mailFrom } from "@/lib/mail";
 import { renderLeadAlert, leadSubject } from "@/lib/mail/leadAlert";
+import { leadTypeLabel } from "@/lib/leadLabels";
 
 /**
  * Staff notification for new leads.
@@ -46,9 +47,14 @@ export async function notifyStaffOfLead(
     failed: [],
   };
 
+  // The type as staff read it: "trade_in" arrives as "Sell / trade-in".
+  // Every other type reads exactly as before (the email capitalizes it and
+  // the text message keeps it lower case, as they always did).
+  const shown: LeadNotification = { ...lead, type: leadTypeLabel(lead.type) };
+
   await Promise.allSettled([
-    sendEmail(lead, outcome),
-    sendSms(lead, outcome),
+    sendEmail(shown, outcome),
+    sendSms(shown, outcome),
   ]);
 
   // Always leave a server-log trace, so a lead is discoverable even if every
@@ -115,7 +121,7 @@ async function sendSms(lead: LeadNotification, out: NotifyOutcome) {
   out.attempted.push("sms");
 
   const body =
-    `New ${lead.type.replace(/_/g, " ")}: ${lead.name}` +
+    `New ${lead.type.replace(/_/g, " ").toLowerCase()}: ${lead.name}` +
     (lead.phone ? ` ${lead.phone}` : "") +
     (lead.vehicle ? ` re ${lead.vehicle}` : "");
 

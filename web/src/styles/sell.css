@@ -1,0 +1,906 @@
+/*
+ * Sell your car (app/[market]/sell, components/SellForm.tsx).
+ *
+ * Every selector starts with `.legacy-theme .sell-*`, at specificity 0,2,0 or
+ * more, so it beats the legacy reset (`.legacy-theme :where(…)`, which zeroes
+ * margins and padding) whatever order the sheets load in. Colors come from
+ * the design tokens (styles/tokens.css). Phone first: one column at 375px,
+ * the intro beside the form from 960px.
+ */
+
+/* ── Page ─────────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-page {
+    /* Clears the fixed header, like the home page's hero. */
+    margin-top: 74px;
+    padding: 28px 16px 48px;
+    background: var(--surface-0);
+}
+
+.legacy-theme .sell-wrap {
+    display: grid;
+    gap: 28px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.legacy-theme .sell-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ── Intro ────────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-intro {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+
+.legacy-theme .sell-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-eyebrow::before {
+    content: "";
+    flex: none;
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+}
+
+.legacy-theme .sell-title {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(36px, 10vw, 72px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+    color: var(--text-primary);
+}
+
+/* The legacy reset gives every element Inter; the highlight keeps the headline's face. */
+.legacy-theme .sell-title span {
+    font-family: inherit;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-lead {
+    max-width: 34ch;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-how {
+    display: grid;
+    gap: 10px;
+    margin-top: 4px;
+    list-style: none;
+}
+
+.legacy-theme .sell-how li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-how-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--brand-300);
+    font-size: 16px;
+}
+
+/* A warning box: the gold of the warning token on the border and the icon,
+   the words in the page's own text colors. */
+.legacy-theme .sell-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 4px;
+    padding: 14px 16px;
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--warning) 9%, var(--surface-0));
+}
+
+.legacy-theme .sell-notice > i {
+    flex: none;
+    margin-top: 3px;
+    font-size: 17px;
+    color: var(--warning);
+}
+
+.legacy-theme .sell-notice p {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-notice strong {
+    color: var(--text-primary);
+}
+
+/* ── The panel ────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-panel {
+    position: relative;
+    min-width: 0;
+    /* Clear of the fixed header when a step change scrolls to it. */
+    scroll-margin-top: 90px;
+    padding: 20px 16px 24px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    background: var(--surface-1);
+}
+
+/* Only a bot fills this in. Off screen rather than display:none, which some bots skip. */
+.legacy-theme .sell-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.legacy-theme .sell-progress {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.legacy-theme .sell-progress span {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-default);
+    transition: background-color 0.24s ease-out;
+}
+
+.legacy-theme .sell-progress .is-on {
+    background: var(--brand-300);
+}
+
+.legacy-theme .sell-step {
+    display: grid;
+    gap: 22px;
+}
+
+/* `hidden` wins over every display rule here: steps, and parts of a step
+   that wait for the car. */
+.legacy-theme .sell-page [hidden] {
+    display: none !important;
+}
+
+.legacy-theme .sell-fieldset,
+.legacy-theme .sell-group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* A floated legend is laid out like any block, instead of on the border. */
+.legacy-theme .sell-legend,
+.legacy-theme .sell-group-legend {
+    float: left;
+    width: 100%;
+    padding: 0;
+}
+
+.legacy-theme .sell-legend + *,
+.legacy-theme .sell-group-legend + * {
+    clear: both;
+}
+
+.legacy-theme .sell-legend {
+    margin-bottom: 20px;
+}
+
+.legacy-theme .sell-step-title {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(26px, 7vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-step-title:focus {
+    outline: none;
+}
+
+.legacy-theme .sell-step-count {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-step-body {
+    display: grid;
+    gap: 24px;
+}
+
+.legacy-theme .sell-back {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -8px 0 -10px;
+    padding: 0 12px 0 0;
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.legacy-theme .sell-back:hover {
+    color: var(--text-primary);
+}
+
+/* ── Fields ───────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-field,
+.legacy-theme .sell-manual {
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .sell-manual {
+    gap: 20px;
+}
+
+.legacy-theme .sell-label,
+.legacy-theme .sell-group-legend {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-label em {
+    margin-left: 6px;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.legacy-theme .sell-hint {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+/* Boxes and answer cards are edged in --border-strong: about 4:1 on the
+   panel, where --border-default is under 2:1 and a box can't be seen. */
+.legacy-theme .sell-input {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    /* 16px or more, or iOS zooms in on focus. */
+    font-size: 17px;
+    line-height: 1.4;
+    transition: border-color 0.18s ease-out;
+}
+
+.legacy-theme .sell-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+.legacy-theme .sell-input:hover {
+    border-color: var(--text-muted);
+}
+
+.legacy-theme .sell-input:focus {
+    border-color: var(--brand-300);
+    box-shadow: none;
+}
+
+.legacy-theme .sell-input[aria-invalid="true"] {
+    border-color: var(--danger);
+}
+
+.legacy-theme .sell-input--vin {
+    font-size: 19px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.legacy-theme .sell-input--vin::placeholder {
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.legacy-theme .sell-select {
+    appearance: none;
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%2394A69C' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    cursor: pointer;
+}
+
+.legacy-theme .sell-textarea {
+    min-height: 104px;
+    resize: vertical;
+}
+
+/* A unit inside the box: "miles" after the number, "$" before the price. */
+.legacy-theme .sell-affix {
+    position: relative;
+}
+
+.legacy-theme .sell-affix .sell-input {
+    padding-right: 72px;
+}
+
+.legacy-theme .sell-affix--before .sell-input {
+    padding-right: 16px;
+    padding-left: 36px;
+}
+
+.legacy-theme .sell-affix-after,
+.legacy-theme .sell-affix-before {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.legacy-theme .sell-affix-after {
+    right: 16px;
+}
+
+.legacy-theme .sell-affix-before {
+    left: 16px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-error {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--danger);
+}
+
+.legacy-theme .sell-error:focus {
+    outline: none;
+}
+
+/* A quiet action in words: still 44px tall to tap. */
+.legacy-theme .sell-link {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--brand-300);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.legacy-theme .sell-link:hover {
+    color: var(--brand-200);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 24px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        background-color 0.18s ease-out,
+        border-color 0.18s ease-out,
+        transform 0.18s ease-out;
+}
+
+.legacy-theme .sell-btn--primary {
+    background: var(--cta-bg);
+    color: var(--cta-fg);
+}
+
+.legacy-theme .sell-btn--primary:hover {
+    background: var(--cta-bg-hover);
+    color: var(--cta-fg);
+}
+
+.legacy-theme .sell-btn--outline {
+    border-color: var(--border-strong);
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-btn--outline:hover {
+    border-color: var(--brand-300);
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-btn:active {
+    transform: translateY(1px);
+}
+
+.legacy-theme .sell-btn--wide {
+    width: 100%;
+}
+
+.legacy-theme .sell-btn--small {
+    min-height: 44px;
+    padding: 0 18px;
+    font-size: 15px;
+}
+
+.legacy-theme .sell-btn[disabled] {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.legacy-theme .sell-page :is(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.legacy-theme .sell-page .sell-input:focus-visible {
+    outline-offset: 2px;
+    border-radius: 14px;
+}
+
+.legacy-theme .sell-actions {
+    display: grid;
+    gap: 10px;
+}
+
+/* Scrolled to after an answer from the server: clear of the fixed header
+   above and the phone's tab bar below (--tabbar-h, refine.css). */
+.legacy-theme .sell-form :is(.sell-btn, input, select, textarea) {
+    scroll-margin-top: 96px;
+    scroll-margin-bottom: calc(var(--tabbar-h, 0px) + 16px);
+}
+
+/* ── The car, by its VIN ──────────────────────────────────────────────── */
+
+.legacy-theme .sell-found {
+    display: grid;
+    gap: 12px;
+    padding: 18px 16px;
+    border: 1px solid color-mix(in srgb, var(--brand-300) 45%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--brand-300) 7%, var(--surface-0));
+}
+
+.legacy-theme .sell-found-title {
+    display: grid;
+    gap: 6px;
+}
+
+.legacy-theme .sell-found-title:focus {
+    outline: none;
+}
+
+.legacy-theme .sell-found-ask {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-found-car {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(24px, 6.4vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-found-vin,
+.legacy-theme .sell-chosen-vin {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .sell-found-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.legacy-theme .sell-chosen {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    column-gap: 12px;
+    padding: 14px 16px 4px;
+    border: 1px solid color-mix(in srgb, var(--brand-300) 45%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--brand-300) 7%, var(--surface-0));
+}
+
+.legacy-theme .sell-chosen > i {
+    margin-top: 2px;
+    font-size: 20px;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-chosen-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.legacy-theme .sell-chosen-car {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-chosen .sell-error {
+    margin-bottom: 10px;
+}
+
+/* ── Answers to tap ───────────────────────────────────────────────────── */
+
+.legacy-theme .sell-group {
+    display: block;
+}
+
+.legacy-theme .sell-group-legend {
+    margin-bottom: 10px;
+}
+
+.legacy-theme .sell-group .sell-hint {
+    margin: -4px 0 10px;
+}
+
+.legacy-theme .sell-group .sell-error {
+    margin-top: 10px;
+}
+
+.legacy-theme .sell-options {
+    display: grid;
+    gap: 10px;
+}
+
+.legacy-theme .sell-options--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.legacy-theme .sell-options--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+/* The whole card is the radio button: the real one, unseen, covers it, so
+   a tap anywhere on the card chooses it. */
+.legacy-theme .sell-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 56px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    background: var(--surface-0);
+    cursor: pointer;
+    transition:
+        border-color 0.18s ease-out,
+        background-color 0.18s ease-out;
+}
+
+.legacy-theme .sell-option:hover {
+    border-color: var(--text-muted);
+}
+
+.legacy-theme .sell-option input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.legacy-theme .sell-option-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.legacy-theme .sell-option-text strong {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-option-text small {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+.legacy-theme .sell-dot {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-strong);
+    border-radius: 999px;
+    transition:
+        border-color 0.18s ease-out,
+        box-shadow 0.18s ease-out;
+}
+
+.legacy-theme .sell-option--compact {
+    justify-content: center;
+    padding: 12px 4px;
+    text-align: center;
+}
+
+/* "WhatsApp" and "Not sure" fit three to a row on a 320px phone. */
+.legacy-theme .sell-option--compact .sell-option-text strong {
+    font-size: clamp(13px, 4.1vw, 16px);
+}
+
+.legacy-theme .sell-tick {
+    position: absolute;
+    top: 7px;
+    right: 9px;
+    font-size: 11px;
+    color: var(--brand-300);
+    opacity: 0;
+}
+
+.legacy-theme .sell-option:has(input:checked) {
+    border-color: var(--brand-300);
+    background: color-mix(in srgb, var(--brand-300) 10%, var(--surface-0));
+}
+
+.legacy-theme .sell-option:has(input:checked) .sell-option-text strong {
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-option:has(input:checked) .sell-dot {
+    border-color: var(--brand-300);
+    background: var(--brand-300);
+    box-shadow: inset 0 0 0 4px var(--surface-0);
+}
+
+.legacy-theme .sell-option:has(input:checked) .sell-tick {
+    opacity: 1;
+}
+
+.legacy-theme .sell-option:has(input:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.legacy-theme .sell-photos {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-photos i {
+    color: var(--brand-300);
+}
+
+/* ── Answers to Send ──────────────────────────────────────────────────── */
+
+.legacy-theme .sell-messages {
+    display: grid;
+    gap: 12px;
+}
+
+.legacy-theme .sell-messages:empty {
+    display: none;
+}
+
+.legacy-theme .sell-alert {
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--danger) 8%, var(--surface-0));
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-alert-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ── Sent ─────────────────────────────────────────────────────────────── */
+
+.legacy-theme .sell-done {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    padding: 28px 20px;
+    border-color: color-mix(in srgb, var(--brand-300) 45%, transparent);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--brand-300) 10%, var(--surface-1)) 0%,
+        var(--surface-1) 70%
+    );
+    scroll-margin-top: 90px;
+}
+
+.legacy-theme .sell-done-icon {
+    font-size: 40px;
+    color: var(--brand-300);
+}
+
+.legacy-theme .sell-done-title {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(28px, 7.5vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.06;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-done-title:focus {
+    outline: none;
+}
+
+.legacy-theme .sell-done-text {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-done-ref {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sell-done-ref strong {
+    margin-left: 4px;
+    font-size: 20px;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sell-done-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+/* ── Wider screens ────────────────────────────────────────────────────── */
+
+@media (min-width: 600px) {
+    .legacy-theme .sell-page {
+        padding: 40px 24px 64px;
+    }
+
+    .legacy-theme .sell-panel {
+        padding: 28px 28px 32px;
+    }
+
+    .legacy-theme .sell-how {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .legacy-theme .sell-how li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .legacy-theme .sell-found-actions,
+    .legacy-theme .sell-done-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 960px) {
+    .legacy-theme .sell-page {
+        padding: 64px 32px 96px;
+    }
+
+    .legacy-theme .sell-wrap {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+        gap: 64px;
+        align-items: start;
+    }
+
+    /* The promise and the warning stay in view beside a long step. */
+    .legacy-theme .sell-intro {
+        position: sticky;
+        top: 110px;
+    }
+
+    .legacy-theme .sell-how {
+        grid-template-columns: 1fr;
+    }
+
+    .legacy-theme .sell-how li {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .sell-page *,
+    .legacy-theme .sell-page *::before,
+    .legacy-theme .sell-page *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
