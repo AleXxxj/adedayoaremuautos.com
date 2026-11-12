@@ -4398,8 +4398,14 @@
 
 /* The highlighted words in a page title ("Check any car", "Earn 5%.") were a
    dark green gradient clipped to the text, unreadable on the dark photos
-   behind most page headers. Solid --brand-300 instead. */
-.legacy-theme .page-header h1 span {
+   behind most page headers. Solid --brand-300 instead, and the same for the
+   other headings that used that gradient (the newsletter's "Newsletter", a
+   car page's title, an article's title, the legal pages). */
+.legacy-theme .page-header h1 span,
+.legacy-theme .newsletter-content h2 span,
+.legacy-theme .car-info h1 span,
+.legacy-theme .post-header h1 span,
+.legacy-theme .legal-page .page-hero h1 span {
     background: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;

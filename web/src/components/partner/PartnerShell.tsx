@@ -40,9 +40,9 @@ export function PartnerShell({
 /**
  * The logo and the business name, back to the public site.
  *
- * The logo file is mostly transparent margin around the mark, so it is
- * cropped to the mark rather than shown whole at a size where the letters
- * would be too small to read. `compact` is for a row it shares with a
+ * The trimmed mark (logo-mark.png), the same file the site header uses: the
+ * original logo.png is mostly transparent margin, which made the letters
+ * too small to read. `compact` is for a row it shares with a
  * button: below 360px the name is left to screen readers, rather than
  * folded into three lines beside it.
  */
@@ -53,12 +53,12 @@ export function PartnerBrand({ href = "/us", compact = false }: { href?: string;
       className="inline-flex min-h-[44px] min-w-0 items-center gap-2 rounded-lg text-text-primary"
     >
       <Image
-        src="/img/logo.png"
+        src="/img/logo-mark.png"
         alt=""
-        width={1536}
-        height={1024}
-        sizes="72px"
-        className="h-[30px] w-[72px] shrink-0 object-cover"
+        width={431}
+        height={160}
+        sizes="81px"
+        className="h-[30px] w-auto shrink-0"
       />
       <span
         className={`min-w-0 font-[family-name:var(--font-space-grotesk)] text-[15px] font-bold leading-tight tracking-tight ${
