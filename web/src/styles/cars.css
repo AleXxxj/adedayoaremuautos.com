@@ -1782,3 +1782,24 @@
         gap: 24px;
     }
 }
+
+/* A sold car's page: says so before anything else, in gold (it is about money
+   changing hands), and offers the list instead of a way to buy. */
+.legacy-theme .cd-sold {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 12px;
+    padding: 8px 14px;
+    border: 1px solid var(--accent-500);
+    border-radius: 999px;
+    color: var(--accent-400);
+    font-weight: 700;
+}
+.legacy-theme .cd-sold-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    margin-top: 16px;
+}

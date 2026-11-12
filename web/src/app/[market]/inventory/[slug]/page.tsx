@@ -184,7 +184,9 @@ export default async function CarDetailPage({
             availability:
               v.status === "available"
                 ? "https://schema.org/InStock"
-                : "https://schema.org/LimitedAvailability",
+                : v.status === "sold"
+                  ? "https://schema.org/SoldOut"
+                  : "https://schema.org/LimitedAvailability",
             // Ties the listing to the dealership described on the homepage,
             // so the two are one entity to a search engine rather than a
             // business and an unrelated car that happens to share a site.
@@ -232,6 +234,7 @@ export default async function CarDetailPage({
   const description = v.description?.trim() ?? "";
 
   // ── Renting it instead ──────────────────────────────────────────────────
+  const sold = v.status === "sold";
   const rentFrom = rental?.bookable
     ? rental.tariff.weeklyMinor != null
       ? `${fmtMinor(rental.tariff.weeklyMinor)} a week`
@@ -283,6 +286,15 @@ export default async function CarDetailPage({
               <SaveButton market={code} slug={v.slug} name={title} variant="pill" />
             </div>
 
+            {/* A sold car keeps its page (people arrive from old links and
+                search results), but says so first and offers nothing to buy. */}
+            {sold && (
+              <p className="cd-sold">
+                <i className="fas fa-circle-check" aria-hidden="true" />
+                Sold. This car has found its owner.
+              </p>
+            )}
+
             {(facts.length > 0 || v.status === "pending") && (
               <ul className="cd-facts">
                 {v.status === "pending" && (
@@ -301,16 +313,16 @@ export default async function CarDetailPage({
             )}
 
             <p className="cd-price">
-              <span className="cd-price-label">Price</span>
+              <span className="cd-price-label">{sold ? "Was listed at" : "Price"}</span>
               <strong>{price ? fmt(price) : "Price on request"}</strong>
-              {from && (
+              {from && !sold && (
                 <span className="cd-price-sub">
                   Finance from {fmt(from)}/mo over {market.financing.termMonths.at(-1)} months
                 </span>
               )}
             </p>
 
-            {rentFrom && (
+            {rentFrom && !sold && (
               <Link href={`/${code}/rentals/${v.slug}`} className="cd-also">
                 Or rent it from {rentFrom}
                 <i className="fas fa-chevron-right" aria-hidden="true" />
@@ -318,6 +330,11 @@ export default async function CarDetailPage({
             )}
 
             {/* 3. Call · Ask · I'm interested: pinned to the bottom on a phone */}
+            {sold ? (
+              <Link href={`/${code}/inventory`} className="btn btn-primary cd-sold-next">
+                See cars for sale now
+              </Link>
+            ) : (
             <ContactBar
               market={code}
               slug={v.slug}
@@ -330,6 +347,7 @@ export default async function CarDetailPage({
               assistant={assistantOn}
               whatsapp={whatsapp}
             />
+            )}
           </section>
 
           {/* 2. Photos */}
@@ -388,6 +406,7 @@ export default async function CarDetailPage({
             )}
 
             {/* 7. Paying for it: cards that open, instead of tabs of forms */}
+            {!sold && (
             <section className="cd-section" aria-labelledby="cd-pay">
               <h2 className="cd-h" id="cd-pay">
                 Paying for it
@@ -474,6 +493,7 @@ export default async function CarDetailPage({
                 )}
               </div>
             </section>
+            )}
 
             {/* 8. Never the VIN in the link: the check page asks for it. */}
             {code === "us" && (
