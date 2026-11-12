@@ -42,9 +42,9 @@ const HOME_SEO: Record<
   },
   ng: {
     title:
-      "Adedayo Aremu Autos | Cars for Sale, Rental & Rent-to-Own in Nigeria",
+      "Adedayo Aremu Autos | Cars for Sale, Rental & Financing in Nigeria",
     description:
-      "Adedayo Aremu Autos sells, rents and finances quality vehicles in Nigeria. Browse available cars, book a rental with or without a driver, or apply for rent-to-own.",
+      "Adedayo Aremu Autos sells, rents and finances quality vehicles in Nigeria. Browse available cars, book a rental with or without a driver, or apply for financing.",
   },
 };
 

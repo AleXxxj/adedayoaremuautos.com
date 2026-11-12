@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatRange, parseTstzRange } from "@/lib/pgRange";
 import { notFound } from "next/navigation";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { getFleetVehicle, bookedWindows } from "@/lib/repositories/rentals";
 import { listLocations } from "@/lib/repositories/locations";
@@ -21,16 +21,6 @@ import { providerConfigured, providerFor } from "@/lib/payments/provider";
  * the page falls back on when the database cannot be reached at all.
  */
 export const revalidate = 300;
-
-/*
- * Edge to edge on phones with a notch or a home indicator, on this page only.
- *
- * The booking form pins its price and its button to the bottom of a phone's
- * screen; without "cover" there is no env(safe-area-inset-bottom) to keep
- * them clear of the home indicator. Next keeps width=device-width and
- * initial-scale=1 beside it. Zoom is never limited.
- */
-export const viewport: Viewport = { viewportFit: "cover" };
 
 export async function generateMetadata({
   params,

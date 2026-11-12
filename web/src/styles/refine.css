@@ -4321,7 +4321,6 @@ html:has(.legacy-theme .booking-form) { scroll-padding-top: 104px; }
     .legacy-theme .booking-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 880; margin: 0; padding: 10px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: rgba(10, 10, 10, 0.97); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45); transition: transform 0.18s ease; }
     .legacy-theme:has(.booking-bar) { padding-bottom: var(--booking-bar-h, 72px); }
     html:has(.legacy-theme .booking-bar) { scroll-padding-top: 88px; scroll-padding-bottom: calc(var(--booking-bar-h, 72px) + 16px); }
-    .legacy-theme:has(.booking-bar) .back-to-top { display: none; }
     .legacy-theme:has(.booking-bar) .assistant-launcher:not(.is-open) { bottom: calc(var(--booking-bar-h, 72px) + 12px); }
     .legacy-theme:has(.booking-bar) .country-notification { bottom: calc(var(--booking-bar-h, 72px) + 12px); }
 }
