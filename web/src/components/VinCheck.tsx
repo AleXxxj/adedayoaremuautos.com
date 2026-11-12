@@ -11,7 +11,15 @@ import {
 import type { ComplaintSummary, CrashRatings, DecodedVin, ModelRecall, RatedVersion } from "@/lib/vin/nhtsa";
 import type { CarPhoto } from "@/lib/vin/photo";
 import type { RecallText } from "@/lib/vin/recallPlain";
-import { airBagsLine, bodyShape, factLines, safetyItems, summaryLine } from "@/lib/vin/features";
+import {
+  airBagsLine,
+  bodyShape,
+  confirmFacts,
+  factLines,
+  safetyItems,
+  summaryLine,
+  type Fact,
+} from "@/lib/vin/features";
 import { aOrAn, brand, cleanModel, freeFix, joinAnd, recallPart, titleCase } from "@/lib/vin/plain";
 import { useHydrated } from "@/lib/useHydrated";
 import { CarShape } from "@/components/CarShape";
@@ -211,6 +219,9 @@ export function VinCheck({
 
   if (view.step === "confirm") {
     const { looked } = view;
+    // The results' own facts, as the same icon list: body, seats, engine,
+    // transmission, drive and where it was built, as far as NHTSA has them.
+    const facts = confirmFacts(looked.car, locale);
     return (
       <div className="vc-card vc-confirm">
         <CarPicture photo={looked.photo} car={looked.car} />
@@ -218,19 +229,23 @@ export function VinCheck({
         <h2 className="vc-car" ref={heading} tabIndex={-1}>
           {carName(looked.car)}
         </h2>
-        <p className="vc-facts">
-          {/* In the results' words; the decode's own fields if it has no details. */}
-          {summaryLine(looked.car) ??
-            [
-              looked.car.body,
-              // An electric car has no engine size; its fuel says what it runs on.
-              looked.car.engine ?? looked.car.fuel,
-              looked.car.drive,
-              looked.car.builtIn && `Built in ${country(looked.car.builtIn)}`,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-        </p>
+        {facts.length >= 2 ? (
+          <FactList facts={facts} compact />
+        ) : (
+          <p className="vc-facts">
+            {/* A decode with almost nothing in it: one line, from its own fields if it has no details. */}
+            {summaryLine(looked.car) ??
+              [
+                looked.car.body,
+                // An electric car has no engine size; its fuel says what it runs on.
+                looked.car.engine ?? looked.car.fuel,
+                looked.car.drive,
+                looked.car.builtIn && `Built in ${country(looked.car.builtIn)}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+          </p>
+        )}
         {looked.warning && <p className="vc-warn">{looked.warning}</p>}
 
         <div className="vc-actions">
@@ -297,16 +312,19 @@ export function VinCheck({
 
 /**
  * A photo of the model from Wikimedia Commons, with the credit its license
- * asks for, or a drawing of the body shape when there is none.
+ * asks for. When there is none, a small plain outline of the body shape and
+ * the words "No photo of this model yet": a placeholder that says so, not a
+ * picture standing in for the car.
  */
 function CarPicture({ photo, car }: { photo: CarPhoto | null | undefined; car: DecodedVin }) {
   // A photo that doesn't load (Wikimedia or the resizer unreachable) gives
-  // way to the drawing, rather than a broken image with a credit under it.
+  // way to the placeholder, rather than a broken image with a credit under it.
   const [failed, setFailed] = useState<string | null>(null);
   if (!photo || failed === photo.src) {
     return (
-      <div className="vc-photo vc-photo--drawn">
+      <div className="vc-photo vc-photo--none">
         <CarShape shape={bodyShape(car)} />
+        <p className="vc-nophoto">No photo of this model yet</p>
       </div>
     );
   }
@@ -363,10 +381,17 @@ function Unloaded({
 
 /** One short line each: body, seats, engine, transmission, drive, fuel, plant, trims, price. */
 function Facts({ car, locale }: { car: DecodedVin; locale: string }) {
-  const facts = factLines(car, locale);
+  return <FactList facts={factLines(car, locale)} />;
+}
+
+/**
+ * An icon, a small label and one short line for each fact. `compact` is the
+ * list on "Is this the car?": two to a row at every width, closer together.
+ */
+function FactList({ facts, compact = false }: { facts: Fact[]; compact?: boolean }) {
   if (facts.length === 0) return null;
   return (
-    <ul className="vc-factgrid" aria-label="About this car">
+    <ul className={`vc-factgrid${compact ? " vc-factgrid--compact" : ""}`} aria-label="About this car">
       {facts.map((f) => (
         <li key={f.key}>
           <span className="vc-fact-label">
@@ -618,6 +643,13 @@ function Results({
         <h3 className="vc-h" id="vc-exact">
           Check this exact car
         </h3>
+        {/* Asked for by name: can the check show accidents? It can't. Those
+            records belong to insurers and to paid history services; what the
+            official ones below hold is theft, total-loss and title records. */}
+        <p className="vc-facts">
+          Accident and title history aren&rsquo;t free anywhere. These official services have the theft,
+          total-loss and title records.
+        </p>
         <p className="vc-facts">
           These sites run their own checks, not Adedayo Aremu Autos. Tap Copy VIN, then paste it on their site.
         </p>
@@ -1101,6 +1133,15 @@ function Recalls({
       <h3 className="vc-h" id="vc-recalls" tabIndex={-1}>
         Recalls for this model
       </h3>
+      {/* What a recall is, for someone who has never met the word: said
+          once, under the heading, whether or not the model has any. */}
+      <p className="vc-explain">
+        <i className="fas fa-circle-info" aria-hidden="true" />
+        <span>
+          A recall means the maker found a safety problem and has to fix it for free. A used car can still
+          have one that was never fixed.
+        </span>
+      </p>
       {list.length === 0 ? (
         <p>
           NHTSA lists no recalls for the {model}. To be sure about this exact car, check its VIN at{" "}

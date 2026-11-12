@@ -4,8 +4,10 @@ import { PERSONA } from "@/lib/ai/persona";
 import { openAssistant } from "@/lib/openAssistant";
 
 /**
- * "Not sure where to start? Ask Ayo" under the hero's buttons. The page shows
- * it only when the assistant is switched on, and the call link otherwise.
+ * "Not sure where to start? Ask Miles" under the hero's buttons, with the
+ * assistant's name taken from PERSONA. The page shows it only when the
+ * assistant is switched on, and the call link otherwise. Silver words with
+ * the part to press in white and underlined (home.css, .hh-link).
  */
 export function AskAyo({ className }: { className: string }) {
   return (

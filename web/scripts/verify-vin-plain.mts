@@ -58,6 +58,23 @@ const VIN = "5TDJZRFH1HS390174";
 const decode = fixture<Record<string, unknown>>("highlander-decode.json");
 const highlander = n.summarizeDecode(decode);
 
+/**
+ * Cars NHTSA's decoder names by class or series, as vPIC answered for each
+ * model's VIN pattern (Nov 2026; a pattern, never anyone's VIN).
+ */
+const SUV = "Sport Utility Vehicle [SUV]/Multipurpose Vehicle [MPV]";
+const ML350 = {
+  ModelYear: "2013", Make: "MERCEDES-BENZ", Model: "ML-Class", Trim: "ML350 4-MATIC", BodyClass: SUV, Doors: "4",
+  DisplacementL: "3.50", EngineCylinders: "6", EngineConfiguration: "V-Shaped", DriveType: "AWD/All-Wheel Drive",
+  FuelTypePrimary: "Gasoline", PlantCity: "VANCE", PlantCountry: "UNITED STATES (USA)",
+};
+const GLE350 = { ModelYear: "2016", Make: "MERCEDES-BENZ", Model: "GLE-Class", Trim: "GLE350", BodyClass: SUV, Doors: "4" };
+const C300 = { ModelYear: "2015", Make: "MERCEDES-BENZ", Model: "C-Class", Trim: "C300", BodyClass: "Sedan/Saloon", Doors: "4" };
+const C_4MATIC = { ...C300, Trim: "4-MATIC" };
+const BMW_328I = { ModelYear: "2014", Make: "BMW", Model: "328i", Series: "3-Series", BodyClass: "Sedan/Saloon", Doors: "4" };
+const RX350 = { ModelYear: "2018", Make: "LEXUS", Model: "RX", Trim: "350/350 F Sport", BodyClass: SUV, Doors: "4" };
+const X5 = { ModelYear: "2015", Make: "BMW", Model: "X5", Trim: "xDrive35i", BodyClass: SUV, Doors: "4" };
+
 /* ── Facts ────────────────────────────────────────────────────────────── */
 console.log("\nPlain facts from the VIN decode (2017 Highlander)");
 {
@@ -146,6 +163,34 @@ console.log("\nPlain facts from the VIN decode (2017 Highlander)");
     { name: "Anti-lock brakes", optional: false },
     { name: "Blind spot warning", optional: true },
   ]);
+
+  // "Is this the car?" shows the results' own facts as a short list.
+  eq(
+    "the confirm step lists the results' facts: gas is left out next to an engine, and so are the trims and the price",
+    f.confirmFacts(highlander).map((x) => `${x.label}: ${x.text}`),
+    ["Body: SUV · 5 doors", "Seats: 7 seats in 3 rows", "Engine: 3.5L V6 · 295 hp", "Transmission: 8-speed automatic", "Drive: 4-wheel drive", "Built in: Princeton, Indiana"],
+  );
+  check(
+    "every fact on the confirm step is word for word a fact on the results",
+    f.confirmFacts(highlander).every((c) => f.factLines(highlander).some((r) => r.key === c.key && r.text === c.text && r.icon === c.icon)),
+  );
+  eq("a hybrid is named on the confirm step", f.confirmFacts(n.summarizeDecode({ ModelYear: "2021", Make: "X", Model: "Y", DisplacementL: "2.5", EngineCylinders: "4", ElectrificationLevel: "Strong HEV (Hybrid Electric Vehicle)", FuelTypePrimary: "Gasoline" })).map((x) => x.text), ["2.5L 4-cylinder", "Hybrid"]);
+  eq("and an electric car, which has no engine size", f.confirmFacts(n.summarizeDecode({ ModelYear: "2021", Make: "X", Model: "Y", FuelTypePrimary: "Electric", ElectrificationLevel: "BEV (Battery Electric Vehicle)" })).map((x) => `${x.label}: ${x.text}`), ["Motor: Electric motor", "Fuel: Electric"]);
+
+  // The developer's car: a 2013 ML350, as vPIC decodes one (Nov 2026). It
+  // gives the plant's city and no state, and no seats or transmission.
+  const ml = n.summarizeDecode(ML350);
+  eq(
+    "a U.S. plant vPIC gives no state for gets its state: \"Vance\" means nothing, \"Vance, Alabama\" does",
+    f.confirmFacts(ml).map((x) => `${x.label}: ${x.text}`),
+    ["Body: SUV · 4 doors", "Engine: 3.5L V6", "Drive: All-wheel drive", "Built in: Vance, Alabama"],
+  );
+  eq("the results say the same", text(f.factLines(ml), "built"), "Vance, Alabama");
+  eq("the state is worked out when shown, so a decode already cached gets it", ml.details.plant, { city: "Vance", state: null, country: "United States" });
+  eq("vPIC's own state is kept", text(as({ PlantCity: "VANCE", PlantState: "ALABAMA", PlantCountry: "UNITED STATES (USA)" }), "built"), "Vance, Alabama");
+  eq("a city the list doesn't have stays a city alone", text(as({ PlantCity: "SPRINGFIELD", PlantCountry: "UNITED STATES (USA)" }), "built"), "Springfield");
+  eq("a city of the same name abroad gets no U.S. state", text(as({ PlantCity: "LINCOLN", PlantCountry: "CANADA" }), "built"), "Lincoln, Canada");
+  eq("Kansas City is in two states, so it gets neither", text(as({ PlantCity: "KANSAS CITY", PlantCountry: "UNITED STATES (USA)" }), "built"), "Kansas City");
 }
 
 /* ── Recalls without AI ───────────────────────────────────────────────── */
@@ -479,6 +524,109 @@ console.log("\nA photo of the model from Wikimedia Commons");
   eq("names to search: a truck's series first", ph.photoNames("Silverado", "1500"), ["Silverado 1500", "Silverado"]);
   eq("a model without its note", ph.photoNames("RAV4 Prime (PHEV)", null), ["RAV4 Prime"]);
   eq("a model named two ways", ph.photoNames("Caravan/Grand Caravan", null), ["Caravan", "Grand Caravan"]);
+
+  // Makes that sell a class under badges. NHTSA calls a 2013 ML350 an
+  // "ML-Class"; photographers name their files "ML350", "ML 350" or "M-Class".
+  const namesOf = (v: Record<string, string>) => {
+    const car = n.summarizeDecode(v);
+    return ph.photoNames(car.model!, car.series, car.names, car.fit.words);
+  };
+  const badgeOf = (v: Record<string, string>) => {
+    const car = n.summarizeDecode(v);
+    return ph.ownBadge(car.model!, car.names, car.fit.words);
+  };
+  eq("an ML350: its badge, any ML, then the class as Commons spells it", namesOf(ML350), ["ML350", "ML-Class", "M-Class"]);
+  eq("a GLE350: its badge, then its class", namesOf(GLE350), ["GLE350", "GLE-Class"]);
+  eq("a C300: its badge, then its class", namesOf(C300), ["C300", "C-Class"]);
+  eq("a C-Class whose VIN names no badge: the class alone, none of the badges NHTSA's recalls are tried under", namesOf(C_4MATIC), ["C-Class"]);
+  eq("a BMW 328i: the badge that is its model, then its series", namesOf(BMW_328I), ["328i", "3 Series"]);
+  eq("a Lexus RX with trim \"350\": the badge, then the model", namesOf(RX350), ["RX350", "RX"]);
+  eq("a drive name with digits is not a badge", namesOf(X5), ["X5"]);
+  eq("the badge is the one NHTSA's names and the trim agree on", [ML350, GLE350, C300, C_4MATIC, BMW_328I, RX350, X5, decode as Record<string, string>].map(badgeOf), ["ML350", "GLE350", "C300", null, null, "RX350", null, null]);
+  eq("the badges come from nhtsaModelNames, not from a second reading of the trim", n.summarizeDecode(ML350).names, ["ML-Class", "ML350"]);
+
+  const asked = (model: string) => new URL(ph.searchUrl(2016, "Mercedes-Benz", model)).searchParams.get("gsrsearch");
+  eq("a badge is asked for as written", asked("GLE350"), 'intitle:"2016 Mercedes-Benz GLE350"');
+  eq("a class is asked for by its letters, which finds \"GLE 350 d\", \"GLE 250\" and \"GLE-Class\"", asked("GLE-Class"), 'intitle:"2016 Mercedes-Benz GLE"');
+  eq("the M-Class by its own letter", asked("M-Class"), 'intitle:"2016 Mercedes-Benz M"');
+
+  // Commons' real replies (Nov 2026), saved as fixtures.
+  const mlReply = fixture<Reply>("commons-2013-mercedes-benz-ml350.json");
+  const gleReply = fixture<Reply>("commons-2016-mercedes-benz-gle.json");
+  const mlWant = { series: null, shape: "suv" as const, words: n.summarizeDecode(ML350).fit.words, badge: "ML350" };
+  const mlPhoto = ph.pickPhoto(mlReply, 2013, "Mercedes-Benz", "ML350", mlWant);
+  eq(
+    "the ML350's photo: filed as \"ML 350\", and an SUV an Australian calls a wagon",
+    mlPhoto && { title: mlPhoto.title, model: mlPhoto.model, photoYear: mlPhoto.photoYear, license: mlPhoto.license, artist: mlPhoto.artist },
+    { title: "2013 Mercedes-Benz ML 350 (W 166) BlueTEC wagon (2014-10-02)", model: "ML350", photoYear: 2013, license: "CC BY-SA 4.0", artist: "EurovisionNim" },
+  );
+  eq("the same file under the class name", ph.pickPhoto(mlReply, 2013, "Mercedes-Benz", "ML-Class", mlWant)?.title, "2013 Mercedes-Benz ML 350 (W 166) BlueTEC wagon (2014-10-02)");
+  eq("a sedan is still not a wagon", pick("2015 Subaru Legacy wagon", 2015, "Subaru", "Legacy", { shape: "sedan" }), null);
+
+  const gleWant = { series: null, shape: "suv" as const, words: ["GLE350"], badge: "GLE350" };
+  const glePhoto = ph.pickPhoto(gleReply, 2016, "Mercedes-Benz", "GLE-Class", gleWant);
+  eq(
+    "among a class's photos the car's own badge comes first, ahead of a front view of another",
+    glePhoto && { title: glePhoto.title, model: glePhoto.model },
+    { title: "2016 Mercedes-Benz GLE 350 d (W 166) wagon (2016-03-05) 01", model: "GLE350" },
+  );
+  const anyGle = ph.pickPhoto(gleReply, 2016, "Mercedes-Benz", "GLE-Class", { ...gleWant, words: [], badge: null });
+  eq(
+    "with no badge, a plain car before an AMG one, and it is credited as the class",
+    anyGle && { title: anyGle.title, model: anyGle.model },
+    { title: "2016 Mercedes-Benz GLE 350 d (W 166) wagon (2016-03-05) 01", model: "GLE-Class" },
+  );
+  eq(
+    "an AMG car gets the AMG photo's front view",
+    ph.pickPhoto(gleReply, 2016, "Mercedes-Benz", "GLE-Class", { ...gleWant, words: ["AMG"], badge: null })?.title,
+    "2016 Mercedes-Benz GLE 250 Diesel 4MATIC AMG Line Premium 2.1 Front",
+  );
+  check(
+    "the fixture's rear view and its nearly square photo are never chosen",
+    [gleWant, { ...gleWant, badge: null }, { ...gleWant, words: ["AMG"], badge: null }].every((w) => {
+      const t = ph.pickPhoto(gleReply, 2016, "Mercedes-Benz", "GLE-Class", w)?.title ?? "";
+      return !/Rear/.test(t) && t !== "2016 Mercedes-Benz GLE 350";
+    }),
+  );
+  eq("a class is not a longer class: a CLA is not a C-Class", pick("2015 Mercedes-Benz CLA 250", 2015, "Mercedes-Benz", "C-Class", { shape: "sedan" }), null);
+  eq("but a C 200 is", pick("2015 Mercedes-Benz C 200 (W 205) sedan", 2015, "Mercedes-Benz", "C-Class", { shape: "sedan" }), "2015 Mercedes-Benz C 200 (W 205) sedan");
+  eq("and so is a C300, written together", pick("2014 Mercedes-Benz C300 4Matic, Front Left", 2014, "Mercedes-Benz", "C-Class", { shape: "sedan" }), "2014 Mercedes-Benz C300 4Matic, Front Left");
+  eq("a C-Class coupe is not the sedan", pick("2015 Mercedes-Benz C 63 AMG (C204) Edition 507 coupe", 2015, "Mercedes-Benz", "C-Class", { shape: "sedan" }), null);
+  eq("a name may be written with or without its hyphen or space", [pick("2019 Ford F150 XLT", 2019, "Ford", "F-150", { shape: "pickup" }), pick("2018 Lexus RX 350 F Sport", 2018, "Lexus", "RX350")], ["2019 Ford F150 XLT", "2018 Lexus RX 350 F Sport"]);
+  eq("a longer number is another model", pick("2018 Lexus RX 3500", 2018, "Lexus", "RX350"), null);
+
+  // End to end: the developer's ML350, which showed a drawing before.
+  {
+    const mlSeen: string[] = [];
+    ph.__setPhotoFetchForTests(async (input) => {
+      const search = new URL(String(input)).searchParams.get("gsrsearch") ?? "";
+      mlSeen.push(search);
+      return json(search === 'intitle:"2013 Mercedes-Benz ML350"' ? mlReply : search === 'intitle:"2016 Mercedes-Benz GLE"' ? gleReply : { batchcomplete: "" });
+    });
+    const gotMl = await ph.carPhotoUncached(n.summarizeDecode(ML350));
+    check("the 2013 ML350 gets a photo of a 2013 ML 350", gotMl?.title === "2013 Mercedes-Benz ML 350 (W 166) BlueTEC wagon (2014-10-02)" && gotMl.model === "ML350" && gotMl.photoYear === 2013, gotMl);
+    eq("in one request", mlSeen, ['intitle:"2013 Mercedes-Benz ML350"']);
+
+    mlSeen.length = 0;
+    const gotGle = await ph.carPhotoUncached(n.summarizeDecode(GLE350));
+    check("the 2016 GLE350, filed nowhere as \"GLE350\", gets a GLE 350 from its class", gotGle?.title === "2016 Mercedes-Benz GLE 350 d (W 166) wagon (2016-03-05) 01" && gotGle.model === "GLE350", gotGle);
+    eq("the badge first, then the class", mlSeen, ['intitle:"2016 Mercedes-Benz GLE350"', 'intitle:"2016 Mercedes-Benz GLE"']);
+
+    mlSeen.length = 0;
+    ph.__setPhotoFetchForTests(async (input) => {
+      mlSeen.push(new URL(String(input)).searchParams.get("gsrsearch") ?? "");
+      return json({ batchcomplete: "" });
+    });
+    check("an ML350 with nothing on Commons is no photo", (await ph.carPhotoUncached(n.summarizeDecode(ML350))) === null);
+    eq(
+      "at most nine requests: three names, three years",
+      mlSeen,
+      ["2013", "2012", "2014"].flatMap((y) => ["ML350", "ML", "M"].map((name) => `intitle:"${y} Mercedes-Benz ${name}"`)),
+    );
+    mlSeen.length = 0;
+    await ph.carPhotoUncached(n.summarizeDecode(C_4MATIC));
+    eq("a class with no badge: three requests", mlSeen, ['intitle:"2015 Mercedes-Benz C"', 'intitle:"2014 Mercedes-Benz C"', 'intitle:"2016 Mercedes-Benz C"']);
+  }
 
   // End to end: the exact year has nothing on Commons, the year before does.
   const seen: { url: URL; ua: string | null }[] = [];

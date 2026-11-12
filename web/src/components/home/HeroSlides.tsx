@@ -13,18 +13,15 @@ import {
   type TouchEvent,
 } from "react";
 import { canResize } from "@/lib/photo";
+import type { HeroSlide } from "./heroDeck";
 
-export interface HeroSlide {
-  src: string;
-  /** "2016 Hyundai Elantra SE" */
-  name: string;
-  /** "$9,500", or null when the car has no published price. */
-  price: string | null;
-  href: string;
-}
+export type { HeroSlide };
 
-/** How long each car is shown. The segment and the zoom run for as long. */
-const SLIDE_MS = 6000;
+/** How long a car is shown. Its segment and its zoom run for as long. */
+const CAR_MS = 6000;
+/** A rent-to-own slide has three short sentences to read, so it stays longer. */
+const OWN_MS = 9000;
+const timeFor = (s: HeroSlide) => (s.kind === "own" ? OWN_MS : CAR_MS);
 
 const REDUCED = "(prefers-reduced-motion: reduce)";
 function subscribeReduced(onChange: () => void) {
@@ -34,13 +31,20 @@ function subscribeReduced(onChange: () => void) {
 }
 
 /**
- * The home page's hero: the cars for sale, one after another, behind the
- * page's first words.
+ * The home page's hero: the cars for sale, one after another, above the
+ * page's first words, with a rent-to-own slide after every second car.
  *
- * Each car shows for six seconds with a slow zoom, then crossfades to the
- * next. A row of thin segments says where the show is, each one a button to
- * its car; the current one fills as its time runs. Swiping across the hero
- * changes car on a phone.
+ * Each slide shows for a few seconds with a slow zoom, then crossfades to
+ * the next. A car slide leaves the standing words in place; a rent-to-own
+ * slide swaps them for its own, over a rental car's photo. Both sets of
+ * words share one grid cell, so the taller one sets the height and the
+ * buttons under them never move.
+ *
+ * Nothing covers the car. The controls are one quiet strip along the bottom
+ * edge of the photo: a row of thin segments, each a button to its slide, the
+ * current one filling as its time runs; a small pause button at the end; and
+ * above the strip's start, the name of the car in the photo as a link to its
+ * page. Swiping across the hero changes slide on a phone.
  *
  * It stops by itself whenever it would be moving for nobody, or in someone's
  * way: while the tab is hidden, while the hero is scrolled out of sight, and
@@ -48,9 +52,13 @@ function subscribeReduced(onChange: () => void) {
  * (WCAG 2.2.2). Someone who asked their system for less motion gets no
  * auto-advance and no zoom; the segments still work.
  *
+ * The words are not a live region: a screen reader is not interrupted every
+ * few seconds, and the pause button is the way to hold a slide. The words
+ * that are not showing are inert, so their link can't be reached unseen.
+ *
  * The advance is driven by the segment's own fill animation ending, so the
- * bar and the change of car can never drift apart, and pausing the animation
- * pauses the show exactly where it was.
+ * bar and the change of slide can never drift apart, and pausing the
+ * animation pauses the show exactly where it was.
  *
  * The first photo is rendered on the server and loaded eagerly at high
  * priority (it is the page's largest image). Each other photo is fetched
@@ -59,12 +67,18 @@ function subscribeReduced(onChange: () => void) {
 export function HeroSlides({
   slides,
   fallback,
+  head,
+  ownHead,
   children,
 }: {
   slides: HeroSlide[];
   /** The photo when there is no car to show. */
   fallback: string;
-  /** The hero's words and buttons, rendered on the server. */
+  /** The standing eyebrow, headline and line, rendered on the server. */
+  head: ReactNode;
+  /** The rent-to-own slide's own eyebrow, headline and line; null when no slide is one. */
+  ownHead: ReactNode | null;
+  /** The buttons and links under the words: the same on every slide. */
   children: ReactNode;
 }) {
   const count = slides.length;
@@ -149,6 +163,7 @@ export function HeroSlides({
 
   const current = slides[index];
   const previous = count > 1 ? (index - 1 + count) % count : -1;
+  const own = Boolean(ownHead) && current?.kind === "own";
 
   return (
     <section
@@ -159,6 +174,7 @@ export function HeroSlides({
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       data-running={running ? "true" : "false"}
+      data-slide={own ? "own" : "car"}
     >
       <div className="hh-photos" aria-hidden="true">
         {count === 0 ? (
@@ -170,9 +186,13 @@ export function HeroSlides({
           slides.map((s, i) =>
             loaded.includes(i) ? (
               <div
-                key={s.href}
+                // By position: a rental car's photo can come round twice.
+                key={i}
                 className={`hh-photo${i === index ? " is-current" : ""}${i === previous ? " is-previous" : ""}`}
-                style={{ animationPlayState: running ? "running" : "paused" }}
+                style={{
+                  animationDuration: `${timeFor(s)}ms`,
+                  animationPlayState: running ? "running" : "paused",
+                }}
               >
                 <Image
                   src={s.src}
@@ -194,22 +214,39 @@ export function HeroSlides({
 
       <div className="hh-body">
         <div className="hh-inner">
-          <div className="hh-copy">{children}</div>
+          <div className="hh-copy">
+            {/* Both sets of words in one grid cell (home.css): the taller sets
+                the height, so the buttons below stay where they are. */}
+            <div className="hh-heads">
+              <div className={`hh-head${own ? "" : " is-on"}`} inert={own} aria-hidden={own || undefined}>
+                {head}
+              </div>
+              {ownHead && (
+                <div className={`hh-head${own ? " is-on" : ""}`} inert={!own} aria-hidden={!own || undefined}>
+                  {ownHead}
+                </div>
+              )}
+            </div>
+            {children}
+          </div>
         </div>
       </div>
 
       {/* After the words in the page's order, so a keyboard reaches the
-          buttons first. Shown over the top of the photo on a phone, and at
-          the bottom right on a wide screen (home.css). */}
+          buttons first. Shown along the bottom edge of the photo, above the
+          words, on a phone, and at the bottom right on a wide screen
+          (home.css). */}
       {count > 0 && current && (
         <div className="hh-dock">
-          <div className="hh-controls" role="group" aria-label="Cars for sale">
-            <Link href={current.href} className="hh-now">
-              <span className="hh-now-label">Now showing</span>
-              <span className="hh-now-car">
-                {current.name}
-                {current.price ? ` · ${current.price}` : ""}
-              </span>
+          <div className="hh-controls" role="group" aria-label="Photos of our cars">
+            <Link
+              href={current.href}
+              className="hh-now"
+              aria-label={`${current.name}${current.note ? `, ${current.note}` : ""}`}
+            >
+              {/* A long name is cut short; its price never is. */}
+              <span className="hh-now-car">{current.name}</span>
+              {current.note && <span className="hh-now-note">· {current.note}</span>}
               <i className="fas fa-arrow-right" aria-hidden="true" />
             </Link>
 
@@ -218,10 +255,10 @@ export function HeroSlides({
                 <div className="hh-segments">
                   {slides.map((s, i) => (
                     <button
-                      key={s.href}
+                      key={i}
                       type="button"
                       className={`hh-seg${i < index ? " is-done" : ""}${i === index ? " is-current" : ""}`}
-                      aria-label={`Show car ${i + 1} of ${count}: ${s.name}`}
+                      aria-label={`Show photo ${i + 1} of ${count}: ${s.kind === "own" ? "Rent to own" : s.name}`}
                       aria-current={i === index ? "true" : undefined}
                       onClick={() => goTo(i)}
                     >
@@ -232,7 +269,7 @@ export function HeroSlides({
                             key={`fill-${index}`}
                             className={`hh-seg-fill${auto ? " is-timed" : ""}`}
                             style={{
-                              animationDuration: `${SLIDE_MS}ms`,
+                              animationDuration: `${timeFor(s)}ms`,
                               animationPlayState: running ? "running" : "paused",
                             }}
                             onAnimationEnd={() => goTo(index + 1)}

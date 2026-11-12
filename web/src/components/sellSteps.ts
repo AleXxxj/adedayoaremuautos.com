@@ -59,7 +59,7 @@ export const TITLE_US: readonly Choice[] = [
   { value: "clean", label: "Clean title in my name", help: "No loan on it." },
   { value: "owe", label: "I still owe money on it", help: "A bank or lender is on the title." },
   { value: "salvage", label: "Salvage or rebuilt title", help: "An insurer totaled it before." },
-  { value: "not_sure", label: "Not sure", help: "That's fine. We'll ask when we call." },
+  { value: "not_sure", label: "Not sure", help: "That's fine. We can check later." },
 ];
 
 export const PAPERS_NG: readonly Choice[] = [
@@ -69,7 +69,7 @@ export const PAPERS_NG: readonly Choice[] = [
 ];
 
 export const WANTS: readonly Choice[] = [
-  { value: "sell", label: "Sell it to us", help: "We make you an offer for it." },
+  { value: "sell", label: "Sell it to us", help: "If we want it, we make you an offer." },
   { value: "trade", label: "Trade it in for one of your cars", help: "Its value goes toward a car from us." },
   { value: "not_sure", label: "Not sure yet", help: "We can talk about both." },
 ];
@@ -450,7 +450,12 @@ export function routeForResult(
   return null;
 }
 
-/** What the confirmation promises, by the way the owner asked us to reply. */
+/**
+ * What the confirmation promises, by the way the owner asked us to reply.
+ *
+ * Only what is true for every owner: the business replies, with an offer,
+ * when the car is one it wants to buy. It never says everyone hears back.
+ */
 export function replyPromise(replyBy: string): string {
   const how =
     replyBy === "sms"
@@ -460,16 +465,18 @@ export function replyPromise(replyBy: string): string {
         : replyBy === "email"
           ? "email you"
           : "call you";
-  return `Adedayo or someone from the team will ${how} within one business day.`;
+  return `If it's a car we want to buy, we'll ${how} within one business day.`;
 }
 
-/** The line above Send, in the same terms. */
+/** The line above Send, in the same terms: photos are asked for only if we reply. */
 export function photosLine(replyBy: string): string {
-  return replyBy === "sms"
-    ? "We'll ask for a few photos when we text you."
-    : replyBy === "whatsapp"
-      ? "We'll ask for a few photos on WhatsApp."
-      : replyBy === "email"
-        ? "We'll ask for a few photos when we email you."
-        : "We'll ask for a few photos when we call.";
+  const when =
+    replyBy === "sms"
+      ? "when we text you"
+      : replyBy === "whatsapp"
+        ? "on WhatsApp"
+        : replyBy === "email"
+          ? "when we email you"
+          : "when we call";
+  return `No photos needed now. If we want your car, we'll ask for a few ${when}.`;
 }

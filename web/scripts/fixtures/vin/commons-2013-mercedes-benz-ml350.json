@@ -1,0 +1,57 @@
+{
+ "continue": {
+  "iistart": "2014-10-10T08:11:38Z",
+  "continue": "||"
+ },
+ "query": {
+  "pages": {
+   "36219031": {
+    "pageid": 36219031,
+    "ns": 6,
+    "title": "File:2013 Mercedes-Benz ML 350 (W 166) BlueTEC wagon (2014-10-02).jpg",
+    "index": 1,
+    "imagerepository": "local",
+    "imageinfo": [
+     {
+      "size": 3333433,
+      "width": 3303,
+      "height": 2323,
+      "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg/960px-2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "thumbwidth": 960,
+      "thumbheight": 675,
+      "responsiveUrls": {
+       "2": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg/1920px-2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+      },
+      "thumbattribs": {
+       "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg/960px-2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+       "decoding": "async",
+       "loading": "lazy",
+       "width": 960,
+       "height": 675,
+       "srcset": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg/1920px-2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail 2x"
+      },
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/97/2013_Mercedes-Benz_ML_350_%28W_166%29_BlueTEC_wagon_%282014-10-02%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "descriptionurl": "https://commons.wikimedia.org/wiki/File:2013_Mercedes-Benz_ML_350_(W_166)_BlueTEC_wagon_(2014-10-02).jpg",
+      "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=36219031",
+      "extmetadata": {
+       "Artist": {
+        "value": "<a href=\"//commons.wikimedia.org/wiki/User:EurovisionNim\" title=\"User:EurovisionNim\">EurovisionNim</a>",
+        "source": "commons-desc-page"
+       },
+       "LicenseShortName": {
+        "value": "CC BY-SA 4.0",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "LicenseUrl": {
+        "value": "https://creativecommons.org/licenses/by-sa/4.0",
+        "source": "commons-desc-page"
+       }
+      },
+      "mime": "image/jpeg"
+     }
+    ]
+   }
+  }
+ }
+}

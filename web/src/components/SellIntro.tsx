@@ -1,23 +1,26 @@
 /**
- * The top of "Sell your car": what happens, in three steps, and the one
+ * The top of "Sell us your car": what happens, in three steps, and the one
  * warning an owner selling a car needs. No price and no estimate: there is
- * no market-data feed behind this page, so the honest promise is a call and
- * an offer once someone has seen the car.
+ * no market-data feed behind this page. And no promise of an offer: the
+ * business makes one only for a car it wants to buy, so every line here says
+ * "if".
  */
 const HOW = [
   { icon: "fa-pen-to-square", text: "Tell us about the car" },
-  { icon: "fa-phone", text: "We call you" },
-  { icon: "fa-handshake", text: "We see the car and make an offer" },
+  { icon: "fa-magnifying-glass", text: "We look at the details" },
+  { icon: "fa-phone", text: "If we want it, we call you with an offer" },
 ];
 
 export function SellIntro() {
   return (
     <div className="sell-intro">
-      <p className="sell-eyebrow">Sell your car</p>
+      <p className="sell-eyebrow">Sell or trade in</p>
       <h1 className="sell-title">
-        Get <span>an offer</span> on your car
+        Sell us <span>your car</span>
       </h1>
-      <p className="sell-lead">Tell us about it in 2 minutes. We&rsquo;ll look at it and call you.</p>
+      <p className="sell-lead">
+        Tell us about it in 2 minutes. If it&rsquo;s a car we want, we&rsquo;ll call you with an offer.
+      </p>
 
       <ol className="sell-how" aria-label="How it works">
         {HOW.map((s, i) => (

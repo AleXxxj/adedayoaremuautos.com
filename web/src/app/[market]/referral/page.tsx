@@ -10,8 +10,10 @@ import {
   DEFAULT_RENTAL_COMMISSION_BPS,
   PAID_REFERRAL_DISCLOSURE,
   formatBps,
+  referralLink,
   weeklyExamples,
 } from "@/lib/referral";
+import { siteUrl } from "@/lib/siteUrl";
 import { ReferralSignup } from "@/components/ReferralSignup";
 import "@/styles/referral.css";
 
@@ -168,37 +170,79 @@ export default async function ReferralPage({
   // The examples carry the car's id; its photo comes from the same list.
   const photo = new Map(fleet.map((v) => [v.id, v.image]));
 
+  // The hero's picture of the idea, from the first example: the same car,
+  // rate and amount as the first card under it.
+  const lead = examples[0];
+  const leadPhoto = lead ? (photo.get(lead.id) ?? null) : null;
+  // A partner's link as it is written, with a stand-in for the code.
+  const sampleLink = referralLink(siteUrl(), "YOURCODE").replace(/^https?:\/\/(www\.)?/, "");
+
   return (
     <div className="rf">
       <section className="rf-hero" aria-labelledby="rf-title">
-        {/* Under the words on a phone, beside them on a wide screen; the
-            scrim in referral.css keeps the text readable on either. */}
-        <div className="rf-hero-photo" aria-hidden="true">
-          <Image
-            src="/img/hero-nissan.png"
-            alt=""
-            fill
-            sizes="(min-width: 1024px) 58vw, 100vw"
-            loading="eager"
-            fetchPriority="high"
-          />
-        </div>
-        <div className="rf-wrap">
-          <p className="rf-eyebrow">Referral program</p>
-          <h1 id="rf-title" className="rf-title">
-            Send a renter. <span>Earn {RATE}.</span>
-          </h1>
-          <p className="rf-lead">
-            You get {RATE} of what they pay, every week they keep renting.
-          </p>
-          <div className="rf-actions">
-            <a href="#apply" className="rf-btn rf-btn--primary">
-              Apply now
-            </a>
-            <Link href="/partner/login" className="rf-btn rf-btn--ghost">
-              Partner log in
-            </Link>
+        <div className="rf-wrap rf-hero-grid">
+          <div className="rf-hero-copy">
+            <p className="rf-eyebrow">Referral program</p>
+            <h1 id="rf-title" className="rf-title">
+              Send a renter. <span>Earn {RATE}.</span>
+            </h1>
+            <p className="rf-lead">
+              You get {RATE} of what they pay, every week they keep renting.
+            </p>
+            <div className="rf-actions">
+              <a href="#apply" className="rf-btn rf-btn--primary">
+                Apply now
+              </a>
+              <Link href="/partner/login" className="rf-btn rf-btn--ghost">
+                Partner log in
+              </Link>
+            </div>
           </div>
+
+          {/* The idea in one look: a message to a friend, the car they rent,
+              what that week earns. Built from real things: a partner's link
+              as it is written, the disclosure every shared message carries,
+              and the first example's car, rate and amount, all computed.
+              Hidden from screen readers: the words beside it and the cards
+              below say all of it. */}
+          {lead && (
+            <div className="rf-flow" aria-hidden="true">
+              <div className="rf-flow-msg">
+                <p className="rf-flow-text">Need a car? Try these guys</p>
+                <p className="rf-flow-url">{sampleLink}</p>
+                <p className="rf-flow-fee">{PAID_REFERRAL_DISCLOSURE}</p>
+              </div>
+              <span className="rf-flow-step rf-flow-step--rent">
+                <i className="fas fa-arrow-down" />
+              </span>
+              <div className="rf-flow-car">
+                <span className="rf-flow-photo">
+                  {leadPhoto ? (
+                    <Image
+                      src={leadPhoto}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 380px, 80vw"
+                      loading="eager"
+                      unoptimized={!canResize(leadPhoto)}
+                    />
+                  ) : (
+                    <span className="rf-car-nophoto">
+                      <i className="fas fa-car" />
+                    </span>
+                  )}
+                </span>
+                <span className="rf-flow-carline">
+                  <span className="rf-flow-name">{lead.car}</span>
+                  <span className="rf-flow-rate">{fmt(lead.weekMinor)} a week</span>
+                </span>
+              </div>
+              <p className="rf-flow-earn">
+                <i className="fas fa-coins" />
+                You earn {fmt(lead.earnMinor)}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -372,9 +372,24 @@ async function main() {
     eq("…and BMW stays BMW", steps.decodedMake("BMW"), "BMW");
     eq("a model's note is dropped", steps.cleanModel("RAV4 Prime (PHEV)"), "RAV4 Prime");
     eq("a trim already in the model isn't said twice", steps.carName({ year: 2015, make: "Toyota", model: "Camry LE", trim: "LE" }), "2015 Toyota Camry LE");
-    eq("the confirmation follows the reply chosen", steps.replyPromise("sms"), "Adedayo or someone from the team will text you within one business day.");
-    eq("…a call by default", steps.replyPromise("phone"), "Adedayo or someone from the team will call you within one business day.");
-    eq("the photos line, for a call", steps.photosLine("phone"), "We'll ask for a few photos when we call.");
+    // The business makes an offer only for a car it wants to buy, so nothing
+    // here may promise every owner a reply or an offer.
+    eq("the confirmation follows the reply chosen", steps.replyPromise("sms"), "If it's a car we want to buy, we'll text you within one business day.");
+    eq("…a call by default", steps.replyPromise("phone"), "If it's a car we want to buy, we'll call you within one business day.");
+    eq("…WhatsApp in Nigeria", steps.replyPromise("whatsapp"), "If it's a car we want to buy, we'll message you on WhatsApp within one business day.");
+    eq("…or an email", steps.replyPromise("email"), "If it's a car we want to buy, we'll email you within one business day.");
+    eq("the photos line, for a call", steps.photosLine("phone"), "No photos needed now. If we want your car, we'll ask for a few when we call.");
+    eq("…and for WhatsApp", steps.photosLine("whatsapp"), "No photos needed now. If we want your car, we'll ask for a few on WhatsApp.");
+    ok(
+      "no reply or photos line promises an offer or a reply to everyone",
+      ["phone", "sms", "whatsapp", "email"].every(
+        (by) => steps.replyPromise(by).startsWith("If it's a car we want to buy, ") && steps.photosLine(by).includes("If we want your car, "),
+      ),
+    );
+    ok(
+      "no choice on the form promises one either",
+      [...steps.TITLE_US, ...steps.PAPERS_NG, ...steps.WANTS].every((c) => !/we make you an offer for it|when we call/i.test(c.help ?? "")),
+    );
     eq("staff read trade_in as a sell request", leadTypeLabel("trade_in"), "Sell / trade-in");
     eq("…and every other type as before", leadTypeLabel("rent_to_own"), "Rent to own");
     eq("a text reply reads as text", contactLabel("sms"), "text");
