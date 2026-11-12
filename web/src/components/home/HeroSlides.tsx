@@ -52,8 +52,9 @@ function subscribeReduced(onChange: () => void) {
  * bar and the change of car can never drift apart, and pausing the animation
  * pauses the show exactly where it was.
  *
- * The first photo is rendered on the server and preloaded (it is the page's
- * largest image). Each other photo is fetched only once it is next.
+ * The first photo is rendered on the server and loaded eagerly at high
+ * priority (it is the page's largest image). Each other photo is fetched
+ * only once it is next.
  */
 export function HeroSlides({
   slides,
@@ -163,7 +164,7 @@ export function HeroSlides({
         {count === 0 ? (
           // Still: a zoom here would be motion with no pause button.
           <div className="hh-photo hh-photo--still">
-            <Image src={fallback} alt="" fill sizes="100vw" preload />
+            <Image src={fallback} alt="" fill sizes="100vw" loading="eager" fetchPriority="high" />
           </div>
         ) : (
           slides.map((s, i) =>
@@ -178,7 +179,11 @@ export function HeroSlides({
                   alt=""
                   fill
                   sizes="100vw"
-                  preload={i === 0}
+                  // The first photo is the page's largest paint: fetched at once
+                  // and first (Next 16 asks for eager loading here, not
+                  // preload). The others wait until they are next.
+                  loading={i === 0 ? "eager" : undefined}
+                  fetchPriority={i === 0 ? "high" : undefined}
                   unoptimized={!canResize(s.src)}
                 />
               </div>
