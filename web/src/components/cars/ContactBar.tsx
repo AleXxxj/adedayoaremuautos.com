@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import { PERSONA } from "@/lib/ai/persona";
@@ -32,7 +33,7 @@ export function ContactBar({
 }: {
   market: MarketCode;
   slug: string;
-  /** "2016 Nissan Altima": how the car is named to the assistant and in the sheet. */
+  /** "2016 Nissan Altima Sedan 4D": how the car is named to the assistant and in the sheet. */
   carName: string;
   /** The showroom's number as dialed, or null when there is none on file. */
   phone: string | null;
@@ -45,6 +46,7 @@ export function ContactBar({
 }) {
   const bar = useRef<HTMLDivElement>(null);
   const sheet = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLAnchorElement>(null);
   // A new number starts the sheet again from its first step.
   const [round, setRound] = useState(0);
   const sent = useRef(false);
@@ -64,9 +66,12 @@ export function ContactBar({
     };
   }, []);
 
-  const open = () => {
+  /** Opens the sheet. False where the browser can't (no <dialog>). */
+  const open = (): boolean => {
     const dialog = sheet.current;
-    if (dialog && !dialog.open) dialog.showModal();
+    if (!dialog || typeof dialog.showModal !== "function") return false;
+    if (!dialog.open) dialog.showModal();
+    return true;
   };
 
   return (
@@ -104,9 +109,23 @@ export function ContactBar({
             </button>
           )
         )}
-        <button type="button" className="cd-btn cd-btn--primary" aria-haspopup="dialog" onClick={open}>
+        {/* A real link to the contact page for this car, which is where it
+            goes if the page's scripts never arrive or the browser has no
+            <dialog>. With both, the tap opens the sheet instead. */}
+        <Link
+          className="cd-btn cd-btn--primary"
+          href={`/${market}/contact?vehicle=${slug}`}
+          // Not fetched ahead: almost nobody leaves by it.
+          prefetch={false}
+          aria-haspopup="dialog"
+          ref={opener}
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (open()) e.preventDefault();
+          }}
+        >
           I&rsquo;m interested
-        </button>
+        </Link>
       </div>
 
       <dialog
@@ -125,6 +144,9 @@ export function ContactBar({
         // Closed part way, it keeps what was typed. Closed after sending, it
         // starts again from the first step next time.
         onClose={() => {
+          // Back to what opened it, said outright: a browser returns focus to
+          // whatever had it before, and Safari gives a tapped control none.
+          opener.current?.focus({ preventScroll: true });
           if (!sent.current) return;
           sent.current = false;
           setRound((n) => n + 1);

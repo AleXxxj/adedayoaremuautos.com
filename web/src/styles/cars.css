@@ -194,7 +194,6 @@
     font-size: 14px;
     line-height: 1.4;
     color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
 }
 
 .legacy-theme .cc-name {
@@ -433,7 +432,6 @@
     line-height: 1.3;
     letter-spacing: 0;
     color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
 }
 
 .legacy-theme .cd-title {

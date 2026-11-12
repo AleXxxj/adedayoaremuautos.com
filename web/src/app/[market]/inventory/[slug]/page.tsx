@@ -320,7 +320,10 @@ export default async function CarDetailPage({
             <ContactBar
               market={code}
               slug={v.slug}
-              carName={`${v.year} ${v.make} ${v.model}`}
+              // The whole name, trim included, as the assistant's own list of
+              // cars has it: with hand-typed records the model is sometimes
+              // in the trim ("Mercedes" "Benz" "Glk").
+              carName={title}
               phone={site?.phone ?? null}
               phoneLabel={formatPhone(site?.phone ?? null)}
               assistant={assistantOn}
@@ -469,21 +472,21 @@ export default async function CarDetailPage({
                   </details>
                 )}
               </div>
-
-              {/* 8. Never the VIN in the link: the check page asks for it. */}
-              {code === "us" && (
-                <Link href="/us/check" className="cd-linkcard">
-                  <span className="cd-pay-icon">
-                    <i className="fas fa-clipboard-check" aria-hidden="true" />
-                  </span>
-                  <span className="cd-pay-words">
-                    <strong>Check this car&rsquo;s recalls and safety stars</strong>
-                    <span>{v.vin ? "Free. The VIN is in the list above." : "Free. Ask us for the VIN."}</span>
-                  </span>
-                  <i className="fas fa-chevron-right cd-pay-turn" aria-hidden="true" />
-                </Link>
-              )}
             </section>
+
+            {/* 8. Never the VIN in the link: the check page asks for it. */}
+            {code === "us" && (
+              <Link href="/us/check" className="cd-linkcard">
+                <span className="cd-pay-icon">
+                  <i className="fas fa-clipboard-check" aria-hidden="true" />
+                </span>
+                <span className="cd-pay-words">
+                  <strong>Check this car&rsquo;s recalls and safety stars</strong>
+                  <span>{v.vin ? "Free. The VIN is in the list above." : "Free. Ask us for the VIN."}</span>
+                </span>
+                <i className="fas fa-chevron-right cd-pay-turn" aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </div>
 

@@ -20,14 +20,15 @@ const SWIPE_PX = 40;
  * the next swipe is already loaded. The rest arrive as they are reached.
  *
  * Full screen is a <dialog> opened with showModal(): the browser keeps the
- * keyboard inside it, closes it on Escape and gives focus back to the button
- * that opened it. Left and right arrow keys work in both views.
+ * keyboard inside it and closes it on Escape, and focus goes back to the
+ * "Full screen" button. Left and right arrow keys work in both views.
  */
 export function Gallery({ images, name }: { images: string[]; name: string }) {
   const count = images.length;
   const [index, setIndex] = useState(0);
   const [full, setFull] = useState(false);
   const viewer = useRef<HTMLDialogElement>(null);
+  const fullButton = useRef<HTMLButtonElement>(null);
   const thumbs = useRef<HTMLUListElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   // A swipe ends with a click on some phones; it must not open full screen.
@@ -70,7 +71,8 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
 
   const open = () => {
     const dialog = viewer.current;
-    if (!dialog || dialog.open) return;
+    // A browser too old for <dialog> keeps the photos in the page.
+    if (!dialog || dialog.open || typeof dialog.showModal !== "function") return;
     dialog.showModal();
     setFull(true);
   };
@@ -168,7 +170,7 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
           <span className="cd-sr">Photo </span>
           {position}
         </p>
-        <button type="button" className="gl-full" onClick={open}>
+        <button type="button" className="gl-full" ref={fullButton} onClick={open}>
           <i className="fas fa-expand" aria-hidden="true" />
           Full screen
         </button>
@@ -196,7 +198,13 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
         ref={viewer}
         className="gl-viewer"
         aria-label={`Photos of the ${name}, full screen`}
-        onClose={() => setFull(false)}
+        onClose={() => {
+          setFull(false);
+          // Back to the button that opens it. A browser returns focus to
+          // whatever had it before, which is nothing when the photo itself
+          // was tapped, or in Safari, where a clicked button is not focused.
+          fullButton.current?.focus({ preventScroll: true });
+        }}
       >
         <div className="gl-viewer-bar">
           <p className="gl-viewer-count" aria-live="polite" aria-atomic="true">
@@ -216,7 +224,9 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
               src={images[index]}
               alt={`${name}, photo ${index + 1} of ${count}`}
               fill
-              sizes="100vw"
+              // The whole screen on a phone. Capped on a wide screen, where
+              // "100vw" on a sharp display would ask for a 3,840px file.
+              sizes="(min-width: 1001px) 960px, 100vw"
               unoptimized={!canResize(images[index])}
             />
           )}
