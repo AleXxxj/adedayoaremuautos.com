@@ -13,6 +13,7 @@ import {
   LegacyFinanceCalculator,
   LegacyFinanceApplication,
 } from "@/components/LegacyFinance";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -259,6 +260,7 @@ export default async function FinancingPage({
           phone={tel}
         />
       </div>
+      <GuideLinks market={code} slugs={["rent-vs-buy-vs-rent-to-own"]} />
     </>
   );
 }

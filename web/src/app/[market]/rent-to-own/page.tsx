@@ -8,6 +8,7 @@ import { formatMoney, money, toMajor } from "@/lib/money";
 import { pathToOwnership } from "@/lib/rentToOwn";
 import { RentToOwnCalculator } from "@/components/RentToOwnCalculator";
 import { EmptyState } from "@/components/EmptyState";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -345,6 +346,7 @@ export default async function RentToOwnPage({
           </div>
         </>
       )}
+      <GuideLinks market={code} slugs={["rent-vs-buy-vs-rent-to-own"]} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { VinCheck } from "@/components/VinCheck";
 import "@/styles/vin-check.css";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 /**
  * Check any car: a free VIN check from US government data.
@@ -54,6 +55,7 @@ export default async function CheckPage({
       <div className="vc-page">
         <VinCheck market={code} locale={market.locale} contactHref={`/${code}/contact`} />
       </div>
+      <GuideLinks market={code} slugs={["used-car-checklist-free-vin-check"]} />
     </>
   );
 }

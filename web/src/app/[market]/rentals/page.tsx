@@ -28,6 +28,7 @@ import {
 import "@/styles/cars.css";
 import "@/styles/car-list.css";
 import "@/styles/rentals.css";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -420,6 +421,10 @@ export default async function RentalsPage({
           )}
         </details>
       </div>
+      <GuideLinks
+        market={code}
+        slugs={["weekly-car-rental-greensboro-nc", "rent-vs-buy-vs-rent-to-own"]}
+      />
     </div>
   );
 }

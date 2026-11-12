@@ -29,6 +29,7 @@ import {
   splitName,
 } from "@/components/cars/carData";
 import "@/styles/cars.css";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -543,6 +544,7 @@ export default async function CarDetailPage({
         {/* 10. From this browser's own list; nothing on a first visit */}
         <RecentlyViewed market={code} slug={v.slug} kind="sale" />
       </div>
+      <GuideLinks market={code} slugs={["used-car-checklist-free-vin-check"]} compare />
     </div>
   );
 }

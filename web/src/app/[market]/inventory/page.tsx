@@ -29,6 +29,7 @@ import {
 } from "@/components/cars/carData";
 import "@/styles/cars.css";
 import "@/styles/car-list.css";
+import { GuideLinks } from "@/components/guides/GuideLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -384,6 +385,7 @@ export default async function InventoryPage({
           </nav>
         )}
       </div>
+      <GuideLinks market={code} slugs={["used-cars-by-budget-greensboro-nc"]} compare />
     </div>
   );
 }
