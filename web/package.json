@@ -29,7 +29,8 @@
     "test:sell": "node --conditions=react-server --import tsx scripts/verify-sell.ts",
     "test:home": "tsx scripts/verify-home.ts",
     "test:cars": "tsx scripts/verify-cars.ts",
-    "test:value": "node --conditions=react-server --import tsx scripts/verify-value.mts"
+    "test:value": "node --conditions=react-server --import tsx scripts/verify-value.mts",
+    "test:guides": "tsx scripts/verify-guides.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
