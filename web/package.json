@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:referrals && npm run test:vin && next build",
+    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:referrals && npm run test:vin && npm run test:home && next build",
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
@@ -25,7 +25,8 @@
     "test:holds": "node --conditions=react-server --import tsx scripts/verify-holds.mts",
     "test:referrals": "node --conditions=react-server --import tsx scripts/verify-referrals.mts",
     "test:vin": "node --import tsx scripts/verify-vin.ts && node --conditions=react-server --import tsx scripts/verify-vin-usage.mts && node --conditions=react-server --import tsx scripts/verify-vin-nhtsa.mts",
-    "check:copy": "node scripts/check-american-english.mjs"
+    "check:copy": "node scripts/check-american-english.mjs",
+    "test:home": "tsx scripts/verify-home.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
