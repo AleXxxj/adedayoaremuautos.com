@@ -1,0 +1,1031 @@
+/*
+ * Compare cars side by side (app/[market]/compare, components/compare/*).
+ *
+ * Phone first. Every selector starts with `.legacy-theme .cmp-…`, at
+ * specificity 0,2,0 or more, so it beats the legacy reset whatever order the
+ * sheets load in. The eyebrow, the lead line, the share button and the
+ * screen-reader class are the guides' (styles/guides.css), which the page
+ * imports first.
+ *
+ * THE TABLE AT 320px. Two or three cars have to sit side by side on the
+ * narrowest phone without the page scrolling sideways. So on a phone a
+ * fact's name is a small label ABOVE its values, and the values share the
+ * full width in equal columns (144px each for two cars at 320px, 93px for
+ * three). From 900px the labels move into a column of their own on the
+ * left. The markup is the same either way, with table roles on it, so a
+ * screen reader hears a table with the cars as its column headers.
+ *
+ * The cars stay in view as the rows scroll: the head row is sticky, just
+ * under the site's fixed header.
+ *
+ * COLOR. Green is the primary button under each car and nothing else. The
+ * better value in a row is white and bold with a small outlined tag
+ * ("Lower", "Newest"); the other is silver. No row is ever colored as worse.
+ */
+
+/* ── Page ─────────────────────────────────────────────────────────────── */
+
+.legacy-theme .cmp-page {
+    /* Clears the fixed header, like the home page's hero. */
+    margin-top: 74px;
+    padding: 20px max(16px, env(safe-area-inset-right)) 56px max(16px, env(safe-area-inset-left));
+    background: var(--surface-0);
+    color: var(--text-secondary);
+    /* Where the sticky head row stops. The fixed header is 65px tall from
+       430px up and as much as 73px on narrower phones, where its name
+       stacks (measured November 2026: 69px at 320, 73px at 375). The row
+       stops at 65px and has 8px of padding on top, so on those phones the
+       padding slides under the header and the photos stay clear of it;
+       nothing ever shows in a gap between the two. */
+    --cmp-top: 65px;
+}
+
+.legacy-theme .cmp-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.legacy-theme .cmp-head-block {
+    display: grid;
+    gap: 12px;
+}
+
+.legacy-theme .cmp-title {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(34px, 9.4vw, 64px);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    text-wrap: balance;
+}
+
+/* The legacy reset gives every element Inter; these keep the headline's face. */
+.legacy-theme .cmp-title span,
+.legacy-theme .cmp-title em {
+    font-family: inherit;
+}
+
+/* The one highlighted phrase on the empty page. */
+.legacy-theme .cmp-title > span {
+    color: var(--brand-300);
+}
+
+/* "A vs B": two or three names, each on its own line, smaller than a slogan. */
+.legacy-theme .cmp-title--pair {
+    font-size: clamp(24px, 6.6vw, 40px);
+    line-height: 1.12;
+}
+
+.legacy-theme .cmp-title--pair > span {
+    display: block;
+    color: var(--text-primary);
+    overflow-wrap: break-word;
+}
+
+.legacy-theme .cmp-title--pair em {
+    margin-right: 0.4em;
+    font-size: 0.6em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-dropped,
+.legacy-theme .cmp-none {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--surface-1);
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-dropped i {
+    flex: none;
+    margin-top: 3px;
+    color: var(--warning);
+}
+
+.legacy-theme .cmp-none {
+    display: block;
+}
+
+.legacy-theme .cmp-none a {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ── Buttons and links ────────────────────────────────────────────────── */
+
+.legacy-theme .cmp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 52px;
+    padding: 8px 20px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        background-color 180ms ease-out,
+        border-color 180ms ease-out,
+        transform 180ms ease-out;
+}
+
+.legacy-theme .cmp-btn:hover {
+    border-color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.legacy-theme .cmp-btn--primary {
+    border-color: var(--cta-bg);
+    background: var(--cta-bg);
+    color: var(--cta-fg);
+}
+
+.legacy-theme .cmp-btn--primary:hover {
+    border-color: var(--cta-bg-hover);
+    background: var(--cta-bg-hover);
+}
+
+.legacy-theme .cmp-btn:active {
+    transform: scale(0.98);
+}
+
+.legacy-theme .cmp-textlink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-primary);
+    text-align: center;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+}
+
+/* Pills and cards keep their shape when focused: refine.css rounds every
+   focused link to 6px. */
+.legacy-theme :is(.cmp-btn, .cmp-chip, .cmp-sheet-x):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+.legacy-theme :is(.cmp-slot, .cmp-head, .cmp-pick, .cmp-pair):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 16px;
+}
+
+.legacy-theme .cmp-textlink:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* ── Nothing chosen yet ───────────────────────────────────────────────── */
+
+.legacy-theme .cmp-start {
+    display: grid;
+    gap: 14px;
+}
+
+.legacy-theme .cmp-slots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.legacy-theme .cmp-slot {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+    min-height: 168px;
+    padding: 8px 8px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    background: var(--surface-1);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color 180ms ease-out;
+}
+
+.legacy-theme .cmp-slot:hover {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .cmp-slot--empty {
+    align-content: center;
+    justify-items: center;
+    border-style: dashed;
+    border-color: var(--border-strong);
+    background: transparent;
+    text-align: center;
+}
+
+.legacy-theme .cmp-slot-plus {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-slot-photo,
+.legacy-theme .cmp-head-photo,
+.legacy-theme .cmp-pick-photo {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 14px;
+    background: var(--surface-2);
+}
+
+.legacy-theme :is(.cmp-slot-photo, .cmp-head-photo, .cmp-pick-photo, .cmp-pair-photo) img {
+    object-fit: cover;
+}
+
+.legacy-theme .cmp-nophoto {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-slot-name {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-slot-price {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .cmp-slot-change {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ── One line for each car ────────────────────────────────────────────── */
+
+.legacy-theme .cmp-lines {
+    display: grid;
+    gap: 8px;
+    list-style: none;
+}
+
+.legacy-theme .cmp-lines li {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    background: var(--surface-1);
+}
+
+.legacy-theme .cmp-lines-name {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .cmp-lines-text {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+}
+
+.legacy-theme .cmp-hint {
+    margin-bottom: -10px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+/* ── The table ────────────────────────────────────────────────────────── */
+
+.legacy-theme .cmp-table {
+    --cols: repeat(var(--n), minmax(0, 1fr));
+}
+
+.legacy-theme .cmp-heads,
+.legacy-theme .cmp-row {
+    display: grid;
+    grid-template-columns: var(--cols);
+    column-gap: 8px;
+}
+
+/* Stays under the site's header while the rows scroll. Opaque, and a little
+   wider than the table, so nothing shows through or beside it. */
+.legacy-theme .cmp-heads {
+    position: sticky;
+    top: var(--cmp-top);
+    z-index: 5;
+    margin: 0 -4px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--surface-0);
+}
+
+/* Kept for a screen reader, so the car columns line up with the cells
+   under them; out of the way on a phone, where labels sit above values. */
+.legacy-theme .cmp-corner {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+}
+
+.legacy-theme .cmp-headcell {
+    min-width: 0;
+}
+
+.legacy-theme .cmp-head {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* Shallow, so the sticky row leaves most of the screen to the facts. */
+.legacy-theme .cmp-head-photo {
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+}
+
+.legacy-theme .cmp-head-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-head-price {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-row {
+    row-gap: 6px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.legacy-theme .cmp-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    grid-column: 1 / -1;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-label i {
+    width: 16px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.legacy-theme .cmp-cell {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 6px;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-cell.is-better .cmp-value {
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-cell.is-missing .cmp-value {
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.legacy-theme .cmp-tag i {
+    font-size: 9px;
+}
+
+.legacy-theme .cmp-features {
+    display: grid;
+    gap: 6px;
+    list-style: none;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.legacy-theme .cmp-features li {
+    padding-left: 10px;
+    border-left: 2px solid var(--border-default);
+}
+
+.legacy-theme .cmp-more {
+    justify-self: stretch;
+}
+
+.legacy-theme .cmp-more summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.legacy-theme .cmp-more summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-theme .cmp-more summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.legacy-theme .cmp-row--actions {
+    border-bottom: 0;
+}
+
+.legacy-theme .cmp-actions {
+    justify-items: stretch;
+    gap: 8px;
+}
+
+/* Under a 93px column the label wraps, so the button grows instead of clipping. */
+.legacy-theme .cmp-actions .cmp-btn {
+    min-height: 48px;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+
+.legacy-theme .cmp-fine {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-fine i {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* ── The picker: a sheet from the bottom on a phone ───────────────────── */
+
+.legacy-theme .cmp-sheet {
+    /* The browser centers a dialog; a sheet sits on the bottom edge. */
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 88dvh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    background: var(--surface-1);
+    color: var(--text-secondary);
+}
+
+.legacy-theme .cmp-sheet:not([open]) {
+    display: none;
+}
+
+.legacy-theme .cmp-sheet::backdrop {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.legacy-theme .cmp-sheet-in {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 12px;
+    max-height: 88dvh;
+    padding: 14px 14px max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.legacy-theme .cmp-sheet-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.legacy-theme .cmp-sheet-h {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-sheet-x {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.legacy-theme .cmp-sheet-now {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 12px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.legacy-theme .cmp-sheet-now strong {
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-sheet-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+}
+
+.legacy-theme .cmp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.legacy-theme .cmp-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.legacy-theme .cmp-chip[aria-pressed="true"] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--surface-0);
+}
+
+.legacy-theme .cmp-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-0);
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-search:focus-within {
+    border-color: var(--focus);
+}
+
+.legacy-theme .cmp-search input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+    /* 16px: iPhones zoom the page on a smaller field. */
+    font-size: 16px;
+    outline: none;
+}
+
+.legacy-theme .cmp-search input::placeholder {
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-sheet-none {
+    padding: 20px 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.legacy-theme .cmp-picks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    list-style: none;
+}
+
+.legacy-theme .cmp-picks > li {
+    min-width: 0;
+}
+
+.legacy-theme .cmp-pick {
+    display: grid;
+    align-content: start;
+    gap: 3px;
+    height: 100%;
+    padding: 6px 6px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 180ms ease-out;
+}
+
+.legacy-theme a.cmp-pick:hover {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .cmp-pick.is-taken {
+    opacity: 0.55;
+}
+
+.legacy-theme .cmp-pick-photo {
+    margin-bottom: 4px;
+    border-radius: 11px;
+}
+
+.legacy-theme .cmp-pick-tag {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(7, 12, 10, 0.9);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.legacy-theme .cmp-pick-name {
+    padding: 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-pick-price {
+    padding: 0 4px;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .cmp-pick-sub {
+    padding: 0 4px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--text-muted);
+}
+
+/* ── Popular comparisons ──────────────────────────────────────────────── */
+
+.legacy-theme .cmp-popular {
+    margin-top: 12px;
+}
+
+.legacy-theme .cmp-pairs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    list-style: none;
+}
+
+.legacy-theme .cmp-pair {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 8px 14px 8px 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    background: var(--surface-1);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 180ms ease-out;
+}
+
+.legacy-theme .cmp-pair:hover {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .cmp-pair-photos {
+    display: flex;
+}
+
+.legacy-theme .cmp-pair-photo {
+    position: relative;
+    overflow: hidden;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--surface-1);
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .cmp-pair-photo + .cmp-pair-photo {
+    margin-left: -12px;
+}
+
+.legacy-theme .cmp-pair-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.legacy-theme .cmp-pair-names {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .cmp-pair-names em {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-pair-note {
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .cmp-pair > i {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.legacy-theme .cmp-also {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+}
+
+/* ── Wider screens ────────────────────────────────────────────────────── */
+
+@media (min-width: 560px) {
+    .legacy-theme .cmp-bar {
+        grid-template-columns: repeat(2, max-content);
+        align-items: start;
+    }
+
+    .legacy-theme .cmp-start .cmp-btn {
+        justify-self: start;
+    }
+
+    .legacy-theme .cmp-picks {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 700px) {
+    .legacy-theme .cmp-page {
+        padding-top: 36px;
+        padding-bottom: 84px;
+    }
+
+    .legacy-theme .cmp-wrap {
+        gap: 28px;
+    }
+
+    .legacy-theme .cmp-slots {
+        max-width: 680px;
+    }
+
+    .legacy-theme .cmp-lines {
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+    }
+
+    .legacy-theme .cmp-pairs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* A centered box rather than a sheet. */
+    .legacy-theme .cmp-sheet {
+        inset: 0;
+        width: min(760px, calc(100% - 48px));
+        max-height: min(760px, 86dvh);
+        margin: auto;
+        border-bottom: 1px solid var(--border-default);
+        border-radius: 20px;
+    }
+
+    .legacy-theme .cmp-sheet-in {
+        max-height: min(760px, 86dvh);
+        padding: 20px;
+    }
+
+    .legacy-theme .cmp-picks {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Labels in a column of their own, values beside them. */
+@media (min-width: 900px) {
+    .legacy-theme .cmp-table {
+        --cols: 190px repeat(var(--n), minmax(0, 1fr));
+    }
+
+    .legacy-theme .cmp-heads,
+    .legacy-theme .cmp-row {
+        column-gap: 20px;
+    }
+
+    .legacy-theme .cmp-corner {
+        position: static;
+        width: auto;
+        height: auto;
+        clip: auto;
+        clip-path: none;
+    }
+
+    .legacy-theme .cmp-label {
+        grid-column: auto;
+        align-items: flex-start;
+        padding-top: 2px;
+    }
+
+    .legacy-theme .cmp-row {
+        padding: 16px 0;
+    }
+
+    .legacy-theme .cmp-cell {
+        font-size: 16px;
+    }
+
+    .legacy-theme .cmp-head-name {
+        font-size: 16px;
+    }
+
+    .legacy-theme .cmp-head-price {
+        font-size: 22px;
+    }
+
+    .legacy-theme .cmp-head-photo {
+        max-height: 110px;
+        width: 100%;
+    }
+
+    .legacy-theme .cmp-features {
+        font-size: 14px;
+    }
+
+    .legacy-theme .cmp-actions .cmp-btn {
+        font-size: 15px;
+    }
+}
+
+/* Room for the photo beside the name: the sticky row is half as tall. */
+@media (min-width: 1100px) {
+    .legacy-theme .cmp-head {
+        grid-template-columns: 136px minmax(0, 1fr);
+        align-content: center;
+        column-gap: 16px;
+    }
+
+    .legacy-theme .cmp-head-photo {
+        grid-row: 1 / span 2;
+        max-height: none;
+    }
+
+    .legacy-theme .cmp-head-name {
+        align-self: end;
+    }
+
+    .legacy-theme .cmp-head-price {
+        align-self: start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme :is(.cmp-btn, .cmp-slot, .cmp-pick, .cmp-pair) {
+        transition: none;
+    }
+
+    .legacy-theme .cmp-btn:active {
+        transform: none;
+    }
+}

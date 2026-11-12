@@ -21,7 +21,12 @@ export function LegacyNav({
   items,
   switches = [],
 }: {
-  items: { href: string; label: string }[];
+  /**
+   * `menuOnly` keeps a link out of the wide-screen row, which has no room
+   * left, and shows it in the menu the row folds into (the existing
+   * .nav-extra rule, as for the partner log in below).
+   */
+  items: { href: string; label: string; menuOnly?: boolean }[];
   /** The other markets, for the switch in the menu. */
   switches?: { href: string; market: string; name: string }[];
 }) {
@@ -68,7 +73,7 @@ export function LegacyNav({
             <Link
               key={n.href}
               href={n.href}
-              className={active ? "active" : undefined}
+              className={[n.menuOnly && "nav-extra", active && "active"].filter(Boolean).join(" ") || undefined}
               aria-current={active ? "page" : undefined}
             >
               {n.label}

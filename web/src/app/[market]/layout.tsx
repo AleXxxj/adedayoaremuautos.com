@@ -81,6 +81,13 @@ export default async function MarketLayout({
     { href: `/${code}/about`, label: "About" },
     { href: `/${code}/contact`, label: "Contact" },
   ];
+  // In the phone menu and the footer, not the desktop row: that row was
+  // measured to the pixel (refine.css) and has no room for another link.
+  // The guides are written for Greensboro and exist on the US site only.
+  const more = [
+    ...(code === "us" ? [{ href: "/us/guides", label: "Guides" }] : []),
+    { href: `/${code}/compare`, label: "Compare Cars" },
+  ];
   const switches = other.map((c) => ({ href: `/${c}`, market: c, name: MARKETS[c].name }));
 
   return (
@@ -128,7 +135,10 @@ export default async function MarketLayout({
             </div>
           </Link>
 
-          <LegacyNav items={nav} switches={switches} />
+          <LegacyNav
+            items={[...nav, ...more.map((m) => ({ ...m, menuOnly: true }))]}
+            switches={switches}
+          />
 
           <div className="header-actions">
             {/* Below 900px the switch moves into the menu (LegacyNav). */}
@@ -228,6 +238,7 @@ export default async function MarketLayout({
               <ul>
                 {[
                   ...nav,
+                  ...more,
                   { href: `/${code}/referral`, label: "Refer a Renter" },
                   { href: "/partner/login", label: "Partner log in" },
                 ].map((n) => (
