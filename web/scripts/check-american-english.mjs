@@ -54,6 +54,7 @@ const RULES = [
   // The noun is "pickup"; the verb is "pick up". "Pick-up" is neither.
   [/\bpick-ups?\b/i, "pickup (noun) or pick up (verb)"],
   [/\btravell(ed|ing|er)\b/i, "traveled / traveling"],
+  [/\banalys(e|es|ed|ing)\b/i, "analyze"],
   [/\bcollect(ing|ion)? (the|your) (vehicle|car)\b|\bcollection time\b|\bwhen you collect\b/i, "pick up / pickup"],
 ];
 
