@@ -1,14 +1,12 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { leads, vehicles, rentalTiers } from "@/db/schema";
 import { isMarketCode } from "@/lib/market";
-import { notifyStaffOfLead } from "@/lib/notify";
-import { resolveReferralPartner } from "@/lib/partner";
+import { intakeLead } from "@/lib/leadIntake";
 
 export interface LeadResult {
   ok: boolean;
@@ -54,13 +52,6 @@ const schema = z
     path: ["email"],
   });
 
-/** Lower bound on how fast a human can plausibly fill this in. */
-const MIN_FILL_MS = 1500;
-/** Per-phone submission cap inside the window below. */
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60 * 60 * 1000;
-
-
 export async function submitLead(
   _prev: LeadResult | null,
   formData: FormData,
@@ -80,141 +71,91 @@ export async function submitLead(
 
   const v = parsed.data;
 
-  // ── Anti-spam ───────────────────────────────────────────────────────────
-  // Honeypot: a field hidden from humans. Anything in it is a bot. Fail
-  // silently with a success response so the bot does not learn it was caught.
-  if (v.leave_empty) return { ok: true };
+  // The bot checks, the per-phone limit, who introduced them, the row and
+  // the alert are shared with the sell page (lib/leadIntake.ts). The lookups
+  // below run only once those checks have passed.
+  const outcome = await intakeLead(
+    {
+      marketCode: v.marketCode,
+      phone: v.phone,
+      leaveEmpty: v.leave_empty,
+      elapsedMs: v.elapsedMs,
+      raw,
+    },
+    async () => {
+      // ── Resolve the vehicle, if any ─────────────────────────────────────
+      let vehicleId: string | null = null;
+      let vehicleLabel: string | null = null;
+      if (v.vehicleSlug && isMarketCode(v.marketCode)) {
+        const [vehicle] = await db
+          .select()
+          .from(vehicles)
+          .where(
+            and(eq(vehicles.marketCode, v.marketCode), eq(vehicles.slug, v.vehicleSlug)),
+          )
+          .limit(1);
+        if (vehicle) {
+          vehicleId = vehicle.id;
+          vehicleLabel = `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
+        }
+      }
 
-  if (v.elapsedMs !== undefined && v.elapsedMs < MIN_FILL_MS) {
-    return { ok: true };
-  }
+      // ── Resolve the rent-to-own category, if any ────────────────────────
+      // Recorded alongside the vehicle rather than inferred from it later:
+      // these are the rates the applicant was actually shown, and a car can be
+      // moved to another category or sold after the application is made.
+      let rentalTierId: string | null = null;
+      let tierName: string | null = null;
+      if (v.tierSlug && isMarketCode(v.marketCode)) {
+        const [tier] = await db
+          .select({ id: rentalTiers.id, name: rentalTiers.name })
+          .from(rentalTiers)
+          .where(
+            and(
+              eq(rentalTiers.marketCode, v.marketCode),
+              eq(rentalTiers.slug, v.tierSlug),
+            ),
+          )
+          .limit(1);
+        if (tier) {
+          rentalTierId = tier.id;
+          tierName = tier.name;
+        }
+      }
 
-  const h = await headers();
-  const ipCountry =
-    h.get("x-vercel-ip-country") ?? h.get("cf-ipcountry") ?? null;
-
-  // ── Rate limit ──────────────────────────────────────────────────────────
-  // Keyed on phone number rather than IP: shared mobile NAT in Nigeria means
-  // many genuine customers can appear behind one address, and blocking by IP
-  // would silently drop real leads.
-  const since = new Date(Date.now() - RATE_WINDOW_MS);
-  const [{ recent }] = await db
-    .select({ recent: sql<number>`count(*)::int` })
-    .from(leads)
-    .where(and(eq(leads.phone, v.phone), gte(leads.createdAt, since)));
-
-  if (recent >= RATE_LIMIT) {
-    return {
-      ok: false,
-      error:
-        "We have already received several inquiries from this number. Please call us directly and we will help right away.",
-    };
-  }
-
-  // ── Resolve the vehicle, if any ─────────────────────────────────────────
-  let vehicleId: string | null = null;
-  let vehicleLabel: string | null = null;
-  if (v.vehicleSlug && isMarketCode(v.marketCode)) {
-    const [vehicle] = await db
-      .select()
-      .from(vehicles)
-      .where(
-        and(eq(vehicles.marketCode, v.marketCode), eq(vehicles.slug, v.vehicleSlug)),
-      )
-      .limit(1);
-    if (vehicle) {
-      vehicleId = vehicle.id;
-      vehicleLabel = `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
-    }
-  }
-
-  // ── Resolve the rent-to-own category, if any ────────────────────────────
-  // Recorded alongside the vehicle rather than inferred from it later: these
-  // are the rates the applicant was actually shown, and a car can be moved to
-  // another category or sold after the application is made.
-  let rentalTierId: string | null = null;
-  let tierName: string | null = null;
-  if (v.tierSlug && isMarketCode(v.marketCode)) {
-    const [tier] = await db
-      .select({ id: rentalTiers.id, name: rentalTiers.name })
-      .from(rentalTiers)
-      .where(
-        and(
-          eq(rentalTiers.marketCode, v.marketCode),
-          eq(rentalTiers.slug, v.tierSlug),
-        ),
-      )
-      .limit(1);
-    if (tier) {
-      rentalTierId = tier.id;
-      tierName = tier.name;
-    }
-  }
-
-  // ── Who introduced them ─────────────────────────────────────────────────
-  // Set by /r/<code> when a partner's link was followed. Looked up rather than
-  // trusted: the cookie holds a code, and only an active partner earns the
-  // attribution. An unknown or suspended code simply attributes to nobody.
-  const referralPartnerId = await resolveReferralPartner(v.marketCode);
-
-  // ── Persist FIRST, notify after ─────────────────────────────────────────
-  // The database write is the commitment to the customer. Notification is best
-  // effort on top of it and can never cost us the lead.
-  let leadId: string;
-  try {
-    const [row] = await db
-      .insert(leads)
-      .values({
-        marketCode: v.marketCode,
+      return {
         type: v.type,
-        status: "new",
-        vehicleId,
-        rentalTierId,
-        referralPartnerId,
+        source: "website",
         name: v.name,
-        email: v.email || null,
-        phone: v.phone,
+        email: v.email,
         message: v.message,
         preferredContact: v.preferredContact,
-        source: "website",
-        utmSource: String(raw.utm_source ?? "") || null,
-        utmMedium: String(raw.utm_medium ?? "") || null,
-        utmCampaign: String(raw.utm_campaign ?? "") || null,
-        referrerUrl: h.get("referer"),
-        landingPath: String(raw.landingPath ?? "") || null,
-        ipCountry,
-      })
-      .returning({ id: leads.id });
-    leadId = row.id;
-  } catch (e) {
-    console.error("[lead] insert failed", e);
-    return {
-      ok: false,
-      error:
-        "Something went wrong saving your inquiry. Please call us on (336) 207-6521 and we will help immediately.",
-    };
-  }
+        vehicleId,
+        rentalTierId,
+        vehicleLabel: tierName
+          ? `${vehicleLabel ?? "No vehicle chosen"} — ${tierName} rent to own`
+          : vehicleLabel,
+      };
+    },
+  );
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-  try {
-    await notifyStaffOfLead({
-      leadId,
-      type: v.type,
-      market: v.marketCode,
-      name: v.name,
-      email: v.email,
-      phone: v.phone,
-      message: v.message,
-      vehicle: tierName ? `${vehicleLabel ?? 'No vehicle chosen'} — ${tierName} rent to own` : vehicleLabel,
-      adminUrl: `${site}/admin/leads`,
-    });
-  } catch (e) {
-    // Swallowed deliberately. The lead is safe; alerting is not.
-    console.error("[lead] notification failed", e);
+  switch (outcome.status) {
+    case "saved":
+    case "bot":
+      return { ok: true };
+    case "busy":
+      return {
+        ok: false,
+        error:
+          "We have already received several inquiries from this number. Please call us directly and we will help right away.",
+      };
+    case "failed":
+      return {
+        ok: false,
+        error:
+          "Something went wrong saving your inquiry. Please call us on (336) 207-6521 and we will help immediately.",
+      };
   }
-
-  revalidatePath("/admin/leads");
-  return { ok: true };
 }
 
 /* ── Admin ─────────────────────────────────────────────────────────────── */
