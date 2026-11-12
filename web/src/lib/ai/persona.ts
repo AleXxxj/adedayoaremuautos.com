@@ -7,9 +7,9 @@ import type { MarketCode } from "@/lib/market";
  * can change in one place: the launcher, the panel, the hero's "Ask Ayo" link
  * and the model's own instructions (prompt.ts) all read PERSONA.
  *
- * Why "Ayo": it means "joy" in Yoruba, the same joy that is in "Adedayo" (the
- * crown becomes joy). It is short and easy to say in Greensboro, and it is not
- * the founder's own name, so nobody thinks they are chatting with him.
+ * Why "Miles": the founder wanted a name Americans take to at once. It is a
+ * common first name and a car word, and it is not the founder's own name, so
+ * nobody thinks they are chatting with him. (It was "Ayo" for one day.)
  *
  * Ayo is software and always says so. The panel's header says "Virtual
  * assistant" for as long as it is open, and the prompt tells the model to say
@@ -18,13 +18,13 @@ import type { MarketCode } from "@/lib/market";
  * No server imports: the chat widget, a client component, reads this file.
  */
 export const PERSONA = {
-  name: "Ayo",
+  name: "Miles",
   /** Said with the name, every time it introduces itself. */
   role: "virtual assistant",
   business: "Adedayo Aremu Autos",
   /** For the model, to use only if a visitor asks about the name. */
   nameMeaning:
-    'Ayo means "joy" in Yoruba. It is the same joy that is in the name Adedayo, which means "the crown becomes joy".',
+    'The name is a nod to the miles people drive. It is just a friendly name for the assistant.',
 } as const;
 
 /** Which greeting and quick replies a page gets. */

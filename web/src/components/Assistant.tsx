@@ -42,22 +42,25 @@ function rememberNudged(): void {
 }
 
 /**
- * Ayo's face: a smile on the brand green. Drawn, not a photo, because Ayo is
- * not a person and should never look like one.
+ * The assistant's mark: its initial in a dark badge with a green ring. Not a
+ * face (the founder found the smile childish) and not a photo, because the
+ * assistant is not a person and should never look like one.
  */
 export function AyoAvatar({ size, online = false }: { size: number; online?: boolean }) {
   return (
     <span className="ayo-avatar" style={{ width: size, height: size }} aria-hidden="true">
       <svg viewBox="0 0 40 40" width={size} height={size} focusable="false">
-        <ellipse cx="14.6" cy="17.2" rx="2.3" ry="2.9" fill="currentColor" />
-        <ellipse cx="25.4" cy="17.2" rx="2.3" ry="2.9" fill="currentColor" />
-        <path
-          d="M13 24.2c1.9 2.6 4.3 3.9 7 3.9s5.1-1.3 7-3.9"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-        />
+        <text
+          x="20"
+          y="27.5"
+          textAnchor="middle"
+          fontSize="21"
+          fontWeight="700"
+          fontFamily="var(--font-space-grotesk), system-ui, sans-serif"
+          fill="currentColor"
+        >
+          {PERSONA.name.charAt(0)}
+        </text>
       </svg>
       {online && <span className="ayo-avatar-dot" />}
     </span>

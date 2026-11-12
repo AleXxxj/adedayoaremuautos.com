@@ -179,7 +179,7 @@ eq("times of day", [5, 11, 12, 16, 17, 23, 0, 4].map(timeOfDay), [
   "Hello",
 ]);
 eq("the greeting", greeting(9, "home"), [
-  "Good morning. I'm Ayo, the virtual assistant at Adedayo Aremu Autos.",
+  "Good morning. I'm Miles, the virtual assistant at Adedayo Aremu Autos.",
   "I can help you rent a car this week, find one to buy, or get an offer on yours. What brings you in?",
 ]);
 eq("home quick replies", quickReplies("home", "$10,000"), [
