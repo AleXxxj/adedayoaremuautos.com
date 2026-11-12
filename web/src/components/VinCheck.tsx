@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useReducer, useRef, useState } from "react";
 import {
   lookUpVin,
@@ -7,22 +8,13 @@ import {
   type LookUpResult,
   type CheckResult,
 } from "@/lib/actions/vinCheck";
-import type { CrashRatings, DecodedVin, ModelRecall, RatedVersion } from "@/lib/vin/nhtsa";
+import type { ComplaintSummary, CrashRatings, DecodedVin, ModelRecall, RatedVersion } from "@/lib/vin/nhtsa";
+import type { CarPhoto } from "@/lib/vin/photo";
+import type { RecallText } from "@/lib/vin/recallPlain";
+import { airBagsLine, bodyShape, factLines, safetyItems, summaryLine } from "@/lib/vin/features";
+import { aOrAn, brand, cleanModel, freeFix, joinAnd, recallPart, titleCase } from "@/lib/vin/plain";
 import { useHydrated } from "@/lib/useHydrated";
-
-/** Makes NHTSA spells in capitals that are written that way. */
-const ACRONYMS = new Set(["BMW", "GMC", "RAM", "MINI", "SRT", "AMG", "VW"]);
-
-/** "MERCEDES-BENZ" -> "Mercedes-Benz", "BMW" stays "BMW". */
-function brand(make: string): string {
-  if (ACRONYMS.has(make)) return make;
-  return make
-    .toLowerCase()
-    .replace(/(^|[\s-])([a-z])/g, (_, sep: string, c: string) => sep + c.toUpperCase());
-}
-
-/** vPIC's model without its note: "RAV4 Prime (PHEV)" -> "RAV4 Prime". */
-const cleanModel = (m: string | null) => m?.replace(/\s*\([^)]*\)\s*$/, "") || null;
+import { CarShape } from "@/components/CarShape";
 
 function carName(c: DecodedVin): string {
   return [c.year, c.make && brand(c.make), cleanModel(c.model), c.series, c.trim].filter(Boolean).join(" ");
@@ -34,24 +26,6 @@ function modelName(c: DecodedVin, under?: string | null): string {
     .join(" ");
 }
 
-/** "C300, C350 and C400". */
-function joinAnd(items: string[]): string {
-  return items.length <= 1 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
-}
-
-/**
- * NHTSA's capitals as a heading: "FUEL/PROPULSION SYSTEM" -> "Fuel/Propulsion
- * System", "UNKNOWN OR OTHER" -> "Unknown or Other", "ELECTRONIC STABILITY
- * CONTROL (ESC)" keeps its "(ESC)".
- */
-function titleCase(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/(^|[\s(/-])([a-z])/g, (_, sep: string, c: string) => sep + c.toUpperCase())
-    .replace(/ (And|Or|Of|The|To|For|In|On|With) /g, (w) => w.toLowerCase())
-    .replace(/\(([A-Za-z]{2,4})\)$/, (_, a: string) => `(${a.toUpperCase()})`);
-}
-
 /** "UNITED STATES" -> "the United States"; "JAPAN" -> "Japan". */
 function country(raw: string): string {
   const name = titleCase(raw);
@@ -60,7 +34,7 @@ function country(raw: string): string {
     : name;
 }
 
-type Looked = { vin: string; car: DecodedVin; warning: string | null };
+type Looked = { vin: string; car: DecodedVin; warning: string | null; photo: CarPhoto | null };
 type Checked = CheckResult & { vin: string; car: DecodedVin };
 
 type View =
@@ -179,20 +153,24 @@ export function VinCheck({
     const fd = new FormData(e.currentTarget);
     void run<LookUpResult>("look", () => lookUpVin(null, fd), (r) => {
       if (r.ok && r.vin && r.car) {
-        dispatch({ type: "looked", looked: { vin: r.vin, car: r.car, warning: r.warning ?? null } });
+        dispatch({
+          type: "looked",
+          looked: { vin: r.vin, car: r.car, warning: r.warning ?? null, photo: r.photo ?? null },
+        });
       } else {
         dispatch({ type: "lookFailed", error: r.error ?? FAILED });
       }
     });
   };
 
-  const check = (vin: string) => {
+  // The photo "Is this the car?" already showed stays if the check comes back without one.
+  const check = (vin: string, photo: CarPhoto | null) => {
     if (busy) return;
     const fd = new FormData();
     fd.set("vin", vin);
     void run<CheckResult>("check", () => checkCar(null, fd), (r) => {
       if (r.ok && r.vin === vin && r.car) {
-        dispatch({ type: "checked", checked: { ...r, vin: r.vin, car: r.car } });
+        dispatch({ type: "checked", checked: { ...r, vin: r.vin, car: r.car, photo: r.photo ?? photo } });
       } else {
         dispatch({ type: "checkFailed", error: r.error ?? FAILED });
       }
@@ -225,7 +203,7 @@ export function VinCheck({
         heading={heading}
         error={errorNote()}
         retrying={busy === "check"}
-        onRetry={busy ? undefined : () => check(view.checked.vin)}
+        onRetry={busy ? undefined : () => check(view.checked.vin, view.checked.photo ?? null)}
         onAnother={() => back("")}
       />
     );
@@ -234,21 +212,24 @@ export function VinCheck({
   if (view.step === "confirm") {
     const { looked } = view;
     return (
-      <div className="vc-card">
+      <div className="vc-card vc-confirm">
+        <CarPicture photo={looked.photo} car={looked.car} />
         <p className="vc-eyebrow">Is this the car?</p>
         <h2 className="vc-car" ref={heading} tabIndex={-1}>
           {carName(looked.car)}
         </h2>
         <p className="vc-facts">
-          {[
-            looked.car.body,
-            // An electric car has no engine size; its fuel says what it runs on.
-            looked.car.engine ?? looked.car.fuel,
-            looked.car.drive,
-            looked.car.builtIn && `Built in ${country(looked.car.builtIn)}`,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+          {/* In the results' words; the decode's own fields if it has no details. */}
+          {summaryLine(looked.car) ??
+            [
+              looked.car.body,
+              // An electric car has no engine size; its fuel says what it runs on.
+              looked.car.engine ?? looked.car.fuel,
+              looked.car.drive,
+              looked.car.builtIn && `Built in ${country(looked.car.builtIn)}`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
         </p>
         {looked.warning && <p className="vc-warn">{looked.warning}</p>}
 
@@ -257,7 +238,7 @@ export function VinCheck({
             type="button"
             className="btn btn-primary vc-primary"
             disabled={busy !== null || !hydrated}
-            onClick={() => check(looked.vin)}
+            onClick={() => check(looked.vin, looked.photo)}
           >
             {busy === "check" ? "Checking…" : "Yes, check it"}
           </button>
@@ -314,6 +295,52 @@ export function VinCheck({
   );
 }
 
+/**
+ * A photo of the model from Wikimedia Commons, with the credit its license
+ * asks for, or a drawing of the body shape when there is none.
+ */
+function CarPicture({ photo, car }: { photo: CarPhoto | null | undefined; car: DecodedVin }) {
+  // A photo that doesn't load (Wikimedia or the resizer unreachable) gives
+  // way to the drawing, rather than a broken image with a credit under it.
+  const [failed, setFailed] = useState<string | null>(null);
+  if (!photo || failed === photo.src) {
+    return (
+      <div className="vc-photo vc-photo--drawn">
+        <CarShape shape={bodyShape(car)} />
+      </div>
+    );
+  }
+  const shown = [photo.photoYear, car.make && brand(car.make), photo.model].filter(Boolean).join(" ");
+  // "a 2017 Toyota Highlander" when it is the car's year; the year itself when it isn't.
+  const caption = photo.photoYear === car.year ? `a ${shown}` : shown;
+  return (
+    <figure className="vc-photo">
+      <Image
+        src={photo.src}
+        width={photo.width}
+        height={photo.height}
+        alt={shown}
+        sizes="(min-width: 792px) 760px, calc(100vw - 32px)"
+        onError={() => setFailed(photo.src)}
+      />
+      <figcaption className="vc-credit">
+        <a href={photo.pageUrl} target="_blank" rel="noopener noreferrer">
+          Photo: {caption}, for illustration
+        </a>
+        {photo.artist && <> · {photo.artist}</>}
+        {" · "}
+        {photo.licenseUrl ? (
+          <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">
+            {photo.license}
+          </a>
+        ) : (
+          photo.license
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
 /** "Couldn't load", and a way to ask again: each check of the car costs one of the day's lookups. */
 function Unloaded({
   what,
@@ -331,6 +358,134 @@ function Unloaded({
         {retrying ? "Checking again…" : "Check again"}
       </button>
     </>
+  );
+}
+
+/** One short line each: body, seats, engine, transmission, drive, fuel, plant, trims, price. */
+function Facts({ car, locale }: { car: DecodedVin; locale: string }) {
+  const facts = factLines(car, locale);
+  if (facts.length === 0) return null;
+  return (
+    <ul className="vc-factgrid" aria-label="About this car">
+      {facts.map((f) => (
+        <li key={f.key}>
+          <span className="vc-fact-label">
+            <i className={`fas fa-${f.icon}`} aria-hidden="true" /> {f.label}
+          </span>
+          <span className="vc-fact-text">{f.text}</span>
+          {f.note && <span className="vc-fact-note">{f.note}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The safety equipment vPIC marks standard or optional, air bags first. */
+function SafetyEquipment({ car }: { car: DecodedVin }) {
+  const bags = airBagsLine(car.details);
+  const items = safetyItems(car.details);
+  if (!bags && items.length === 0) return null;
+  return (
+    <section className="vc-card" aria-labelledby="vc-equipment">
+      <h3 className="vc-h" id="vc-equipment">
+        Safety equipment
+      </h3>
+      <ul className="vc-checks">
+        {bags && (
+          <li>
+            <i className="fas fa-circle-check" aria-hidden="true" />
+            <span>{bags}</span>
+          </li>
+        )}
+        {items.map((item) => (
+          <li key={item.name} className={item.optional ? "vc-check--optional" : undefined}>
+            <i className={`fas ${item.optional ? "fa-circle-plus" : "fa-circle-check"}`} aria-hidden="true" />
+            <span>
+              {item.name}
+              {item.optional && " (optional)"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="vc-note">From NHTSA&rsquo;s VIN data. A missing item doesn&rsquo;t mean the car lacks it.</p>
+    </section>
+  );
+}
+
+const STAR_WORD: Record<string, string> = { "5": "Top score", "4": "Good", "3": "Fair", "2": "Poor", "1": "Poor" };
+
+/** Moves to a section and its heading, smoothly unless the visitor asked for less motion. */
+function jumpTo(e: React.MouseEvent<HTMLAnchorElement>) {
+  const target = document.getElementById(e.currentTarget.hash.slice(1));
+  if (!target) return;
+  e.preventDefault();
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+  target.focus({ preventScroll: true });
+}
+
+const UNLOADED = "Couldn’t load";
+
+function safetyGlance(r: CrashRatings | null | undefined): { value: string; sub: string } {
+  if (!r) return { value: "—", sub: UNLOADED };
+  const { versions, matched } = r;
+  if (versions.length === 0) return { value: "—", sub: "Not rated" };
+  if (matched > versions.length || new Set(versions.map((v) => v.overall ?? "-")).size > 1) {
+    return { value: "?", sub: "Depends on version" };
+  }
+  const overall = versions[0].overall;
+  return overall ? { value: `${overall}/5`, sub: STAR_WORD[overall] ?? "" } : { value: "—", sub: "Not rated" };
+}
+
+/** Three tiles that say the most in the least reading, and jump to their sections. */
+function Glance({
+  recalls,
+  complaints,
+  ratings,
+  locale,
+}: {
+  recalls: ModelRecall[] | null;
+  complaints: ComplaintSummary | null | undefined;
+  ratings: CrashRatings | null | undefined;
+  locale: string;
+}) {
+  const urgent = recalls?.some((r) => r.parkIt || r.parkOutside) ?? false;
+  const tone = !recalls ? "plain" : urgent ? "stop" : recalls.length > 0 ? "warn" : "ok";
+  const safety = safetyGlance(ratings);
+  return (
+    <nav className="vc-glance" aria-label="At a glance">
+      <ul>
+        <li>
+          <a href="#vc-recalls" className={`vc-tile vc-tile--${tone}`} onClick={jumpTo}>
+            <i
+              className={`fas ${urgent ? "fa-triangle-exclamation" : tone === "ok" ? "fa-circle-check" : "fa-wrench"}`}
+              aria-hidden="true"
+            />
+            <strong>{recalls ? recalls.length : "—"}</strong>
+            <span className="vc-tile-label">Recalls</span>
+            <span className="vc-tile-sub">
+              {!recalls ? UNLOADED : urgent ? "Urgent" : recalls.length > 0 ? "Check if fixed" : "None on file"}
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="#vc-complaints" className="vc-tile vc-tile--plain" onClick={jumpTo}>
+            <i className="fas fa-comments" aria-hidden="true" />
+            <strong>{complaints ? complaints.total.toLocaleString(locale) : "—"}</strong>
+            <span className="vc-tile-label">Complaints</span>
+            <span className="vc-tile-sub">{complaints ? "From owners" : UNLOADED}</span>
+          </a>
+        </li>
+        <li>
+          <a href="#vc-stars" className="vc-tile vc-tile--plain" onClick={jumpTo}>
+            <i className="fas fa-star" aria-hidden="true" />
+            <strong>{safety.value}</strong>
+            <span className="vc-tile-label">Safety</span>
+            <span className="vc-tile-sub">{safety.sub}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
   );
 }
 
@@ -384,63 +539,65 @@ function Results({
 
   return (
     <div className="vc-results">
-      <div className="vc-card">
-        <p className="vc-eyebrow">Free check{asOf ? ` · NHTSA data as of ${asOf}` : ""}</p>
-        <h2 className="vc-car" ref={heading} tabIndex={-1}>
+      <section className="vc-card vc-hero" aria-labelledby="vc-car-name">
+        <CarPicture photo={checked.photo} car={car} />
+        <p className="vc-eyebrow">Free check</p>
+        <h2 className="vc-car" id="vc-car-name" ref={heading} tabIndex={-1}>
           {carName(car)}
         </h2>
-        <p className="vc-facts">
-          VIN <code>{vin}</code>{" "}
-          <button type="button" className="vc-link-button" onClick={copyVin}>
-            {copied ? "Copied" : "Copy VIN"}
-          </button>
-        </p>
+        <div className="vc-vin">
+          <p>
+            VIN <code>{vin}</code>{" "}
+            <button type="button" className="vc-link-button" onClick={copyVin}>
+              {copied ? "Copied" : "Copy VIN"}
+            </button>
+          </p>
+          {/* When NHTSA was asked: a cached answer can be a day or more old. */}
+          {asOf && <p className="vc-note">NHTSA data as of {asOf}</p>}
+        </div>
         {error}
-      </div>
+        <Facts car={car} locale={locale} />
+      </section>
+
+      <Glance recalls={recalls ? recalls.list : null} complaints={complaints} ratings={ratings} locale={locale} />
+
+      <SafetyEquipment car={car} />
 
       {recalls ? (
-        <Recalls list={recalls.list} model={recallModel} locale={locale} />
+        <Recalls
+          list={recalls.list}
+          texts={checked.recallText ?? {}}
+          model={recallModel}
+          make={car.make ? brand(car.make) : null}
+          locale={locale}
+        />
       ) : (
-        <section className="vc-card">
-          <h3 className="vc-h">Recalls</h3>
+        <section className="vc-card" aria-labelledby="vc-recalls">
+          <h3 className="vc-h" id="vc-recalls" tabIndex={-1}>
+            Recalls
+          </h3>
           <Unloaded what="recalls" retrying={retrying} onRetry={onRetry} />
         </section>
       )}
 
-      <section className="vc-card">
-        <h3 className="vc-h">Owner complaints</h3>
+      <section className="vc-card" aria-labelledby="vc-complaints">
+        <h3 className="vc-h" id="vc-complaints" tabIndex={-1}>
+          Owner complaints
+        </h3>
         {!complaints ? (
           <Unloaded what="complaints" retrying={retrying} onRetry={onRetry} />
         ) : complaints.total === 0 ? (
           <p>No complaints on file with NHTSA for the {model}.</p>
         ) : (
-          <>
-            <p className="vc-big">
-              {complaints.total.toLocaleString(locale)}{" "}
-              <span>complaint{complaints.total === 1 ? "" : "s"}</span>
-            </p>
-            <p className="vc-facts">
-              For the {complaintModel}: {complaints.crashes} involved a crash · {complaints.fires} a fire ·{" "}
-              {complaints.injuries} injur{complaints.injuries === 1 ? "y" : "ies"} reported
-            </p>
-            {complaints.topParts.length > 0 && (
-              <ul className="vc-parts">
-                {complaints.topParts.map((p) => (
-                  <li key={p.part}>
-                    <span>{titleCase(p.part)}</span> <strong>{p.count.toLocaleString(locale)}</strong>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
+          <Complaints complaints={complaints} filedAs={complaintModel === model ? null : complaintModel} locale={locale} />
         )}
-        <p className="vc-note">
-          Problems owners reported to NHTSA for this model year. These are reports, not proven defects.
-        </p>
+        <p className="vc-note">These are reports, not proven defects.</p>
       </section>
 
-      <section className="vc-card">
-        <h3 className="vc-h">Crash-test stars</h3>
+      <section className="vc-card" aria-labelledby="vc-stars">
+        <h3 className="vc-h" id="vc-stars" tabIndex={-1}>
+          Crash-test stars
+        </h3>
         {!ratings ? (
           <Unloaded what="crash-test stars" retrying={retrying} onRetry={onRetry} />
         ) : ratings.versions.length === 0 ? (
@@ -453,12 +610,14 @@ function Results({
             .
           </p>
         ) : (
-          <Stars ratings={ratings} model={model} />
+          <Stars ratings={ratings} model={model} year={car.year} />
         )}
       </section>
 
-      <section className="vc-card">
-        <h3 className="vc-h">Check this exact car</h3>
+      <section className="vc-card" aria-labelledby="vc-exact">
+        <h3 className="vc-h" id="vc-exact">
+          Check this exact car
+        </h3>
         <p className="vc-facts">
           These sites run their own checks, not Adedayo Aremu Autos. Tap Copy VIN, then paste it on their site.
         </p>
@@ -488,8 +647,10 @@ function Results({
         </button>
       </section>
 
-      <section className="vc-card vc-cta">
-        <h3 className="vc-h">Need a car?</h3>
+      <section className="vc-card vc-cta" aria-labelledby="vc-need">
+        <h3 className="vc-h" id="vc-need">
+          Need a car?
+        </h3>
         <div className="vc-actions">
           <a className="btn btn-primary vc-primary" href={`/${market}/rentals`}>
             See cars for rent
@@ -511,9 +672,73 @@ function Results({
   );
 }
 
+/** The count, what happened, and the parts owners name most, as bars. */
+function Complaints({
+  complaints,
+  filedAs,
+  locale,
+}: {
+  complaints: ComplaintSummary;
+  filedAs: string | null;
+  locale: string;
+}) {
+  const { total, crashes, fires, injuries } = complaints;
+  const areas =
+    complaints.topAreas ?? complaints.topParts.map((p) => ({ area: titleCase(p.part), count: p.count }));
+  const most = Math.max(1, ...areas.map((a) => a.count));
+  const n = (x: number) => x.toLocaleString(locale);
+  return (
+    <>
+      <p className="vc-big">
+        {n(total)} <span>complaint{total === 1 ? "" : "s"}</span>
+      </p>
+      <p className="vc-facts">
+        Reported by owners for this model year{filedAs ? `, filed as the ${filedAs}` : ""}.
+      </p>
+      <ul className="vc-incidents">
+        <li>
+          <i className="fas fa-car-burst" aria-hidden="true" />
+          <span>
+            <strong>{n(crashes)}</strong> involved a crash
+          </span>
+        </li>
+        <li>
+          <i className="fas fa-fire" aria-hidden="true" />
+          <span>
+            <strong>{n(fires)}</strong> involved a fire
+          </span>
+        </li>
+        <li>
+          <i className="fas fa-user-injured" aria-hidden="true" />
+          <span>
+            <strong>{n(injuries)}</strong> {injuries === 1 ? "injury" : "injuries"} reported
+          </span>
+        </li>
+      </ul>
+      {areas.length > 0 && (
+        <>
+          <p className="vc-subhead">Problems owners report most</p>
+          <ul className="vc-bars">
+            {areas.map((a) => (
+              <li key={a.area}>
+                <span className="vc-bar-name">{a.area}</span>
+                <strong>{n(a.count)}</strong>
+                <span className="vc-bar-track" aria-hidden="true">
+                  <span className="vc-bar-fill" style={{ width: `${Math.max(2, Math.round((a.count / most) * 100))}%` }} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </>
+  );
+}
+
+// The names the stars are explained under (StarList).
 const STAR_ROWS = [
   ["Overall", "overall"],
-  ["Front crash", "front"],
+  ["Head-on crash", "front"],
   ["Side crash", "side"],
   ["Rollover", "rollover"],
 ] as const;
@@ -532,9 +757,9 @@ const KEEP_CAPS = new Set(["MINI", "AMG", "SUV", "AWD", "FWD", "RWD", "4WD", "2W
 /**
  * NHTSA's shorthand in words: "Super Crew PU/CC 4x4" -> "Super Crew 4WD",
  * "Crew PU/CC 4WD" -> "Crew Cab 4WD", "5 HB FWD" -> "5-door hatchback FWD",
- * "C RWD" -> "convertible RWD", "HEV" -> "hybrid", "W/ SAB" -> "with side
- * air bags", "TOYOTA TUNDRA" -> "Toyota Tundra". "Later Release" stays, as
- * "built later": it is what tells two versions apart.
+ * "C RWD" -> "convertible RWD", "HEV" or "HV" -> "hybrid", "W/ SAB" -> "with
+ * side air bags", "TOYOTA TUNDRA" -> "Toyota Tundra". "Later Release" stays,
+ * as "built later": it is what tells two versions apart.
  */
 function plainVersion(description: string): string {
   let d = description
@@ -557,7 +782,7 @@ function plainVersion(description: string): string {
     .replace(/\bSW\b/gi, "wagon")
     .replace(/\bVAN\b/g, "van")
     .replace(/\bPHEV\b/g, "plug-in hybrid")
-    .replace(/\bHEV\b/g, "hybrid")
+    .replace(/\b(HEV|HV)\b/g, "hybrid")
     .replace(/\bBEV\b/g, "electric")
     .replace(/\s+C\s+(?=(?:AWD|4WD|FWD|RWD|2WD|4x4|4x2)\b)/i, " convertible ")
     .replace(/\b4x4\b/gi, "4WD")
@@ -594,117 +819,234 @@ function sharedStart(descriptions: string[]): string {
   return words.join(" ");
 }
 
-function StarRow({ value }: { value: string }) {
-  const n = Number(value);
-  // One image with one name, so a screen reader says "4 of 5 stars", not
-  // five "black star"s. Hollow stars for the rest still read in high contrast.
+/** Words of a phrase ("built later", "with side air bags"), kept even when every version has them. */
+const PHRASE_WORD = /^(built|with|without|side|air|bags|rear)$/i;
+
+/**
+ * What tells each version apart, in words: "AWD", "FWD", "hybrid AWD" for
+ * the Highlanders; "built later" and "built earlier"; "crew cab 4WD" for a
+ * Silverado rated alone. Words every version shares ("SUV") are left out.
+ */
+function versionLabels(descriptions: string[]): string[] {
+  const plain = descriptions.map(plainVersion);
+  const start = modelPart(sharedStart(plain));
+  const rests = plain.map((p) => p.slice(start.length).trim().split(" ").filter(Boolean));
+  const common =
+    rests.length > 1 ? rests[0].filter((w) => !PHRASE_WORD.test(w) && rests.every((r) => r.includes(w))) : [];
+  return rests.map((r, i) => {
+    const own = r.filter((w) => !common.includes(w));
+    return (own.length > 0 ? own : r).join(" ") || plain[i];
+  });
+}
+
+/** Stars as one image with one name, so a screen reader says "4 of 5 stars", not five "black star"s. */
+function StarGlyphs({ value }: { value: string }) {
+  const n = Math.max(0, Math.min(5, Number(value) || 0));
   return (
-    <dd>
-      <span role="img" aria-label={`${value} of 5 stars`}>
-        {"★".repeat(n)}
-        <span className="vc-star-off">{"☆".repeat(Math.max(0, 5 - n))}</span>
-      </span>
-    </dd>
+    <span className="vc-glyphs" role="img" aria-label={`${value} of 5 stars`}>
+      {"★".repeat(n)}
+      <span className="vc-star-off">{"☆".repeat(5 - n)}</span>
+    </span>
+  );
+}
+
+/** "17%", or "17% to 19%" when the versions this car could be differ. */
+function rolloverChance(versions: RatedVersion[]): string | null {
+  const risks = versions
+    .map((v) => v.rolloverRisk)
+    .filter((r): r is number => typeof r === "number")
+    .map((r) => Math.round(r * 100));
+  if (risks.length === 0) return null;
+  const lo = Math.min(...risks);
+  const hi = Math.max(...risks);
+  return lo === hi ? `${lo}%` : `${lo}% to ${hi}%`;
+}
+
+const MEANING = {
+  front: "How well it protects people in a crash at the front.",
+  side: "How well it protects people when it’s hit from the side.",
+} as const;
+
+/** The three crash tests, each with what it means. */
+function StarList({ v, chance }: { v: RatedVersion; chance: string | null }) {
+  const rows = [
+    { icon: "car-burst", name: "Head-on crash", value: v.front, meaning: MEANING.front },
+    { icon: "car-side", name: "Side crash", value: v.side, meaning: MEANING.side },
+    {
+      icon: "rotate",
+      name: "Rollover",
+      value: v.rollover,
+      meaning: chance
+        ? `How likely it is to roll over: ${chance} chance in a crash with no other car.`
+        : "How likely it is to roll over in a crash with no other car.",
+    },
+  ];
+  return (
+    <ul className="vc-starlist">
+      {rows.map((row) => (
+        <li key={row.name}>
+          <i className={`fas fa-${row.icon}`} aria-hidden="true" />
+          <span className="vc-star-name">{row.name}</span>
+          {row.value ? <StarGlyphs value={row.value} /> : <span className="vc-muted">Not rated</span>}
+          <span className="vc-star-meaning">{row.meaning}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Four rows of stars, small: for a version shown beside this car's. */
+function MiniStars({ v, rows = STAR_ROWS }: { v: RatedVersion; rows?: readonly (typeof STAR_ROWS)[number][] }) {
+  return (
+    <dl className="vc-ministars">
+      {rows.map(([label, k]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{v[k] ? <StarGlyphs value={v[k]!} /> : <span className="vc-muted">Not rated</span>}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
 /**
- * The stars for the versions that match this car. One set when they agree.
- * When they don't, the ratings they share once, then each version with the
- * ratings that differ — never one version's stars presented as another's,
- * and never "Not rated" for a version that has some stars. When more
- * versions match than could be fetched, none are offered as the choices.
+ * Crash-test stars, explained. One set when the versions this car could be
+ * agree, with the other versions of the model compared; when they differ,
+ * each version with its own stars — never one version's stars presented as
+ * another's, and never "Not rated" for a version that has some stars. When
+ * more versions match than could be fetched, none are offered as the choices.
  */
-function Stars({ ratings, model }: { ratings: CrashRatings; model: string }) {
+function Stars({ ratings, model, year }: { ratings: CrashRatings; model: string; year: number | null }) {
   const { versions, matched } = ratings;
+  const others = ratings.others ?? [];
+  const otherCount = ratings.otherCount ?? 0;
+  const intro = (
+    <p className="vc-facts">
+      NHTSA, the U.S. road safety agency, crashes new cars on purpose and scores them from 1 to 5 stars. More
+      stars means more protection.
+    </p>
+  );
+  const notes = (
+    <>
+      {year !== null && year < 2011 && (
+        <p className="vc-note">Cars from before 2011 were rated under an older system, so compare their stars only with each other.</p>
+      )}
+      <p className="vc-note">Compare stars only with cars of a similar size and weight.</p>
+    </>
+  );
+  const seeAll = (
+    <a href="https://www.nhtsa.gov/ratings" target="_blank" rel="noopener noreferrer">
+      nhtsa.gov/ratings
+    </a>
+  );
+
   if (matched > versions.length) {
     return (
-      <p className="vc-muted">
-        NHTSA rates more versions of the {model} than we can show here, and the VIN doesn&rsquo;t say
-        which one this is. See them all at{" "}
-        <a href="https://www.nhtsa.gov/ratings" target="_blank" rel="noopener noreferrer">
-          nhtsa.gov/ratings
-        </a>
-        .
-      </p>
-    );
-  }
-
-  const agree = new Set(versions.map(starsOf)).size === 1;
-  const v = versions[0];
-  const rated = STAR_ROWS.filter(([, k]) => v[k]);
-  const plain = versions.map((x) => plainVersion(x.description));
-
-  if (agree) {
-    if (rated.length === 0) {
-      // Often a car from before 2011, rated under NHTSA's older system.
-      return <p className="vc-muted">NHTSA has no 5-Star ratings on file for this version.</p>;
-    }
-    return (
       <>
-        <dl className="vc-stars">
-          {rated.map(([label, k]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <StarRow value={v[k]!} />
-            </div>
-          ))}
-        </dl>
-        <p className="vc-facts">
-          {versions.length === 1
-            ? `Rated: ${plain[0]}`
-            : "The same for every version of this model that matches this car."}
-        </p>
-        <p className="vc-note">
-          NHTSA crash-test stars. Compare them only with cars of the same type and about the same weight.
+        {intro}
+        <p className="vc-muted">
+          NHTSA rates more versions of the {model} than we can show here, and the VIN doesn&rsquo;t say
+          which one this is. See them all at {seeAll}.
         </p>
       </>
     );
   }
 
+  const agree = new Set(versions.map(starsOf)).size === 1;
+  const v = versions[0];
+
+  if (agree) {
+    if (!STAR_ROWS.some(([, k]) => v[k])) {
+      return (
+        <>
+          {intro}
+          <p className="vc-muted">NHTSA has no 5-Star ratings on file for this version.</p>
+          {notes}
+        </>
+      );
+    }
+    const one = versions.length === 1;
+    const labels = versionLabels([...versions, ...others].map((x) => x.description));
+    const otherLabels = labels.slice(versions.length);
+    const othersAgree = others.every((o) => starsOf(o) === starsOf(v));
+    const checkedAll = others.length === otherCount;
+    // "Same stars": the rollover chance above is this version's own, and can differ.
+    let line: string | null = null;
+    if (!one) line = otherCount === 0 ? "Same stars for every version of this model." : "Same stars for every version that matches this car.";
+    else if (otherCount > 0 && othersAgree && checkedAll) line = "Same stars for every version of this model.";
+    else if (otherCount > 0) line = `Rated: the ${labels[0]} version.`;
+    const alsoSame =
+      one && others.length > 0 && othersAgree && !checkedAll
+        ? `The ${joinAnd(otherLabels)} version${others.length === 1 ? " has" : "s have"} the same stars.`
+        : null;
+
+    return (
+      <>
+        {intro}
+        <div className="vc-overall">
+          <p className="vc-overall-label">Overall</p>
+          {v.overall ? (
+            <>
+              <StarGlyphs value={v.overall} />
+              <p className="vc-overall-score">
+                <strong>{v.overall} out of 5</strong> · {STAR_WORD[v.overall]}
+              </p>
+            </>
+          ) : (
+            <p className="vc-overall-score">
+              <strong>No overall score</strong>
+            </p>
+          )}
+        </div>
+        <StarList v={v} chance={rolloverChance(versions)} />
+        {line && <p className="vc-facts vc-version-line">{line}</p>}
+        {alsoSame && <p className="vc-facts">{alsoSame}</p>}
+        {one && others.length > 0 && !othersAgree && (
+          <details className="vc-others">
+            <summary>Other versions</summary>
+            <ul className="vc-versions">
+              {others.map((o, i) => (
+                <li key={`${i}:${o.description}`}>
+                  <p className="vc-version-name">The {otherLabels[i]} version</p>
+                  <MiniStars v={o} />
+                </li>
+              ))}
+            </ul>
+            {!checkedAll && <p className="vc-note">NHTSA rates more versions. See them all at {seeAll}.</p>}
+          </details>
+        )}
+        {notes}
+      </>
+    );
+  }
+
+  const plain = versions.map((x) => plainVersion(x.description));
   const start = modelPart(sharedStart(plain));
+  // What tells them apart, without the words they share: "Built later", "Built earlier".
+  const names = versionLabels(versions.map((x) => x.description)).map((l) => l.charAt(0).toUpperCase() + l.slice(1));
   const same = STAR_ROWS.filter(([, k]) => v[k] && versions.every((x) => x[k] === v[k]));
   const differ = STAR_ROWS.filter(([, k]) => new Set(versions.map((x) => x[k] ?? "-")).size > 1);
   return (
     <>
+      {intro}
       <p className="vc-facts">
         The stars for the {start || "model"} depend on the version, and the VIN doesn&rsquo;t say which.
       </p>
       {same.length > 0 && (
         <>
           <p className="vc-note">The same for every version:</p>
-          <dl className="vc-stars">
-            {same.map(([label, k]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <StarRow value={v[k]!} />
-              </div>
-            ))}
-          </dl>
+          <MiniStars v={v} rows={same} />
         </>
       )}
       <ul className="vc-versions">
         {versions.map((x, i) => (
           <li key={`${i}:${x.description}`}>
-            <p className="vc-version-name">{plain[i].slice(start.length).trim() || plain[i]}</p>
-            {STAR_ROWS.some(([, k]) => x[k]) ? (
-              <dl className="vc-stars">
-                {differ.map(([label, k]) => (
-                  <div key={label}>
-                    <dt>{label}</dt>
-                    {x[k] ? <StarRow value={x[k]!} /> : <dd className="vc-muted">Not rated</dd>}
-                  </div>
-                ))}
-              </dl>
-            ) : (
-              <p className="vc-muted">Not rated</p>
-            )}
+            <p className="vc-version-name">{names[i] || plain[i]}</p>
+            {STAR_ROWS.some(([, k]) => x[k]) ? <MiniStars v={x} rows={differ} /> : <p className="vc-muted">Not rated</p>}
           </li>
         ))}
       </ul>
-      <p className="vc-note">
-        NHTSA crash-test stars. Compare them only with cars of the same type and about the same weight.
-      </p>
+      {notes}
     </>
   );
 }
@@ -714,11 +1056,15 @@ const FIRST_RECALLS = 5;
 
 function Recalls({
   list,
+  texts,
   model,
+  make,
   locale,
 }: {
   list: ModelRecall[];
+  texts: Record<string, RecallText>;
   model: string;
+  make: string | null;
   locale: string;
 }) {
   // YYYY-MM-DD from the server, shown the way the reader writes dates.
@@ -730,15 +1076,31 @@ function Recalls({
   const listRef = useRef<HTMLUListElement>(null);
 
   // The button that was pressed is gone; focus goes to the first recall it
-  // revealed, so the reader carries on from where they were.
+  // revealed, so the reader carries on from where they were. Each recall's
+  // own summary, not the "Read NHTSA's notice" one inside it.
   useEffect(() => {
-    if (showAll) listRef.current?.querySelectorAll("summary")[FIRST_RECALLS]?.focus();
+    if (showAll) {
+      listRef.current?.querySelectorAll<HTMLElement>(":scope > li > details > summary")[FIRST_RECALLS]?.focus();
+    }
   }, [showAll]);
 
   const urgent = list.some((r) => r.parkIt || r.parkOutside);
+  const textOf = (r: ModelRecall): RecallText =>
+    texts[r.campaign] ?? {
+      headline: recallPart(r.component),
+      problem: r.summary,
+      risk: r.consequence,
+      fix: r.remedy,
+      source: "nhtsa",
+    };
+  const anyAi = list.some((r) => texts[r.campaign]?.source === "ai");
+  const dealer = make ? `${aOrAn(make)} ${make} dealer` : "the maker’s dealers";
+
   return (
-    <section className="vc-card">
-      <h3 className="vc-h">Recalls for this model</h3>
+    <section className="vc-card" aria-labelledby="vc-recalls">
+      <h3 className="vc-h" id="vc-recalls" tabIndex={-1}>
+        Recalls for this model
+      </h3>
       {list.length === 0 ? (
         <p>
           NHTSA lists no recalls for the {model}. To be sure about this exact car, check its VIN at{" "}
@@ -753,38 +1115,95 @@ function Recalls({
             {list.length} <span>recall{list.length === 1 ? "" : "s"}</span>
           </p>
           {urgent && (
-            <p className="vc-warn">
+            <p className="vc-warn vc-warn--stop">
               Some {model} cars are under a recall that says not to drive them, or to park them
               outside, until they&rsquo;re fixed. Check this car&rsquo;s VIN at nhtsa.gov/recalls
               before you drive it.
             </p>
           )}
+          <div className="vc-todo">
+            <p className="vc-todo-title">
+              <i className="fas fa-wrench" aria-hidden="true" /> What to do
+            </p>
+            <p>
+              Recall repairs are usually free at {dealer}. Ask the seller for proof these were fixed, or
+              check this car&rsquo;s VIN for free at{" "}
+              <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener noreferrer">
+                nhtsa.gov/recalls
+              </a>
+              .
+            </p>
+          </div>
           <p className="vc-facts">
-            {list.length} recall{list.length === 1 ? " was" : "s were"} issued for the {model}. Some may
-            not apply to this car, and some may already be fixed. Check this car&rsquo;s VIN for free at{" "}
-            <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener noreferrer">
-              nhtsa.gov/recalls
-            </a>
-            .
+            {list.length === 1 ? "This recall was" : `These ${list.length} recalls were`} issued for the{" "}
+            {model}. Some may not apply to this car, and some may already be fixed.
           </p>
+          {anyAi && (
+            <p className="vc-note">
+              Plain-English summaries written by AI from NHTSA&rsquo;s notices. Tap a recall to read the original.
+            </p>
+          )}
           <ul className="vc-recalls" ref={listRef}>
-            {(showAll ? list : list.slice(0, FIRST_RECALLS)).map((r) => (
-              <li key={r.campaign}>
-                <details>
-                  <summary>
-                    <span>{r.component ? titleCase(r.component.split(":")[0]) : "Recall"}</span>
-                    {r.date && <small>{when(r.date)}</small>}
-                  </summary>
-                  {r.summary && <p>{r.summary}</p>}
-                  {r.remedy && (
-                    <p>
-                      <strong>The fix:</strong> {r.remedy}
-                    </p>
-                  )}
-                  <p className="vc-note">NHTSA campaign {r.campaign}</p>
-                </details>
-              </li>
-            ))}
+            {(showAll ? list : list.slice(0, FIRST_RECALLS)).map((r) => {
+              const t = textOf(r);
+              return (
+                <li key={r.campaign}>
+                  <details>
+                    <summary>
+                      <span className="vc-recall-head">{t.headline}</span>
+                      <span className="vc-recall-meta">
+                        {r.date && <span>{when(r.date)}</span>}
+                        {r.parkIt && <span className="vc-badge vc-badge--stop">Don&rsquo;t drive it until it&rsquo;s fixed</span>}
+                        {r.parkOutside && <span className="vc-badge vc-badge--stop">Park it outside</span>}
+                        {freeFix(r.remedy) && <span className="vc-badge vc-badge--free">Free fix</span>}
+                      </span>
+                    </summary>
+                    <div className="vc-recall-body">
+                      {anyAi && t.source === "nhtsa" && <p className="vc-note">In NHTSA&rsquo;s own words.</p>}
+                      <dl>
+                        {t.problem && (
+                          <div>
+                            <dt>What&rsquo;s wrong</dt>
+                            <dd>{t.problem}</dd>
+                          </div>
+                        )}
+                        {t.risk && (
+                          <div>
+                            <dt>What could happen</dt>
+                            <dd>{t.risk}</dd>
+                          </div>
+                        )}
+                        {t.fix && (
+                          <div>
+                            <dt>The fix</dt>
+                            <dd>{t.fix}</dd>
+                          </div>
+                        )}
+                      </dl>
+                      <details className="vc-notice">
+                        <summary>Read NHTSA&rsquo;s notice</summary>
+                        {r.summary && (
+                          <p>
+                            <strong>Summary:</strong> {r.summary}
+                          </p>
+                        )}
+                        {r.consequence && (
+                          <p>
+                            <strong>What could happen:</strong> {r.consequence}
+                          </p>
+                        )}
+                        {r.remedy && (
+                          <p>
+                            <strong>The fix:</strong> {r.remedy}
+                          </p>
+                        )}
+                        <p className="vc-note">NHTSA campaign {r.campaign}</p>
+                      </details>
+                    </div>
+                  </details>
+                </li>
+              );
+            })}
           </ul>
           {!showAll && list.length > FIRST_RECALLS && (
             <button type="button" className="btn btn-outline vc-copy" onClick={() => setShowAll(true)}>

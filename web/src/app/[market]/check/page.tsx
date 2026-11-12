@@ -47,10 +47,7 @@ export default async function CheckPage({
           <h1>
             Check <span>any car</span>
           </h1>
-          <p>
-            Free. Enter a VIN to see what the car is, and the recalls, owner
-            complaints and crash-test stars for its model.
-          </p>
+          <p>Free. Type a VIN to see the car, its recalls and its safety stars.</p>
         </div>
       </div>
 

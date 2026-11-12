@@ -1,6 +1,8 @@
 import "server-only";
 import { createHash, createHmac } from "node:crypto";
 import { unstable_cache } from "next/cache";
+import { readDetails, type CarDetails } from "./features";
+import { complaintArea } from "./plain";
 
 /**
  * Free US government data about a vehicle, from NHTSA.
@@ -287,6 +289,8 @@ export interface DecodedVin {
   /** The names to look this model up under elsewhere (nhtsaModelNames). */
   names: string[];
   fit: VersionFit;
+  /** Seats, engine, transmission, plant, base price and safety equipment (features.ts). */
+  details: CarDetails;
 }
 
 /*
@@ -500,6 +504,7 @@ export function summarizeDecode(v: Record<string, unknown>): DecodedVin {
       power,
       words: wordsOf(trim, series, text(v.Series2)),
     },
+    details: readDetails(v),
   };
 }
 
@@ -532,7 +537,8 @@ function vinKey(vin: string): string {
 }
 
 export function decodeVin(vin: string): Promise<DecodedVin | null> {
-  const cached = unstable_cache(() => decodeLive(vin), ["nhtsa-decode-v5", vinKey(vin)], {
+  // v6: the answer gained `details`.
+  const cached = unstable_cache(() => decodeLive(vin), ["nhtsa-decode-v6", vinKey(vin)], {
     revalidate: 30 * DAY,
   });
   return orNull("decode", cached());
@@ -841,6 +847,12 @@ export interface ComplaintSummary {
   injuries: number;
   /** The parts complained about most, with counts, most first. */
   topParts: { part: string; count: number }[];
+  /**
+   * The same in plain groups ("Brakes", "Electrical"), each complaint counted
+   * once per group: "SERVICE BRAKES" and "SERVICE BRAKES, HYDRAULIC" on one
+   * complaint is one brake complaint, not two.
+   */
+  topAreas: { area: string; count: number }[];
   /** The model names the complaints were found under. */
   foundUnder: string[];
   fetchedAt: string;
@@ -892,20 +904,24 @@ async function complaintsLive(year: number, make: string, own: string[], want: W
   const rows = [...byId.values()];
 
   const parts = new Map<string, number>();
+  const areas = new Map<string, number>();
   for (const row of rows) {
-    for (const part of complaintParts(String(row.components ?? ""))) {
-      parts.set(part, (parts.get(part) ?? 0) + 1);
-    }
+    const own = complaintParts(String(row.components ?? ""));
+    for (const part of own) parts.set(part, (parts.get(part) ?? 0) + 1);
+    for (const area of new Set(own.map(complaintArea))) areas.set(area, (areas.get(area) ?? 0) + 1);
   }
+  const top = <K extends string>(m: Map<string, number>, key: K) =>
+    [...m.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ [key]: name, count }) as Record<K, string> & { count: number });
   return {
     total: rows.length,
     crashes: rows.filter((x) => x.crash === true).length,
     fires: rows.filter((x) => x.fire === true).length,
     injuries: rows.reduce((s, x) => s + (Number(x.numberOfInjuries) || 0), 0),
-    topParts: [...parts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([part, count]) => ({ part, count })),
+    topParts: top(parts, "part"),
+    topAreas: top(areas, "area"),
     foundUnder: perName.filter((p) => p.rows.length > 0).map((p) => p.name),
     fetchedAt: new Date().toISOString(),
   };
@@ -916,7 +932,8 @@ async function complaintsLive(year: number, make: string, own: string[], want: W
 const complaintsCached = unstable_cache(
   (year: number, make: string, names: string[], want: Want) =>
     shared(JSON.stringify(["complaints", year, make, names, want]), () => complaintsLive(year, make, names, want)),
-  ["nhtsa-complaints-v5"],
+  // v6: the answer gained `topAreas`.
+  ["nhtsa-complaints-v6"],
   { revalidate: 2 * DAY },
 );
 
@@ -938,6 +955,8 @@ export interface RatedVersion {
   front: string | null;
   side: string | null;
   rollover: string | null;
+  /** NHTSA's chance of rolling over in a crash with no other car: 0.169 is 17%. */
+  rolloverRisk: number | null;
 }
 
 export interface CrashRatings {
@@ -948,6 +967,14 @@ export interface CrashRatings {
    * some were left out; then the page lists none of them as the choices.
    */
   matched: number;
+  /**
+   * Other versions of the model built like this one (same body, cab and
+   * doors: an AWD's FWD sibling, a gas car's hybrid), to compare with. Only
+   * when the VIN pins down one version; at most a few.
+   */
+  others: RatedVersion[];
+  /** How many other versions NHTSA rates in all; more than `others` holds when some weren't read. */
+  otherCount: number;
   fetchedAt: string;
 }
 
@@ -1012,9 +1039,10 @@ export function readVersion(description: string): {
                 ? "closed"
                 : null;
   const doors = (kind === "DR" || kind === "HB") && doorWord && /^\d$/.test(doorWord) ? Number(doorWord) : null;
+  // "HV" too: NHTSA names the 2017 Highlander Hybrid "Highlander HV SUV AWD".
   const power: Power | null = /\b(PHEV|PRIME|PLUG-IN|ENERGI|4XE)\b/.test(d)
     ? "plugin"
-    : /\b(HEV|HYBRID)\b/.test(d)
+    : /\b(HEV|HV|HYBRID)\b/.test(d)
       ? "hybrid"
       : /\bDIESEL\b/.test(d)
         ? "diesel"
@@ -1066,9 +1094,30 @@ export function pickVersions<T extends { description: string; extra?: string[] }
   return scored.filter((x) => x.s === best).map((x) => x.v);
 }
 
+/**
+ * The other versions to compare this car's stars with: built like it (the
+ * same body, cab and doors as NHTSA names them), differing in drive or
+ * powertrain. A crew cab is compared with crew cabs, never with a regular
+ * cab; closest to the car first.
+ */
+export function siblingVersions<T extends { description: string; extra?: string[] }>(
+  primary: T,
+  rest: T[],
+  fit: VersionFit,
+): T[] {
+  const p = readVersion(primary.description);
+  return rest
+    .map((v, i) => ({ v, i, r: readVersion(v.description) }))
+    .filter(({ r }) => r.body === p.body && r.cab === p.cab && r.doors === p.doors)
+    .sort((a, b) => versionScore(b.v, fit) - versionScore(a.v, fit) || a.i - b.i)
+    .map(({ v }) => v);
+}
+
 /** The most rated models one check reads, and the most versions it fetches stars for. */
 const MAX_RATED_MODELS = 16;
 const MAX_RATED_VERSIONS = 6;
+/** The most other versions read to compare with. */
+const MAX_OTHER_VERSIONS = 4;
 
 /**
  * The rated models to read for this car, from the make's list for the year.
@@ -1164,29 +1213,49 @@ async function ratingsLive(year: number, make: string, names: string[], fit: Ver
 
   const best = pickVersions(candidates, fit);
   const picked = best.slice(0, MAX_RATED_VERSIONS);
-  const details = await Promise.all(
-    picked.map((c) =>
-      getJson<{ Results?: Record<string, unknown>[] }>("ratings", `https://api.nhtsa.gov/SafetyRatings/VehicleId/${c.id}`, {
-        timeoutMs: 8_000,
-      }),
-    ),
-  );
+  const bestIds = new Set(best.map((b) => b.id));
+  const rest = candidates.filter((c) => !bestIds.has(c.id));
+  // Others are only compared with one version the VIN pins down.
+  const siblings = best.length === 1 ? siblingVersions(best[0], rest, fit).slice(0, MAX_OTHER_VERSIONS) : [];
+
+  const detail = (c: VersionName) =>
+    getJson<{ Results?: Record<string, unknown>[] }>("ratings", `https://api.nhtsa.gov/SafetyRatings/VehicleId/${c.id}`, {
+      timeoutMs: 8_000,
+    });
+  const read = (r: Record<string, unknown>, fallback: string): RatedVersion => {
+    const risk = Number(r.RolloverPossibility);
+    return {
+      description: text(r.VehicleDescription) ?? fallback,
+      overall: stars(r.OverallRating),
+      front: stars(r.OverallFrontCrashRating),
+      side: stars(r.OverallSideCrashRating),
+      rollover: stars(r.RolloverRating),
+      rolloverRisk: Number.isFinite(risk) && risk > 0 && risk < 1 ? risk : null,
+    };
+  };
+  const [details, otherDetails] = await Promise.all([
+    Promise.all(picked.map(detail)),
+    // A version only compared with is left out if it can't be read; the
+    // count below then tells the page not every version was checked.
+    Promise.all(siblings.map((c) => detail(c).catch(() => null))),
+  ]);
   const versions = details.map((d, i): RatedVersion => {
     const r = d.Results?.[0];
     // Never shown short: with one of the best matches missing, the others'
     // stars could pass for this car's.
     if (!r) throw new Unavailable("ratings: a version came back empty");
-    return {
-      description: text(r.VehicleDescription) ?? picked[i].description,
-      overall: stars(r.OverallRating),
-      front: stars(r.OverallFrontCrashRating),
-      side: stars(r.OverallSideCrashRating),
-      rollover: stars(r.RolloverRating),
-    };
+    return read(r, picked[i].description);
+  });
+  const others = otherDetails.flatMap((d, i) => {
+    const r = d?.Results?.[0];
+    return r ? [read(r, siblings[i].description)] : [];
   });
   return {
     versions,
     matched: modelsCut ? Math.max(best.length, picked.length + 1) : best.length,
+    others,
+    // Models left out by the cap may hold more versions still.
+    otherCount: modelsCut ? Math.max(rest.length, others.length + 1) : rest.length,
     fetchedAt: new Date().toISOString(),
   };
 }
@@ -1194,7 +1263,8 @@ async function ratingsLive(year: number, make: string, names: string[], fit: Ver
 const ratingsCached = unstable_cache(
   (year: number, make: string, names: string[], fit: VersionFit) =>
     shared(JSON.stringify(["ratings", year, make, names, fit]), () => ratingsLive(year, make, names, fit)),
-  ["nhtsa-ratings-v5"],
+  // v6: versions gained `rolloverRisk`, and the answer `others` and `otherCount`.
+  ["nhtsa-ratings-v6"],
   { revalidate: 30 * DAY },
 );
 
