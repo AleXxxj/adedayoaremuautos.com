@@ -300,7 +300,10 @@ export function VinCheck({
  * asks for, or a drawing of the body shape when there is none.
  */
 function CarPicture({ photo, car }: { photo: CarPhoto | null | undefined; car: DecodedVin }) {
-  if (!photo) {
+  // A photo that doesn't load (Wikimedia or the resizer unreachable) gives
+  // way to the drawing, rather than a broken image with a credit under it.
+  const [failed, setFailed] = useState<string | null>(null);
+  if (!photo || failed === photo.src) {
     return (
       <div className="vc-photo vc-photo--drawn">
         <CarShape shape={bodyShape(car)} />
@@ -318,6 +321,7 @@ function CarPicture({ photo, car }: { photo: CarPhoto | null | undefined; car: D
         height={photo.height}
         alt={shown}
         sizes="(min-width: 792px) 760px, calc(100vw - 32px)"
+        onError={() => setFailed(photo.src)}
       />
       <figcaption className="vc-credit">
         <a href={photo.pageUrl} target="_blank" rel="noopener noreferrer">
