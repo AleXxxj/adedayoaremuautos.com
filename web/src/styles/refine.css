@@ -3115,14 +3115,48 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   24. The website assistant
+   24. Ayo, the website assistant
 
    Answers from the live database — stock, rental rates, rent-to-own terms —
    so someone looking at a car at 2am is not left with a contact form and a
    wait until morning. It never negotiates, never promises a vehicle on
    specific dates and never touches finance approval; those go to a person.
+
+   It has a name and a face (components/Assistant.tsx, lib/ai/persona.ts): a
+   drawn smile on the brand green, never a photo, and "Virtual assistant" in
+   its header for as long as the panel is open.
    ------------------------------------------------------------------------ */
 
+/* The face. The glyphs are the page's near-black on the green: 5:1 or more. */
+.legacy-theme .ayo-avatar {
+    position: relative;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(140deg, #97dbb6 0%, #5fc791 45%, #15964f 100%);
+    color: #070c0a;
+}
+
+.legacy-theme .ayo-avatar svg {
+    display: block;
+}
+
+/* "Online": a small green dot with a ring of the page color around it. */
+.legacy-theme .ayo-avatar-dot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 26%;
+    height: 26%;
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 50%;
+    background: #2fb26c;
+    box-shadow: 0 0 0 2px #070c0a;
+}
+
+/* The launcher: the face, 56px, with "Ask Ayo" beside it on a wide screen. */
 .legacy-theme .assistant-launcher {
     position: fixed;
     right: 20px;
@@ -3131,93 +3165,218 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    height: 52px;
-    padding: 0 20px;
-    border: 1px solid rgba(78, 157, 118, 0.5);
+    padding: 0;
+    border: 0;
     border-radius: 999px;
-    background: linear-gradient(135deg, #1d4535 0%, #0f2a20 100%);
-    color: #fff;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 180ms ease-out;
+}
+
+.legacy-theme .assistant-launcher .ayo-avatar {
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.14) inset;
 }
 
 .legacy-theme .assistant-launcher:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
 }
 
-.legacy-theme .assistant-launcher.is-open {
-    width: 52px;
-    padding: 0;
-    justify-content: center;
+.legacy-theme .assistant-launcher:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+.legacy-theme .ayo-launcher-label {
+    display: none;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-1);
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 1024px) {
+    .legacy-theme .ayo-launcher-label {
+        display: inline-flex;
+    }
+}
+
+/* Never beside a booking form: on a rental page the old "Ask us" pill sat
+   on the insurance choices and the privacy note. The face alone fits. */
+.legacy-theme:has(.rental-book, .booking-form) .ayo-launcher-label {
+    display: none;
+}
+
+.legacy-theme .ayo-launcher-close {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    background: var(--surface-1);
+    font-size: 18px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* The once-a-visit "Hi, I'm Ayo" beside the launcher, on the home page. */
+.legacy-theme .ayo-nudge {
+    position: fixed;
+    right: 20px;
+    bottom: 88px;
+    z-index: 899;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    max-width: min(300px, calc(100vw - 40px));
+    padding: 4px 4px 4px 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 18px 18px 6px 18px;
+    background: var(--surface-1);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+    animation: ayo-nudge-in 280ms ease-out both;
+}
+
+@keyframes ayo-nudge-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+.legacy-theme .ayo-nudge-open {
+    flex: 1;
+    min-height: 44px;
+    padding: 8px 0;
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+}
+
+.legacy-theme .ayo-nudge-close {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.legacy-theme .ayo-nudge-close:hover {
+    color: var(--text-primary);
 }
 
 .legacy-theme .assistant-panel {
     position: fixed;
     right: 20px;
-    bottom: 84px;
+    bottom: 88px;
     z-index: 901;
     display: flex;
     flex-direction: column;
     width: min(400px, calc(100vw - 40px));
-    height: min(560px, calc(100dvh - 140px));
-    border: 1px solid var(--border, #262626);
-    border-radius: 18px;
-    background: #0d0d0d;
-    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+    height: min(600px, calc(100dvh - 140px));
     overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: 20px;
+    background: var(--surface-0);
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
     opacity: 0;
     visibility: hidden;
     transform: translateY(12px) scale(0.98);
     transform-origin: bottom right;
+    /* Hidden only once the fade out has finished... */
     transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        visibility 0.2s;
+        opacity 0.2s ease-out,
+        transform 0.2s ease-out,
+        visibility 0s linear 0.2s;
 }
 
+/* ...but visible at once on opening, so focus can move into it straight
+   away (a hidden element cannot take focus, even halfway into a fade). */
 .legacy-theme .assistant-panel.is-open {
     opacity: 1;
     visibility: visible;
     transform: none;
+    transition:
+        opacity 0.2s ease-out,
+        transform 0.2s ease-out,
+        visibility 0s;
 }
 
 .legacy-theme .assistant-head {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    align-items: center;
     gap: 12px;
-    padding: 16px 18px;
-    border-bottom: 1px solid var(--border, #262626);
-    background: rgba(42, 92, 66, 0.16);
+    padding: 12px 12px 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--surface-1);
 }
 
-.legacy-theme .assistant-head strong {
+.legacy-theme .ayo-head-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.legacy-theme .ayo-head-text strong {
     display: block;
-    font-size: 15px;
-    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
 }
 
-.legacy-theme .assistant-head span {
+.legacy-theme .ayo-head-text strong:focus {
+    outline: none;
+}
+
+.legacy-theme .ayo-head-text span {
     display: block;
-    margin-top: 2px;
-    font-size: 12px;
-    color: var(--text-muted, #8f8f8f);
+    margin-top: 1px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
 }
 
-.legacy-theme .assistant-head button {
-    flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-    border: 1px solid var(--border, #262626);
-    border-radius: 8px;
+.legacy-theme .ayo-head-btn {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
     background: transparent;
-    color: var(--text-secondary, #b9b9b9);
+    color: var(--text-primary);
+    font-size: 15px;
+    text-decoration: none;
     cursor: pointer;
+}
+
+.legacy-theme .ayo-head-btn:hover {
+    border-color: var(--brand-300);
+    color: var(--brand-300);
+}
+
+.legacy-theme .ayo-head-btn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 999px;
 }
 
 .legacy-theme .assistant-log {
@@ -3231,32 +3390,84 @@
     scroll-behavior: smooth;
 }
 
+/* Ayo's bubbles carry its face. */
+.legacy-theme .ayo-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 92%;
+}
+
 .legacy-theme .assistant-msg {
     max-width: 86%;
     padding: 10px 14px;
-    border-radius: 14px;
-    font-size: 14.5px;
-    line-height: 1.55;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.5;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
+.legacy-theme .ayo-row .assistant-msg {
+    max-width: none;
+    min-width: 0;
+}
+
 .legacy-theme .assistant-msg--bot {
-    align-self: flex-start;
-    border: 1px solid var(--border, #262626);
-    border-bottom-left-radius: 4px;
-    background: #141414;
-    color: var(--text-secondary, #d0d0d0);
+    border: 1px solid var(--border-subtle);
+    border-bottom-left-radius: 6px;
+    background: var(--surface-1);
+    color: var(--text-primary);
 }
 
 .legacy-theme .assistant-msg--you {
     align-self: flex-end;
-    border-bottom-right-radius: 4px;
-    background: linear-gradient(135deg, #23503c 0%, #16382a 100%);
-    color: #fff;
+    border-bottom-right-radius: 6px;
+    background: var(--cta-bg);
+    color: var(--cta-fg);
 }
 
-/* Three dots while the first token is still on its way. */
+/* One-tap questions under the greeting, until the first message. */
+.legacy-theme .ayo-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-left: 36px;
+}
+
+.legacy-theme .ayo-quick-chip {
+    position: relative;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--brand-300);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--brand-300);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* 40px to look at, 44px to press. */
+.legacy-theme .ayo-quick-chip::after {
+    content: "";
+    position: absolute;
+    inset: -3px 0;
+}
+
+.legacy-theme .ayo-quick-chip:hover {
+    background: rgba(95, 199, 145, 0.1);
+}
+
+.legacy-theme .ayo-quick-chip:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 999px;
+}
+
+/* Three dots while the first word is still on its way. */
 .legacy-theme .assistant-typing {
     display: inline-block;
     width: 34px;
@@ -3273,11 +3484,21 @@
     50% { opacity: 1; }
 }
 
+.legacy-theme .ayo-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
 .legacy-theme .assistant-error {
     margin: 4px 0 0;
     padding: 10px 12px;
     border: 1px solid rgba(217, 83, 79, 0.4);
-    border-radius: 10px;
+    border-radius: 12px;
     background: rgba(217, 83, 79, 0.1);
     font-size: 13.5px;
     line-height: 1.5;
@@ -3286,39 +3507,45 @@
 
 .legacy-theme .assistant-input {
     display: flex;
+    align-items: flex-end;
     gap: 8px;
     padding: 12px 14px 0;
-    border-top: 1px solid var(--border, #262626);
+    border-top: 1px solid var(--border-subtle);
 }
 
 .legacy-theme .assistant-input textarea {
     flex: 1;
-    min-height: 42px;
+    min-height: 44px;
     max-height: 120px;
-    padding: 11px 13px;
-    border: 1px solid var(--border, #262626);
-    border-radius: 12px;
-    background: #0a0a0a;
-    color: #fff;
+    padding: 11px 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 22px;
+    background: var(--surface-1);
+    color: var(--text-primary);
     font-family: inherit;
     font-size: 15px;
     line-height: 1.4;
     resize: none;
 }
 
+.legacy-theme .assistant-input textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
 .legacy-theme .assistant-input textarea:focus {
     outline: none;
-    border-color: var(--brand-400, #4e9d76);
+    border-color: var(--brand-300);
 }
 
 .legacy-theme .assistant-input button {
     flex-shrink: 0;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border: 0;
-    border-radius: 12px;
-    background: var(--brand-400, #4e9d76);
-    color: #07130d;
+    border-radius: 999px;
+    background: var(--cta-bg);
+    color: var(--cta-fg);
     font-size: 15px;
     cursor: pointer;
 }
@@ -3330,25 +3557,29 @@
 
 .legacy-theme .assistant-foot {
     margin: 0;
-    padding: 9px 14px 13px;
+    padding: 9px 16px 13px;
     font-size: 11.5px;
     line-height: 1.5;
-    color: var(--text-muted, #8f8f8f);
+    color: var(--text-muted);
 }
 
+/* On a phone the panel is a sheet from the bottom, over the tab bar, with
+   its own close button; the launcher steps aside while it is open. */
 @media (max-width: 520px) {
-    /* Full width on a phone. A 400px panel inset from both edges leaves a
-       message column too narrow to read. */
     .legacy-theme .assistant-panel {
         right: 0;
         left: 0;
         bottom: 0;
         width: 100%;
-        height: min(88dvh, 640px);
-        border-radius: 18px 18px 0 0;
+        height: min(88dvh, 680px);
+        border-radius: 20px 20px 0 0;
         border-left: 0;
         border-right: 0;
         border-bottom: 0;
+    }
+
+    .legacy-theme .assistant-foot {
+        padding-bottom: max(13px, env(safe-area-inset-bottom, 0px));
     }
 
     .legacy-theme .assistant-launcher {
@@ -3357,9 +3588,15 @@
     }
 
     .legacy-theme .assistant-launcher.is-open {
-        /* Above the sheet, so the same button still closes it. */
-        z-index: 902;
-        bottom: calc(min(88dvh, 640px) + 12px);
+        display: none;
+    }
+}
+
+/* Above the tab bar, with the launcher (the tab bar section places it). */
+@media (max-width: 900px) {
+    .legacy-theme .ayo-nudge {
+        right: 16px;
+        bottom: calc(var(--tabbar-h, 0px) + 78px);
     }
 }
 
@@ -3369,7 +3606,8 @@
         transition: none;
     }
 
-    .legacy-theme .assistant-typing {
+    .legacy-theme .assistant-typing,
+    .legacy-theme .ayo-nudge {
         animation: none;
     }
 }
@@ -4051,88 +4289,355 @@
     text-decoration: underline;
 }
 
-/* ── Fitting the header between tablet and wide desktop ─────────────────────
-   The header is one wrapping flex row: logo, eight nav links, the market
-   switch. Above ~1250px they fit; below 900px the nav becomes the menu
-   button. In between — which is most laptops once the browser's own chrome
-   is subtracted — the row only just fits, so the browser squeezed the logo
-   block and the tagline broke onto two lines ("BUY • RENT • RENT-TO-OWN •" /
-   "FINANCE"). The name above it never wrapped because it was nowrap and the
-   tagline was not.
+/* ── The header ─────────────────────────────────────────────────────────────
+   One row at every width: the logo and name (one link home), the links, the
+   country switch and the partner log in. Below 1100px the links fold behind
+   the menu button, which then sits last in the row; below 900px the country
+   switch moves into the menu too, leaving the logo, the name, "Log in" and
+   the menu button.
 
-   Two changes. The tagline can no longer break, so where things genuinely do
-   not fit the nav moves to its own row cleanly instead of the logo
-   collapsing. And across that band the nav is set a little tighter, so for
-   most widths it does fit on one row in the first place. */
+   The mark is public/img/logo-mark.png: the logo trimmed of the empty border
+   that made up two thirds of logo.png, so at 34-40px tall the letters are
+   legible. The name never breaks mid-word; where room runs out it stacks,
+   and on the narrowest phones the tagline is dropped (the menu lists the
+   same things one tap away). */
+.legacy-theme .header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.legacy-theme .header-container {
+    flex-wrap: wrap;
+    column-gap: 12px;
+}
+
+.legacy-theme .logo-container {
+    min-width: 0;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.legacy-theme .logo-container .logo-mark {
+    flex: none;
+    width: auto;
+    height: 36px;
+}
+
+.legacy-theme .logo-container:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
+.legacy-theme .logo-text {
+    min-width: 0;
+}
+
+.legacy-theme .logo-text h1 {
+    line-height: 1.15;
+}
+
 .legacy-theme .logo-text p {
     white-space: nowrap;
 }
 
-/* On a phone the tagline was set at 8px — below comfortable reading size —
-   and, kept to one line, ran under the menu button. The menu lists exactly
-   these four things one tap away, so on the narrowest screens the header
-   carries the name alone. */
-@media (max-width: 480px) {
+/* "Log in" on a phone, "Partner log in" from 1100px. */
+.legacy-theme .partner-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+        border-color 180ms ease-out,
+        background-color 180ms ease-out;
+}
+
+.legacy-theme .partner-pill i {
+    font-size: 13px;
+    color: var(--brand-300);
+}
+
+.legacy-theme .partner-pill:hover {
+    border-color: var(--brand-300);
+    background: rgba(95, 199, 145, 0.08);
+}
+
+.legacy-theme .partner-pill:focus-visible,
+.legacy-theme .market-switch:focus-visible,
+.legacy-theme .mobile-menu-btn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+.legacy-theme .partner-pill-long {
+    display: none;
+}
+
+.legacy-theme .header-actions {
+    gap: 8px;
+}
+
+.legacy-theme .header-actions .market-switch {
+    min-height: 44px;
+}
+
+/* The menu's own copies of the partner log in and the country switch. */
+.legacy-theme .nav-extra {
+    display: none;
+}
+
+/* The highlighted words in a page title ("Check any car", "Earn 5%.") were a
+   dark green gradient clipped to the text, unreadable on the dark photos
+   behind most page headers. Solid --brand-300 instead. */
+.legacy-theme .page-header h1 span {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: currentColor;
+    color: var(--brand-300);
+}
+
+/* Wide screens: every link in the row, which is long. Measured November
+   2026 (US header): the eight links need 587px of text at 12.5px and 634px
+   at 13.5px; the mark is 108px at 40px tall; the name 198px at 16px and
+   246px at 20px; the globe 44px and the pill 150px, plus the gaps. So:
+
+     1100-1279  the mark alone (the name is still read out), 1,019px of 1,070
+     1280-1439  the mark and the name, 1,216px of 1,250
+     1440 up    the name at full size and the tagline, 1,364px of 1,400
+
+   and the country switch is the globe alone throughout (its label is in
+   its accessible name and tooltip). */
+@media (min-width: 1100px) {
+    .legacy-theme .logo-container .logo-mark {
+        height: 40px;
+    }
+
+    .legacy-theme .partner-pill-short {
+        display: none;
+    }
+
+    .legacy-theme .partner-pill-long {
+        display: inline;
+    }
+
+    .legacy-theme .header-actions .market-switch {
+        width: 44px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .legacy-theme .header-actions .market-switch span {
+        display: none;
+    }
+
+    .legacy-theme .nav-menu a {
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 1100px) and (max-width: 1439px) {
+    .legacy-theme .nav-menu {
+        gap: 14px;
+    }
+
+    .legacy-theme .nav-menu a {
+        font-size: 12.5px;
+        letter-spacing: 0.02em;
+    }
+
+    .legacy-theme .logo-text h1 {
+        font-size: 16px;
+    }
+
     .legacy-theme .logo-text p {
         display: none;
     }
 }
 
-@media (min-width: 1100px) and (max-width: 1280px) {
+@media (min-width: 1100px) and (max-width: 1279px) {
+    .legacy-theme .logo-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 1280px) and (max-width: 1439px) {
+    .legacy-theme .logo-container .logo-mark {
+        height: 36px;
+    }
+}
+
+@media (min-width: 1440px) {
     .legacy-theme .nav-menu {
-        gap: 18px;
+        gap: 20px;
     }
 
     .legacy-theme .nav-menu a {
         font-size: 13.5px;
-        letter-spacing: 0.3px;
-    }
-
-    .legacy-theme .logo-container img {
-        height: 44px;
-    }
-
-    .legacy-theme .logo-text h1 {
-        font-size: 18px;
-    }
-
-    .legacy-theme .logo-text p {
-        font-size: 9.5px;
-        letter-spacing: 1.2px;
+        letter-spacing: 0.02em;
     }
 }
 
-/* Below 1100px eight links, the logo and the market switch cannot share a
-   row without the text shrinking past comfortable reading size. The legacy
-   sheet only switched to the menu button at 900px, so between 901px and
-   1039px the header broke into two ragged rows, with the market switch
-   stranded alone under the logo. The menu button took over from 1039px
-   down; since the US header's "Blog" became "Check a Car" the row needs
-   1,090px (measured, November 2026), so it now takes over from 1099px down,
-   replicating the legacy 900px rules so the open menu behaves exactly as it
-   does on a phone. */
+/* Below 1100px eight links, the logo and the actions cannot share a row
+   without the text shrinking past comfortable reading size, so the links
+   fold behind the menu button, as the legacy sheet does below 900px. The
+   button goes last in the row, after "Log in"; the open menu is a list
+   under the row, scrolling if it is taller than the screen. */
 @media (max-width: 1099px) {
+    .legacy-theme .header-actions {
+        order: 1;
+        margin-left: auto;
+    }
+
     .legacy-theme .mobile-menu-btn {
-        display: block;
+        order: 2;
+        display: inline-grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 1px solid var(--border-default);
+        border-radius: 999px;
+        font-size: 18px;
     }
 
     .legacy-theme .nav-menu {
+        order: 3;
         display: none;
         width: 100%;
         flex-direction: column;
-        align-items: center;
-        gap: 15px;
-        padding: 20px 0 10px;
-        border-top: 1px solid rgba(21, 77, 53, 0.2);
-        margin-top: 15px;
+        align-items: stretch;
+        gap: 0;
+        max-height: calc(100dvh - 72px);
+        margin-top: 10px;
+        padding: 4px 0 12px;
+        overflow-y: auto;
+        border-top: 1px solid var(--border-subtle);
     }
 
     .legacy-theme .nav-menu.active {
         display: flex;
     }
 
+    .legacy-theme .nav-menu a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 48px;
+        padding: 0 4px;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 15px;
+    }
+
+    .legacy-theme .nav-menu a::after {
+        display: none;
+    }
+
+    .legacy-theme .nav-menu a.active {
+        color: var(--brand-300);
+    }
+
+    .legacy-theme .nav-menu .nav-extra {
+        display: flex;
+    }
+
+    .legacy-theme .nav-extra i {
+        width: 18px;
+        text-align: center;
+        color: var(--brand-300);
+    }
+
+    .legacy-theme .nav-extra--market[data-market="ng"] i {
+        color: #00a862;
+    }
+
+    .legacy-theme .nav-extra--market[data-market="us"] i {
+        color: #8e9ae0;
+    }
+}
+
+/* The switch is in the menu here; in the header it would crowd the name. */
+@media (min-width: 900px) and (max-width: 1099px) {
+    .legacy-theme .nav-menu .nav-extra--market {
+        display: none;
+    }
+}
+
+@media (max-width: 899px) {
+    .legacy-theme .header-actions .market-switch {
+        display: none;
+    }
+}
+
+/* Phones, upright and on their side: the mark, the name stacked, "Log in",
+   the menu. On one line the name needs about 220px, which with "Log in" and
+   the menu fits only from 600px. */
+@media (max-width: 599px) {
+    .legacy-theme .header-container {
+        column-gap: 8px;
+    }
+
+    .legacy-theme .logo-container {
+        gap: 8px;
+    }
+
+    .legacy-theme .logo-container .logo-mark {
+        height: 30px;
+    }
+
+    .legacy-theme .logo-text h1 {
+        font-size: 15px;
+        white-space: normal;
+    }
+
+    .legacy-theme .logo-text h1 span {
+        display: block;
+    }
+
+    .legacy-theme .logo-text p {
+        display: none;
+    }
+
+    .legacy-theme .partner-pill {
+        padding: 0 12px;
+    }
+
     .legacy-theme .header-actions {
         margin-left: auto;
+    }
+
+    .legacy-theme .mobile-menu-btn {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 359px) {
+    .legacy-theme .logo-container .logo-mark {
+        height: 24px;
+    }
+
+    .legacy-theme .logo-text h1 {
+        font-size: 14px;
+    }
+
+    .legacy-theme .partner-pill {
+        padding: 0 10px;
     }
 }
 
@@ -4165,29 +4670,6 @@
 .legacy-theme .rental-spec dt i {
     margin-right: 0;
     flex: none;
-}
-
-/* ── The assistant button ───────────────────────────────────────────────────
-   Fixed bottom-right, which on a rental page is exactly where the booking
-   form sits — the full "Ask us" pill covered the insurance choices and the
-   privacy note. Below 1600px the content runs close enough to the edge that
-   the pill always lands on something, so it becomes a round icon there. The
-   button keeps its aria-label, so nothing is lost to a screen reader. */
-@media (max-width: 1600px) {
-    .legacy-theme .assistant-launcher {
-        width: 52px;
-        padding: 0;
-        justify-content: center;
-    }
-
-    .legacy-theme .assistant-launcher span {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        white-space: nowrap;
-    }
 }
 
 /* ── Filter dropdowns that grow with the data ───────────────────────────────

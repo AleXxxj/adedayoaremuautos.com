@@ -67,11 +67,12 @@ export default async function MarketLayout({
   const site = sites[0];
   const assistantEnabled = Boolean(process.env.ANTHROPIC_API_KEY);
 
+  // No "Home": the logo and the tab bar both go there.
   const nav = [
-    { href: `/${code}`, label: "Home" },
     { href: `/${code}/inventory`, label: "Buy Cars" },
-    { href: `/${code}/rent-to-own`, label: "Rent to Own" },
+    { href: `/${code}/sell`, label: "Sell Your Car" },
     { href: `/${code}/rentals`, label: "Rentals" },
+    { href: `/${code}/rent-to-own`, label: "Rent to Own" },
     { href: `/${code}/financing`, label: "Financing" },
     // There are no US articles, so the US header has the car check instead.
     code === "us"
@@ -80,6 +81,7 @@ export default async function MarketLayout({
     { href: `/${code}/about`, label: "About" },
     { href: `/${code}/contact`, label: "Contact" },
   ];
+  const switches = other.map((c) => ({ href: `/${c}`, market: c, name: MARKETS[c].name }));
 
   return (
     <div className="legacy-theme">
@@ -94,50 +96,70 @@ export default async function MarketLayout({
       <NotifyPrompt market={code} />
       {/* Rendered only when the API key exists. An assistant button that
           apologises for being unavailable is worse than no button. */}
-      {assistantEnabled && <Assistant market={code} />}
+      {assistantEnabled && (
+        <Assistant
+          market={code}
+          phone={site?.phone ?? null}
+          phoneLabel={formatPhone(site?.phone ?? null)}
+        />
+      )}
 
       <div className="header">
         <div className="header-container">
-          <div className="logo-container">
-            {/* Stored at 1536×1024 (450 KB) for print and email; resized here to
-                the 50-odd pixels it is shown at. Eager: it is on every screen. */}
+          {/* One link home: the mark and the name together. The mark is the
+              logo trimmed of its empty border (public/img/logo-mark.png), so
+              it is legible at header size; logo.png stays for print and
+              email. */}
+          <Link href={`/${code}`} className="logo-container" aria-label="Adedayo Aremu Autos home">
             <Image
-              src="/img/logo.png"
-              alt="Adedayo Aremu Autos Logo"
-              width={1536}
-              height={1024}
-              sizes="80px"
+              className="logo-mark"
+              src="/img/logo-mark.png"
+              alt=""
+              width={431}
+              height={160}
+              sizes="108px"
               loading="eager"
             />
             <div className="logo-text">
               <h1>
                 ADEDAYO AREMU <span>AUTOS</span>
               </h1>
-              <p>BUY • RENT • RENT-TO-OWN • FINANCE</p>
+              <p>BUY • SELL • RENT • FINANCE</p>
             </div>
-          </div>
+          </Link>
 
-          <LegacyNav items={nav} />
+          <LegacyNav items={nav} switches={switches} />
 
           <div className="header-actions">
-            {other.map((c) => (
+            {/* Below 900px the switch moves into the menu (LegacyNav). */}
+            {switches.map((sw) => (
               <Link
-                key={c}
-                href={`/${c}`}
+                key={sw.market}
+                href={sw.href}
                 className="market-switch"
                 /* The globe carries the destination country's colour, so the
-                   control still says where it goes when the label is hidden
-                   on a phone. */
-                data-market={c}
-                /* The label is hidden below 600px, so the accessible name has
-                   to come from the attribute rather than the text node. */
-                aria-label={`Switch to ${MARKETS[c].name}`}
-                title={`Switch to ${MARKETS[c].name}`}
+                   control still says where it goes when the label is hidden. */
+                data-market={sw.market}
+                /* The label is hidden at narrower widths, so the accessible
+                   name has to come from the attribute rather than the text. */
+                aria-label={`Switch to ${sw.name}`}
+                title={`Switch to ${sw.name}`}
               >
                 <i className="fas fa-globe" aria-hidden="true" />
-                <span>{MARKETS[c].name}</span>
+                <span>{sw.name}</span>
               </Link>
             ))}
+            {/* The partners' way in, on every page rather than buried in the
+                referral page. "Log in" on a phone, "Partner log in" wider. */}
+            <Link href="/partner/login" className="partner-pill" aria-label="Partner log in">
+              <i className="fas fa-user" aria-hidden="true" />
+              <span className="partner-pill-short" aria-hidden="true">
+                Log in
+              </span>
+              <span className="partner-pill-long" aria-hidden="true">
+                Partner log in
+              </span>
+            </Link>
           </div>
         </div>
       </div>
@@ -158,12 +180,12 @@ export default async function MarketLayout({
             <div className="footer-about">
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 15 }}>
                 <Image
-                  src="/img/logo.png"
-                  alt="Logo"
-                  width={1536}
-                  height={1024}
-                  sizes="80px"
-                  style={{ height: 45, width: "auto" }}
+                  src="/img/logo-mark.png"
+                  alt=""
+                  width={431}
+                  height={160}
+                  sizes="108px"
+                  style={{ height: 40, width: "auto" }}
                 />
                 <h3 style={{ color: "var(--silver-classic)", fontSize: 20 }}>
                   ADEDAYO AREMU <span>AUTOS</span>
@@ -204,7 +226,11 @@ export default async function MarketLayout({
             <div className="footer-links">
               <h4>Quick Links</h4>
               <ul>
-                {[...nav, { href: `/${code}/referral`, label: "Refer a Renter" }].map((n) => (
+                {[
+                  ...nav,
+                  { href: `/${code}/referral`, label: "Refer a Renter" },
+                  { href: "/partner/login", label: "Partner log in" },
+                ].map((n) => (
                   <li key={n.href}>
                     <Link href={n.href}>{n.label}</Link>
                   </li>

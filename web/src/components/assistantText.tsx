@@ -20,9 +20,10 @@ import { Fragment, type ReactNode } from "react";
  * `javascript:`.
  */
 
-// Markdown link, full URL, or a path beginning with a known market segment.
+// Markdown link, full URL, or a path beginning with a known first segment:
+// a market, or "partner" for the partner log in (/partner/login).
 const PATTERN =
-  /\[([^\]]+)\]\((\/(?:us|ng)\/[^\s)]*|https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>"')\]]+[^\s<>"')\].,;:!?])|(\/(?:us|ng)\/[A-Za-z0-9\-_/?=&%.]*[A-Za-z0-9\-_/])/g;
+  /\[([^\]]+)\]\((\/(?:us|ng|partner)\/[^\s)]*|https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>"')\]]+[^\s<>"')\].,;:!?])|(\/(?:us|ng|partner)\/[A-Za-z0-9\-_/?=&%.]*[A-Za-z0-9\-_/])/g;
 
 /** Trailing punctuation belongs to the sentence, not the address. */
 function trimTrailing(href: string): string {

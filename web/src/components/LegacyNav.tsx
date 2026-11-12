@@ -5,15 +5,26 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
- * The original header navigation, including its mobile behaviour.
+ * The header navigation, and the menu it folds into on smaller screens.
  *
- * Below 900px the stylesheet hides `.nav-menu` and shows `.mobile-menu-btn`,
+ * Below 1100px the stylesheet hides the links and shows `.mobile-menu-btn`,
  * so the button is not decoration — without it the site has no navigation at
  * all on a phone. The original toggled `.active` and swapped the bars icon for
  * a cross; that is reproduced, with the keyboard and screen-reader wiring the
  * original left out.
+ *
+ * The menu also carries two things the header row has no room for on a
+ * phone: the partner log in and, below 900px, the country switch. On a wide
+ * screen both stay in the header and these copies are hidden (refine.css).
  */
-export function LegacyNav({ items }: { items: { href: string; label: string }[] }) {
+export function LegacyNav({
+  items,
+  switches = [],
+}: {
+  items: { href: string; label: string }[];
+  /** The other markets, for the switch in the menu. */
+  switches?: { href: string; market: string; name: string }[];
+}) {
   const pathname = usePathname();
   // Storing the route the menu was opened on, rather than a plain boolean,
   // closes it on any navigation — link, back button or forward — without an
@@ -42,7 +53,7 @@ export function LegacyNav({ items }: { items: { href: string; label: string }[] 
         aria-label={open ? "Close menu" : "Open menu"}
         onClick={() => setOpen(!open)}
       >
-        <i className={open ? "fas fa-times" : "fas fa-bars"} />
+        <i className={open ? "fas fa-times" : "fas fa-bars"} aria-hidden="true" />
       </button>
 
       <nav
@@ -51,12 +62,8 @@ export function LegacyNav({ items }: { items: { href: string; label: string }[] 
         aria-label="Primary"
       >
         {items.map((n) => {
-          // The market root is only "current" on an exact match; every other
-          // entry also owns its sub-pages, so a car detail page keeps Buy Cars lit.
-          const active =
-            n.href.split("/").length === 2
-              ? pathname === n.href
-              : pathname === n.href || pathname.startsWith(`${n.href}/`);
+          // Every entry owns its sub-pages, so a car's page keeps Buy Cars lit.
+          const active = pathname === n.href || pathname.startsWith(`${n.href}/`);
           return (
             <Link
               key={n.href}
@@ -68,6 +75,22 @@ export function LegacyNav({ items }: { items: { href: string; label: string }[] 
             </Link>
           );
         })}
+
+        <Link href="/partner/login" className="nav-extra nav-extra--partner">
+          <i className="fas fa-user" aria-hidden="true" />
+          Partner log in
+        </Link>
+        {switches.map((s) => (
+          <Link
+            key={s.market}
+            href={s.href}
+            className="nav-extra nav-extra--market"
+            data-market={s.market}
+          >
+            <i className="fas fa-globe" aria-hidden="true" />
+            Switch to {s.name}
+          </Link>
+        ))}
       </nav>
     </>
   );
