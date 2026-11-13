@@ -69,6 +69,9 @@ export async function generateMetadata({
   };
 }
 
+/** Cards under "More guides". The index has them all. */
+const MORE_GUIDES = 3;
+
 /** "November 12, 2026", read as a calendar date, not shifted by a time zone. */
 const longDate = (iso: string) =>
   new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
@@ -128,7 +131,8 @@ function CarsRow({ cars, data }: { cars: GuideCars; data: GuideData }) {
  * One guide: a real tool wrapped in a short article.
  *
  * Top to bottom on a phone: where you are, the title and its one-line
- * promise, "The short version" with live numbers, the tool, a share button,
+ * promise, "The short version" with live numbers, the tool (a game comes
+ * before the short version, so it is on the first screen), a share button,
  * short sections under the questions people search, live cars from stock,
  * the questions people ask, a share button again, the other guides and the
  * matching pages, and one call to action.
@@ -197,8 +201,39 @@ export default async function GuidePage({
     },
   ];
 
-  const others = cards.filter((c) => c.slug !== slug);
+  // "More guides": three, the ones of this guide's kind first.
+  const rest = cards.filter((c) => c.slug !== slug);
+  const others = [...rest.filter((c) => c.group === meta.group), ...rest.filter((c) => c.group !== meta.group)].slice(0, MORE_GUIDES);
   const share = { title: meta.title, text: meta.card.line, path: guideHref(slug) };
+
+  const shortBox = (
+        <section className="gd-short" aria-labelledby="gd-short-h">
+          <h2 className="gd-short-h" id="gd-short-h">
+            The short version
+          </h2>
+          <ul>
+            {words.short.map((line) => (
+              <li key={line}>
+                <i className="fas fa-check" aria-hidden="true" />
+                <span>
+                  <Rich text={line} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          {meta.live && <p className="gd-short-note">Live numbers from our stock today.</p>}
+        </section>
+  );
+
+  const toolBox = (
+        <section className="gd-toolbox" id="tool" aria-labelledby="gd-tool-h">
+          <h2 className="gd-h" id="gd-tool-h">
+            {words.toolHeading}
+          </h2>
+          <GuideTool meta={meta} data={data} />
+          <p className="gd-toolnote">{words.toolNote}</p>
+        </section>
+  );
 
   return (
     <article className="gd-page">
@@ -230,30 +265,18 @@ export default async function GuidePage({
           </p>
         </header>
 
-        <section className="gd-short" aria-labelledby="gd-short-h">
-          <h2 className="gd-short-h" id="gd-short-h">
-            The short version
-          </h2>
-          <ul>
-            {words.short.map((line) => (
-              <li key={line}>
-                <i className="fas fa-check" aria-hidden="true" />
-                <span>
-                  <Rich text={line} />
-                </span>
-              </li>
-            ))}
-          </ul>
-          {meta.live && <p className="gd-short-note">Live numbers from our stock today.</p>}
-        </section>
-
-        <section className="gd-toolbox" id="tool" aria-labelledby="gd-tool-h">
-          <h2 className="gd-h" id="gd-tool-h">
-            {words.toolHeading}
-          </h2>
-          <GuideTool meta={meta} data={data} />
-          <p className="gd-toolnote">{words.toolNote}</p>
-        </section>
+        {/* A game is played before it is read about: it comes first. */}
+        {meta.game ? (
+          <>
+            {toolBox}
+            {shortBox}
+          </>
+        ) : (
+          <>
+            {shortBox}
+            {toolBox}
+          </>
+        )}
 
         <ShareButton {...share} />
 
@@ -402,6 +425,10 @@ export default async function GuidePage({
               More guides
             </h2>
             <GuideCards cards={others} level={3} compact />
+            <Link href="/us/guides" className="gd-more">
+              See all {cards.length} guides
+              <i className="fas fa-arrow-right" aria-hidden="true" />
+            </Link>
           </section>
         )}
       </div>

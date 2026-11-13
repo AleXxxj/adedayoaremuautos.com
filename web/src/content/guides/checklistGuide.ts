@@ -143,6 +143,7 @@ export const checklistGuide: Guide = {
     published: "2026-11-12",
     updated: "2026-11-12",
     live: false,
+    group: "check",
   },
   words,
 };

@@ -19,6 +19,10 @@
  *   6. What the guides restate from other pages is still what those pages
  *      say: the rental policy, and the rent-to-own disclosure, word for word.
  *   7. The checklist: its shape, its tally, and the text it shares.
+ *   8. The games: the quiz's scoring and what each result shows, how a
+ *      round of "guess the price" is dealt and scored, every way through
+ *      the story reaching an ending, every recall card with its source, the
+ *      trip's cost against quoteRental, and what a shared link may carry.
  *
  * Nothing here touches the live database or the network.
  *
@@ -53,6 +57,43 @@ import {
 } from "../src/components/guides/guideMath";
 import { threeWay, verdict } from "../src/components/guides/threeWay";
 import {
+  PRICE_OPTIONS,
+  PRICE_ROUNDS,
+  PROFILE_ORDER,
+  TRIP_DAYS,
+  gotHash,
+  lifeBudgetMinor,
+  lifeMatch,
+  lifeMode,
+  lifeResult,
+  lifeScores,
+  parseGotHash,
+  parseScoreHash,
+  priceEligible,
+  priceOptions,
+  priceRounds,
+  priceScore,
+  rankFor,
+  rng,
+  roundTripMiles,
+  scoreHash,
+  shuffle,
+  storyChances,
+  storyDone,
+  storyEnding,
+  storyPaths,
+  tripCost,
+  trueFalseScore,
+  type LifeAnswers,
+  type ProfileId,
+} from "../src/components/guides/gameMath";
+import { STORY_ENDINGS, STORY_STEPS, STORY_VERDICT, TITLE_PRICES_MAJOR, storyCars, storyShareText } from "../src/content/guides/cheapCar";
+import { LIFE_PROFILES, LIFE_QUESTIONS, lifeShareText } from "../src/content/guides/lifeQuiz";
+import { PRICE_RANKS, priceShareText } from "../src/content/guides/priceGame";
+import { NHTSA_RECALLS_URL, RECALL_FACTS, RECALL_RANKS, recallShareText } from "../src/content/guides/recallQuiz";
+import { TRIP_MILEAGE_NOTE, TRIP_PLACES, TRIP_POLICY_RELIES_ON, tripShareText } from "../src/content/guides/roadTrip";
+import { bodyGroup as bodyOf } from "../src/components/compare/compareData";
+import {
   MAX_COMPARE,
   betterIndexes,
   bodyGroup,
@@ -67,7 +108,7 @@ import {
   withoutCar,
   type CompareCar,
 } from "../src/components/compare/compareData";
-import { GUIDES, HOME_GUIDE_SLUGS, getGuide, guideHref } from "../src/content/guides";
+import { GUIDES, GUIDE_GROUPS, HOME_GUIDE_SLUGS, getGuide, guideHref } from "../src/content/guides";
 import { MARKS, plain } from "../src/content/guides/format";
 import { ALL_CHECKS, CHECKLIST } from "../src/content/guides/checklist";
 import { RTO_DISCLOSURE, owningTiers, rtoTierLine } from "../src/content/guides/rentBuyOwn";
@@ -121,11 +162,33 @@ const tariff = (
   driverDailyMinor: null,
 });
 
+/** The body type each fixture car's listing means, and its seats where the listing has them. */
+const BODY: Record<string, [GuideSaleCar["body"], number | null]> = {
+  "2009-smart-fortwo": ["Coupe", 2],
+  "2001-lexus-rx": ["SUV", 5],
+  "2014-kia-soul": ["Hatchback", 5],
+  "2001-mercedes-s430": ["Sedan", 5],
+  "2016-elantra": ["Sedan", 5],
+  "2007-toyota-camry": ["Sedan", 5],
+  "2013-hyundai-sonata": ["Sedan", 5],
+  "2016-nissan-altima": ["Sedan", 5],
+  "2010-toyota-venza": ["Wagon", 5],
+  "2012-mercedes-glk": ["SUV", 5],
+  "2012-buick-enclave": ["SUV", 7],
+  "2014-dodge-charger": ["Sedan", 5],
+  "2015-chevrolet-malibu": ["Sedan", 5],
+  "2013-chevrolet-equinox": ["SUV", 5],
+  "2016-dodge-dart": [null, null],
+  "2011-acura-mdx": ["SUV", 7],
+};
+
 const rentCar = (slug: string, name: string, t: RentalTariff): GuideRentCar => ({
   slug,
   name,
   image: `https://photos.test/${slug}.jpg`,
   tariff: t,
+  body: BODY[slug][0],
+  seats: BODY[slug][1],
 });
 
 const RENT: GuideRentCar[] = [
@@ -151,6 +214,8 @@ const saleCar = (slug: string, name: string, year: number, dollars: number, mile
   image: `https://photos.test/${slug}.jpg`,
   transmission: "Automatic",
   pending: false,
+  body: BODY[slug][0],
+  seats: BODY[slug][1],
 });
 
 const SALE: GuideSaleCar[] = [
@@ -528,7 +593,11 @@ eq("a listing with none has nothing more", featuresOnlyOn([A, C]), [["Power wind
 
 // ── 5. Every guide's words ────────────────────────────────────────────────
 console.log("\nGuides: the list");
-eq("four guides", GUIDES.length, 4);
+eq("nine guides", GUIDES.length, 9);
+ok("the games lead", GUIDES.slice(0, 5).every((g) => g.meta.game) && GUIDES.slice(5).every((g) => !g.meta.game), GUIDES.map((g) => g.meta.slug));
+ok("every guide is in one of the index's groups", GUIDES.every((g) => GUIDE_GROUPS.some((x) => x.id === g.meta.group)));
+eq("the index's groups, games first", GUIDE_GROUPS.map((x) => [x.id, GUIDES.filter((g) => g.meta.group === x.id).length]), [["play", 3], ["plan", 4], ["check", 2]]);
+ok("every tool is used once", new Set(GUIDES.map((g) => g.meta.tool)).size === GUIDES.length);
 ok("every slug is a slug, once", GUIDES.every((g) => isSlug(g.meta.slug)) && new Set(GUIDES.map((g) => g.meta.slug)).size === GUIDES.length);
 ok("newest first", GUIDES.every((g, i) => i === 0 || GUIDES[i - 1].meta.published >= g.meta.published));
 ok("the home page's three exist", HOME_GUIDE_SLUGS.length === 3 && HOME_GUIDE_SLUGS.every((s) => getGuide(s)));
@@ -541,6 +610,11 @@ const QUERY: Record<string, { words: string[]; inSlug: string[] }> = {
   "rent-vs-buy-vs-rent-to-own": { words: ["rent", "buy", "rent to own", "greensboro"], inSlug: ["rent", "buy", "rent-to-own"] },
   "used-cars-by-budget-greensboro-nc": { words: ["used cars under", "greensboro, nc"], inSlug: ["used-cars", "budget", "greensboro"] },
   "used-car-checklist-free-vin-check": { words: ["check a used car", "before you buy"], inSlug: ["used-car-checklist", "vin-check"] },
+  "which-car-fits-your-life-quiz": { words: ["what car fits your life", "quiz"], inSlug: ["car-fits-your-life", "quiz"] },
+  "guess-the-price-game": { words: ["guess the price", "used car prices"], inSlug: ["guess-the-price"] },
+  "true-cost-of-a-cheap-car": { words: ["car", "which really costs more"], inSlug: ["true-cost", "cheap-car"] },
+  "recall-or-not-quiz": { words: ["recall or not", "car safety recalls"], inSlug: ["recall", "quiz"] },
+  "road-trip-from-greensboro": { words: ["day trips from greensboro", "rental car"], inSlug: ["road-trip", "greensboro"] },
 };
 
 /** Every word a guide puts on the page. */
@@ -610,7 +684,8 @@ for (const g of GUIDES) {
     ok(`${g.meta.slug}: with nothing in stock, the description still fits`, empty.description.length >= 140 && empty.description.length <= 160, empty.description.length);
     // A budget in a question ("What does $15,000 buy?") is the tool's own
     // constant, not a price anyone is quoting.
-    const budgets = new RegExp(BUDGETS_MAJOR.map((b) => `\\$${b.toLocaleString("en-US")}`).join("|"), "g");
+    // The same goes for the two round prices in the cheap-car story's title.
+    const budgets = new RegExp([...BUDGETS_MAJOR, ...TITLE_PRICES_MAJOR].map((b) => `\\$${b.toLocaleString("en-US")}`).join("|"), "g");
     const priced = everyWord(g.meta, empty).filter((t) => /\$\d/.test(plain(t).replace(budgets, "")));
     ok(`${g.meta.slug}: and it claims no price`, priced.length === 0, priced);
     ok(`${g.meta.slug}: and it shows no cars`, empty.sections.every((s) => !s.cars || s.cars.slugs.length === 0));
@@ -727,6 +802,240 @@ ok("it links to the free car check", ALL_CHECKS.some((c) => c.link?.href === "/u
     "Checklist: https://example.test/us/guides/x",
   ]);
   eq("with no problems, no list", checklistText(CHECKLIST, all, "u").split("\n"), ["Used car checklist", `${ids.length} good · 0 to ask about`, "", "Checklist: u"]);
+}
+
+// ── 8. The games ──────────────────────────────────────────────────────────
+console.log("\nGames: chance, ranks and shared links");
+{
+  const a = rng(7);
+  const b = rng(7);
+  ok("the same seed deals the same run", [a(), a(), a()].join() === [b(), b(), b()].join());
+  ok("a run stays between 0 and 1", Array.from({ length: 200 }, rng(3)).every((n) => n >= 0 && n < 1));
+  const deck = shuffle([1, 2, 3, 4, 5, 6], rng(11));
+  eq("a shuffle keeps every card", [...deck].sort(), [1, 2, 3, 4, 5, 6]);
+  ok("and moves them", deck.join() !== "1,2,3,4,5,6", deck);
+
+  for (const [name, ranks] of [["price", PRICE_RANKS], ["recall", RECALL_RANKS]] as const) {
+    ok(`${name} ranks: one starts at zero, ids once each`, ranks.some((r) => r.from === 0) && new Set(ranks.map((r) => r.id)).size === ranks.length);
+    ok(`${name} ranks: every score from 0 to 8 has one`, Array.from({ length: 9 }, (_, n) => rankFor(ranks, n, 8)).every((r) => r.title.length > 3));
+    eq(`${name} ranks: a full score is the top rank`, rankFor(ranks, 5, 5).id, [...ranks].sort((x, y) => y.from - x.from)[0].id);
+    eq(`${name} ranks: nothing right is the bottom rank`, rankFor(ranks, 0, 5).from, 0);
+    ok(`${name} ranks: no hype`, ranks.every((r) => !HYPE.test(`${r.title} ${r.line}`)));
+  }
+  eq("4 of 5 at guess the price", rankFor(PRICE_RANKS, 4, 5).id, "sharp");
+  eq("3 of 5", rankFor(PRICE_RANKS, 3, 5).id, "haggler");
+  eq("2 of 3, with fewer rounds", rankFor(PRICE_RANKS, 2, 3).id, "haggler");
+  eq("6 of 8 at recall or not", rankFor(RECALL_RANKS, 6, 8).id, "minded");
+  eq("no rounds at all", rankFor(PRICE_RANKS, 0, 0).from, 0);
+
+  eq("a score in a link", scoreHash(4, 5), "#score=4-5");
+  eq("read back", parseScoreHash("#score=4-5"), { score: 4, of: 5 });
+  eq("a score above its total is no score", parseScoreHash("#score=6-5"), null);
+  eq("a link with anything else in it is no score", [parseScoreHash("#score=4-5&x=1"), parseScoreHash("#score=a-b"), parseScoreHash(""), parseScoreHash("#score=4-0"), parseScoreHash("#score=4-99")], [null, null, null, null, null]);
+  eq("a result in a link", gotHash("roadtrip"), "#got=roadtrip");
+  eq("read back when it is a known result", parseGotHash("#got=roadtrip", PROFILE_ORDER), "roadtrip");
+  eq("an unknown result is none", [parseGotHash("#got=limo", PROFILE_ORDER), parseGotHash("#got=<b>", PROFILE_ORDER), parseGotHash("", PROFILE_ORDER)], [null, null, null]);
+}
+
+console.log("\nQuiz: what car fits your life");
+{
+  const Q = LIFE_QUESTIONS;
+  eq("six questions", Q.map((q) => q.id), ["riders", "cargo", "miles", "parking", "budget", "mode"]);
+  ok("3 or 4 answers each, ids once", Q.every((q) => q.options.length >= 3 && q.options.length <= 4 && new Set(q.options.map((o) => o.id)).size === q.options.length));
+  ok("every answer has a label and an icon", Q.every((q) => q.options.every((o) => o.label.length > 3 && o.icon.startsWith("fa-"))));
+  eq("five results, one for each id", Object.keys(LIFE_PROFILES).sort(), [...PROFILE_ORDER].sort());
+  ok("every result names body types and says something", PROFILE_ORDER.every((id) => LIFE_PROFILES[id].id === id && LIFE_PROFILES[id].bodies.length > 0 && LIFE_PROFILES[id].lines.length >= 2));
+  ok("no hype in a result", PROFILE_ORDER.every((id) => !HYPE.test(`${LIFE_PROFILES[id].title} ${LIFE_PROFILES[id].lines.join(" ")}`)));
+  ok("only the first four questions score", Q.slice(0, 4).every((q) => q.options.every((o) => o.points)) && Q.slice(4).every((q) => q.options.every((o) => !o.points)));
+  ok("points only go to real results", Q.every((q) => q.options.every((o) => Object.keys(o.points ?? {}).every((id) => PROFILE_ORDER.includes(id as ProfileId)))));
+
+  const answer = (riders: string, cargo: string, miles: string, parking: string, budget = "open", mode = "unsure"): LifeAnswers => ({ riders, cargo, miles, parking, budget, mode });
+  eq("no answers: no result", lifeResult(Q, {}), null);
+  eq("five of six: still none", lifeResult(Q, { ...answer("solo", "light", "few", "tight"), mode: undefined }), null);
+  eq("an answer that isn't one doesn't count", lifeResult(Q, { ...answer("solo", "light", "few", "tight"), mode: "fly" }), null);
+  eq("alone, light, few miles, tight parking", lifeResult(Q, answer("solo", "light", "few", "tight")), "runabout");
+  eq("two people, light, many miles", lifeResult(Q, answer("pair", "light", "many", "driveway")), "commuter");
+  eq("a crew with gear and many miles", lifeResult(Q, answer("crew", "gear", "many", "room")), "roadtrip");
+  eq("a full house", lifeResult(Q, answer("full", "gear", "some", "driveway")), "family");
+  eq("tools and lumber", lifeResult(Q, answer("solo", "big", "some", "room")), "workhorse");
+  eq("the points behind a result", lifeScores(Q, answer("crew", "gear", "many", "room")), { roadtrip: 6, family: 4, workhorse: 1, commuter: 2, runabout: 0 });
+
+  // Every way through the four scoring questions.
+  const reached = new Set<string>();
+  let all = true;
+  for (const r of Q[0].options) for (const c of Q[1].options) for (const m of Q[2].options) for (const p of Q[3].options) {
+    const got = lifeResult(Q, answer(r.id, c.id, m.id, p.id));
+    if (!got) all = false;
+    else reached.add(got);
+  }
+  ok("every set of answers has a result", all);
+  eq("and every result can be reached", [...reached].sort(), [...PROFILE_ORDER].sort());
+  ok("budget and rent-or-own never change the type", Q[4].options.every((b) => Q[5].options.every((m) => lifeResult(Q, answer("crew", "gear", "many", "room", b.id, m.id)) === "roadtrip")));
+
+  eq("the budgets are the budget guide's", [lifeBudgetMinor(Q, answer("solo", "light", "few", "tight", "low")), lifeBudgetMinor(Q, answer("solo", "light", "few", "tight", "mid"))], [BUDGETS_MAJOR[0] * 100, BUDGETS_MAJOR[1] * 100]);
+  eq("over the top budget, or not sure: no limit", [lifeBudgetMinor(Q, answer("solo", "light", "few", "tight", "high")), lifeBudgetMinor(Q, answer("solo", "light", "few", "tight", "open"))], [null, null]);
+  eq("rent or own", ["rent", "own", "rto", "unsure"].map((m) => lifeMode(Q, answer("solo", "light", "few", "tight", "open", m))), ["rent", "own", "rto", "unsure"]);
+
+  const suv = lifeMatch(LIFE_PROFILES.roadtrip.bodies, SALE, RENT, null);
+  eq("an SUV result shows the SUVs and wagons for sale, dearest first", suv.sale.map((c) => c.slug), ["2012-mercedes-glk", "2012-buick-enclave", "2011-acura-mdx", "2013-chevrolet-equinox", "2010-toyota-venza", "2001-lexus-rx"]);
+  eq("and the ones to rent", suv.rent.map((c) => c.slug), ["2001-lexus-rx", "2010-toyota-venza", "2012-mercedes-glk", "2012-buick-enclave"]);
+  eq("within a budget", lifeMatch(LIFE_PROFILES.roadtrip.bodies, SALE, RENT, 800000).sale.map((c) => c.slug), ["2013-chevrolet-equinox", "2010-toyota-venza", "2001-lexus-rx"]);
+  const over = lifeMatch(LIFE_PROFILES.roadtrip.bodies, SALE, RENT, 400000);
+  ok("nothing at the budget: the closest, marked as over it", over.overBudget && over.sale[0].slug === "2001-lexus-rx" && over.sale.every((c) => c.priceMinor > 400000), over);
+  ok("a match within budget is never marked over it", !suv.overBudget && !lifeMatch(LIFE_PROFILES.roadtrip.bodies, SALE, RENT, 800000).overBudget);
+  const truck = lifeMatch(["Truck"], SALE, RENT, null);
+  eq("no car of the type: nothing, and not called over budget", [truck.sale.length, truck.rent.length, truck.overBudget], [0, 0, false]);
+  ok("a listing with no body type is never guessed into a match", PROFILE_ORDER.every((id) => !lifeMatch(LIFE_PROFILES[id].bodies, SALE, RENT, null).sale.some((c) => c.slug === "2016-dodge-dart")));
+  eq("body types are read the way compare reads them", [bodyOf("Suv"), bodyOf("4 - Door Sedan"), bodyOf(null, "Equinox", "LT Sport Utility 4D")], ["SUV", "Sedan", "SUV"]);
+  eq("the shared line carries the result", lifeShareText(LIFE_PROFILES.roadtrip), "I got: The Road-Trip SUV. What car fits your life?");
+}
+
+console.log("\nGuess the price");
+{
+  const pending = { ...SALE[0], slug: "pending", pending: true };
+  const noPhoto = { ...SALE[1], slug: "no-photo", image: null };
+  const stock = [...SALE, pending, noPhoto];
+  eq("only priced, photographed cars still for sale are played", priceEligible(stock).length, SALE.length);
+
+  const game = priceRounds(stock, 1);
+  eq("five rounds", game.length, PRICE_ROUNDS);
+  ok("five different cars", new Set(game.map((r) => r.slug)).size === PRICE_ROUNDS);
+  ok("never a pending car or one without a photo", game.every((r) => r.slug !== "pending" && r.slug !== "no-photo"));
+  eq("the same seed deals the same game", priceRounds(stock, 1), game);
+  ok("another seed deals another", JSON.stringify(priceRounds(stock, 2)) !== JSON.stringify(game));
+  eq("three cars: three rounds", priceRounds(SALE.slice(0, 3), 1).length, 3);
+  eq("no cars: no rounds", priceRounds([], 1), []);
+
+  // Many games: every round's four prices hold up.
+  let sound = true;
+  const places = new Set<number>();
+  for (let seed = 1; seed <= 200; seed++) {
+    for (const r of priceRounds(stock, seed)) {
+      const real = stock.find((c) => c.slug === r.slug)!.priceMinor;
+      const o = r.optionsMinor;
+      places.add(o.indexOf(real));
+      if (o.length !== PRICE_OPTIONS || new Set(o).size !== PRICE_OPTIONS || !o.includes(real) || o.some((n) => n <= 0) || o.some((n, i) => i > 0 && n <= o[i - 1])) sound = false;
+      // No wrong price within $100 of the right one, and none more than double it.
+      if (o.some((n) => n !== real && (Math.abs(n - real) < 10000 || n > real * 2))) sound = false;
+    }
+  }
+  ok("four different prices, lowest first, the real one among them", sound);
+  eq("the real price turns up in every position", [...places].sort(), [0, 1, 2, 3]);
+  const odd = priceOptions(599500, rng(5));
+  ok("wrong prices keep the real one's last digits, so it isn't the odd one out", odd.every((n) => n % 10000 === 9500), odd);
+  const tiny = priceOptions(20000, rng(5));
+  ok("a very low price still gets four prices above zero", tiny.length === PRICE_OPTIONS && new Set(tiny).size === PRICE_OPTIONS && tiny.every((n) => n > 0) && tiny.includes(20000), tiny);
+
+  const answers = [450000, 570000, 590000, 600000, 850000];
+  eq("nothing guessed", priceScore(answers, []), 0);
+  eq("three right, one wrong, one to go", priceScore(answers, [450000, 570000, 100, 600000]), 3);
+  eq("all right", priceScore(answers, answers), 5);
+  eq("the shared line carries the score and the rank", priceShareText(4, 5, rankFor(PRICE_RANKS, 4, 5)), "I scored 4 of 5 on Guess the Price (Sharp Eye). Can you beat it?");
+
+  const g = getGuide("guess-the-price-game")!;
+  ok("the guide counts its rounds from stock", g.words(DATA).short[0].includes("5 rounds") && g.words({ ...DATA, sale: SALE.slice(0, 3), saleTotal: 3 }).short[0].includes("3 rounds"));
+  ok("and gives our own price range, nobody else's", g.words(DATA).short[2] === "Prices on our lot today run from **$4,500** to **$12,500**.", g.words(DATA).short[2]);
+}
+
+console.log("\nThe cheap car story");
+{
+  eq("seven moments in a year", STORY_STEPS.map((s) => s.id), ["recall", "tires", "title", "drive", "light", "service", "recheck"]);
+  ok("two choices each: one checks, one leaves it to chance", STORY_STEPS.every((s) => s.choices.length === 2 && s.choices.filter((c) => c.chance).length === 1 && s.choices[0].id !== s.choices[1].id));
+  ok("every choice has a consequence", STORY_STEPS.every((s) => s.choices.every((c) => c.label.length > 2 && c.result.length > 20)));
+  const text = [...STORY_STEPS.flatMap((s) => [s.ask, ...s.choices.flatMap((c) => [c.label, c.result])]), ...STORY_ENDINGS.flatMap((e) => [e.title, e.line]), STORY_VERDICT].join(" ");
+  ok("no repair bills, odds or statistics: no figure with a $ or a %", !/[$%]|\bpercent\b|\b\d+ (in|out of) \d+\b|\bon average\b|\bstudies\b/i.test(text));
+  ok("nothing about North Carolina law", !/north carolina|\bnc\b|dmv|state inspection|notar|lien|salvage|by law|legally|illegal/i.test(text));
+  ok("no hype", !HYPE.test(text));
+  ok("a consequence that names NHTSA has its source", STORY_STEPS.every((s) => !s.choices.some((c) => /NHTSA|free/i.test(c.result)) || s.source?.url === NHTSA_RECALLS_URL));
+
+  const paths = storyPaths(STORY_STEPS);
+  eq("every way through: 2 to the 7th", paths.length, 128);
+  ok("every way through is a whole story", paths.every((p) => storyDone(STORY_STEPS, p)));
+  ok("and reaches an ending", paths.every((p) => storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, p)) != null));
+  eq("every ending can be reached", [...new Set(paths.map((p) => storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, p))!.id))].sort(), STORY_ENDINGS.map((e) => e.id).sort());
+  const picksOf = (skip: number) => Object.fromEntries(STORY_STEPS.map((s, i) => [s.id, i < skip ? "skip" : "check"]));
+  eq("check everything", storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, picksOf(0)))!.id, "careful");
+  eq("skip two", storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, picksOf(2)))!.id, "mostly");
+  eq("skip three", storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, picksOf(3)))!.id, "gambler");
+  eq("skip everything", storyEnding(STORY_ENDINGS, storyChances(STORY_STEPS, picksOf(7)))!.id, "sticker");
+  eq("a half-told story isn't done", storyDone(STORY_STEPS, { recall: "check" }), false);
+  eq("a choice that doesn't exist counts for nothing", storyChances(STORY_STEPS, { recall: "maybe" }), 0);
+  eq("more chances than there are steps: no ending", storyEnding(STORY_ENDINGS, 99), null);
+
+  const pair = storyCars(SALE)!;
+  eq("the two cars: the lowest price, and the one nearest the title's higher price", [pair.cheap.slug, pair.pricier.slug, pair.gapMinor], ["2009-smart-fortwo", "2011-acura-mdx", 370000]);
+  eq("one car, or one price: no pair", [storyCars(SALE.slice(0, 1)), storyCars(SALE.slice(0, 2))], [null, null]);
+  eq("a pending car is left out", storyCars([{ ...SALE[0], pending: true }, SALE[2], SALE[12]])!.cheap.slug, "2001-mercedes-s430");
+  const g = getGuide("true-cost-of-a-cheap-car")!;
+  ok("the guide's prices are the pair's", g.words(DATA).short[0] === "Two real cars from our lot: **$4,500** and **$8,200**. Pick one." && g.words(DATA).sections[1].body[1].includes("**$3,700**"), g.words(DATA).short[0]);
+  ok("the title's two round prices are the only typed ones", g.meta.title === "The $3,000 Car vs the $8,000 Car: Which Really Costs More?");
+  eq("the shared line carries the ending", storyShareText(STORY_ENDINGS[0]), 'I got "The Careful Buyer" in the cheap car vs pricier car story. What would you do?');
+}
+
+console.log("\nRecall or not");
+{
+  eq("eight cards", RECALL_FACTS.length, 8);
+  ok("ids once each", new Set(RECALL_FACTS.map((f) => f.id)).size === RECALL_FACTS.length);
+  eq("as many true as false", RECALL_FACTS.filter((f) => f.answer).length, 4);
+  ok("every card has a source on nhtsa.gov", RECALL_FACTS.every((f) => /^https:\/\/www\.nhtsa\.gov\//.test(f.url)));
+  ok("and NHTSA's own words beside it", RECALL_FACTS.every((f) => f.quote.length > 30));
+  ok("every card says why in one line", RECALL_FACTS.every((f) => f.why.length > 20 && f.why.length <= 140 && f.claim.length <= 80), RECALL_FACTS.filter((f) => f.why.length > 140 || f.claim.length > 80).map((f) => f.id));
+  const text = RECALL_FACTS.map((f) => `${f.claim} ${f.why}`).join(" ");
+  ok("nothing about North Carolina law", !/north carolina|\bnc\b|dmv|by law|legally|illegal/i.test(text));
+  ok("no hype", !HYPE.test(text));
+  const right = Object.fromEntries(RECALL_FACTS.map((f) => [f.id, f.answer]));
+  const wrong = Object.fromEntries(RECALL_FACTS.map((f) => [f.id, !f.answer]));
+  eq("all right", trueFalseScore(RECALL_FACTS, right), 8);
+  eq("all wrong", trueFalseScore(RECALL_FACTS, wrong), 0);
+  eq("nothing answered", trueFalseScore(RECALL_FACTS, {}), 0);
+  eq("always tapping True gets half", trueFalseScore(RECALL_FACTS, Object.fromEntries(RECALL_FACTS.map((f) => [f.id, true]))), 4);
+  eq("an answer for a card that doesn't exist counts for nothing", trueFalseScore(RECALL_FACTS, { nope: true }), 0);
+  eq("the shared line carries the score and the rank", recallShareText(8, 8, rankFor(RECALL_RANKS, 8, 8)), "I got 8 of 8 on Recall or Not (Recall Pro). How much do you know about car recalls?");
+  const w = getGuide("recall-or-not-quiz")!.words(DATA);
+  ok("the guide counts its cards", w.short[0].includes("8 cards") && w.description.includes("8 true-or-false cards"));
+  ok("and sends the reader to the free car check", w.cta.primary.href === "/us/check" && w.links[0].href === "/us/check");
+}
+
+console.log("\nRoad trips");
+{
+  eq("eight places", TRIP_PLACES.length, 8);
+  ok("ids are slugs, once each", TRIP_PLACES.every((p) => isSlug(p.id)) && new Set(TRIP_PLACES.map((p) => p.id)).size === TRIP_PLACES.length);
+  ok("nearest first", TRIP_PLACES.every((p, i) => i === 0 || TRIP_PLACES[i - 1].miles <= p.miles));
+  ok("every distance has two sources", TRIP_PLACES.every((p) => /^https:\/\//.test(p.routed.source) && /^https:\/\//.test(p.check.source)));
+  ok("each is the routed figure to the nearest 5", TRIP_PLACES.every((p) => p.miles === Math.round(p.routed.miles / 5) * 5), TRIP_PLACES.filter((p) => p.miles !== Math.round(p.routed.miles / 5) * 5).map((p) => p.id));
+  ok("and within 10% of the second figure", TRIP_PLACES.every((p) => Math.abs(p.miles - p.check.miles) / p.check.miles <= 0.1), TRIP_PLACES.filter((p) => Math.abs(p.miles - p.check.miles) / p.check.miles > 0.1).map((p) => p.id));
+  ok("all within a day's drive", TRIP_PLACES.every((p) => p.miles >= 20 && p.miles <= 350));
+  eq("there and back", roundTripMiles(170), 340);
+
+  for (const days of TRIP_DAYS) {
+    const t = tripCost(RENT, days);
+    ok(`${days} ${days === 1 ? "day" : "days"}: every car's rent is the booking form's`, t.rows.every((r) => r.cost == null || (r.cost.rentMinor === quoteRental(r.car.tariff, days).hireMinor && r.cost.depositMinor === r.car.tariff.depositMinor)));
+    ok(`${days} ${days === 1 ? "day" : "days"}: lowest first, and "from" is the lowest`, t.fromMinor === Math.min(...RENT.map((c) => quoteRental(c.tariff, days).hireMinor)) && t.rows.every((r, i) => i === 0 || r.cost!.rentMinor >= t.rows[i - 1].cost!.rentMinor));
+  }
+  eq("1 day starts at the lowest daily rate", tripCost(RENT, 1).fromMinor, 6500);
+  eq("7 days is a week's rate, not 7 days'", tripCost(RENT, 7).fromMinor, 35000);
+  const weekOnly = [{ ...RENT[0], tariff: { ...RENT[0].tariff, minDays: 7 } }];
+  eq("a car rented by the week only has no 1-day price", [tripCost(weekOnly, 1).fromMinor, tripCost(weekOnly, 1).rows[0].cost], [null, null]);
+  eq("no fleet: no price", tripCost([], 2).fromMinor, null);
+
+  const g = getGuide("road-trip-from-greensboro")!;
+  const w = g.words(DATA);
+  ok("the guide's prices are the trip's", w.short[1].includes("**$65** for 1 day") && w.short[1].includes("**$130** for 2"), w.short[1]);
+  // "about 45 to 310 miles", "about 400 and 420 miles", "about **115 miles**": the word comes first, a few words back at most.
+  const bare = everyWord(g.meta, w).map(plain).filter((t) => [...t.matchAll(/(\d[\d,]*) miles/g)].some((m) => Number(m[1].replace(/,/g, "")) >= 20 && !/about [^.]{0,24}$/i.test(t.slice(0, m.index))));
+  ok("every distance in the words is called about", bare.length === 0, bare);
+  ok("no fuel cost, mpg or drive time", !everyWord(g.meta, w).some((t) => /\bmpg\b|miles per gallon|gallons?\b|\bhours?\b.*drive|drive.*\bhours?\b|\bminutes\b/i.test(t)));
+  ok("it never says unlimited miles are included", !everyWord(g.meta, w).some((t) => /unlimited/i.test(t) && !/does not say unlimited/i.test(t) && !t.endsWith("?")));
+  ok("it says nothing about insurance", !everyWord(g.meta, w).some((t) => /insur/i.test(t)));
+  eq("the shared line carries the trip", tripShareText(TRIP_PLACES[4], 2, "$130"), "Asheville and back, 2 days, from $130 in a rental car. Where would you go?");
+  eq("with no price, it carries none", tripShareText(TRIP_PLACES[4], 1, null), "Asheville and back, 1 day. Where would you go?");
+
+  const policy = RENTAL_POLICY_US.body.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ");
+  for (const phrase of TRIP_POLICY_RELIES_ON) {
+    ok(`the policy still says: ${phrase}`, policy.includes(phrase));
+  }
+  ok("the mileage line is the policy's own sentence", TRIP_MILEAGE_NOTE.includes(TRIP_POLICY_RELIES_ON[0]));
+  ok("the policy still names no number of miles (if it does, say it here)", !/\b\d[\d,]* ?(miles|mi)\b/i.test(policy));
 }
 
 // ── The page around a tool ────────────────────────────────────────────────

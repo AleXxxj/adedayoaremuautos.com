@@ -13,7 +13,8 @@ import { useRef, useState } from "react";
  *
  * Nothing is sent anywhere by this button: sharing hands the page's own
  * address to the visitor's phone, and the address holds no personal data
- * (a guide's slug, or the slugs of the cars being compared).
+ * (a guide's slug, the slugs of the cars being compared, or a game's score
+ * or result name after the #).
  */
 export function ShareButton({
   title,
@@ -21,6 +22,8 @@ export function ShareButton({
   path,
   label = "Send this to a friend",
   className = "",
+  primary = false,
+  withText = false,
 }: {
   /** The share sheet's title. */
   title: string;
@@ -30,6 +33,13 @@ export function ShareButton({
   path?: string;
   label?: string;
   className?: string;
+  /** The one green button on its screen: a game's result. */
+  primary?: boolean;
+  /**
+   * Copy the line with the link ("I scored 4 of 5. Can you beat it? https://…"),
+   * for a result that means nothing without its words.
+   */
+  withText?: boolean;
 }) {
   const [status, setStatus] = useState<"idle" | "copied" | "manual">("idle");
   const [manualUrl, setManualUrl] = useState("");
@@ -48,7 +58,7 @@ export function ShareButton({
       }
     }
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(withText && text ? `${text} ${url}` : url);
       setStatus("copied");
     } catch {
       setManualUrl(url);
@@ -60,14 +70,14 @@ export function ShareButton({
 
   return (
     <div className={`gd-share ${className}`.trim()}>
-      <button type="button" className="gd-share-btn" onClick={share}>
+      <button type="button" className={`gd-share-btn${primary ? " gd-share-btn--primary" : ""}`} onClick={share}>
         <i className="fas fa-arrow-up-from-bracket" aria-hidden="true" />
         {label}
       </button>
       <p className="gd-share-status" role="status" aria-live="polite">
         {status === "copied" && (
           <>
-            <i className="fas fa-check" aria-hidden="true" /> Link copied. Paste it in a text or a chat.
+            <i className="fas fa-check" aria-hidden="true" /> {withText && text ? "Copied" : "Link copied"}. Paste it in a text or a chat.
           </>
         )}
         {status === "manual" && "Copy this link:"}
