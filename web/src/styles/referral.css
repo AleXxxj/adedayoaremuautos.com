@@ -991,3 +991,55 @@
         display: none;
     }
 }
+
+/* The developer found the full statement card too busy behind the headline.
+   Below 700px it is now a small card in the band's top right corner, clear
+   of the words: its label and the total only, with one coin. The per-car
+   lines stay in the cards further down the page. */
+@media (max-width: 699px) {
+    .legacy-theme .rf-art::after {
+        display: none;
+    }
+    .legacy-theme .rf-art-card {
+        top: 76px;
+        right: 12px;
+        width: auto;
+        max-width: 150px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        transform: rotate(-3deg);
+    }
+    .legacy-theme .rf-art-rows {
+        display: none;
+    }
+    .legacy-theme .rf-art-head {
+        margin: 0;
+        font-size: 9.5px;
+        letter-spacing: 0.08em;
+        white-space: normal;
+    }
+    .legacy-theme .rf-art-total {
+        margin-top: 6px;
+        padding-top: 6px;
+        align-items: baseline;
+        font-size: 12px;
+    }
+    .legacy-theme .rf-art-total b {
+        font-size: 19px;
+    }
+    .legacy-theme .rf-art-coin--a {
+        top: 64px;
+        right: 4px;
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    .legacy-theme .rf-art-coin--b {
+        display: none;
+    }
+}
+@media (max-width: 359px) {
+    .legacy-theme .rf-art {
+        display: none;
+    }
+}
