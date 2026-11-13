@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { referralPartners } from "@/db/schema";
+import { createClient } from "@/lib/supabase/server";
 import { CONTACT_EMAIL } from "@/lib/contact";
 import { PartnerBrand, PartnerShell } from "@/components/partner/PartnerShell";
 import { PartnerLoginForm } from "@/components/partner/PartnerLoginForm";
@@ -43,6 +48,25 @@ export default async function PartnerLoginPage({
 }) {
   const { error } = await searchParams;
   const reason = error ? REASONS[error] : undefined;
+
+  // Already logged in: the header's "Log in" is on every page, and a partner
+  // who taps it should land on their page, not on a form asking again. Only
+  // an active partner is sent on; anyone else sees the form (and the reason,
+  // when requirePartner sent them here with one), so this can't loop.
+  if (!error) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const [partner] = await db
+        .select({ status: referralPartners.status })
+        .from(referralPartners)
+        .where(eq(referralPartners.userId, user.id))
+        .limit(1);
+      if (partner?.status === "active") redirect("/partner");
+    }
+  }
 
   return (
     <PartnerShell narrow>
