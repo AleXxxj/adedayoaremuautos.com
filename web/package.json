@@ -4,15 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:referrals && npm run test:vin && npm run test:sell && npm run test:home && npm run test:cars && npm run test:value && npm run test:guides && npm run test:alerts && npm run test:holds-sale && next build",
-=======
-    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:extensions && npm run test:referrals && npm run test:vin && npm run test:sell && npm run test:home && npm run test:cars && npm run test:value && npm run test:guides && next build",
->>>>>>> worktree-agent-a0954b40d48eccef5
-=======
-    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:referrals && npm run test:vin && npm run test:sell && npm run test:home && npm run test:cars && npm run test:value && npm run test:guides && npm run test:announce && next build",
->>>>>>> worktree-agent-a6c8d3ccc9736f758
+    "build": "npm run tokens && npm run check:contrast && npm run check:copy && npm run test:schema && npm run test:deal && npm run test:amort && npm run test:ledger && npm run test:rental && npm run test:payout && npm run test:holds && npm run test:referrals && npm run test:vin && npm run test:sell && npm run test:home && npm run test:cars && npm run test:value && npm run test:guides && npm run test:alerts && npm run test:holds-sale && npm run test:extensions && npm run test:announce && next build",
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
@@ -31,11 +23,6 @@
     "verify:rto": "tsx scripts/verify-rent-to-own.ts",
     "test:payout": "tsx scripts/verify-payout-allocation.ts",
     "test:holds": "node --conditions=react-server --import tsx scripts/verify-holds.mts",
-<<<<<<< HEAD
-    "test:holds-sale": "node --conditions=react-server --import tsx scripts/verify-sale-holds.mts",
-=======
-    "test:extensions": "node --conditions=react-server --import tsx scripts/verify-extensions.mts",
->>>>>>> worktree-agent-a0954b40d48eccef5
     "test:referrals": "node --conditions=react-server --import tsx scripts/verify-referrals.mts",
     "test:vin": "node --import tsx scripts/verify-vin.ts && node --conditions=react-server --import tsx scripts/verify-vin-usage.mts && node --conditions=react-server --import tsx scripts/verify-vin-nhtsa.mts && node --conditions=react-server --import tsx scripts/verify-vin-plain.mts",
     "check:copy": "node scripts/check-american-english.mjs",
@@ -44,11 +31,10 @@
     "test:cars": "tsx scripts/verify-cars.ts",
     "test:value": "node --conditions=react-server --import tsx scripts/verify-value.mts",
     "test:guides": "tsx scripts/verify-guides.ts",
-<<<<<<< HEAD
-    "test:alerts": "node --conditions=react-server --import tsx scripts/verify-price-alerts.mts"
-=======
+    "test:alerts": "node --conditions=react-server --import tsx scripts/verify-price-alerts.mts",
+    "test:holds-sale": "node --conditions=react-server --import tsx scripts/verify-sale-holds.mts",
+    "test:extensions": "node --conditions=react-server --import tsx scripts/verify-extensions.mts",
     "test:announce": "node --conditions=react-server --import tsx scripts/verify-announce.mts"
->>>>>>> worktree-agent-a6c8d3ccc9736f758
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

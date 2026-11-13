@@ -1658,7 +1658,7 @@ export const vinCheckUsage = pgTable(
   (t) => [primaryKey({ columns: [t.visitor, t.day] })],
 );
 
-<<<<<<< HEAD
+
 /* ── Price-drop alerts ─────────────────────────────────────────────────── */
 
 /**
@@ -1676,17 +1676,6 @@ export const vinCheckUsage = pgTable(
  */
 export const priceAlerts = pgTable(
   "price_alerts",
-/* ═══════════════════════════════════════════════════════════════════════════
-   HOLDING A CAR FOR SALE
-
-   A small refundable deposit, paid on Stripe's hosted page, that keeps a car
-   off the market for a set time (migration 0034). The status and deposit
-   values, the checks between them, and the two "one per car" unique indexes
-   are in the migration: the index helpers here only describe them.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-export const saleHolds = pgTable(
-  "sale_holds",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     vehicleId: uuid("vehicle_id")
@@ -1738,6 +1727,23 @@ export const saleHolds = pgTable(
 );
 
 export type PriceAlertRow = typeof priceAlerts.$inferSelect;
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOLDING A CAR FOR SALE
+
+   A small refundable deposit, paid on Stripe's hosted page, that keeps a car
+   off the market for a set time (migration 0034). The status and deposit
+   values, the checks between them, and the two "one per car" unique indexes
+   are in the migration: the index helpers here only describe them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export const saleHolds = pgTable(
+  "sale_holds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    vehicleId: uuid("vehicle_id")
+      .notNull()
       .references(() => vehicles.id, { onDelete: "restrict" }),
     marketCode: marketCode("market_code")
       .notNull()
@@ -1793,7 +1799,8 @@ export type PriceAlertRow = typeof priceAlerts.$inferSelect;
 );
 
 export type SaleHold = typeof saleHolds.$inferSelect;
-=======
+
+
 /* ── Rental extensions ─────────────────────────────────────────────────── */
 
 /**
@@ -1855,4 +1862,3 @@ export const rentalExtensionReminders = pgTable(
   },
   (t) => [primaryKey({ columns: [t.bookingId, t.returnDate] })],
 );
->>>>>>> worktree-agent-a0954b40d48eccef5
