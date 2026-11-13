@@ -19,6 +19,7 @@
 import type { CurrencyCode } from "@/lib/money";
 import type { RentalTariff } from "@/lib/rental";
 import type { OwnershipTier } from "@/lib/rentToOwn";
+import type { BodyGroup } from "@/components/compare/compareData";
 
 /** A car to rent, as much of it as a guide shows or prices. */
 export interface GuideRentCar {
@@ -26,6 +27,9 @@ export interface GuideRentCar {
   name: string;
   image: string | null;
   tariff: RentalTariff;
+  /** The body type the listing means ("SUV", "Sedan"), or null when it names none. */
+  body: BodyGroup | null;
+  seats: number | null;
 }
 
 /** A car for sale with a price on it. */
@@ -38,6 +42,8 @@ export interface GuideSaleCar {
   image: string | null;
   transmission: string | null;
   pending: boolean;
+  body: BodyGroup | null;
+  seats: number | null;
 }
 
 /** Today's stock and the site's own rules: everything a guide's numbers come from. */
@@ -65,7 +71,19 @@ export interface GuideData {
   stockUpdated: string | null;
 }
 
-export type ToolKey = "weeks" | "three-way" | "budget" | "checklist";
+export type ToolKey =
+  | "weeks"
+  | "three-way"
+  | "budget"
+  | "checklist"
+  | "life-quiz"
+  | "price-game"
+  | "cost-story"
+  | "recall-quiz"
+  | "road-trip";
+
+/** Where a guide sits on the index: games first, then planning, then checking a car. */
+export type GuideGroup = "play" | "plan" | "check";
 
 export interface GuideMeta {
   slug: string;
@@ -85,6 +103,9 @@ export interface GuideMeta {
   updated: string;
   /** Whether the guide's numbers move with stock, so "Updated" follows the stock too. */
   live: boolean;
+  group: GuideGroup;
+  /** A game: the tool comes straight after the title, before "The short version". */
+  game?: boolean;
 }
 
 /** A row of live cars inside the text. */

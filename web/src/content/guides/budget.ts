@@ -210,6 +210,7 @@ export const budget: Guide = {
     published: "2026-11-12",
     updated: "2026-11-12",
     live: true,
+    group: "plan",
   },
   words,
 };

@@ -8,6 +8,7 @@ import { listTiers, toOwnershipTier } from "@/lib/repositories/tiers";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { providerConfigured, providerFor } from "@/lib/payments/provider";
 import { MAX_OPEN_RESERVATIONS, RESERVATION_HOURS } from "@/lib/reservation";
+import { bodyGroup } from "@/components/compare/compareData";
 import type { GuideData } from "@/content/guides/types";
 
 /** A cap, not a page size: the business lists a few dozen cars at most. */
@@ -21,7 +22,7 @@ const carName = (v: { year: number; make: string; model: string; trim: string | 
  * written. Wrapped in `cache` so a page and its metadata share one load.
  *
  * Only what a guide shows leaves this function: names, photos, prices,
- * rates, years and miles. No ids, no VINs, no cost prices.
+ * rates, years, miles, body types and seats. No ids, no VINs, no cost prices.
  */
 export const loadGuideData = cache(async (): Promise<GuideData> => {
   const market = MARKETS.us;
@@ -43,6 +44,8 @@ export const loadGuideData = cache(async (): Promise<GuideData> => {
       name: carName(v),
       image: v.image,
       tariff: v.tariff,
+      body: bodyGroup(v.bodyStyle, v.model, v.trim),
+      seats: v.seats,
     })),
     sale: sale.vehicles
       .filter((v): v is typeof v & { priceMinor: number } => v.priceMinor != null)
@@ -55,6 +58,8 @@ export const loadGuideData = cache(async (): Promise<GuideData> => {
         image: v.primaryImage ? mediaUrl(v.primaryImage) : null,
         transmission: v.transmission,
         pending: v.status === "pending",
+        body: bodyGroup(v.bodyStyle, v.model, v.trim),
+        seats: v.seats,
       })),
     saleTotal: sale.total,
     tiers: tiers.map(toOwnershipTier),

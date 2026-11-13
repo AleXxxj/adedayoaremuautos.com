@@ -11,13 +11,30 @@
  * between guides all read this list.
  */
 import { budget } from "./budget";
+import { cheapCarGuide } from "./cheapCar";
+import { lifeQuizGuide } from "./lifeQuiz";
+import { priceGameGuide } from "./priceGame";
+import { recallQuizGuide } from "./recallQuiz";
+import { roadTripGuide } from "./roadTrip";
 import { checklistGuide } from "./checklistGuide";
 import { rentBuyOwn } from "./rentBuyOwn";
 import { weeklyRental } from "./weeklyRental";
-import type { Guide } from "./types";
+import type { Guide, GuideGroup } from "./types";
 
 /** In the order written. Shown newest first; guides of the same day keep this order. */
-const WRITTEN: Guide[] = [weeklyRental, rentBuyOwn, budget, checklistGuide];
+const WRITTEN: Guide[] = [
+  // November 13: the games, which lead the index.
+  lifeQuizGuide,
+  priceGameGuide,
+  recallQuizGuide,
+  roadTripGuide,
+  cheapCarGuide,
+  // November 12.
+  weeklyRental,
+  rentBuyOwn,
+  budget,
+  checklistGuide,
+];
 
 /** Newest first. Array sort is stable, so same-day guides keep their written order. */
 export const GUIDES: Guide[] = [...WRITTEN].sort((a, b) =>
@@ -32,6 +49,13 @@ export const HOME_GUIDE_SLUGS = [
   rentBuyOwn.meta.slug,
   checklistGuide.meta.slug,
 ] as const;
+
+/** The index's groups, in the order shown: the games lead. */
+export const GUIDE_GROUPS = [
+  { id: "play", title: "Play", line: "Quick games. Send your score to a friend." },
+  { id: "plan", title: "Plan", line: "Trips, rentals and budgets, with today's prices." },
+  { id: "check", title: "Check", line: "Know a car before you pay for it." },
+] as const satisfies readonly { id: GuideGroup; title: string; line: string }[];
 
 export const guideHref = (slug: string) => `/us/guides/${slug}`;
 

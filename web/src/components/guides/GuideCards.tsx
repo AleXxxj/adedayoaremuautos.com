@@ -2,11 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { canResize } from "@/lib/photo";
 import { GUIDES, guideHref } from "@/content/guides";
-import type { GuideData } from "@/content/guides/types";
+import type { GuideData, GuideGroup } from "@/content/guides/types";
 import { guidePhotos, readMinutes } from "./guideMath";
 
 export interface GuideCard {
   slug: string;
+  group: GuideGroup;
   href: string;
   icon: string;
   label: string;
@@ -33,6 +34,7 @@ export function guideCards(data: GuideData): GuideCard[] {
   );
   return built.map(({ g, w }) => ({
     slug: g.meta.slug,
+    group: g.meta.group,
     href: guideHref(g.meta.slug),
     icon: g.meta.card.icon,
     label: g.meta.card.label,
@@ -54,10 +56,13 @@ export function GuideCards({
   cards,
   level,
   compact = false,
+  eager = false,
 }: {
   cards: GuideCard[];
   level: 2 | 3;
   compact?: boolean;
+  /** Load the first photo at once: the page's largest image. */
+  eager?: boolean;
 }) {
   const Title = level === 2 ? "h2" : "h3";
   return (
@@ -74,7 +79,7 @@ export function GuideCards({
                   sizes={compact ? "(min-width: 900px) 380px, 100vw" : "(min-width: 900px) 580px, 100vw"}
                   unoptimized={!canResize(c.photo)}
                   // The first card's photo is the index page's largest image.
-                  loading={!compact && i === 0 ? "eager" : "lazy"}
+                  loading={eager && i === 0 ? "eager" : "lazy"}
                 />
               )}
               <span className="gd-card-label">
