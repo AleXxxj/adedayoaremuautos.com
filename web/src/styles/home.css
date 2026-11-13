@@ -196,7 +196,7 @@
 
 @supports (height: 1svh) {
     .legacy-theme .hh {
-        --hh-stage: clamp(520px, calc(100svh - 248px - env(safe-area-inset-bottom, 0px)), 720px);
+        --hh-stage: clamp(400px, calc(100svh - 248px - env(safe-area-inset-bottom, 0px)), 720px);
     }
 }
 
