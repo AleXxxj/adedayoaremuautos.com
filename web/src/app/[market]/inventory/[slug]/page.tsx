@@ -32,6 +32,8 @@ import {
 } from "@/components/cars/carData";
 import "@/styles/cars.css";
 import { GuideLinks } from "@/components/guides/GuideLinks";
+import { SaleHoldCard } from "@/components/cars/SaleHoldCard";
+import { refreshSaleHolds, saleHoldOffer } from "@/lib/saleHolds/offer";
 
 /**
  * Cached and revalidated, not rebuilt per visitor.
@@ -92,8 +94,13 @@ export default async function CarDetailPage({
   if (!isMarketCode(code)) notFound();
 
   const market = MARKETS[code];
+  // A hold whose time is up ends here, so the car reads as available again.
+  // Nothing happens while SALE_HOLD_ENABLED is off.
+  await refreshSaleHolds();
   const v = await getVehicleBySlug(code, slug);
   if (!v) notFound();
+  // "Hold this car", in "Paying for it". Null unless the switch is on.
+  const holdOffer = saleHoldOffer(code, v);
 
   const alsoRented = v.listingKind === "both" || v.listingKind === "rental";
   const [{ vehicles: others }, sites, rental, tiers] = await Promise.all([
@@ -497,6 +504,17 @@ export default async function CarDetailPage({
                       </Link>
                     </div>
                   </details>
+                )}
+
+                {holdOffer && (
+                  <SaleHoldCard
+                    market={code}
+                    slug={v.slug}
+                    amount={holdOffer.amount}
+                    hours={holdOffer.hours}
+                    terms={holdOffer.terms}
+                    testMode={holdOffer.testMode}
+                  />
                 )}
               </div>
             </section>
