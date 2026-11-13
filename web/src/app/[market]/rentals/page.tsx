@@ -423,7 +423,7 @@ export default async function RentalsPage({
       </div>
       <GuideLinks
         market={code}
-        slugs={["weekly-car-rental-greensboro-nc", "rent-vs-buy-vs-rent-to-own"]}
+        slugs={["weekly-car-rental-greensboro-nc", "road-trip-from-greensboro"]}
       />
     </div>
   );

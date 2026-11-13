@@ -55,7 +55,7 @@ export default async function CheckPage({
       <div className="vc-page">
         <VinCheck market={code} locale={market.locale} contactHref={`/${code}/contact`} />
       </div>
-      <GuideLinks market={code} slugs={["used-car-checklist-free-vin-check"]} />
+      <GuideLinks market={code} slugs={["recall-or-not-quiz", "used-car-checklist-free-vin-check"]} />
     </>
   );
 }

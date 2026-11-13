@@ -385,7 +385,7 @@ export default async function InventoryPage({
           </nav>
         )}
       </div>
-      <GuideLinks market={code} slugs={["used-cars-by-budget-greensboro-nc"]} compare />
+      <GuideLinks market={code} slugs={["guess-the-price-game", "which-car-fits-your-life-quiz"]} compare />
     </div>
   );
 }
