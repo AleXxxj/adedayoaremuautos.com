@@ -219,3 +219,51 @@ export async function announce(
 
   return outcome;
 }
+
+/**
+ * Records a guide as announced without telling anyone.
+ *
+ * For clearing the list: guides and articles that were on the site long
+ * before this screen existed do not need an email each. The row has no
+ * campaign and no notification counts, which is how it is told apart from a
+ * real announcement ("Marked, not sent"). It takes the same one slot the
+ * unique index allows, so it can still go out later through "Send again",
+ * and never by a plain Send.
+ *
+ * Sends nothing. It calls neither sender.
+ */
+export async function markAnnounced(
+  input: { item: Announceable; user: { id?: string | null; email: string } },
+  deps: Pick<AnnounceDeps, "database"> = {},
+): Promise<{ ok: boolean; error?: string; already?: boolean }> {
+  const database = deps.database ?? db;
+  const { item, user } = input;
+  try {
+    await database.insert(contentAnnouncements).values({
+      marketCode: item.market,
+      contentType: item.kind,
+      slug: item.slug,
+      title: item.title,
+      // Nothing was written to anyone, so there is no first line to keep.
+      intro: "",
+      campaignId: null,
+      sendAgain: false,
+      announcedBy: user.id ?? null,
+      announcedByEmail: user.email,
+    });
+  } catch (e) {
+    if (isMissingAnnounceTable(e)) return { ok: false, error: ANNOUNCE_NOT_READY };
+    if (violates(e, "content_announcements_once")) {
+      return { ok: false, already: true, error: "This is already on the announced list." };
+    }
+    throw e;
+  }
+  console.log(
+    `[announce] ${item.market} ${item.kind} "${item.slug}" marked as announced by ${user.email}, nothing sent`,
+  );
+  return { ok: true };
+}
+
+/** A row that was marked by hand: no email campaign and no notification. */
+export const isMarkedOnly = (row: { campaignId: string | null; pushSent: number | null }): boolean =>
+  row.campaignId == null && row.pushSent == null;

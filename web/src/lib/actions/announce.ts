@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireStaff, assertMarketAccess } from "@/lib/auth";
-import { announce } from "@/lib/campaign/announce";
+import { announce, markAnnounced } from "@/lib/campaign/announce";
 import { findAnnounceable } from "@/lib/campaign/announceContent";
 import { INTRO_MAX, kindWord } from "@/lib/campaign/announceDraft";
 
@@ -98,4 +98,38 @@ export async function sendAnnouncement(
     key,
     message: `The ${kindWord(item.kind)} is announced. ${parts.join(" ")}`.trim(),
   };
+}
+
+const markSchema = schema.pick({ marketCode: true, kind: true, slug: true, confirm: true });
+
+/**
+ * Moves a guide or article to "Already announced" without sending anything.
+ *
+ * Same people as Send: owners and managers, within their own markets.
+ */
+export async function markAnnouncedAction(
+  _prev: AnnounceResult | null,
+  formData: FormData,
+): Promise<AnnounceResult> {
+  const user = await requireStaff();
+  if (user.role === "sales") {
+    return { ok: false, error: "Only an owner or manager can do this." };
+  }
+
+  const parsed = markSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { ok: false, error: "That did not come through. Try again." };
+  const v = parsed.data;
+  const key = `${v.marketCode}:${v.kind}:${v.slug}`;
+  assertMarketAccess(user, v.marketCode);
+
+  if (v.confirm !== "yes") return { ok: false, key, error: "Press Mark, then confirm." };
+
+  const item = findAnnounceable(v.marketCode, v.kind, v.slug);
+  if (!item) return { ok: false, key, error: "That page is not on the site." };
+
+  const out = await markAnnounced({ item, user: { id: user.id, email: user.email } });
+  revalidatePath("/admin/campaigns");
+  if (!out.ok) return { ok: false, key, error: out.error };
+
+  return { ok: true, key, message: "Marked as announced. Nothing was sent." };
 }

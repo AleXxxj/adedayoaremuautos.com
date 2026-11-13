@@ -13,6 +13,7 @@
  *   - the audience is the right market and only people still subscribed
  *   - an announced item cannot be sent again without "send again", even when
  *     two people press Send at once
+ *   - "mark as announced without sending" records it and sends nothing
  *   - before migration 0036 is applied, everything answers "feature off"
  *
  * Run: npm run test:announce
@@ -59,7 +60,9 @@ webpush.sendNotification = (async (sub: { endpoint: string }, payload: string) =
   return { statusCode: 201, body: "", headers: {} };
 }) as never;
 
-const { announce, ANNOUNCE_NOT_READY } = await import("../src/lib/campaign/announce");
+const { announce, markAnnounced, isMarkedOnly, ANNOUNCE_NOT_READY } = await import(
+  "../src/lib/campaign/announce"
+);
 const { announceables, findAnnounceable, firstSentence } = await import(
   "../src/lib/campaign/announceContent"
 );
@@ -392,6 +395,65 @@ check(
     (await count(pg, `SELECT count(*) AS n FROM content_announcements WHERE slug = '${ng[1].slug}' AND campaign_id IS NULL AND push_sent = 1`)) === 1,
 );
 
+/* ── Marking as announced without sending ──────────────────────────────── */
+console.log("\nMark as announced without sending");
+{
+  const item = us[4];
+  const m = mails.length;
+  const p = pushes.length;
+  const camps = await count(pg, `SELECT count(*) AS n FROM campaigns`);
+
+  const marked = await markAnnounced({ item, user: staff }, { database: db });
+  check("marking succeeds", marked.ok, JSON.stringify(marked));
+  check("and sends no email and no notification", mails.length === m && pushes.length === p);
+  check("and makes no campaign", (await count(pg, `SELECT count(*) AS n FROM campaigns`)) === camps);
+  check(
+    "it is recorded with no campaign and no sends, by the member of staff",
+    (await count(
+      pg,
+      `SELECT count(*) AS n FROM content_announcements WHERE slug = '${item.slug}' AND market_code = 'us'
+         AND campaign_id IS NULL AND push_sent IS NULL AND push_failed IS NULL AND NOT send_again
+         AND announced_by_email = 'owner@example.test'`,
+    )) === 1,
+  );
+
+  const rows = (await listAnnounced(["us"], db)).rows;
+  const row = rows.find((r) => r.slug === item.slug)!;
+  check("the screen can tell it was marked, not sent", isMarkedOnly(row));
+  check(
+    "a real announcement is not mistaken for a marked one",
+    rows.filter((r) => r.slug !== item.slug).every((r) => !isMarkedOnly(r)),
+  );
+  check(
+    "a notification-only announcement is not mistaken for a marked one",
+    !isMarkedOnly({ campaignId: null, pushSent: 0 }),
+  );
+
+  const twice = await markAnnounced({ item, user: staff }, { database: db });
+  check(
+    "marking twice is refused and adds nothing",
+    !twice.ok && twice.already === true &&
+      (await count(pg, `SELECT count(*) AS n FROM content_announcements WHERE slug = '${item.slug}'`)) === 1,
+  );
+
+  const plain = await announce({ item, email: true, push: true, user: staff }, { database: db });
+  check("a plain Send on a marked guide is refused and sends nothing", !plain.ok && plain.already === true && mails.length === m && pushes.length === p);
+
+  const later = await announce({ item, email: true, push: true, again: true, user: staff }, { database: db });
+  check(
+    "\"Send again\" still sends it later, to the 2 people still subscribed and 2 devices",
+    later.ok && mails.length === m + 2 && pushes.length === p + 2,
+    JSON.stringify(later),
+  );
+  check(
+    "after that it no longer reads as \"not sent\"",
+    (await listAnnounced(["us"], db)).rows.filter((r) => r.slug === item.slug).some((r) => !isMarkedOnly(r)),
+  );
+
+  const already = await markAnnounced({ item: guide, user: staff }, { database: db });
+  check("something already announced cannot be marked over", !already.ok && already.already === true);
+}
+
 /* ── 3. Refusals record nothing ────────────────────────────────────────── */
 console.log("\nRefusals");
 
@@ -447,6 +509,8 @@ const old = await database(false);
   check("Send is refused with a plain reason", !r.ok && r.error === ANNOUNCE_NOT_READY, JSON.stringify(r));
   check("and nothing is sent", mails.length === m && pushes.length === p);
   check("and no campaign is created", (await count(old.pg, `SELECT count(*) AS n FROM campaigns`)) === 0);
+  const mk = await markAnnounced({ item: guide, user: staff }, { database: old.db });
+  check("marking is refused with the same plain reason", !mk.ok && mk.error === ANNOUNCE_NOT_READY, JSON.stringify(mk));
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

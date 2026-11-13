@@ -16,6 +16,7 @@ import { AnnouncePanel, type AnnounceItem } from "@/components/admin/AnnouncePan
 import { announceables } from "@/lib/campaign/announceContent";
 import { listAnnounced } from "@/lib/campaign/announceRecord";
 import { mailingAddress } from "@/lib/campaign/send";
+import { isMarkedOnly } from "@/lib/campaign/announce";
 import { siteUrl } from "@/lib/siteUrl";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,10 @@ export default async function AdminCampaignsPage() {
   const announced = await listAnnounced(markets);
   const day = (d: Date) =>
     d.toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "America/New_York" });
+  const everSent = (m: string, kind: string, slug: string) =>
+    announced.rows.some(
+      (r) => r.marketCode === m && r.contentType === kind && r.slug === slug && !isMarkedOnly(r),
+    );
   const announceItems: AnnounceItem[] = markets.flatMap((m) =>
     announceables(m).map((item) => {
       // Rows are newest first, so the last match is the first announcement.
@@ -98,6 +103,8 @@ export default async function AdminCampaignsPage() {
             })
           : null,
         announcedLabel: first ? day(first.createdAt) : null,
+        // Cleared from the list by hand, and never sent since.
+        markedOnly: Boolean(first) && !everSent(m, item.kind, item.slug),
       };
     }),
   );

@@ -2,7 +2,11 @@
 
 import { useActionState, useState } from "react";
 import { useActionToast } from "@/components/Toast";
-import { sendAnnouncement, type AnnounceResult } from "@/lib/actions/announce";
+import {
+  markAnnouncedAction,
+  sendAnnouncement,
+  type AnnounceResult,
+} from "@/lib/actions/announce";
 import {
   INTRO_MAX,
   defaultIntro,
@@ -28,6 +32,8 @@ export interface AnnounceItem extends Announceable {
   publishedLabel: string | null;
   /** When it was first announced, or null if it has not been. */
   announcedLabel: string | null;
+  /** On the announced list because staff marked it; nothing has been sent. */
+  markedOnly: boolean;
 }
 
 const MARKET_NAME: Record<MarketCode, string> = { us: "United States", ng: "Nigeria" };
@@ -57,6 +63,14 @@ export function AnnouncePanel({
     null,
   );
   useActionToast(state);
+  const [markState, markAction, marking] = useActionState<AnnounceResult | null, FormData>(
+    markAnnouncedAction,
+    null,
+  );
+  useActionToast(markState);
+  const [markConfirming, setMarkConfirming] = useState(false);
+  /** Which of the two actions answered last; that is the result on show. */
+  const [lastWasMark, setLastWasMark] = useState(false);
 
   const [market, setMarket] = useState<MarketCode>(markets[0] ?? "us");
   const [picked, setPicked] = useState<{ key: string; again: boolean } | null>(null);
@@ -70,12 +84,21 @@ export function AnnouncePanel({
   const [seen, setSeen] = useState(state);
   if (state !== seen) {
     setSeen(state);
+    setLastWasMark(false);
     setConfirming(false);
     if (state?.ok) {
       setPicked(null);
       setIntro("");
     }
   }
+  const [seenMark, setSeenMark] = useState(markState);
+  if (markState !== seenMark) {
+    setSeenMark(markState);
+    setLastWasMark(true);
+    setMarkConfirming(false);
+    if (markState?.ok) setPicked(null);
+  }
+  const shown = lastWasMark ? markState : state;
 
   const here = items.filter((i) => i.market === market);
   const fresh = here.filter((i) => !i.announcedLabel);
@@ -93,6 +116,7 @@ export function AnnouncePanel({
     setByEmail(true);
     setByPush(true);
     setConfirming(false);
+    setMarkConfirming(false);
   }
 
   function draftPane(item: AnnounceItem) {
@@ -206,7 +230,10 @@ export function AnnouncePanel({
               <button
                 type="button"
                 disabled={!canSend}
-                onClick={() => setConfirming(true)}
+                onClick={() => {
+                  setConfirming(true);
+                  setMarkConfirming(false);
+                }}
                 className="min-h-[52px] w-full rounded-full bg-[var(--cta-bg)] px-6 py-2 text-base font-bold leading-tight text-[var(--cta-fg)] disabled:opacity-50 sm:w-auto"
               >
                 {reach.length > 0 ? `Send to ${reach.join(" and ")}` : "Send"}
@@ -227,7 +254,9 @@ export function AnnouncePanel({
             >
               <p className="font-semibold">Send to {reach.join(" and ")} now?</p>
               <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                {again
+                {again && item.markedOnly
+                  ? "This was marked as announced and never sent. This sends it now. It cannot be undone."
+                  : again
                   ? `They already got this on ${item.announcedLabel}. This sends it again. It cannot be undone.`
                   : "It goes out right away. It cannot be undone."}
               </p>
@@ -237,7 +266,7 @@ export function AnnouncePanel({
                   disabled={pending}
                   className="min-h-[52px] whitespace-nowrap rounded-full bg-[var(--cta-bg)] px-6 text-base font-bold text-[var(--cta-fg)] disabled:opacity-60"
                 >
-                  {pending ? "Sending…" : again ? "Yes, send again" : "Yes, send"}
+                  {pending ? "Sending…" : again && !item.markedOnly ? "Yes, send again" : "Yes, send"}
                 </button>
                 <button
                   type="button"
@@ -251,6 +280,56 @@ export function AnnouncePanel({
             </div>
           )}
         </form>
+
+        {/* Clearing the list: for pages that were on the site long before
+            this screen existed. Its own form, so it can never carry a send. */}
+        {!again && !confirming && (
+          <form action={markAction} className="mt-3">
+            <input type="hidden" name="marketCode" value={item.market} />
+            <input type="hidden" name="kind" value={item.kind} />
+            <input type="hidden" name="slug" value={item.slug} />
+            <input type="hidden" name="confirm" value="yes" />
+            {!markConfirming ? (
+              <button
+                type="button"
+                disabled={!ready}
+                onClick={() => setMarkConfirming(true)}
+                className="min-h-11 text-left text-sm text-[var(--text-secondary)] underline underline-offset-4 disabled:opacity-50"
+              >
+                Mark as announced without sending
+              </button>
+            ) : (
+              <div
+                role="alertdialog"
+                aria-label="Confirm marking as announced"
+                className="rounded-xl border border-[var(--border-default)] p-4"
+              >
+                <p className="font-semibold">Mark as announced?</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  Nothing is sent. It moves to Already announced. You can still
+                  send it later.
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="submit"
+                    disabled={marking}
+                    className="min-h-[52px] whitespace-nowrap rounded-full border border-[var(--text-primary)] px-6 text-base font-bold disabled:opacity-60"
+                  >
+                    {marking ? "Marking…" : "Yes, mark it"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={marking}
+                    onClick={() => setMarkConfirming(false)}
+                    className="min-h-[52px] whitespace-nowrap rounded-full border border-[var(--border-strong)] px-6 text-base font-bold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+        )}
       </div>
     );
   }
@@ -275,7 +354,9 @@ export function AnnouncePanel({
             <span className="block break-words text-sm font-semibold">{item.title}</span>
             <span className="mt-0.5 block text-xs text-[var(--text-muted)]">
               {again
-                ? `Announced ${item.announcedLabel}`
+                ? item.markedOnly
+                  ? `Marked, not sent · ${item.announcedLabel}`
+                  : `Announced ${item.announcedLabel}`
                 : item.publishedLabel
                   ? `Published ${item.publishedLabel}`
                   : "Not announced"}
@@ -283,7 +364,7 @@ export function AnnouncePanel({
           </span>
           <span className="flex-none text-sm text-[var(--text-secondary)]">
             <span className="max-sm:sr-only">
-              {open ? "Close" : again ? "Send again" : "Announce"}
+              {open ? "Close" : again ? (item.markedOnly ? "Send" : "Send again") : "Announce"}
             </span>
             <i className={`fas ${open ? "fa-chevron-up" : "fa-chevron-down"} ml-2 text-xs`} aria-hidden />
           </span>
@@ -331,20 +412,20 @@ export function AnnouncePanel({
         </p>
       )}
 
-      {state?.ok && state.message && (
+      {shown?.ok && shown.message && (
         <p
           role="status"
           className="mt-4 rounded-lg border border-[var(--success)]/40 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
         >
-          {state.message}
+          {shown.message}
         </p>
       )}
-      {state && !state.ok && state.error && (
+      {shown && !shown.ok && shown.error && (
         <p
           role="alert"
           className="mt-4 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]"
         >
-          {state.error}
+          {shown.error}
         </p>
       )}
 
