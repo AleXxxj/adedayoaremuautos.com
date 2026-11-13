@@ -48,7 +48,9 @@ const {
   decideExtension,
   pendingExtensions,
   runExtensionReminders,
+  notifyExtensionDecision,
 } = await import("../src/lib/extensions/store");
+const { renderExtensionDecision, extensionDecisionSubject } = await import("../src/lib/mail/extensionDecision");
 const { extendCardProps } = await import("../src/lib/extensions/present");
 const { renderReservation } = await import("../src/lib/mail/reservation");
 const { renderBookingPaid } = await import("../src/lib/mail/bookingPaid");
@@ -450,6 +452,70 @@ console.log("\nA clash is refused by the database constraint");
   check("and after that nothing more can be asked for", asked.ok === false, asked);
 }
 
+/* ── 6b. The answer email ───────────────────────────────────────────────── */
+console.log("\nThe renter is emailed the answer");
+{
+  type Notice = Parameters<Parameters<typeof notifyExtensionDecision>[1]>[0];
+  const sends: Notice[] = [];
+  const record = async (n: Notice) => void sends.push(n);
+  const on = { database: db, enabled: true };
+
+  const r = await rental(pg);
+  const filed = await fileExtensionRequest({ token: r.token, marketCode: "us", addedDays: 7 }, { database: db, ...ON });
+  check("nothing is sent while the request is still waiting", (await notifyExtensionDecision(filed.request!.id, record, on)) === false && sends.length === 0);
+  await decideExtension({ id: filed.request!.id, decision: "approve", staffEmail: "staff@example.com" }, db);
+  const sent = await notifyExtensionDecision(filed.request!.id, record, on);
+  const a = sends[0];
+  check("an approval goes to the renter's own address", sent === true && sends.length === 1 && a.to === "renter@example.com" && a.approved === true, a);
+  check("with the new return date, the added cost and the new total", a?.returnDate === addDays(r.end, 7) && a.addedMinor === WEEKLY && a.totalMinor === WEEKLY * 2, a);
+  check("and their private link", a?.token === r.token);
+
+  const d = await rental(pg);
+  const ask = await fileExtensionRequest({ token: d.token, marketCode: "us", addedDays: 7 }, { database: db, ...ON });
+  await decideExtension({ id: ask.request!.id, decision: "decline", staffEmail: "staff@example.com" }, db);
+  await notifyExtensionDecision(ask.request!.id, record, on);
+  const no = sends[1];
+  check("a decline carries the unchanged return date and the unchanged total", sends.length === 2 && no.approved === false && no.returnDate === d.end && no.totalMinor === WEEKLY, no);
+
+  const quiet = await rental(pg, { email: null });
+  const q = await fileExtensionRequest({ token: quiet.token, marketCode: "us", addedDays: 7 }, { database: db, ...ON });
+  await decideExtension({ id: q.request!.id, decision: "approve", staffEmail: "staff@example.com" }, db);
+  check("a booking with no email gets none", (await notifyExtensionDecision(q.request!.id, record, on)) === false && sends.length === 2);
+  check("with the switch off none is sent", (await notifyExtensionDecision(filed.request!.id, record, { database: db })) === false && sends.length === 2);
+  check("an unknown request sends none", (await notifyExtensionDecision("cccccccc-0000-0000-0000-000000000000", record, on)) === false && sends.length === 2);
+
+  // Mail failing must not throw, and must not touch the decision.
+  const f = await rental(pg);
+  const fr = await fileExtensionRequest({ token: f.token, marketCode: "us", addedDays: 7 }, { database: db, ...ON });
+  await decideExtension({ id: fr.request!.id, decision: "approve", staffEmail: "staff@example.com" }, db);
+  let threw = false;
+  let result = true;
+  try {
+    result = await notifyExtensionDecision(fr.request!.id, async () => { throw new Error("mail is down"); }, on);
+  } catch {
+    threw = true;
+  }
+  check("a mail failure is reported as not sent, never thrown", threw === false && result === false);
+  check("and the approval stands", (await requestOf(pg, fr.request!.id)).status === "approved" && (await bookingOf(pg, f.id)).ends === addDays(f.end, 7));
+
+  const base = { to: "a@example.com", name: "Test Renter", vehicle: "2019 Toyota Camry", businessPhone: "(336) 555-0100", url: "https://example.com/us/rentals/reserved/tok" };
+  const yes = { ...base, approved: true, returnDay: "Fri, Mar 19", added: "$350", newTotal: "$700" };
+  const okMail = renderExtensionDecision(yes);
+  for (const [kind, body] of [["text", okMail.text], ["html", okMail.html]] as const) {
+    check(`the approval ${kind} has the date, the cost, the total, how to pay and the link`,
+      /Fri, Mar 19/.test(body) && /\$350/.test(body) && /\$700/.test(body) && /You pay the added cost with us, not online\./.test(body) && /reserved\/tok/.test(body), body.slice(0, 80));
+  }
+  check("its subject says approved and until when", /Approved/.test(extensionDecisionSubject(yes)) && /Fri, Mar 19/.test(extensionDecisionSubject(yes)));
+  const nope = { ...base, approved: false, returnDay: "Fri, Mar 12", added: null, newTotal: null };
+  const noMail = renderExtensionDecision(nope);
+  for (const [kind, body] of [["text", noMail.text], ["html", noMail.html]] as const) {
+    check(`the decline ${kind} is kind, keeps the return date and says to call`,
+      /We are sorry\. We could not extend/.test(body) && /Fri, Mar 12/.test(body) && /has not changed/.test(body) && /Call us at \(336\) 555-0100/.test(body) && !/\$/.test(body), body.slice(0, 80));
+  }
+  check("a free extension does not ask for money", /There is no added cost\./.test(renderExtensionDecision({ ...yes, added: null }).text) && !/not online/.test(renderExtensionDecision({ ...yes, added: null }).text));
+  check("with no private link the email has no button", !/View your booking/.test(renderExtensionDecision({ ...yes, url: null }).html + renderExtensionDecision({ ...yes, url: null }).text));
+}
+
 /* ── 7. The reminder ────────────────────────────────────────────────────── */
 console.log("\nThe reminder 2 days before return");
 {
@@ -500,6 +566,8 @@ console.log("\nBefore migration 0035 is applied");
   check("the admin lists none, and no error", (await pendingExtensions([r.id], { database: oldDb, enabled: true })).size === 0);
   const out = await runExtensionReminders("us", async () => { throw new Error("must not send"); }, { database: oldDb, ...ON });
   check("the reminder run does nothing, and says why", out.sent === 0 && /0035/.test(out.skipped ?? ""), out);
+  const told = await notifyExtensionDecision("cccccccc-0000-0000-0000-000000000000", async () => { throw new Error("must not send"); }, { database: oldDb, enabled: true });
+  check("the answer email does nothing, and no error", told === false);
   const decided = await decideExtension({ id: "cccccccc-0000-0000-0000-000000000000", decision: "approve", staffEmail: "s@example.com" }, oldDb);
   check("deciding a request is refused, not thrown", decided.ok === false, decided);
 }

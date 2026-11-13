@@ -137,7 +137,10 @@ export default async function ReservedPage({
           {b.status === "returned"
             ? "Thank you for renting with us."
             : b.status === "active"
-              ? "Call us if you need to keep the vehicle longer."
+              ? // The card below is how to ask; it replaces this line.
+                extension
+                ? ""
+                : "Call us if you need to keep the vehicle longer."
               : paidMinor > 0 && owedMinor === 0
                 ? `The rental is paid.${dep ? " The refundable deposit is taken when you pick up the vehicle." : ""}`
                 : paidMinor > 0

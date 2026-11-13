@@ -482,6 +482,78 @@ export async function decideExtension(
   }
 }
 
+/** What the answer email needs. Amounts in minor units, dates as "YYYY-MM-DD". */
+export interface DecisionNotice {
+  requestId: string;
+  marketCode: MarketCode;
+  to: string;
+  name: string;
+  vehicle: string;
+  approved: boolean;
+  /** The booking's return date as it now stands: new if approved, unchanged if not. */
+  returnDate: string;
+  addedMinor: number;
+  /** The booking's total as it now stands. */
+  totalMinor: number;
+  currency: Booking["currency"];
+  /** The renter's private link, when the booking has one. */
+  token: string | null;
+}
+
+/**
+ * Tells the renter the answer, after it has been saved.
+ *
+ * Runs after decideExtension has committed and can't reach back into it: any
+ * failure here, in the lookup or in the mail, is logged and reported as "not
+ * sent", and the decision stands. Nothing goes out with the switch off, for a
+ * request still waiting, or for a booking with no email address.
+ *
+ * `send` is a parameter: the action passes the real mailer, the test suite a
+ * recorder.
+ */
+export async function notifyExtensionDecision(
+  requestId: string,
+  send: (n: DecisionNotice) => Promise<void>,
+  opts: { database?: Database; enabled?: boolean } = {},
+): Promise<boolean> {
+  if (!(opts.enabled ?? extensionsEnabled())) return false;
+  try {
+    const [row] = await (opts.database ?? db)
+      .select({ r: rentalExtensionRequests, b: rentalBookings, v: vehicles })
+      .from(rentalExtensionRequests)
+      .innerJoin(rentalBookings, eq(rentalBookings.id, rentalExtensionRequests.bookingId))
+      .leftJoin(vehicles, eq(vehicles.id, rentalBookings.vehicleId))
+      .where(eq(rentalExtensionRequests.id, requestId))
+      .limit(1);
+    if (!row || row.r.status === "pending") return false;
+    const to = row.b.customerEmail?.trim();
+    if (!to) return false;
+    const range = parseTstzRange(row.b.period as unknown as string);
+    if (!range) return false;
+
+    await send({
+      requestId,
+      marketCode: row.b.marketCode as MarketCode,
+      to,
+      name: row.b.customerName,
+      vehicle: row.v ? [row.v.year, row.v.make, row.v.model].filter(Boolean).join(" ") : "vehicle",
+      approved: row.r.status === "approved",
+      returnDate: iso(range.end),
+      addedMinor: row.r.addedMinor,
+      totalMinor: row.b.totalMinor,
+      currency: row.b.currency,
+      token: validToken(row.b.reservationToken) ? row.b.reservationToken : null,
+    });
+    return true;
+  } catch (e) {
+    // Before migration 0035 there is nothing to tell anyone about.
+    if (!isMissingSchema(e)) {
+      console.error("[extensions] answer email not sent for request", requestId, e);
+    }
+    return false;
+  }
+}
+
 /** Open requests for the admin list, by booking. Empty when the feature is off. */
 export async function pendingExtensions(
   bookingIds: string[],

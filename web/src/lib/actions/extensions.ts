@@ -11,7 +11,12 @@ import {
   decideExtension,
   fileExtensionRequest,
   findExtensionRequest,
+  notifyExtensionDecision,
 } from "@/lib/extensions/store";
+import { dayLabel } from "@/lib/extensions/present";
+import { sendExtensionDecision } from "@/lib/mail/extensionDecision";
+import { listLocations, formatPhone } from "@/lib/repositories/locations";
+import { siteUrl } from "@/lib/siteUrl";
 
 export interface ExtensionResult {
   ok: boolean;
@@ -113,6 +118,37 @@ export async function decideExtensionRequest(
   console.log(
     `[extensions] ${user.email} ${parsed.data.decision === "approve" ? "approved" : "declined"} request ${parsed.data.id}`,
   );
+  /*
+   * Tell the renter. After the reply and after the decision is saved, so a
+   * mail problem can neither slow the button nor undo the answer. Only when
+   * the booking has an email address and the switch is on.
+   */
+  const requestId = parsed.data.id;
+  after(() =>
+    notifyExtensionDecision(requestId, async (n) => {
+      const market = MARKETS[n.marketCode];
+      const fmt = (minor: number) => formatMoney(money(minor, n.currency), market.locale);
+      let businessPhone: string | null = null;
+      try {
+        const sites = await listLocations(n.marketCode);
+        businessPhone = formatPhone(sites.find((s) => s.phone)?.phone ?? null);
+      } catch (e) {
+        console.error("[extensions] showroom phone lookup failed", e);
+      }
+      await sendExtensionDecision({
+        to: n.to,
+        name: n.name,
+        vehicle: n.vehicle,
+        approved: n.approved,
+        returnDay: dayLabel(n.returnDate, market.locale),
+        added: n.approved && n.addedMinor > 0 ? fmt(n.addedMinor) : null,
+        newTotal: n.approved ? fmt(n.totalMinor) : null,
+        url: n.token ? `${siteUrl()}/${n.marketCode}/rentals/reserved/${n.token}` : null,
+        businessPhone,
+      });
+    }),
+  );
+
   revalidatePath("/admin/rentals");
   revalidatePath(`/admin/rentals/${request.bookingId}/agreement`);
   // The vehicle's public page lists taken dates.
