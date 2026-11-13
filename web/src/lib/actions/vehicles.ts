@@ -7,7 +7,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { and, count, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { vehicles, vehicleMedia, auditLog, deals, rentalBookings, rentalTiers } from "@/db/schema";
+import { vehicles, vehicleMedia, auditLog, deals, rentalBookings, rentalTiers, saleHolds } from "@/db/schema";
+import { holdsTableReady } from "@/lib/saleHolds/core";
 import { requireStaff, assertMarketAccess, type Staff } from "@/lib/auth";
 import { supabaseAdmin, VEHICLE_BUCKET } from "@/lib/supabase/admin";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
@@ -598,7 +599,23 @@ export async function deleteVehicle(
     db.select({ n: count() }).from(rentalBookings).where(eq(rentalBookings.vehicleId, id)),
   ]);
 
+  // A deposit hold is a payment record, and the database refuses to delete a
+  // car that has one. Counted here so staff get the same plain advice as for
+  // deals and bookings, not a raw database error. Skipped until the holds
+  // table exists (migration 0034).
+  let holdCount = 0;
+  if (await holdsTableReady()) {
+    const [row] = await db
+      .select({ n: count() })
+      .from(saleHolds)
+      .where(eq(saleHolds.vehicleId, id));
+    holdCount = Number(row?.n ?? 0);
+  }
+
   const blockers: string[] = [];
+  if (holdCount > 0) {
+    blockers.push(`${holdCount} deposit hold${holdCount === 1 ? "" : "s"}`);
+  }
   if (Number(dealCount.n) > 0) {
     blockers.push(`${dealCount.n} deal${Number(dealCount.n) === 1 ? "" : "s"}`);
   }

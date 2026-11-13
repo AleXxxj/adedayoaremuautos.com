@@ -31,6 +31,7 @@ import {
 import "@/styles/cars.css";
 import "@/styles/car-list.css";
 import { GuideLinks } from "@/components/guides/GuideLinks";
+import { refreshSaleHolds } from "@/lib/saleHolds/offer";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,11 @@ export default async function InventoryPage({
 }) {
   const { market: code } = await params;
   if (!isMarketCode(code)) notFound();
+
+  // End any deposit hold whose time is up before the list is read, so a car
+  // doesn't keep saying "Sale pending" here until someone opens its own page.
+  // Asks the database nothing while holds are switched off.
+  await refreshSaleHolds();
   const market = MARKETS[code];
 
   const sp = await searchParams;
