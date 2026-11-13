@@ -303,6 +303,124 @@ export function checklistText(
   return lines.join("\n");
 }
 
+/* ── The checklist as a walk around the car ────────────────────────────── */
+
+/** One check, and where it sits in the walk. */
+export interface WalkStop {
+  id: string;
+  /** Which part of the car, and which check within it (both from 0). */
+  part: number;
+  index: number;
+}
+
+type WalkGroup = { id: string; title: string; checks: { id: string }[] };
+
+/** Every check in the order it is walked: part by part, top to bottom. */
+export function walkStops(groups: WalkGroup[]): WalkStop[] {
+  return groups.flatMap((g, part) => g.checks.map((c, index) => ({ id: c.id, part, index })));
+}
+
+/**
+ * Where the walk goes next: the first check with no answer after `from`,
+ * then round to the ones skipped earlier. `stops.length` (the result) once
+ * every check has an answer. Pass -1 to start from the top.
+ */
+export function nextStop(stops: WalkStop[], answers: Record<string, Answer | undefined>, from: number): number {
+  for (let step = 1; step <= stops.length; step++) {
+    const i = (from + step) % stops.length;
+    if (!answers[stops[i].id]) return i;
+  }
+  return stops.length;
+}
+
+export interface AreaProgress {
+  id: string;
+  title: string;
+  done: number;
+  total: number;
+  problems: number;
+  /** Every check in this part has an answer: it gets its seal. */
+  sealed: boolean;
+}
+
+/** How far along each part of the car is. */
+export function areaProgress(groups: WalkGroup[], answers: Record<string, Answer | undefined>): AreaProgress[] {
+  return groups.map((g) => {
+    const done = g.checks.filter((c) => answers[c.id]).length;
+    return {
+      id: g.id,
+      title: g.title,
+      done,
+      total: g.checks.length,
+      problems: g.checks.filter((c) => answers[c.id] === "problem").length,
+      sealed: g.checks.length > 0 && done === g.checks.length,
+    };
+  });
+}
+
+/** The whole walk is sold as ten minutes, so each check is its share of ten. */
+export const WALK_MINUTES = 10;
+
+/** "about 4 min left", from the checks left. Never zero while one is left. */
+export function minutesLeft(left: number, total: number, minutes = WALK_MINUTES): number {
+  if (left <= 0 || total <= 0) return 0;
+  return Math.max(1, Math.round((left / total) * minutes));
+}
+
+/** "Outside", "Outside and Inside", "Outside, Inside and Paperwork". */
+function listed(names: string[]): string {
+  if (names.length <= 1) return names.join("");
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
+/**
+ * The words on a result, finished or not. A walk that stops early is still
+ * a result: it says what was covered, and never scolds for what was not.
+ */
+export function walkResult(
+  groups: WalkGroup[],
+  answers: Record<string, Answer | undefined>,
+): { title: string; line: string } {
+  const areas = areaProgress(groups, answers);
+  const total = areas.reduce((n, a) => n + a.total, 0);
+  const done = areas.reduce((n, a) => n + a.done, 0);
+  const problems = areas.reduce((n, a) => n + a.problems, 0);
+  const sealed = areas.filter((a) => a.sealed).map((a) => a.title);
+  const ask = problems === 0 ? "No problems marked." : `${problems} to ask the seller about.`;
+  if (done === 0) return { title: "Nothing checked yet", line: "Tap Good or Problem on any check to start." };
+  if (done === total) return { title: `All ${total} checked`, line: ask };
+  return {
+    title: `${done} of ${total} checked`,
+    line: sealed.length
+      ? `${listed(sealed)} ${sealed.length === 1 ? "is" : "are"} done. ${ask}`
+      : `${ask} Each check is one less surprise later.`,
+  };
+}
+
+/**
+ * The moment an answer earns, if any: a part of the car finished, the
+ * halfway mark, or the last check. `before` is the answers as they were.
+ */
+export function walkMoment(
+  groups: WalkGroup[],
+  before: Record<string, Answer | undefined>,
+  after: Record<string, Answer | undefined>,
+): string | null {
+  const was = areaProgress(groups, before);
+  const now = areaProgress(groups, after);
+  const total = now.reduce((n, a) => n + a.total, 0);
+  const doneWas = was.reduce((n, a) => n + a.done, 0);
+  const doneNow = now.reduce((n, a) => n + a.done, 0);
+  if (doneNow <= doneWas) return null;
+  if (doneNow === total) return "All done";
+  const sealed = now.find((a, i) => a.sealed && !was[i].sealed);
+  if (sealed) return `${sealed.title} done`;
+  const half = Math.ceil(total / 2);
+  if (doneWas < half && doneNow >= half) return "Halfway";
+  if (doneNow === total - 1) return "One left";
+  return null;
+}
+
 /* ── The page around a tool ────────────────────────────────────────────── */
 
 /**

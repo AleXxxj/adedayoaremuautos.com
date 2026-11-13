@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { resultsShown, useResultSignal } from "./tools/gameKit";
 
 /**
  * "Send this to a friend": the phone's own share sheet where there is one,
@@ -24,6 +25,7 @@ export function ShareButton({
   className = "",
   primary = false,
   withText = false,
+  beat = false,
 }: {
   /** The share sheet's title. */
   title: string;
@@ -40,7 +42,12 @@ export function ShareButton({
    * for a result that means nothing without its words.
    */
   withText?: boolean;
+  /** Beat once when the page's tool first shows an answer: now there is something to send. */
+  beat?: boolean;
 }) {
+  // Answers shown before this button arrived (on an earlier guide) don't count.
+  const [before] = useState(() => (typeof window === "undefined" ? 0 : resultsShown()));
+  const answers = useResultSignal();
   const [status, setStatus] = useState<"idle" | "copied" | "manual">("idle");
   const [manualUrl, setManualUrl] = useState("");
   const box = useRef<HTMLInputElement>(null);
@@ -69,7 +76,7 @@ export function ShareButton({
   }
 
   return (
-    <div className={`gd-share ${className}`.trim()}>
+    <div className={`gd-share ${className}`.trim()} data-beat={beat && answers > before ? "" : undefined}>
       <button type="button" className={`gd-share-btn${primary ? " gd-share-btn--primary" : ""}`} onClick={share}>
         <i className="fas fa-arrow-up-from-bracket" aria-hidden="true" />
         {label}

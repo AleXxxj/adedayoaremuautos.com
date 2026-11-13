@@ -3,17 +3,8 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { canResize } from "@/lib/photo";
-import type { SpotsScene as Data } from "../sceneData";
+import { SPOT_AT, type SpotsScene as Data } from "../sceneData";
 import { SceneFrame, useScene, type SceneProps } from "../sceneKit";
-
-/** Where each part's mark sits on the photo: spread out, not pinned to a panel of this one car. */
-const WHERE: Record<string, { x: number; y: number }> = {
-  outside: { x: 20, y: 60 },
-  inside: { x: 46, y: 34 },
-  hood: { x: 70, y: 50 },
-  paperwork: { x: 88, y: 24 },
-  drive: { x: 66, y: 84 },
-};
 
 /**
  * A real car from stock with the checklist's parts marked over it. Each mark
@@ -37,7 +28,7 @@ export default function SpotsScene({ scene: data }: SceneProps<Data>) {
       )}
       <span className="sc-sweep" />
       {data.spots.map((s, i) => {
-        const at = WHERE[s.id] ?? { x: 16 + i * 17, y: 22 };
+        const at = SPOT_AT[s.id] ?? { x: 16 + i * 17, y: 22 };
         return (
           <span className="sc-spot" key={s.id} style={{ left: `${at.x}%`, top: `${at.y}%`, "--i": i } as CSSProperties}>
             <i className={`fas ${s.icon}`} />

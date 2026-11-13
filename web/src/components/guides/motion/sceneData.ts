@@ -63,6 +63,19 @@ export interface BudgetScene {
   caption: string;
 }
 
+/**
+ * Where each part of the checklist is marked on the car's photo, in percent:
+ * spread out, not pinned to a panel of this one car. The scene at the top of
+ * the checklist and the walk inside its tool mark the same places.
+ */
+export const SPOT_AT: Record<string, { x: number; y: number }> = {
+  outside: { x: 20, y: 60 },
+  inside: { x: 46, y: 34 },
+  hood: { x: 70, y: 50 },
+  paperwork: { x: 88, y: 24 },
+  drive: { x: 66, y: 84 },
+};
+
 export interface SpotsScene {
   tool: "checklist";
   photo: string | null;

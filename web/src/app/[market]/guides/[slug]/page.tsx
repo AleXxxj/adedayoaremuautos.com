@@ -11,6 +11,8 @@ import { guideUpdated, readMinutes } from "@/components/guides/guideMath";
 import { GuideCards, guideCards } from "@/components/guides/GuideCards";
 import { GuideCarCard } from "@/components/guides/GuideCarCard";
 import { GuideTool } from "@/components/guides/GuideTool";
+import { CardMotion } from "@/components/guides/motion/CardMotion";
+import { GuideOutro } from "@/components/guides/motion/GuideOutro";
 import { GuideScene } from "@/components/guides/motion/GuideScene";
 import { ScrollLife } from "@/components/guides/motion/ScrollLife";
 import { sceneFor } from "@/components/guides/motion/sceneData";
@@ -236,7 +238,7 @@ export default async function GuidePage({
           <h2 className="gd-h" id="gd-tool-h">
             {words.toolHeading}
           </h2>
-          <GuideTool meta={meta} data={data} />
+          <GuideTool meta={meta} data={data} photo={photo} />
           <p className="gd-toolnote">{words.toolNote}</p>
         </section>
   );
@@ -245,6 +247,8 @@ export default async function GuidePage({
     <article className="gd-page">
       {/* Sections ease in as they are reached, figures count up, and a line under the header shows how far along the page is. */}
       <ScrollLife progress />
+      {/* The other guides' cards lean to the pointer and play their small previews, as on the index. */}
+      <CardMotion />
       {jsonLd.map((node) => (
         <script
           key={node["@type"]}
@@ -288,23 +292,25 @@ export default async function GuidePage({
           </>
         )}
 
-        <ShareButton {...share} />
+        <ShareButton {...share} beat />
 
         <details className="gd-toc">
           <summary>
             <span>On this page</span>
             <span className="gd-toc-count">{words.sections.length + 1} sections</span>
           </summary>
-          <ol>
-            {words.sections.map((s) => (
-              <li key={s.id}>
-                <a href={`#${s.id}`}>{s.heading}</a>
+          <div className="gd-fold">
+            <ol>
+              {words.sections.map((s) => (
+                <li key={s.id}>
+                  <a href={`#${s.id}`}>{s.heading}</a>
+                </li>
+              ))}
+              <li>
+                <a href="#questions">Questions people ask</a>
               </li>
-            ))}
-            <li>
-              <a href="#questions">Questions people ask</a>
-            </li>
-          </ol>
+            </ol>
+          </div>
         </details>
 
         {words.sections.map((s) => (
@@ -375,7 +381,9 @@ export default async function GuidePage({
                   <span>{f.q}</span>
                   <i className="fas fa-plus" aria-hidden="true" />
                 </summary>
-                <p>{f.a}</p>
+                <div className="gd-fold">
+                  <p>{f.a}</p>
+                </div>
               </details>
             ))}
           </div>
@@ -405,6 +413,8 @@ export default async function GuidePage({
         </section>
 
         <section className="gd-cta" aria-labelledby="gd-cta-h">
+          {/* The guide's own picture comes to rest here: its car drives in, its stamp lands, its route ends. */}
+          <GuideOutro tool={meta.tool} photo={photo} />
           <h2 className="gd-cta-h" id="gd-cta-h">
             {words.cta.title}
           </h2>

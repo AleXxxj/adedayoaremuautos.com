@@ -27,6 +27,10 @@ const COUNT_MS = 900;
  *   3. On a guide, a thin line under the header shows how far down the page
  *      the reader is.
  *
+ *   4. "The short version" ticks: when it is first on screen each of its
+ *      check marks beats in turn (data-tick), whether the box eased in or
+ *      was there from the start.
+ *
  * Everything is a transform or an opacity; the scroll handler does one
  * read and one write a frame.
  */
@@ -97,6 +101,23 @@ export function ScrollLife({ progress = false }: { progress?: boolean }) {
       page.removeEventListener("focusin", reach);
       window.removeEventListener("hashchange", jump);
       page.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));
+    });
+
+    /* 4. The short version ticks. */
+    const ticks = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.setAttribute("data-tick", "");
+          ticks.unobserve(e.target);
+        }
+      },
+      { threshold: 0.5 },
+    );
+    page.querySelectorAll(".gd-short").forEach((el) => ticks.observe(el));
+    undo.push(() => {
+      ticks.disconnect();
+      page.querySelectorAll("[data-tick]").forEach((el) => el.removeAttribute("data-tick"));
     });
 
     /* 2. Figures count up. */

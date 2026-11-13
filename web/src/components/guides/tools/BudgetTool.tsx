@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
 import type { GuideSaleCar } from "@/content/guides/types";
 import { GuideCarCard } from "../GuideCarCard";
 import { budgetBucket } from "../guideMath";
 import { signalScene } from "../motion/sceneKit";
+import { CountUp, buzz, signalResult } from "./gameKit";
 
 /** Cards shown under a budget; the rest are a tap away on the sale list. */
 const SHOWN = 6;
 
 /**
- * Tap a budget, see what it buys from the cars in stock: how many fit, the
- * typical year and miles among them, and the cars themselves.
+ * One question (what is your budget?) answered on a price line: every car in
+ * stock is a mark at its price, a marker slides to the budget, the marks it
+ * passes light up, the count climbs to how many fit, and those cars drive
+ * in. Then the typical year and miles among them.
  *
  * "Typical" is the middle value, counted from the cars for sale today and
  * nothing else, so the words say "in our stock today". Few of the listings
@@ -45,43 +48,70 @@ export function BudgetTool({
   const fmt = (minor: number) => formatMoney(money(minor, currency), locale);
   const num = (n: number) => new Intl.NumberFormat(locale).format(n);
   const b = buckets.find((x) => x.major === major)!;
-  const at = `${fmt(b.budgetMinor)} or less`;
+  const reach = `${fmt(b.budgetMinor)} or less`;
   const lowestInStock = cars.length ? Math.min(...cars.map((c) => c.priceMinor)) : null;
+
+  // The price line runs from nothing to the dearest car or the largest budget, whichever is more.
+  const top = Math.max(...cars.map((c) => c.priceMinor), ...buckets.map((x) => x.budgetMinor));
+  const at = (minor: number) => (top > 0 ? Math.min(1, minor / top) : 0);
+
+  function pick(next: number) {
+    if (next === major) return;
+    buzz();
+    setMajor(next);
+    signalResult();
+  }
 
   return (
     <div className="gt">
       <p className="gt-ask" id={label}>
         What is your budget?
       </p>
-      <div className="gt-chips" role="group" aria-labelledby={label}>
+      <div className="gt-tiles gt-tiles--3" role="group" aria-labelledby={label}>
         {buckets.map((x) => (
-          <button
-            key={x.major}
-            type="button"
-            className="gt-chip"
-            aria-pressed={x.major === major}
-            onClick={() => setMajor(x.major)}
-          >
-            {fmt(x.budgetMinor)}
-            <span className="gt-chip-count">
-              {x.count}
-              <span className="gd-sr"> {x.count === 1 ? "car" : "cars"}</span>
+          <button key={x.major} type="button" className="gt-tile" aria-pressed={x.major === major} onClick={() => pick(x.major)}>
+            <span className="gt-tile-n gt-tile-n--money">{fmt(x.budgetMinor)}</span>
+            <span className="gt-tile-from">
+              {x.count} {x.count === 1 ? "car" : "cars"}
             </span>
           </button>
         ))}
       </div>
 
+      {/* Every car in stock at its price; the marker stops at the budget. For the eye: the count below is the fact. */}
+      {cars.length > 0 && (
+        <div className="gt-rail" aria-hidden="true">
+          <span className="gt-rail-line" />
+          {cars.map((c) => (
+            <span
+              key={c.slug}
+              className="gt-rail-car"
+              data-in={c.priceMinor <= b.budgetMinor || undefined}
+              style={{ left: `${(at(c.priceMinor) * 100).toFixed(2)}%`, "--d": at(c.priceMinor).toFixed(3) } as CSSProperties}
+            />
+          ))}
+          <span className="gt-rail-reach" style={{ "--at": at(b.budgetMinor).toFixed(4) } as CSSProperties} />
+          <span className="gt-rail-mark" style={{ "--at": at(b.budgetMinor).toFixed(4) } as CSSProperties}>
+            <span>{fmt(b.budgetMinor)}</span>
+          </span>
+          <span className="gt-rail-ends">
+            <span>{fmt(0)}</span>
+            <span>{fmt(top)}</span>
+          </span>
+        </div>
+      )}
+
       <p className="gt-answer gt-answer--count" role="status" aria-live="polite">
         {b.count === 0 ? (
           <>
-            <strong>No cars</strong> <span>at {at} in our stock today</span>
+            <strong>No cars</strong> <span>at {reach} in our stock today</span>
           </>
         ) : (
           <>
             <strong>
-              {b.count} {b.count === 1 ? "car" : "cars"}
+              <CountUp value={b.count} format={String} /> {b.count === 1 ? "car" : "cars"}
             </strong>{" "}
-            <span>at {at} in our stock today</span>
+            <span>at {reach} in our stock today</span>
           </>
         )}
       </p>
@@ -100,7 +130,7 @@ export function BudgetTool({
       )}
 
       {b.count > 0 && (
-        <dl className="gt-facts">
+        <dl className="gt-facts gt-facts--in" key={b.major}>
           <div>
             <dt>Typical year</dt>
             <dd>{b.typicalYear}</dd>
@@ -130,8 +160,8 @@ export function BudgetTool({
 
       {b.count > 0 && (
         <>
-          {/* Keyed by the budget: its cars arrive one after another. */}
-          <ul className="gd-cars gd-cars--in" key={b.major}>
+          {/* Keyed by the budget: its cars drive in one after another. */}
+          <ul className="gd-cars gd-cars--drive" key={b.major}>
             {b.cars.slice(0, SHOWN).map((c) => (
               <GuideCarCard
                 key={c.slug}
@@ -149,7 +179,7 @@ export function BudgetTool({
             ))}
           </ul>
           <Link href={`/us/inventory?price=0-${b.major}`} className="gt-all">
-            {b.count > SHOWN ? `See all ${b.count} cars at ${at}` : `See ${b.count === 1 ? "it" : "them"} on the sale list`}
+            {b.count > SHOWN ? `See all ${b.count} cars at ${reach}` : `See ${b.count === 1 ? "it" : "them"} on the sale list`}
             <i className="fas fa-arrow-right" aria-hidden="true" />
           </Link>
         </>

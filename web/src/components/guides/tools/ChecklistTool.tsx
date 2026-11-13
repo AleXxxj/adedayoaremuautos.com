@@ -1,17 +1,38 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { memo, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { canResize } from "@/lib/photo";
 import type { CheckGroup } from "@/content/guides/checklist";
-import { checklistText, tally, type Answer } from "../guideMath";
+import {
+  areaProgress,
+  checklistText,
+  minutesLeft,
+  nextStop,
+  tally,
+  walkMoment,
+  walkResult,
+  walkStops,
+  type Answer,
+} from "../guideMath";
+import { SPOT_AT } from "../motion/sceneData";
+import { CountUp, Moment, buzz, useStepFocus } from "./gameKit";
 
 /**
- * The used-car checklist: five parts of a car, tapped through one at a time,
- * with a running tally and a result to share or save.
+ * The used-car checklist as a walk around the car. The car's photo stays on
+ * screen with the part being checked lit up; under it is ONE check at a
+ * time, a card with two big answers, Good and Problem. A tap is confirmed on
+ * the card and the walk moves to the next check by itself. A part that is
+ * finished gets its seal on the photo. Nothing is typed.
  *
- * Every check has two big buttons, Good and Problem. Nothing is typed. The
- * tally at the top is announced politely as it changes; moving to the next
- * part puts focus on its heading, so a screen reader starts reading there.
+ * It can be left at any point: "Stop here" shows a result for what was
+ * checked, and that result is a result, not a scolding. What is left is
+ * shown as minutes, not as a pile.
+ *
+ * The tally is announced politely as it changes; each new check takes focus
+ * on its heading, so a screen reader starts reading there. Everything is a
+ * real button: the parts of the car, Back, Skip and Stop.
  *
  * WHERE THE ANSWERS GO: nowhere. They are kept in this browser's
  * localStorage (check ids and "good"/"problem", nothing else), so a visitor
@@ -197,51 +218,93 @@ function drawResult(
   return canvas;
 }
 
+/* ── The deck's unseen cards ───────────────────────────────────────────── */
+
+/**
+ * Every check's words, hidden, stacked where the card in view sits, so the
+ * card is always as tall as the longest check. Drawn once: the checklist
+ * doesn't change, so an answer never draws these again.
+ */
+const Ghosts = memo(function Ghosts({ groups }: { groups: CheckGroup[] }) {
+  return (
+    <>
+      {groups.map((g) =>
+        g.checks.map((c) => (
+          <div className="ck-card ck-card--ghost" aria-hidden="true" key={c.id}>
+            <p className="ck-kicker">{g.title}</p>
+            <p className="ck-label">{c.label}</p>
+            <p className="ck-hint">
+              {c.hint} {c.link?.label}
+            </p>
+          </div>
+        )),
+      )}
+    </>
+  );
+});
+
 /* ── The tool ──────────────────────────────────────────────────────────── */
 
-export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: string }) {
-  const ids = groups.flatMap((g) => g.checks.map((c) => c.id));
+/** How long a tap's answer stays on the card before the walk moves on. */
+const CONFIRM_MS = 560;
+
+export function ChecklistTool({
+  groups,
+  path,
+  photo,
+}: {
+  groups: CheckGroup[];
+  path: string;
+  /** A real car from stock to walk around; the marks sit on a plain panel without one. */
+  photo: string | null;
+}) {
+  const stops = walkStops(groups);
+  const ids = stops.map((s) => s.id);
   const raw = useSyncExternalStore(subscribe, readRaw, () => "");
   const answers = parse(raw, new Set(ids));
   const score = tally(ids, answers);
+  const areas = areaProgress(groups, answers);
 
-  // 0 to groups.length - 1 are the parts; groups.length is the result.
-  const [step, setStep] = useState(0);
+  // Where the walk is: a check (0 to stops.length - 1) or the result (stops.length).
+  // Until the reader moves, it is the first check with no answer, so a visitor
+  // who comes back to a half-done walk is put where they left off.
+  const [pos, setPos] = useState<number | null>(null);
+  const at = pos ?? nextStop(stops, answers, -1);
+  const [moment, setMoment] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [manual, setManual] = useState("");
-  const heading = useRef<HTMLHeadingElement>(null);
-  const moved = useRef(false);
-
-  // After Next, Back or a jump: start reading at the new part's heading.
-  useEffect(() => {
-    if (!moved.current) return;
-    moved.current = false;
-    heading.current?.focus({ preventScroll: true });
-    heading.current?.scrollIntoView({ block: "start", behavior: "auto" });
-  }, [step]);
+  const { ref: heading, moved } = useStepFocus<HTMLHeadingElement>(at);
+  const timer = useRef(0);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
 
   function go(next: number) {
-    moved.current = true;
+    window.clearTimeout(timer.current);
+    moved();
     setNote("");
     setManual("");
-    setStep(next);
+    setPos(next);
   }
 
   function answer(id: string, value: Answer) {
-    const next = { ...answers };
-    // A second tap on the same button takes the answer back.
-    if (next[id] === value) delete next[id];
-    else next[id] = value;
-    writeRaw(Object.keys(next).length ? JSON.stringify(next) : "");
+    const next = { ...answers, [id]: value };
+    // Hold the walk on this card while the answer shows, then move on.
+    setPos(at);
+    setMoment(walkMoment(groups, answers, next));
+    writeRaw(JSON.stringify(next));
+    buzz();
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => go(nextStop(stops, next, at)), CONFIRM_MS);
   }
 
-  const onResult = step >= groups.length;
-  const group = onResult ? null : groups[step];
-  const partDone = (g: CheckGroup) => g.checks.every((c) => answers[c.id]);
+  const onResult = at >= stops.length;
+  const stop = onResult ? null : stops[at];
+  const group = stop ? groups[stop.part] : null;
+  const check = stop && group ? group.checks[stop.index] : null;
   const problems = groups.flatMap((g) =>
     g.checks.filter((c) => answers[c.id] === "problem").map((c) => ({ part: g.title, label: c.label })),
   );
-  const firstOpen = groups.findIndex((g) => !partDone(g));
+  const left = minutesLeft(score.left, score.total);
+  const result = walkResult(groups, answers);
 
   const pageUrl = () => new URL(path, window.location.origin).toString();
   const resultText = () => checklistText(groups, answers, pageUrl());
@@ -299,42 +362,76 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
 
   function reset() {
     writeRaw("");
+    setMoment(null);
     go(0);
   }
 
+  /** The first check with no answer in a part, or its first check when it is done. */
+  const enter = (part: number) => {
+    const open = stops.findIndex((s) => s.part === part && !answers[s.id]);
+    return open !== -1 ? open : stops.findIndex((s) => s.part === part);
+  };
+
   return (
     <div className="gt ck">
+      {/* The car being walked around. Decoration: the parts are named on the buttons under it. */}
+      <div className="ck-car" aria-hidden="true" data-result={onResult || undefined}>
+        {photo && <Image src={photo} alt="" fill sizes="(min-width: 800px) 720px, 100vw" unoptimized={!canResize(photo)} />}
+        {groups.map((g, i) => {
+          const where = SPOT_AT[g.id] ?? { x: 16 + i * 17, y: 22 };
+          const sealed = areas[i].sealed;
+          return (
+            <span
+              key={g.id}
+              className="ck-spot"
+              data-on={stop?.part === i || undefined}
+              data-sealed={sealed || undefined}
+              style={{ left: `${where.x}%`, top: `${where.y}%` } as CSSProperties}
+            >
+              {/* Keyed, so the seal presses on when the part is finished. */}
+              <i className={`fas ${sealed ? "fa-check" : g.icon}`} key={sealed ? "seal" : "icon"} />
+            </span>
+          );
+        })}
+        <span className="ck-car-read">
+          {group && stop ? (
+            <>
+              <strong>{group.title}</strong> check {stop.index + 1} of {group.checks.length}
+            </>
+          ) : (
+            <>
+              <strong>{score.total - score.left}</strong> of {score.total} checked
+            </>
+          )}
+        </span>
+      </div>
+
       <div className="ck-top">
-        <ol className="ck-steps" aria-label="Parts of the checklist">
+        <ol className="ck-steps" aria-label="Parts of the car">
           {groups.map((g, i) => (
             <li key={g.id}>
               <button
                 type="button"
                 className="ck-step"
-                aria-current={i === step ? "step" : undefined}
-                data-done={partDone(g) || undefined}
-                onClick={() => go(i)}
+                aria-current={stop?.part === i ? "step" : undefined}
+                data-done={areas[i].sealed || undefined}
+                onClick={() => go(enter(i))}
               >
-                <i className={`fas ${partDone(g) ? "fa-check" : g.icon}`} aria-hidden="true" />
+                <i className={`fas ${areas[i].sealed ? "fa-check" : g.icon}`} aria-hidden="true" />
                 <span>{g.title}</span>
-                {partDone(g) && <span className="gd-sr"> (done)</span>}
+                <span className="gd-sr">
+                  {" "}
+                  ({areas[i].done} of {areas[i].total} checked)
+                </span>
               </button>
             </li>
           ))}
-          <li>
-            <button
-              type="button"
-              className="ck-step"
-              aria-current={onResult ? "step" : undefined}
-              onClick={() => go(groups.length)}
-            >
-              <i className="fas fa-flag-checkered" aria-hidden="true" />
-              <span>Result</span>
-            </button>
-          </li>
         </ol>
-        <div className="ck-bar" aria-hidden="true">
-          <span style={{ transform: `scaleX(${((score.total - score.left) / score.total).toFixed(3)})` }} />
+        <div className="ck-barrow">
+          <div className="ck-bar" aria-hidden="true">
+            <span style={{ transform: `scaleX(${((score.total - score.left) / score.total).toFixed(3)})` }} />
+          </div>
+          <Moment text={moment} />
         </div>
         <p className="ck-tally" role="status" aria-live="polite">
           <span>
@@ -344,93 +441,124 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
             <strong>{score.problems}</strong> to ask about
           </span>
           <span>
-            <strong>{score.left}</strong> left
+            <strong>{score.left}</strong> left{left > 0 && <> · about {left} min</>}
           </span>
         </p>
       </div>
 
-      {group ? (
+      {check && group && stop ? (
         <section className="ck-part" aria-labelledby="ck-part-title">
-          <h3 className="ck-part-title" id="ck-part-title" tabIndex={-1} ref={heading}>
-            {group.title}
-            <span>
-              Part {step + 1} of {groups.length}
-            </span>
-          </h3>
-          <ul className="ck-list ck-list--in" key={group.id}>
-            {group.checks.map((c) => (
-              <li key={c.id} className="ck-item" data-answer={answers[c.id]}>
-                <p className="ck-label">{c.label}</p>
-                <p className="ck-hint">
-                  {c.hint}
-                  {c.link && (
-                    <>
-                      {" "}
-                      <Link href={c.link.href} className="gd-a">
-                        {c.link.label}
-                      </Link>
-                    </>
-                  )}
-                </p>
-                <div className="ck-btns" role="group" aria-label={c.label}>
-                  <button
-                    type="button"
-                    className="ck-btn"
-                    data-kind="good"
-                    aria-pressed={answers[c.id] === "good"}
-                    onClick={() => answer(c.id, "good")}
-                  >
-                    <i className="fas fa-check" aria-hidden="true" />
-                    Good
-                  </button>
-                  <button
-                    type="button"
-                    className="ck-btn"
-                    data-kind="problem"
-                    aria-pressed={answers[c.id] === "problem"}
-                    onClick={() => answer(c.id, "problem")}
-                  >
-                    <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-                    Problem
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="ck-nav">
-            {step > 0 && (
-              <button type="button" className="gd-btn" onClick={() => go(step - 1)}>
-                <i className="fas fa-arrow-left" aria-hidden="true" />
-                Back
-              </button>
+          {/* Every check's words, unseen, in the same place: the card is as tall as the
+              longest of them, so moving on never moves what is under it. */}
+          <div className="ck-deck">
+            <Ghosts groups={groups} />
+            {/* Keyed by the check: each one is dealt in, and takes its answer like a stamp. */}
+            <div className="ck-card" key={check.id} data-answer={answers[check.id]}>
+            <p className="ck-kicker">
+              <i className={`fas ${group.icon}`} aria-hidden="true" />
+              {group.title} · {stop.index + 1} of {group.checks.length}
+            </p>
+            <h3 className="ck-label" id="ck-part-title" tabIndex={-1} ref={heading}>
+              {check.label}
+            </h3>
+            <p className="ck-hint">
+              {check.hint}
+              {check.link && (
+                <>
+                  {" "}
+                  <Link href={check.link.href} className="gd-a">
+                    {check.link.label}
+                  </Link>
+                </>
+              )}
+            </p>
+            {answers[check.id] && (
+              <span className="ck-stamp" aria-hidden="true" data-kind={answers[check.id]} key={answers[check.id]}>
+                {answers[check.id] === "good" ? "Good" : "Ask"}
+              </span>
             )}
-            <button type="button" className="gd-btn gd-btn--primary" onClick={() => go(step + 1)}>
-              {step + 1 < groups.length ? `Next: ${groups[step + 1].title}` : "See my result"}
+            </div>
+          </div>
+          <div className="ck-btns" role="group" aria-label={check.label}>
+            <button
+              type="button"
+              className="ck-btn"
+              data-kind="good"
+              aria-pressed={answers[check.id] === "good"}
+              onClick={() => answer(check.id, "good")}
+            >
+              <i className="fas fa-check" aria-hidden="true" />
+              Good
+            </button>
+            <button
+              type="button"
+              className="ck-btn"
+              data-kind="problem"
+              aria-pressed={answers[check.id] === "problem"}
+              onClick={() => answer(check.id, "problem")}
+            >
+              <i className="fas fa-triangle-exclamation" aria-hidden="true" />
+              Problem
+            </button>
+          </div>
+          <div className="ck-nav">
+            <button type="button" className="ck-link" disabled={at === 0} onClick={() => go(at - 1)}>
+              <i className="fas fa-arrow-left" aria-hidden="true" />
+              Back
+            </button>
+            <button type="button" className="ck-link" onClick={() => go(at + 1 < stops.length ? at + 1 : stops.length)}>
+              Skip
               <i className="fas fa-arrow-right" aria-hidden="true" />
+            </button>
+            <button type="button" className="ck-link ck-link--stop" onClick={() => go(stops.length)}>
+              <i className="fas fa-flag-checkered" aria-hidden="true" />
+              {score.left === score.total ? "See the result" : "Stop here"}
             </button>
           </div>
         </section>
       ) : (
         <section className="ck-part ck-result" aria-labelledby="ck-part-title">
-          <h3 className="ck-part-title" id="ck-part-title" tabIndex={-1} ref={heading}>
-            Your result
+          <p className="ck-kicker">Your result</p>
+          <h3 className="ck-result-title" id="ck-part-title" tabIndex={-1} ref={heading}>
+            {result.title}
           </h3>
+          <p className="ck-result-line">{result.line}</p>
           <dl className="ck-score">
             <div>
-              <dd>{score.good}</dd>
+              <dd>
+                <CountUp value={score.good} format={String} />
+              </dd>
               <dt>good</dt>
             </div>
             <div data-kind={score.problems ? "problem" : undefined}>
-              <dd>{score.problems}</dd>
+              <dd>
+                <CountUp value={score.problems} format={String} />
+              </dd>
               <dt>to ask about</dt>
             </div>
             <div>
-              <dd>{score.left}</dd>
+              <dd>
+                <CountUp value={score.left} format={String} />
+              </dd>
               <dt>not checked</dt>
             </div>
           </dl>
 
-          {problems.length > 0 ? (
+          {/* Each part of the car: sealed, or how far along. */}
+          <ul className="ck-areas">
+            {areas.map((a, i) => (
+              <li key={a.id} data-sealed={a.sealed || undefined} style={{ "--i": i } as CSSProperties}>
+                <i className={`fas ${a.sealed ? "fa-circle-check" : groups[i].icon}`} aria-hidden="true" />
+                <span>{a.title}</span>
+                <span className="ck-area-n">
+                  {a.sealed ? "Done" : `${a.done} of ${a.total}`}
+                  {a.problems > 0 && <em> · {a.problems} to ask</em>}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {problems.length > 0 && (
             <>
               <p className="ck-result-h">Ask the seller about</p>
               <ul className="ck-problems">
@@ -445,31 +573,31 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
                 ))}
               </ul>
             </>
-          ) : (
-            <p className="ck-result-h">{score.left ? "No problems marked so far." : "No problems marked."}</p>
           )}
 
-          {score.left > 0 && firstOpen !== -1 && (
-            <button type="button" className="gd-btn" onClick={() => go(firstOpen)}>
-              <i className="fas fa-list-check" aria-hidden="true" />
-              Finish the {score.left} {score.left === 1 ? "check" : "checks"} left
+          {score.left > 0 && (
+            <button type="button" className="gd-btn" onClick={() => go(nextStop(stops, answers, -1))}>
+              <i className="fas fa-person-walking" aria-hidden="true" />
+              {score.left === score.total ? "Start the walk" : `Keep going: ${score.left} left, about ${left} min`}
             </button>
           )}
 
-          <div className="ck-actions">
-            <button type="button" className="gd-btn gd-btn--primary" onClick={share}>
-              <i className="fas fa-arrow-up-from-bracket" aria-hidden="true" />
-              Share result
-            </button>
-            <button type="button" className="gd-btn" onClick={saveImage}>
-              <i className="fas fa-image" aria-hidden="true" />
-              Save as image
-            </button>
-            <button type="button" className="gd-btn" onClick={copy}>
-              <i className="fas fa-copy" aria-hidden="true" />
-              Copy as text
-            </button>
-          </div>
+          {score.left < score.total && (
+            <div className="ck-actions">
+              <button type="button" className="gd-btn gd-btn--primary" onClick={share}>
+                <i className="fas fa-arrow-up-from-bracket" aria-hidden="true" />
+                Share result
+              </button>
+              <button type="button" className="gd-btn" onClick={saveImage}>
+                <i className="fas fa-image" aria-hidden="true" />
+                Save as image
+              </button>
+              <button type="button" className="gd-btn" onClick={copy}>
+                <i className="fas fa-copy" aria-hidden="true" />
+                Copy as text
+              </button>
+            </div>
+          )}
           <p className="ck-note" role="status" aria-live="polite">
             {note}
           </p>
@@ -488,12 +616,32 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
             <Link href="/us/check" className="gd-a">
               Check this car&rsquo;s VIN free
             </Link>
-            <button type="button" className="ck-reset" onClick={reset}>
-              Start over
-            </button>
+            {score.left < score.total && (
+              <button type="button" className="ck-reset" onClick={reset}>
+                Start over
+              </button>
+            )}
           </div>
         </section>
       )}
+
+      {/* Without JavaScript the walk can't move: the whole list, as plain reading. */}
+      <noscript>
+        <ol className="ck-plain">
+          {groups.map((g) => (
+            <li key={g.id}>
+              <strong>{g.title}</strong>
+              <ul>
+                {g.checks.map((c) => (
+                  <li key={c.id}>
+                    {c.label}. {c.hint}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </noscript>
     </div>
   );
 }

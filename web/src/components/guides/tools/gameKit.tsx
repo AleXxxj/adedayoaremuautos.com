@@ -3,8 +3,8 @@
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 
 /**
- * The parts the guides' games share: a progress line, a number that counts
- * up, a small store for a score kept in this browser, the hash of a shared
+ * The parts the guides' tools share: a progress line with the moment a step
+ * earns, a buzz for a tap, a number that counts up, a small store for a score kept in this browser, the hash of a shared
  * link, and a heading that takes focus when the game moves on.
  *
  * WHAT IS KEPT, AND WHERE. A game keeps numbers and ids only (a best score,
@@ -110,8 +110,24 @@ export function useStepFocus<T extends HTMLElement>(step: unknown) {
 
 /* ── Progress ──────────────────────────────────────────────────────────── */
 
-/** A thin line that fills as the game goes on, with "2 of 6" beside it. */
-export function Progress({ done, of, label }: { done: number; of: number; label: string }) {
+/**
+ * A thin line that fills as the game goes on, with "2 of 6" beside it.
+ *
+ * @param moment a word for a step that earned one ("3 in a row", "Halfway").
+ *   It lands over the end of the line, so nothing below it moves, and it is
+ *   read out politely.
+ */
+export function Progress({
+  done,
+  of,
+  label,
+  moment = null,
+}: {
+  done: number;
+  of: number;
+  label: string;
+  moment?: string | null;
+}) {
   const pct = of > 0 ? Math.round((Math.min(done, of) / of) * 100) : 0;
   return (
     <div className="gm-progress">
@@ -120,7 +136,65 @@ export function Progress({ done, of, label }: { done: number; of: number; label:
         <span style={{ transform: `scaleX(${pct / 100})` }} />
       </div>
       <p className="gm-progress-text">{label}</p>
+      <Moment text={moment} />
     </div>
+  );
+}
+
+/** The word a step earned. Keyed by its text, so each new one lands afresh. */
+export function Moment({ text }: { text: string | null }) {
+  return (
+    <p className="gm-moment" role="status" aria-live="polite">
+      {text && (
+        <span key={text}>
+          <i className="fas fa-bolt" aria-hidden="true" />
+          {text}
+        </span>
+      )}
+    </p>
+  );
+}
+
+/* ── A tap that is felt ────────────────────────────────────────────────── */
+
+/**
+ * A short buzz on phones that have one (Android; an iPhone ignores it), for
+ * an answer or a result. Never with reduced motion, and never a pattern.
+ */
+export function buzz(ms = 12) {
+  try {
+    if (!allowsMotion() || typeof navigator.vibrate !== "function") return;
+    navigator.vibrate(Math.min(20, Math.max(0, ms)));
+  } catch {
+    // A browser that refuses is simply silent.
+  }
+}
+
+/* ── A tool tells the page it has an answer worth sending ──────────────── */
+
+const RESULT = "gd:result";
+let shown = 0;
+
+/** Called by a tool once it has shown an answer. Carries nothing, and goes nowhere but this page. */
+export function signalResult() {
+  shown += 1;
+  window.dispatchEvent(new Event(RESULT));
+}
+
+/** The count so far, for a button that should beat only for answers shown after it arrived. */
+export const resultsShown = () => shown;
+
+function subscribeResult(listener: () => void) {
+  window.addEventListener(RESULT, listener);
+  return () => window.removeEventListener(RESULT, listener);
+}
+
+/** How many answers this page's tool has shown: the share button under it beats once for the first. */
+export function useResultSignal(): number {
+  return useSyncExternalStore(
+    subscribeResult,
+    () => shown,
+    () => 0,
   );
 }
 
@@ -185,8 +259,9 @@ export function CountUp({ value, format }: { value: number; format: (n: number) 
 
 /* ── A photo that carries from one step to the next ────────────────────── */
 
-const allowsMotion = () =>
-  typeof window.matchMedia !== "function" || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function allowsMotion() {
+  return typeof window.matchMedia !== "function" || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 /**
  * Makes one picture seem to travel between two steps: call `take(el)` with

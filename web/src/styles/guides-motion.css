@@ -2172,6 +2172,530 @@
     }
 }
 
+/* ── Every part of the page (second motion round) ─────────────────────────
+ *
+ * The scene at the top was the first round. This carries the same life down
+ * the whole page: the tools' answers, each tap, the article's parts, and
+ * the ending. The same five rules hold, with one stated exception: a
+ * question that opens (rule 1) eases its height where the browser can do
+ * that by itself (interpolate-size), since a height is what opening is.
+ */
+
+/* ── Big answers ── */
+
+.legacy-theme .gd-page :is(.gt-tile, .gt-hero, .gd-car-link, .gd-links a, .ck-link, .gm-skip) {
+    transition:
+        transform 480ms var(--gd-spring),
+        background-color 180ms ease-out,
+        border-color 180ms ease-out,
+        color 180ms ease-out;
+}
+
+.legacy-theme .gd-page :is(.gt-tile, .gt-hero, .gd-car-link, .gd-links a):active {
+    transform: scale(0.96);
+    transition-duration: 90ms, 180ms, 180ms, 180ms;
+    transition-timing-function: ease-out;
+}
+
+.legacy-theme .gd-page .gt-tile[aria-pressed="true"] {
+    animation: gm-pop 420ms var(--gd-spring);
+}
+
+/* The weeks fill one after another, up to the length chosen. */
+.legacy-theme .gt-span span::after {
+    transition: transform 280ms var(--gd-out) calc(var(--i) * 45ms);
+}
+
+/* The answer's car rolls in along its road and settles; its figures follow. */
+.legacy-theme .gt-stage .gt-hero-car {
+    animation: gt-roll-in 720ms var(--gd-out) backwards;
+}
+
+.legacy-theme .gt-stage .gt-hero-road::after {
+    animation: gt-road 720ms var(--gd-out) backwards;
+}
+
+.legacy-theme .gt-stage .gt-hero-text > * {
+    animation: gm-rise 420ms var(--gd-out) 140ms backwards;
+}
+
+.legacy-theme .gt-stage .gt-hero-text > :nth-child(3) {
+    animation-delay: 220ms;
+}
+
+.legacy-theme .gt-stage .gt-hero-text > :nth-child(4) {
+    animation-delay: 280ms;
+}
+
+@keyframes gt-roll-in {
+    from {
+        opacity: 0;
+        transform: translateX(-115%);
+    }
+    60% {
+        opacity: 1;
+    }
+}
+
+@keyframes gt-road {
+    from {
+        transform: translateX(-52px);
+    }
+}
+
+/* Each row's bar grows to its share of the highest total. */
+.legacy-theme .gt-rows--in .gt-row-bar span {
+    animation: gt-grow 760ms var(--gd-out) calc(160ms + var(--i, 0) * 70ms) backwards;
+}
+
+@keyframes gt-grow {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+/* ── Three lanes ── */
+
+/* A new length: each bar runs on to its new figure. */
+.legacy-theme .gt-lane-track span {
+    transition: transform 820ms var(--gd-out);
+}
+
+.legacy-theme .gt-lane:nth-child(2) .gt-lane-track span {
+    transition-delay: 60ms;
+}
+
+.legacy-theme .gt-lane:nth-child(3) .gt-lane-track span {
+    transition-delay: 120ms;
+}
+
+/* The mark lands on the lowest lane once the bars have run. */
+.legacy-theme .gt-lane .gt-tag {
+    animation: gt-land 460ms var(--gd-spring) 520ms backwards;
+}
+
+@keyframes gt-land {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(1.5);
+    }
+}
+
+/* ── A budget on a line of prices ── */
+
+.legacy-theme .gt-rail-reach,
+.legacy-theme .gt-rail-mark,
+.legacy-theme .gt-rail-mark span {
+    transition: transform 760ms var(--gd-out);
+}
+
+/* Each car's mark stands up as the marker passes its price. */
+.legacy-theme .gt-rail-car {
+    transition:
+        transform 420ms var(--gd-spring) calc(var(--d, 0) * 520ms),
+        background-color 0s linear calc(var(--d, 0) * 520ms);
+}
+
+.legacy-theme .gt-facts--in > * {
+    animation: gm-rise 420ms var(--gd-out) backwards;
+}
+
+.legacy-theme .gt-facts--in > :nth-child(2) {
+    animation-delay: 70ms;
+}
+
+.legacy-theme .gt-facts--in > :nth-child(3) {
+    animation-delay: 140ms;
+}
+
+/* Cars drive in from the side, one after another. */
+.legacy-theme :is(.gd-cars--drive, .gm-cars .gd-cars) > *,
+.legacy-theme .gd-page [data-reveal="in"] .gd-carsbox .gd-car {
+    animation: gd-drive 620ms var(--gd-out) backwards;
+}
+
+.legacy-theme :is(.gd-cars--drive, .gm-cars .gd-cars, .gd-carsbox .gd-cars) > :nth-child(2) {
+    animation-delay: 80ms;
+}
+
+.legacy-theme :is(.gd-cars--drive, .gm-cars .gd-cars, .gd-carsbox .gd-cars) > :nth-child(3) {
+    animation-delay: 160ms;
+}
+
+.legacy-theme :is(.gd-cars--drive, .gm-cars .gd-cars, .gd-carsbox .gd-cars) > :nth-child(4) {
+    animation-delay: 240ms;
+}
+
+.legacy-theme :is(.gd-cars--drive, .gm-cars .gd-cars, .gd-carsbox .gd-cars) > :nth-child(n + 5) {
+    animation-delay: 320ms;
+}
+
+@keyframes gd-drive {
+    from {
+        opacity: 0;
+        transform: translateX(44px);
+    }
+}
+
+/* A car's photo comes a little closer under the pointer. */
+.legacy-theme .gd-car-photo img {
+    transition: transform 700ms var(--gd-out);
+}
+
+@media (hover: hover) {
+    .legacy-theme .gd-car-link:hover .gd-car-photo img {
+        transform: scale(1.05);
+    }
+
+    .legacy-theme .gd-links a:hover i {
+        transform: translateX(3px);
+    }
+}
+
+.legacy-theme .gd-links a i {
+    transition: transform 320ms var(--gd-spring);
+}
+
+/* ── The walk around the car ── */
+
+.legacy-theme .ck-spot {
+    transition: transform 460ms var(--gd-spring);
+}
+
+/* The part being checked sends out one ring. */
+.legacy-theme .ck-spot[data-on]::after {
+    animation: sc-ping 900ms ease-out;
+}
+
+/* A finished part takes its seal like a stamp. */
+.legacy-theme .ck-spot[data-sealed] i {
+    animation: gm-stamp 280ms cubic-bezier(0.6, 0, 0.9, 0.4) backwards;
+}
+
+/* Each check is dealt in from the side the walk is going. */
+.legacy-theme .ck-card:not(.ck-card--ghost) {
+    animation: gm-in 380ms var(--gd-out) backwards;
+}
+
+.legacy-theme .ck-card[data-answer] {
+    animation:
+        gm-in 380ms var(--gd-out) backwards,
+        gm-card-press 280ms ease-out 120ms;
+}
+
+.legacy-theme .ck-stamp {
+    animation: ck-stamp 240ms cubic-bezier(0.6, 0, 0.9, 0.4) backwards;
+}
+
+@keyframes ck-stamp {
+    from {
+        opacity: 0;
+        transform: rotate(7deg) scale(2.6);
+    }
+}
+
+/* The result's parts arrive one after another; a sealed one presses on. */
+.legacy-theme .ck-result > * {
+    animation: gm-rise 420ms var(--gd-out) 120ms backwards;
+}
+
+.legacy-theme .ck-result > :nth-child(2) {
+    animation-delay: 180ms;
+}
+
+.legacy-theme .ck-result > :nth-child(3) {
+    animation-delay: 240ms;
+}
+
+.legacy-theme .ck-result > :nth-child(n + 4) {
+    animation-delay: 300ms;
+}
+
+.legacy-theme .ck-result .ck-areas li {
+    animation: gm-in 420ms var(--gd-out) calc(380ms + var(--i, 0) * 80ms) backwards;
+}
+
+.legacy-theme .ck-result .ck-areas [data-sealed] i {
+    animation: gm-stamp 280ms cubic-bezier(0.6, 0, 0.9, 0.4) calc(640ms + var(--i, 0) * 80ms) backwards;
+}
+
+/* ── The word a step earns ── */
+
+/* It drops onto the line, holds, and lifts away. Without motion it simply stays until the next step. */
+.legacy-theme .gm-moment span {
+    animation: gm-moment 2400ms var(--gd-out) both;
+}
+
+@keyframes gm-moment {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.7);
+    }
+    9% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.08);
+    }
+    15%,
+    84% {
+        opacity: 1;
+        transform: none;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* ── Right and wrong move differently ── */
+
+/* Right: a lift. Wrong: a short shake of the head. */
+.legacy-theme .gd-page .gm-price[data-state="right"],
+.legacy-theme .gm-card-verdict[data-right],
+.legacy-theme .gm-reveal-line[data-right],
+.legacy-theme .gm-outcome:not([data-chance]) {
+    animation: gm-yes 520ms var(--gd-spring) backwards;
+}
+
+.legacy-theme .gd-page .gm-price[data-state="wrong"],
+.legacy-theme .gm-card-verdict:not([data-right]),
+.legacy-theme .gm-outcome[data-chance] {
+    animation: gm-no 420ms ease-out backwards;
+}
+
+@keyframes gm-yes {
+    from {
+        opacity: 0.4;
+        transform: translateY(10px) scale(0.96);
+    }
+}
+
+@keyframes gm-no {
+    0% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-7px);
+    }
+    45% {
+        transform: translateX(6px);
+    }
+    70% {
+        transform: translateX(-3px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* A result's last lines: what was answered, one after another. */
+.legacy-theme .gm-recap li {
+    animation: gm-rise 420ms var(--gd-out) backwards;
+}
+
+.legacy-theme .gm-recap li:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.legacy-theme .gm-recap li:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.legacy-theme .gm-recap li:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+.legacy-theme .gm-recap li:nth-child(n + 5) {
+    animation-delay: 240ms;
+}
+
+/* ── "Send this" beats once, when there is something to send ── */
+
+.legacy-theme .gd-share[data-beat] .gd-share-btn {
+    animation: gd-beat 900ms ease-in-out 700ms 1;
+}
+
+.legacy-theme :is(.gm-result, .gm-trip) .gd-share-btn,
+.legacy-theme .ck-result .ck-actions .gd-btn--primary {
+    animation: gd-beat 900ms ease-in-out 1500ms 1;
+}
+
+@keyframes gd-beat {
+    30% {
+        transform: scale(1.07);
+    }
+    55% {
+        transform: scale(0.98);
+    }
+    78% {
+        transform: scale(1.03);
+    }
+}
+
+/* ── The article ── */
+
+/* "The short version": its lines arrive one by one, and each check mark beats in turn. */
+.legacy-theme .gd-short[data-reveal="in"] li {
+    animation: gm-in 440ms var(--gd-out) 120ms backwards;
+}
+
+.legacy-theme .gd-short[data-reveal="in"] li:nth-child(2) {
+    animation-delay: 220ms;
+}
+
+.legacy-theme .gd-short[data-reveal="in"] li:nth-child(3) {
+    animation-delay: 320ms;
+}
+
+.legacy-theme .gd-short[data-reveal="in"] li:nth-child(n + 4) {
+    animation-delay: 420ms;
+}
+
+.legacy-theme .gd-short[data-tick] li > i {
+    color: var(--text-primary);
+    animation: gd-tick 560ms var(--gd-spring) 300ms;
+    transition: color 0s linear 300ms;
+}
+
+.legacy-theme .gd-short[data-tick] li:nth-child(2) > i {
+    animation-delay: 480ms;
+    transition-delay: 480ms;
+}
+
+.legacy-theme .gd-short[data-tick] li:nth-child(3) > i {
+    animation-delay: 660ms;
+    transition-delay: 660ms;
+}
+
+.legacy-theme .gd-short[data-tick] li:nth-child(n + 4) > i {
+    animation-delay: 840ms;
+    transition-delay: 840ms;
+}
+
+@keyframes gd-tick {
+    40% {
+        transform: scale(1.8) rotate(-8deg);
+    }
+}
+
+/* A section's heading rises and its rule is drawn; its list follows item by item. */
+.legacy-theme .gd-page [data-reveal="in"] > .gd-h::after {
+    animation: gt-grow 760ms var(--gd-out) 260ms backwards;
+}
+
+.legacy-theme .gd-page [data-reveal="in"] :is(.gd-list, .gd-steps, .gd-links) > li {
+    animation: gm-rise 460ms var(--gd-out) 160ms backwards;
+}
+
+.legacy-theme .gd-page [data-reveal="in"] :is(.gd-list, .gd-steps, .gd-links) > li:nth-child(2) {
+    animation-delay: 230ms;
+}
+
+.legacy-theme .gd-page [data-reveal="in"] :is(.gd-list, .gd-steps, .gd-links) > li:nth-child(3) {
+    animation-delay: 300ms;
+}
+
+.legacy-theme .gd-page [data-reveal="in"] :is(.gd-list, .gd-steps, .gd-links) > li:nth-child(4) {
+    animation-delay: 370ms;
+}
+
+.legacy-theme .gd-page [data-reveal="in"] :is(.gd-list, .gd-steps, .gd-links) > li:nth-child(n + 5) {
+    animation-delay: 440ms;
+}
+
+/* A step's number drops into place after its line. */
+.legacy-theme .gd-page [data-reveal="in"] .gd-steps-n {
+    animation: gt-land 420ms var(--gd-spring) 420ms backwards;
+}
+
+/* Questions, the contents and the working open smoothly: the height eases
+   where the browser can ease to "auto", and the words rise in everywhere. */
+@supports (interpolate-size: allow-keywords) {
+    .legacy-theme :is(.gd-faq, .gt-math) details,
+    .legacy-theme details.gd-toc {
+        interpolate-size: allow-keywords;
+    }
+
+    .legacy-theme :is(.gd-faq, .gt-math) details::details-content,
+    .legacy-theme details.gd-toc::details-content {
+        overflow: clip;
+        block-size: 0;
+        transition:
+            block-size 340ms var(--gd-out),
+            content-visibility 340ms allow-discrete;
+    }
+
+    .legacy-theme :is(.gd-faq, .gt-math) details[open]::details-content,
+    .legacy-theme details.gd-toc[open]::details-content {
+        block-size: auto;
+    }
+}
+
+.legacy-theme details[open] > :is(.gd-fold, .gt-math-body) {
+    animation: gm-rise 380ms var(--gd-out) 60ms backwards;
+}
+
+.legacy-theme :is(.gd-faq, .gt-math) summary > i {
+    transition: transform 320ms var(--gd-spring);
+}
+
+/* ── The ending: the guide's own picture comes to rest ── */
+
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro-run {
+    animation: gd-arrive 1300ms cubic-bezier(0.16, 0.76, 0.24, 1) 260ms backwards;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro--car .gd-outro-road,
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro--seal .gd-outro-road,
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro--tag .gd-outro-road {
+    animation: gt-road 1300ms cubic-bezier(0.16, 0.76, 0.24, 1) 260ms backwards;
+}
+
+/* The route is drawn from Greensboro as the car runs it, and its far pin lands at the end. */
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro--route .gd-outro-road {
+    animation: gt-grow 1300ms cubic-bezier(0.16, 0.76, 0.24, 1) 260ms backwards;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro-pin--to,
+.legacy-theme .gd-cta[data-reveal="in"] :is(.gd-outro-seal, .gd-outro-tag) {
+    animation: gt-land 460ms var(--gd-spring) 1500ms backwards;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro-notice {
+    animation:
+        gm-rise 420ms var(--gd-out) 200ms backwards,
+        gm-card-press 280ms ease-out 760ms;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] .gd-outro-stamp {
+    animation: gd-stamp 260ms cubic-bezier(0.6, 0, 0.9, 0.4) 600ms backwards;
+}
+
+@keyframes gd-arrive {
+    from {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes gd-stamp {
+    from {
+        opacity: 0;
+        transform: rotate(-7deg) scale(2.8);
+    }
+}
+
+/* The words of the call to action follow what arrived. */
+.legacy-theme .gd-cta[data-reveal="in"] > :is(h2, p, .gd-cta-actions) {
+    animation: gm-rise 460ms var(--gd-out) 500ms backwards;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] > p {
+    animation-delay: 580ms;
+}
+
+.legacy-theme .gd-cta[data-reveal="in"] > .gd-cta-actions {
+    animation-delay: 660ms;
+}
+
 /* ── Reduced motion: every picture is its last frame, and stays there ─── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2190,6 +2714,20 @@
     }
 
     .legacy-theme .gd-page :is(.gt-chip, .gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gd-btn, .gd-share-btn, .ck-btn, .ck-step, .gt-more):active {
+        transform: none;
+    }
+
+    /* The second round: the article's parts, what opens, and the ending. */
+    .legacy-theme .gd-page :is(.gd-short, .gd-section, .gd-toolbox, .gd-toc, .gd-cta, .gd-send, .gd-share, .gd-others) *,
+    .legacy-theme .gd-page :is(.gd-short, .gd-section, .gd-toolbox, .gd-toc, .gd-cta, .gd-send, .gd-share, .gd-others) *::before,
+    .legacy-theme .gd-page :is(.gd-short, .gd-section, .gd-toolbox, .gd-toc, .gd-cta, .gd-send, .gd-share, .gd-others) *::after,
+    .legacy-theme .gd-page :is(.gd-faq, .gt-math) details::details-content,
+    .legacy-theme .gd-page details.gd-toc::details-content {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .legacy-theme .gd-page :is(.gt-tile, .gt-hero, .gd-car-link, .gd-links a):active {
         transform: none;
     }
 }

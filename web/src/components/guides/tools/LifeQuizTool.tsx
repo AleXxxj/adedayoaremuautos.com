@@ -14,11 +14,16 @@ import {
   lifeMatch,
   lifeMode,
   lifeResult,
+  momentFor,
   parseGotHash,
+  timeLeft,
   type LifeAnswers,
   type LifeQuestion,
 } from "../gameMath";
-import { FriendNote, Progress, useHash, useStepFocus } from "./gameKit";
+import { FriendNote, Progress, buzz, useHash, useStepFocus } from "./gameKit";
+
+/** Seconds a question takes: one line and one tap. */
+const QUESTION_SECONDS = 6;
 
 /** Cars shown under a result; the rest are a tap away on the lists. */
 const SHOWN = 4;
@@ -68,6 +73,7 @@ export function LifeQuizTool({
 
   function pick(optionId: string) {
     setAnswers((a) => ({ ...a, [q.id]: optionId }));
+    buzz();
     go(step + 1);
   }
 
@@ -84,7 +90,12 @@ export function LifeQuizTool({
             Your friend got <strong>{LIFE_PROFILES[friend].title}</strong>. What do you get?
           </FriendNote>
         )}
-        <Progress done={step} of={questions.length} label={`Question ${step + 1} of ${questions.length}`} />
+        <Progress
+          done={step}
+          of={questions.length}
+          label={`Question ${step + 1} of ${questions.length} · ${timeLeft(questions.length - step, QUESTION_SECONDS)}`}
+          moment={momentFor(step, questions.length)}
+        />
         {/* Keyed by the question: each one is dealt in, its answers one after another. */}
         <h3 className="gm-ask gm-in" key={`ask-${q.id}`} tabIndex={-1} ref={ref}>
           {q.ask}
