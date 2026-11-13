@@ -260,9 +260,11 @@ export default async function RentToOwnPage({
                 with no explanation reads as a broken page. */}
             {tiers.length < 4 && (
               <p className="rto-more">
-                <i className="fas fa-circle-info" /> More categories — Comfort,
-                Premium and First Class — are being priced now. Ask us and we
-                will tell you where they will land.
+                {/* No names here: a typed list ("Comfort, Premium and First
+                    Class") went stale once Comfort and Luxury were priced and
+                    shown above it. */}
+                <i className="fas fa-circle-info" /> More categories are being
+                priced now. Ask us and we will tell you where they will land.
               </p>
             )}
           </div>
