@@ -296,6 +296,15 @@ export function DashboardView({
         {/* The sale-stock list that was here is gone: the program is built
             around rentals now ("Cars to share", above), and sale referrals
             wait on a North Carolina lawyer's view of G.S. 20-306. */}
+        {partner.saleRate === null && (
+          <Panel title="Car sale referrals">
+            <p className="text-[15px] leading-relaxed text-text-secondary">
+              <strong className="text-text-primary">Coming soon.</strong> Today you earn on
+              rentals only. When referrals for cars we sell open up, they will show here on
+              this same page, and we will email you first.
+            </p>
+          </Panel>
+        )}
       </div>
     </PartnerShell>
   );

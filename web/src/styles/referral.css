@@ -844,3 +844,18 @@
         transform: none;
     }
 }
+
+/* On a phone the gold "You earn" chip sat at the visual's bottom right, which
+   is where the assistant's round button floats, so the amount was covered
+   (seen on an iPhone, November 2026). It now sits under the car card at the
+   left, in the flow, clear of that corner. */
+@media (max-width: 1023px) {
+    .legacy-theme .rf-flow {
+        padding-bottom: 0;
+    }
+    .legacy-theme .rf-flow-earn {
+        position: static;
+        justify-self: start;
+        margin-top: 12px;
+    }
+}
