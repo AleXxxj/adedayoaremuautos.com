@@ -31,20 +31,22 @@ function subscribeReduced(onChange: () => void) {
 }
 
 /**
- * The home page's hero: the cars for sale, one after another, above the
- * page's first words, with a rent-to-own slide after every second car.
+ * The home page's hero: the cars for sale, one after another, with the
+ * page's first words on the photo and the three buttons right under it, and
+ * a rent-to-own slide after every second car.
  *
  * Each slide shows for a few seconds with a slow zoom, then crossfades to
  * the next. A car slide leaves the standing words in place; a rent-to-own
  * slide swaps them for its own, over a rental car's photo. Both sets of
- * words share one grid cell, so the taller one sets the height and the
- * buttons under them never move.
+ * words lie in one grid cell at the foot of the photo, each over its own
+ * shade, so the photo's height and the buttons under it never move.
  *
- * Nothing covers the car. The controls are one quiet strip along the bottom
- * edge of the photo: a row of thin segments, each a button to its slide, the
- * current one filling as its time runs; a small pause button at the end; and
- * above the strip's start, the name of the car in the photo as a link to its
- * page. Swiping across the hero changes slide on a phone.
+ * The words keep to the lower part of the photo; the car has the rest. Under
+ * the words, along the photo's bottom edge, the controls are one quiet
+ * strip: the name of the car in the photo as a link to its page, then a row
+ * of thin segments, each a button to its slide, the current one filling as
+ * its time runs, and a small pause button at the end. Swiping across the
+ * hero changes slide on a phone.
  *
  * It stops by itself whenever it would be moving for nobody, or in someone's
  * way: while the tab is hidden, while the hero is scrolled out of sight, and
@@ -78,7 +80,7 @@ export function HeroSlides({
   head: ReactNode;
   /** The rent-to-own slide's own eyebrow, headline and line; null when no slide is one. */
   ownHead: ReactNode | null;
-  /** The buttons and links under the words: the same on every slide. */
+  /** The buttons and links under the photo: the same on every slide. */
   children: ReactNode;
 }) {
   const count = slides.length;
@@ -212,30 +214,35 @@ export function HeroSlides({
         )}
       </div>
 
-      <div className="hh-body">
+      {/* The words, on the photo. Both sets lie in one grid cell (home.css),
+          at the photo's foot, so neither moves anything when it gives way to
+          the other. */}
+      <div className="hh-words">
         <div className="hh-inner">
-          <div className="hh-copy">
-            {/* Both sets of words in one grid cell (home.css): the taller sets
-                the height, so the buttons below stay where they are. */}
-            <div className="hh-heads">
-              <div className={`hh-head${own ? "" : " is-on"}`} inert={own} aria-hidden={own || undefined}>
-                {head}
-              </div>
-              {ownHead && (
-                <div className={`hh-head${own ? " is-on" : ""}`} inert={!own} aria-hidden={!own || undefined}>
-                  {ownHead}
-                </div>
-              )}
+          <div className="hh-heads">
+            <div className={`hh-head${own ? "" : " is-on"}`} inert={own} aria-hidden={own || undefined}>
+              {head}
             </div>
-            {children}
+            {ownHead && (
+              <div className={`hh-head${own ? " is-on" : ""}`} inert={!own} aria-hidden={!own || undefined}>
+                {ownHead}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* After the words in the page's order, so a keyboard reaches the
-          buttons first. Shown along the bottom edge of the photo, above the
-          words, on a phone, and at the bottom right on a wide screen
-          (home.css). */}
+      {/* The buttons and links: right under the photo on a phone, under the
+          words on a wide screen. */}
+      <div className="hh-body">
+        <div className="hh-inner">
+          <div className="hh-copy">{children}</div>
+        </div>
+      </div>
+
+      {/* After the buttons in the page's order, so a keyboard reaches them
+          first. Shown along the bottom edge of the photo, under the words,
+          on a phone, and at the bottom right on a wide screen (home.css). */}
       {count > 0 && current && (
         <div className="hh-dock">
           <div className="hh-controls" role="group" aria-label="Photos of our cars">

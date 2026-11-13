@@ -357,8 +357,9 @@ export default async function MarketHome({
       />
 
       {/* ── Hero ───────────────────────────────────────────────────────────
-          The cars for sale, one after another, above three buttons, with a
-          rent-to-own slide after every second car (US only). The slide's
+          The cars for sale, one after another, with the page's first words
+          on the photo and three buttons right under it, and a rent-to-own
+          slide after every second car (US only). The slide's
           line is the rent-to-own disclosure, with the facts of the
           `home-terms` paragraph below and no claim it doesn't make. */}
       <HeroSlides
@@ -460,6 +461,7 @@ export default async function MarketHome({
           stock={stock}
           chips={findChips}
           nextYear={new Date().getFullYear() + 1}
+          compareHref={forSale + fleet.length >= 2 ? href("/compare") : null}
         />
       </div>
 

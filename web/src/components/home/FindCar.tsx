@@ -21,12 +21,16 @@ export interface FindChip {
  *
  * The chips are computed on the server from the cars listed (homeData.ts), so
  * every one of them leads to at least one car.
+ *
+ * Under the chips, one row to the compare page, when there are at least two
+ * cars to compare.
  */
 export function FindCar({
   action,
   stock,
   chips,
   nextYear,
+  compareHref,
 }: {
   /** "/us/inventory" */
   action: string;
@@ -34,6 +38,8 @@ export function FindCar({
   stock: StockCar[];
   chips: FindChip[];
   nextYear: number;
+  /** "/us/compare", or null when fewer than two cars are in stock. */
+  compareHref: string | null;
 }) {
   const router = useRouter();
   const [text, setText] = useState("");
@@ -86,6 +92,14 @@ export function FindCar({
             </li>
           ))}
         </ul>
+      )}
+
+      {compareHref && (
+        <Link href={compareHref} className="find-compare">
+          <i className="fas fa-scale-balanced find-compare-icon" aria-hidden="true" />
+          <span>Compare two cars side by side</span>
+          <i className="fas fa-arrow-right find-compare-go" aria-hidden="true" />
+        </Link>
       )}
     </section>
   );
