@@ -8,6 +8,8 @@ import { formatMoney, money, toMajor } from "@/lib/money";
 import { BookingRow } from "@/components/admin/BookingRow";
 import { bookingTiming, timingLabel, urgencyOf } from "@/lib/bookingTiming";
 import { PaymentCheck } from "@/components/admin/PaymentCheck";
+import { pendingExtensions, type ExtensionRequestSummary } from "@/lib/extensions/store";
+import { dayLabel } from "@/lib/extensions/present";
 
 /** The time zone a booking's dates are counted in: its own market's. */
 const zoneOf = (market: string) => MARKETS[market as MarketCode]?.timezone ?? "America/New_York";
@@ -17,6 +19,15 @@ export const dynamic = "force-dynamic";
 export default async function AdminRentalsPage() {
   const user = await requireStaff();
   const rows = await listBookings(allowedMarkets(user));
+
+  // Requests to keep a car longer. Empty when the feature is switched off
+  // or its tables are not there yet, and never allowed to break this screen.
+  let extensions = new Map<string, ExtensionRequestSummary>();
+  try {
+    extensions = await pendingExtensions(rows.map((r) => r.booking.id));
+  } catch (e) {
+    console.error("[extensions] requests not listed", e);
+  }
 
   const quotes = rows.filter((r) => r.booking.status === "quote").length;
   const active = rows.filter((r) => r.booking.status === "active").length;
@@ -96,6 +107,7 @@ export default async function AdminRentalsPage() {
               const m = MARKETS[booking.marketCode];
               const paid = Number(paidMinor ?? 0);
               const owedMinor = Math.max(0, booking.totalMinor - paid);
+              const ext = extensions.get(booking.id);
               return (
                 <BookingRow
                   key={booking.id}
@@ -135,6 +147,15 @@ export default async function AdminRentalsPage() {
                     paid: formatMoney(money(paid, m.currency), m.locale),
                     owedMajor: toMajor(money(owedMinor, m.currency)),
                     currencySymbol: m.currency === "USD" ? "$" : "₦",
+                    extension: ext
+                      ? {
+                          id: ext.id,
+                          addedDays: ext.addedDays,
+                          newEnd: dayLabel(ext.newEnd, m.locale),
+                          added: formatMoney(money(ext.addedMinor, m.currency), m.locale),
+                          newTotal: formatMoney(money(ext.newTotalMinor, m.currency), m.locale),
+                        }
+                      : null,
                   }}
                   vehicle={make ? { label: `${year} ${make} ${model}`, slug: slug! } : null}
                   locale={m.locale}

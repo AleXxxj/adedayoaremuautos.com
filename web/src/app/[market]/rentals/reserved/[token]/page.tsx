@@ -11,6 +11,9 @@ import { holdRemaining } from "@/lib/reservation";
 import { releaseExpiredHolds } from "@/lib/rentalHolds";
 import { providerConfigured, providerFor } from "@/lib/payments/provider";
 import { RentalPayButton } from "@/components/RentalPayButton";
+import { ExtendCard } from "@/components/ExtendCard";
+import { extensionViewFor } from "@/lib/extensions/store";
+import { extendCardProps } from "@/lib/extensions/present";
 
 export const dynamic = "force-dynamic";
 
@@ -106,6 +109,19 @@ export default async function ReservedPage({
     const owed = formatMoney(money(owedMinor, b.currency), market.locale);
     const what = `${vehicle}${dates ? `, ${dates}` : ""}.`;
 
+    /*
+     * "Need it longer?" Null unless RENTAL_EXTENSIONS_ENABLED is on, the
+     * extensions tables exist, and this booking is confirmed or under way
+     * (or has asked before). Never allowed to take this page down: any
+     * failure reads as "no card".
+     */
+    let extension = null;
+    try {
+      extension = await extensionViewFor(b);
+    } catch (e) {
+      console.error("[extensions] card not shown", e);
+    }
+
     return (
       <Shell>
         <div className="resv-tick">✅</div>
@@ -121,13 +137,23 @@ export default async function ReservedPage({
           {b.status === "returned"
             ? "Thank you for renting with us."
             : b.status === "active"
-              ? "Call us if you need to keep the vehicle longer."
+              ? // The card below is how to ask; it replaces this line.
+                extension
+                ? ""
+                : "Call us if you need to keep the vehicle longer."
               : paidMinor > 0 && owedMinor === 0
                 ? `The rental is paid.${dep ? " The refundable deposit is taken when you pick up the vehicle." : ""}`
                 : paidMinor > 0
                   ? `Pay the rest of the rental, ${owed}${dep ? ", and the refundable deposit," : ","} when you pick up the vehicle.`
                   : `Pay the rental total of ${amount}${dep ? " and the refundable deposit" : ""} when you pick up the vehicle.`}
         </p>
+        {extension && (
+          <ExtendCard
+            token={token}
+            marketCode={code}
+            {...extendCardProps(extension, { currency: b.currency, locale: market.locale })}
+          />
+        )}
       </Shell>
     );
   }

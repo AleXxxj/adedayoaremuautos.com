@@ -9,6 +9,7 @@ import { rentalDays } from "@/lib/rental";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { siteUrl } from "@/lib/siteUrl";
 import { sendBookingPaidEmail } from "@/lib/mail/bookingPaid";
+import { extensionsEnabled } from "@/lib/extensions/pricing";
 
 /**
  * Gathers what a receipt needs and sends it.
@@ -67,6 +68,10 @@ export async function sendBookingReceipt(bookingId: string): Promise<void> {
       pickupLocation: b.pickupLocation || address,
       businessPhone: site?.phone ? formatPhone(site.phone) : null,
       bookingUrl: `${siteUrl()}/${market}/rentals`,
+      extendUrl:
+        extensionsEnabled() && b.reservationToken
+          ? `${siteUrl()}/${market}/rentals/reserved/${b.reservationToken}`
+          : null,
     });
 
     console.log(`[payments] receipt sent for booking ${bookingId}`);

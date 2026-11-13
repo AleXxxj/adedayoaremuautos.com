@@ -36,6 +36,11 @@ export interface ReservationMail {
    * the reservation, but it does not tell anyone to pay from their phone.
    */
   payOnline: boolean;
+  /**
+   * Whether "Keep it another week" is switched on. When it is, the email says
+   * that the same link is where to ask for more days later.
+   */
+  canExtend?: boolean;
 }
 
 export function reservationSubject(d: ReservationMail): string {
@@ -112,7 +117,16 @@ export function renderReservation(d: ReservationMail): {
     <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:${MUTED}">
       If the button does not work, copy this into your browser:<br>
       <span style="word-break:break-all;color:#333">${escapeHtml(d.payUrl)}</span>
-    </p>
+    </p>${
+      d.canExtend
+        ? `
+    <p style="margin:14px 0 0;font-size:14px;line-height:1.6;color:#333">
+      <strong>Need it longer later?</strong> Keep this email. Once you have the vehicle,
+      <a href="${escapeHtml(d.payUrl)}" style="color:${GREEN};font-weight:600">open the same link</a>
+      and tap &ldquo;Keep it another week&rdquo;.
+    </p>`
+        : ""
+    }
   </td></tr>
 
   <tr><td style="padding:22px 28px 28px">
@@ -156,6 +170,9 @@ export function renderReservation(d: ReservationMail): {
       : ["Next step: come and see the vehicle, and pay when you pick it up."]),
     "",
     `${d.payOnline ? "View your reservation and pay" : "View your reservation"}: ${d.payUrl}`,
+    ...(d.canExtend
+      ? ["", 'Need it longer later? Keep this email. Once you have the vehicle, open the same link and tap "Keep it another week".']
+      : []),
     "",
     "When you pick up the vehicle, bring the driver's license of whoever will be driving. We check your documents before the vehicle is released.",
     "",

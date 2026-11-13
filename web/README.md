@@ -39,6 +39,7 @@ Optional settings and what they switch on:
 | `VALUE_CHECK_PUBLIC=1` | Opens the price estimate to everyone. `VALUE_CHECK_MONTHLY_CAP` limits calls per month. |
 | `PRICE_ALERTS_ENABLED=1` | Price-drop alerts: "Tell me if the price drops" on sale cars and saved cars, and one message to each watcher when staff lower a price. Off by default: no button, nothing sent. Needs migration 0033 applied first. Notifications use the VAPID keys; the email option shows only when `RESEND_API_KEY` is set. |
 | `SALE_HOLD_ENABLED=1` | "Hold this car" on cars for sale: a refundable deposit paid on Stripe's hosted checkout, and Holds in the admin. Off unless set. Needs migration 0034 and the Stripe keys; the amount, hours and terms are in `src/lib/saleHolds/settings.ts`. With a Stripe test key only signed-in staff can pay. |
+| `RENTAL_EXTENSIONS_ENABLED=1` | "Keep it another week": renters ask for more days from their booking page, staff approve in Rentals. Off by default. Needs migration 0035; the reminder 2 days before return also needs `CRON_SECRET`. |
 
 ## Where things are
 

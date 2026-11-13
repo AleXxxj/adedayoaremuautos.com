@@ -1614,6 +1614,7 @@ export const vinCheckUsage = pgTable(
   (t) => [primaryKey({ columns: [t.visitor, t.day] })],
 );
 
+<<<<<<< HEAD
 /* ── Price-drop alerts ─────────────────────────────────────────────────── */
 
 /**
@@ -1748,3 +1749,66 @@ export type PriceAlertRow = typeof priceAlerts.$inferSelect;
 );
 
 export type SaleHold = typeof saleHolds.$inferSelect;
+=======
+/* ── Rental extensions ─────────────────────────────────────────────────── */
+
+/**
+ * A renter asking to keep the car longer (migration 0035).
+ *
+ * A request holds nothing. Approving one lengthens the booking's own period
+ * in a single UPDATE, and `rental_bookings_no_overlap` judges that UPDATE, so
+ * the constraint is still the only thing that decides who has the car.
+ *
+ * Deliberately its own table: a new column on `rental_bookings` would be read
+ * by every rental screen before the migration is applied.
+ */
+export const rentalExtensionRequests = pgTable(
+  "rental_extension_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => rentalBookings.id, { onDelete: "cascade" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    /** The return date the booking had when the renter asked. */
+    fromEnd: timestamp("from_end", { withTimezone: true }).notNull(),
+    newEnd: timestamp("new_end", { withTimezone: true }).notNull(),
+    addedDays: integer("added_days").notNull(),
+    /** What the renter was shown, priced on the server. */
+    addedMinor: bigint("added_minor", { mode: "number" }).notNull(),
+    addedCoverMinor: bigint("added_cover_minor", { mode: "number" })
+      .notNull()
+      .default(0),
+    newTotalMinor: bigint("new_total_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+    /** pending | approved | declined */
+    status: text("status").notNull().default("pending"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedByEmail: text("decided_by_email"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("rental_extension_requests_one_pending_idx")
+      .on(t.bookingId)
+      .where(sql`status = 'pending'`),
+    index("rental_extension_requests_booking_idx").on(t.bookingId, t.createdAt),
+  ],
+);
+
+/** The one reminder per return date, so the scheduler never mails twice. */
+export const rentalExtensionReminders = pgTable(
+  "rental_extension_reminders",
+  {
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => rentalBookings.id, { onDelete: "cascade" }),
+    returnDate: date("return_date").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.bookingId, t.returnDate] })],
+);
+>>>>>>> worktree-agent-a0954b40d48eccef5
