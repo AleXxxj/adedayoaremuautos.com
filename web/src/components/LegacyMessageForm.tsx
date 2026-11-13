@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { submitLead, type LeadResult } from "@/lib/actions/leads";
 import type { MarketConfig } from "@/lib/market";
 import { useFormTimer } from "@/lib/useFormTimer";
+import { REPLY_WITHIN } from "@/content/site";
 
 /** The original's four options, mapped onto the lead types the pipeline uses. */
 const INTERESTS: { value: string; label: string }[] = [
@@ -84,7 +85,7 @@ export function LegacyMessageForm({
       <h2>
         Send us a <span>Message</span>
       </h2>
-      <p>Fill out the form below and we&rsquo;ll get back to you within 24 hours.</p>
+      <p>Fill out the form below and we&rsquo;ll get back to you within {REPLY_WITHIN}.</p>
 
       <form action={submit}>
         <input type="hidden" name="marketCode" value={market.code} />

@@ -33,6 +33,8 @@ const TARGETS = [
   "src/content/partnerTerms.ts",
   "src/content/legal.ts",
   "src/content/rentalPolicyUs.ts",
+  // The About and Financing pages' words.
+  "src/content/site.ts",
   // The US guides: every word of them is read by Greensboro customers.
   "src/content/guides",
   // Pricing and reservation rules: their errors are shown to renters.

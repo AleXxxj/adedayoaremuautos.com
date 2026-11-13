@@ -5067,3 +5067,12 @@ html:has(.legacy-theme .booking-form) { scroll-padding-top: 104px; }
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* The About page's stats, now three tiles (the "2 Markets Served" tile is
+   hidden until the founder confirms it). Three across on a desktop only; the
+   phone and tablet rules in legacy.css (one column up to 1024px) are untouched. */
+@media (min-width: 1025px) {
+    .stats-grid.stats-grid--three {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

@@ -8,10 +8,11 @@ import {
   VISION,
   VALUES,
   OBJECTIVES,
-  TIMELINE,
+  CONFIRMED_TIMELINE,
   FOUNDED_YEAR,
 } from "@/content/site";
 import { getSiteStats, formatMilestone } from "@/lib/stats";
+import { siteUrl } from "@/lib/siteUrl";
 import {
   listLocations,
   summariseHours,
@@ -73,13 +74,17 @@ export default async function AboutPage({
   // original's "5+ Years Experience" did.
   const years = new Date().getFullYear() - FOUNDED_YEAR;
 
+  // The same business the rest of the site describes (lib/seo/dealer.ts), by
+  // its `@id`, with the two facts this page adds. It used to be a second,
+  // unnamed dealer whose area served was the whole United States, while the
+  // dealer record says Greensboro, North Carolina.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AutoDealer",
+    "@id": `${siteUrl()}/${code}#dealer`,
     name: "Adedayo Aremu Autos",
     foundingDate: String(FOUNDED_YEAR),
     founder: { "@type": "Person", name: "Adedayo Aremu" },
-    areaServed: market.name,
   };
 
   return (
@@ -109,7 +114,7 @@ export default async function AboutPage({
           satisfaction claim is a liability in the US market. Every figure here
           is either counted live or derived. */}
       <div className="section">
-        <div className="stats-grid">
+        <div className="stats-grid stats-grid--three">
           <div className="stat-item">
             <div className="stat-number">
               {formatMilestone(stats.vehiclesSold, market.locale)}
@@ -132,10 +137,9 @@ export default async function AboutPage({
               {years >= 1 ? "Years Trading" : "Trading Since"}
             </div>
           </div>
-          <div className="stat-item">
-            <div className="stat-number">2</div>
-            <div className="stat-label">Markets Served</div>
-          </div>
+          {/* A fourth tile said "2 Markets Served" on both sites. Only
+              Greensboro has a location and stock on file, so the count is
+              not shown until the founder confirms what Nigeria offers today. */}
         </div>
 
         {hours && (
@@ -247,26 +251,31 @@ export default async function AboutPage({
         </div>
       </div>
 
-      <div className="section section-light">
-        <div className="section-title">
-          <h2>
-            Our <span>Journey</span>
-          </h2>
-          <p>Milestones in building a trusted automotive brand</p>
-        </div>
+      {/* Only milestones the founder has confirmed. The legacy dates
+          (2020–2024) contradict the founding year above, so today this
+          section does not render at all (content/site.ts). */}
+      {CONFIRMED_TIMELINE.length > 0 && (
+        <div className="section section-light">
+          <div className="section-title">
+            <h2>
+              Our <span>Journey</span>
+            </h2>
+            <p>Milestones in building a trusted automotive brand</p>
+          </div>
 
-        <div className="timeline">
-          {TIMELINE.map((m) => (
-            <div className="timeline-item" key={m.year}>
-              <div className="timeline-year">{m.year}</div>
-              <div className="timeline-content">
-                <h4>{m.title}</h4>
-                <p>{m.body}</p>
+          <div className="timeline">
+            {CONFIRMED_TIMELINE.map((m) => (
+              <div className="timeline-item" key={m.title}>
+                <div className="timeline-year">{m.year}</div>
+                <div className="timeline-content">
+                  <h4>{m.title}</h4>
+                  <p>{m.body}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

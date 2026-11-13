@@ -1,18 +1,37 @@
-import type { MarketCode } from "@/lib/market";
+import { MARKETS, type MarketCode } from "@/lib/market";
+import { WHATSAPP } from "@/lib/contact";
+import {
+  DEFAULT_RENTAL_COMMISSION_BPS,
+  REF_COOKIE_MAX_AGE,
+  formatBps,
+} from "@/lib/referral";
 import { RENTAL_POLICY_US } from "./rentalPolicyUs";
 
 /**
  * Legal pages, carried over from the legacy site.
  *
- * The text is the business's own and is reproduced verbatim — it is not ours
- * to reword. Two things were removed rather than copied:
+ * The text is the business's own, written for Nigeria. It used to be shown
+ * unchanged on the Greensboro site, which told a North Carolina customer that
+ * Nigerian law governed the sale, that prices were in naira, that disputes
+ * went to arbitration in Lagos, and that we collect bank details this website
+ * never asks for.
  *
- * - the contact card at the foot of each page, which linked to
- *   `wa.me/2348012345678` (a number the business does not own) and stated
- *   opening hours that contradict the ones on file. The route renders that
- *   card from the location record instead.
- * - nothing else. Anything below that needs a lawyer's eye is listed in
- *   LEGAL_REVIEW rather than silently edited.
+ * Each page is now built per market:
+ *
+ * - Nigeria's pages keep the original wording.
+ * - The United States pages replace every Nigeria-only statement with a plain
+ *   description of what the Greensboro site really does, read from the code.
+ *   Nothing was written as a new legal promise. Each replacement that is a
+ *   legal judgment is a named constant below marked LAWYER TO CONFIRM, so a
+ *   North Carolina attorney can supply the real clause in one place.
+ * - Facts stated elsewhere on the site (financing terms, the referral rate,
+ *   how long a referral link counts, whether we have a WhatsApp line) are read
+ *   from the same constants the pages use, never typed again here.
+ *
+ * The contact card at the foot of each page is rendered by the route from the
+ * location record. The original's card linked to `wa.me/2348012345678` (a
+ * number the business does not own) and stated opening hours that contradict
+ * the ones on file.
  */
 
 export interface LegalPage {
@@ -26,14 +45,108 @@ export interface LegalPage {
  * When the text itself was last changed. Shown on the page, so it must track
  * real edits to the wording — not the date of a deploy.
  */
-export const LEGAL_LAST_UPDATED = "2026-11-11";
+export const LEGAL_LAST_UPDATED = "2026-11-13";
 
-export const LEGAL_PAGES: Record<string, LegalPage> = {
-  "privacy-policy": {
-    slug: "privacy-policy",
-    title: "Privacy <span>Policy</span>",
-    subtitle: "How we collect, use, and protect your personal information",
-    body: `<!-- Table of Contents -->
+/** Facts the legal text repeats, read from where the rest of the site reads them. */
+function factsFor(market: MarketCode) {
+  const months = MARKETS[market].financing.termMonths;
+  const hasWhatsApp = WHATSAPP[market] !== null;
+  return {
+    /** The same terms the financing page lists. */
+    termRange: `${months[0]} to ${months.at(-1)} months`,
+    /** The rate the referral page and the assistant quote. */
+    rentalRate: formatBps(DEFAULT_RENTAL_COMMISSION_BPS),
+    /** How long a followed partner link is remembered. */
+    refDays: REF_COOKIE_MAX_AGE / (24 * 60 * 60),
+    /** WhatsApp is named only where the market has a line (lib/contact). */
+    channels: hasWhatsApp ? "phone, email, or WhatsApp" : "phone or email",
+    writtenChannels: hasWhatsApp ? "email or WhatsApp" : "email",
+    andWhatsApp: hasWhatsApp ? ", email, or WhatsApp" : ", or email",
+    confirmPayment: hasWhatsApp
+      ? "Always confirm payment details via our official WhatsApp or phone number."
+      : "Always confirm payment details with us directly, using the contact details on this website.",
+  };
+}
+
+/*
+ * ── United States wording ─────────────────────────────────────────────────
+ *
+ * Each constant replaces a statement that was true only in Nigeria. They say
+ * what the Greensboro site does and no more. LAWYER TO CONFIRM marks the ones
+ * where the right text is a legal judgment.
+ */
+
+/** The bold lead-in the legal pages use. */
+const S = '<strong style="color: var(--silver-classic);">';
+
+/** What the US forms really ask for (RentalBookingForm, LegacyFinance). */
+const US_COLLECTED = `<li>A photo of your driver's license when you reserve a rental, and proof of insurance if you choose to use your own</li>
+                <li>For a financing application: your employment status, a monthly income range, and the down payment and term you have in mind</li>`;
+
+/**
+ * LAWYER TO CONFIRM: which United States and North Carolina laws to name
+ * here, if any. The original named Nigeria's Data Protection Act.
+ */
+const US_LEGAL_COMPLIANCE = "To comply with the laws that apply to our business.";
+
+/**
+ * LAWYER TO CONFIRM: whether a dealer that finances in-house owes customers a
+ * financial privacy notice, and what this must say if a lender is ever used.
+ * The original said applications go to banks; on this website they go to
+ * staff only (lib/actions/financeApplication.ts).
+ */
+const US_FINANCE_SHARING = `${S}Financing:</strong> Financing applications made on this website go to our own team. The website does not send them to a bank or other lender.`;
+
+/**
+ * LAWYER TO CONFIRM: the original promised "strict data processing
+ * agreements" with every provider, which we cannot verify. This lists who
+ * receives data, from the code.
+ */
+const US_SERVICE_PROVIDERS = `${S}Service Providers:</strong> With the companies that help us run our services, such as website hosting, our database, email delivery and card payments. If you choose added coverage on a rental, your details go to our insurance company so you can be added to our policy.`;
+
+/**
+ * LAWYER TO CONFIRM: which privacy rights apply to a North Carolina customer
+ * and what must be said about them. The original listed rights under
+ * Nigeria's Data Protection Act. This names no law and promises no outcome;
+ * the 30 days is the business's own existing commitment.
+ */
+const US_YOUR_RIGHTS = `<p>You can ask us for a copy of the personal information we hold about you, ask us to correct it, or ask us to delete it. You can stop marketing emails at any time with the link in each email.</p>
+            <p>To make a request, please contact us using the details in the Contact section below. We will respond to your request within 30 days.</p>`;
+
+/** How payment really works on the US site (lib/payments, rentalPolicyUs). */
+const US_PAYMENT_METHODS = `<p>Where online payment is offered, you pay by card on our payment provider's secure page, and your card details never reach this website. Other payments are made in person at our Greensboro location. We will tell you which payment methods we accept before you pay.</p>`;
+
+/**
+ * LAWYER TO CONFIRM: deposit and refund terms for vehicle sales. The original
+ * said a deposit is always required and is kept if the buyer withdraws. On
+ * the US site a rental reservation takes no deposit, and a sale hold shows its
+ * own terms before payment (lib/saleHolds/settings.ts), so this points to
+ * those and states none of its own.
+ */
+const US_DEPOSITS = `<p>${S}Rentals:</strong> reserving a rental online does not take a deposit. The refundable security deposit is taken at pickup, as our Rental Policy explains.</p>
+            <p>${S}Vehicles for sale:</strong> if we take a deposit to hold a vehicle for you, the amount, how long the hold lasts and the refund terms are shown to you before you pay. Those terms apply to your deposit.</p>`;
+
+/**
+ * LAWYER TO CONFIRM: the dispute clause. The original required mediation and
+ * then arbitration in Lagos under Nigerian law. Whether to require
+ * arbitration, mediation or a particular court in North Carolina is the
+ * attorney's call, so this keeps the first step and waives nothing.
+ */
+const US_DISPUTES = `<p>We are committed to resolving disputes amicably and promptly. If you have a dispute with us, please contact us directly by phone or email first. We will endeavor to resolve the matter within 14 business days.</p>
+            <p>If we cannot resolve it together, you and we each keep the rights and remedies the law provides.</p>`;
+
+/**
+ * LAWYER TO CONFIRM: the governing-law and venue clause. North Carolina is
+ * what the Rental Policy, the rental agreement and the partner agreement
+ * already say for Greensboro; this repeats it and adds no court clause.
+ */
+const US_GOVERNING_LAW = `<p>For our business in Greensboro, these Terms of Service are governed by the laws of the State of North Carolina, except where another rule is required by law.</p>`;
+
+/** The Privacy Policy, with each market's own facts filled in. */
+function privacyBody(market: MarketCode): string {
+  const us = market === "us";
+  const f = factsFor(market);
+  return `<!-- Table of Contents -->
         <div class="toc">
             <h3><i class="fas fa-list"></i> Table of Contents</h3>
             <ul class="toc-list">
@@ -59,12 +172,18 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>When you interact with us — whether to purchase a vehicle, apply for financing, rent a car, or make an inquiry — we may collect the following personal information:</p>
             <ul>
                 <li>Full name, email address, phone number, and home/business address</li>
-                <li>Government-issued identification (e.g., NIN, driver's license, international passport)</li>
-                <li>Financial information including bank account details, employment information, and income verification for financing applications</li>
+                ${
+                  us
+                    ? US_COLLECTED
+                    : `<li>Government-issued identification (e.g., NIN, driver's license, international passport)</li>
+                <li>Financial information including bank account details, employment information, and income verification for financing applications</li>`
+                }
                 <li>Vehicle preferences, purchase history, and transaction records</li>
                 <li>Details of a car you ask us to buy or take in trade, such as its VIN, mileage and condition</li>
-                <li>Messages and communications you send to us via contact forms, our website chat, email, or WhatsApp</li>
+                <li>Messages and communications you send to us via contact forms, our website chat${f.andWhatsApp}</li>
+                <li>Your email address, and your first name and birthday (day and month) if you choose to give them, when you join our mailing list</li>
             </ul>
+            <p>The forms on this website never ask for ${us ? "a Social Security number" : "a BVN"}, a bank account number or a card number. Documents that verify your identity and income for a financing agreement are reviewed in person when the paperwork is drawn up.</p>
             <h3>Information Collected Automatically</h3>
             <p>When you visit our website, certain information is automatically collected through your browser and device:</p>
             <ul>
@@ -80,11 +199,11 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>We use the information we collect for the following purposes:</p>
             <ol>
                 <li><strong style="color: var(--silver-classic);">Service Delivery:</strong> To process vehicle purchases, rentals, and financing applications, and to complete transactions you initiate with us.</li>
-                <li><strong style="color: var(--silver-classic);">Communication:</strong> To respond to your inquiries, send order confirmations, and provide updates about your transactions via phone, email, or WhatsApp.</li>
+                <li><strong style="color: var(--silver-classic);">Communication:</strong> To respond to your inquiries, send order confirmations, and provide updates about your transactions via ${f.channels}.</li>
                 <li><strong style="color: var(--silver-classic);">Identity Verification:</strong> To verify your identity and prevent fraud, particularly for financing and rental agreements.</li>
                 <li><strong style="color: var(--silver-classic);">Marketing &amp; Promotions:</strong> With your consent, to send information about new vehicle listings, special offers, and promotions. You may opt out at any time.</li>
                 <li><strong style="color: var(--silver-classic);">Website Improvement:</strong> To analyze usage patterns, improve our website functionality, and enhance the user experience.</li>
-                <li><strong style="color: var(--silver-classic);">Legal Compliance:</strong> To comply with applicable Nigerian laws and regulations, including the Nigeria Data Protection Act (NDPA) 2023.</li>
+                <li><strong style="color: var(--silver-classic);">Legal Compliance:</strong> ${us ? US_LEGAL_COMPLIANCE : "To comply with applicable Nigerian laws and regulations, including the Nigeria Data Protection Act (NDPA) 2023."}</li>
             </ol>
         </div>
         <!-- Section 3 -->
@@ -92,15 +211,15 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-share-alt"></i> 3. Information Sharing</h2>
             <p>We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following limited circumstances:</p>
             <ul>
-                <li><strong style="color: var(--silver-classic);">Financial Partners:</strong> With banks or financing institutions to process loan and installment payment applications, strictly under confidentiality agreements.</li>
+                <li>${us ? US_FINANCE_SHARING : `<strong style="color: var(--silver-classic);">Financial Partners:</strong> With banks or financing institutions to process loan and installment payment applications, strictly under confidentiality agreements.`}</li>
                 <li><strong style="color: var(--silver-classic);">Legal Authorities:</strong> When required by law, court order, or regulation, or to protect the rights, property, or safety of Adedayo Aremu Autos, our customers, or others.</li>
-                <li><strong style="color: var(--silver-classic);">Service Providers:</strong> With trusted third-party service providers (e.g., logistics, insurance) who assist in delivering our services, bound by strict data processing agreements.</li>
+                <li>${us ? US_SERVICE_PROVIDERS : `<strong style="color: var(--silver-classic);">Service Providers:</strong> With trusted third-party service providers (e.g., logistics, insurance) who assist in delivering our services, bound by strict data processing agreements.`}</li>
                 <li><strong style="color: var(--silver-classic);">Referral Partners:</strong> With our referral partners only to the extent necessary to attribute and process a referral commission: for a booking recorded against a partner, they can see the vehicle, the total and the booking's status. Your name, contact details, documents and payment details are not shared with them.</li>
                 <li><strong style="color: var(--silver-classic);">Free Car Check (United States):</strong> When you check a car, the VIN you enter is sent to the U.S. National Highway Traffic Safety Administration (NHTSA) to decode it. Only what NHTSA says about the model, such as its year, make, model, trim and engine type, is then used to look up its recalls, owner complaints and crash ratings. We don't keep the VIN itself. We keep NHTSA's answer under a coded form of the VIN, made with a secret key, so the same car checks faster next time. To limit how many checks one visitor can run in a day, we keep a daily count tied to a coded form of your network address, made with a secret key and changed every month. Counts more than a few days old are deleted as new checks come in. To show a photo of that kind of car, we search Wikimedia Commons, a free photo library, for its year, make and model. To explain recalls in plain English, we send NHTSA's published recall notices to Anthropic, whose AI writes the summaries. Neither receives the VIN or anything about you.</li>
                 <li><strong style="color: var(--silver-classic);">Price Estimate (United States):</strong> When you ask what a car is worth, the VIN, mileage and ZIP code you enter are sent to MarketCheck, a vehicle market data company, to get the estimate. Nothing about you is sent. The estimate is shown to you and is not stored by us. We keep only counts of how many estimates are run, to limit use.</li>
                 <li><strong style="color: var(--silver-classic);">Saved and Recently Viewed Cars:</strong> The cars you save or look at are remembered in your own browser, on your device. We don't keep that list, and it isn't tied to your name.</li>
                 <li><strong style="color: var(--silver-classic);">Price Alerts:</strong> If you ask to be told when a car's price drops, we keep either your browser's notification address or your email address, with the car and its price at that time. We use it only to send that car's price alerts, through your browser's notification service or our email provider. It isn't added to our newsletter. Stopping the alert deletes it at once, and it is deleted within 30 days after the car is sold.</li>
-                <li><strong style="color: var(--silver-classic);">Holding a Car With a Deposit:</strong> If you hold a car with a deposit, we keep your name, phone number and email with the hold. The payment is made on Stripe's own page, so your card details never reach this website. Stripe receives the amount, the car's year, make and model, and your email if you gave one.</li>
+                <li><strong style="color: var(--silver-classic);">Holding a Car With a Deposit (United States):</strong> If you hold a car with a deposit, we keep your name, phone number and email with the hold. The payment is made on Stripe's own page, so your card details never reach this website. Stripe receives the amount, the car's year, make and model, and your email if you gave one.</li>
                 <li><strong style="color: var(--silver-classic);">Keeping a Rental Longer:</strong> If you ask to keep a rental longer, we record the dates and amounts with your booking and email you the answer. We may also email you once before each return date to offer this.</li>
                 <li><strong style="color: var(--silver-classic);">Website Chat (Miles):</strong> Miles, the virtual assistant on our website, is an AI, not a person. What you type in the chat is sent to Anthropic, the company whose AI model writes Miles's replies, and we keep the conversation so our team can follow up with you. To limit how many messages one visitor can send, we also keep a coded form of your network address with the conversation. Please don't type card numbers, bank details, a Social Security number or a BVN in the chat.</li>
             </ul>
@@ -111,7 +230,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 4 -->
         <div class="policy-section" id="data-security">
             <h2><i class="fas fa-shield-alt"></i> 4. Data Security</h2>
-            <p>We take the security of your personal information seriously. We implement appropriate technical and organizational measures to protect your data against unauthorised access, alteration, disclosure, or destruction. These measures include:</p>
+            <p>We take the security of your personal information seriously. We implement appropriate technical and organizational measures to protect your data against ${us ? "unauthorized" : "unauthorised"} access, alteration, disclosure, or destruction. These measures include:</p>
             <ul>
                 <li>Secure storage of physical and digital records with restricted access</li>
                 <li>Use of encrypted communication channels for sensitive data transmission</li>
@@ -125,7 +244,9 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-cookie-bite"></i> 5. Cookies &amp; Tracking</h2>
             <p>Our website uses cookies and similar tracking technologies to enhance your browsing experience. Cookies are small files stored on your device that help us:</p>
             <ul>
-                <li>Remember your currency preference and other settings between visits</li>
+                <li>Remember that you reached us through a referral partner's link, for ${f.refDays} days</li>
+                <li>Keep referral partners signed in to their partner account</li>
+                <li>${us ? "Remember choices in your own browser, such as the cars you saved and notices you closed" : "Remember your currency preference and other settings between visits"}</li>
                 <li>Understand how visitors use our website (pages visited, time spent, etc.)</li>
                 <li>Improve website performance and load times</li>
                 <li>Enable certain features such as the country detection notification</li>
@@ -135,7 +256,10 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 6 -->
         <div class="policy-section" id="your-rights">
             <h2><i class="fas fa-user-shield"></i> 6. Your Rights</h2>
-            <p>Under the Nigeria Data Protection Act (NDPA) 2023 and applicable data protection regulations, you have the following rights regarding your personal data:</p>
+            ${
+              us
+                ? US_YOUR_RIGHTS
+                : `<p>Under the Nigeria Data Protection Act (NDPA) 2023 and applicable data protection regulations, you have the following rights regarding your personal data:</p>
             <ul>
                 <li><strong style="color: var(--silver-classic);">Right to Access:</strong> Request a copy of the personal data we hold about you.</li>
                 <li><strong style="color: var(--silver-classic);">Right to Rectification:</strong> Request correction of inaccurate or incomplete data.</li>
@@ -143,7 +267,8 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li><strong style="color: var(--silver-classic);">Right to Object:</strong> Object to processing of your data for marketing purposes at any time.</li>
                 <li><strong style="color: var(--silver-classic);">Right to Data Portability:</strong> Request that we transfer your data to another service provider in a structured format.</li>
             </ul>
-            <p>To exercise any of these rights, please contact us using the details in the Contact section below. We will respond to your request within 30 days.</p>
+            <p>To exercise any of these rights, please contact us using the details in the Contact section below. We will respond to your request within 30 days.</p>`
+            }
         </div>
         <!-- Section 7 -->
         <div class="policy-section" id="third-party">
@@ -165,14 +290,14 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-envelope"></i> 10. Contact Us</h2>
             <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us through any of the following channels:</p>
         </div>
-        <!-- Contact Card -->`,
-  },
+        <!-- Contact Card -->`;
+}
 
-  "terms-of-service": {
-    slug: "terms-of-service",
-    title: "Terms of <span>Service</span>",
-    subtitle: "The terms and conditions governing your use of our services",
-    body: `<div class="toc">
+/** The Terms of Service, with each market's own facts filled in. */
+function termsBody(market: MarketCode): string {
+  const us = market === "us";
+  const f = factsFor(market);
+  return `<div class="toc">
             <h3><i class="fas fa-list"></i> Table of Contents</h3>
             <ul class="toc-list">
                 <li><a href="#acceptance"><i class="fas fa-chevron-right"></i> Acceptance of Terms</a></li>
@@ -197,7 +322,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-file-signature"></i> 1. Acceptance of Terms</h2>
             <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("Customer" or "you") and Adedayo Aremu Autos ("we", "us", or "our"), governing your use of our website and all services we provide. By proceeding with any transaction, inquiry, or use of our website, you confirm that:</p>
             <ul>
-                <li>You are at least 18 years of age and legally capable of entering into binding contracts under Nigerian law.</li>
+                <li>${us ? "You are at least 18 years of age and legally able to enter into a binding contract." : "You are at least 18 years of age and legally capable of entering into binding contracts under Nigerian law."}</li>
                 <li>You have read, understood, and agreed to these Terms in their entirety.</li>
                 <li>All information you provide to us is accurate, current, and complete.</li>
             </ul>
@@ -216,7 +341,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <tbody>
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Vehicle Sales</strong></td>
-                        <td>Purchase of new, foreign-used (Tokunbo), and Nigerian-used vehicles from our curated inventory.</td>
+                        <td>${us ? "Purchase of vehicles from our inventory in Greensboro, North Carolina." : "Purchase of new, foreign-used (Tokunbo), and Nigerian-used vehicles from our curated inventory."}</td>
                     </tr>
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Car Rental</strong></td>
@@ -224,8 +349,16 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                     </tr>
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Vehicle Financing</strong></td>
-                        <td>Flexible installment payment plans for vehicle purchases, ranging from 6 to 24 months.</td>
-                    </tr>
+                        <td>Flexible installment payment plans for vehicle purchases, ranging from ${f.termRange}.</td>
+                    </tr>${
+                      us
+                        ? `
+                    <tr>
+                        <td><strong style="color: var(--silver-classic);">Rent to Own</strong></td>
+                        <td>Rent a vehicle by the day or the week, with your rent counting toward owning it. The terms are on our Rent to Own page and in your agreement.</td>
+                    </tr>`
+                        : ""
+                    }
                     <tr>
                         <td><strong style="color: var(--silver-classic);">Referral Program</strong></td>
                         <td>Commission-based referral program for partners who introduce rental customers.</td>
@@ -240,9 +373,13 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h3>Inspection & Condition</h3>
             <p>All vehicles listed for sale have undergone a pre-listing inspection. Vehicles are sold in their inspected condition at the time of sale. We strongly encourage all buyers to conduct their own independent inspection prior to completing a purchase.</p>
             <h3>Pricing</h3>
-            <p>All prices displayed on our website and marketing materials are in Nigerian Naira (₦) unless otherwise stated. Prices are subject to change without prior notice until a purchase agreement is formally signed. Currency conversion rates shown are indicative only and may vary at the time of actual payment.</p>
+            <p>${
+              us
+                ? "All prices on this website are in US dollars. Prices are subject to change without prior notice until a purchase agreement is formally signed."
+                : "All prices displayed on our website and marketing materials are in Nigerian Naira (₦) unless otherwise stated. Prices are subject to change without prior notice until a purchase agreement is formally signed. Currency conversion rates shown are indicative only and may vary at the time of actual payment."
+            }</p>
             <h3>Transfer of Ownership</h3>
-            <p>Legal ownership of a vehicle transfers to the buyer only upon receipt of full payment or execution of a signed financing agreement. We will assist with all documentation required for vehicle registration and transfer in Nigeria.</p>
+            <p>Legal ownership of a vehicle transfers to the buyer only upon receipt of full payment or execution of a signed financing agreement. We will assist with all documentation required for vehicle registration and transfer${us ? "" : " in Nigeria"}.</p>
             <h3>Vehicle Availability</h3>
             <p>Vehicle listings on our website represent our current inventory to the best of our knowledge. We do not guarantee availability and will notify you promptly if a selected vehicle has been sold. In such cases, any deposit paid will be fully refunded.</p>
             <div class="warning-box">
@@ -255,7 +392,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>Our vehicle financing is subject to credit assessment and approval. By applying for financing, you authorize us to verify your financial information and share it with relevant financial partners. The following terms apply:</p>
             <ul>
                 <li>A minimum down payment is required. The amount varies based on the vehicle price and your assessed creditworthiness.</li>
-                <li>Installment payment plans range from 6 to 24 months. Interest rates will be disclosed in your financing agreement before signing.</li>
+                <li>Installment payment plans range from ${f.termRange}. Interest rates will be disclosed in your financing agreement before signing.</li>
                 <li>Vehicles financed through our program remain in our name or that of our financing partner until full repayment is completed.</li>
                 <li>Missed or late installments may result in penalties, repossession of the vehicle, and/or legal action as specified in the financing agreement.</li>
                 <li>Early full repayment is permitted. Any applicable early repayment terms will be stated in your agreement.</li>
@@ -265,11 +402,11 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 5 -->
         <div class="policy-section" id="referral">
             <h2><i class="fas fa-users"></i> 5. Referral Program</h2>
-            <p>Our referral program allows individuals ("Referrers") to earn a commission by introducing buyers and rental customers to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
+            <p>Our referral program allows individuals ("Referrers") to earn a commission by introducing ${us ? "rental customers" : "buyers and rental customers"} to our business. Admission is by application and is subject to a separate written partner agreement, which sets out the full terms and which a Referrer must accept before any referral earns commission. The following conditions apply:</p>
             <ul>
-                <li>Commission is payable to the Referrer upon completion of a successful vehicle rental or purchase by the referred party, at <strong style="color: var(--silver-classic);">5% on vehicle rental</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A vehicle sale earns commission only where a Referrer's partner agreement says in writing that sales are included; in the United States they are not included at present. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
+                <li>Commission is payable to the Referrer upon completion of a successful vehicle rental or purchase by the referred party, at <strong style="color: var(--silver-classic);">${f.rentalRate} on vehicle rental</strong>, calculated on the amount the customer pays us. Taxes, refundable deposits and third-party charges are excluded. A vehicle sale earns commission only where a Referrer's partner agreement says in writing that sales are included; in the United States they are not included at present. A Referrer's own rates are shown on their partner account and in their partner agreement.</li>
                 <li>A referral is deemed successful only when that amount has been paid in full and the purchase or rental has been completed.</li>
-                <li>Referrers are issued a personal referral link and code on acceptance into the program. A customer is recorded against the Referrer for 90 days from the first time they use that link, or when they quote the code to us. Once a referred customer has rented from us, later rentals they book with the same phone number are also recorded against that Referrer, for as long as they keep renting. A Referrer can see the vehicle, total and status of the bookings recorded against them, but not the customer's contact details or documents.</li>
+                <li>Referrers are issued a personal referral link and code on acceptance into the program. A customer is recorded against the Referrer for ${f.refDays} days from the first time they use that link, or when they quote the code to us. Once a referred customer has rented from us, later rentals they book with the same phone number are also recorded against that Referrer, for as long as they keep renting. A Referrer can see the vehicle, total and status of the bookings recorded against them, but not the customer's contact details or documents.</li>
                 <li>Earnings appear on the Referrer's own partner account as they are confirmed. A payout may be requested at any time once earnings are available, and is paid on our next payment run. We do not hold funds on a Referrer's behalf and this website does not collect bank details; payment arrangements are made with each Referrer directly.</li>
                 <li>Referrers may not misrepresent our services, apply undue pressure on potential buyers, or engage in deceptive practices. Breach of this condition forfeits the referral commission.</li>
                 <li>We reserve the right to modify or terminate the referral program at any time with reasonable notice.</li>
@@ -279,18 +416,24 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <div class="policy-section" id="payments">
             <h2><i class="fas fa-money-bill-wave"></i> 6. Payments &amp; Deposits</h2>
             <h3>Accepted Payment Methods</h3>
-            <p>We accept payment via bank transfer, USSD, and other electronic transfer methods. Cash payments may be accepted for amounts up to ₦5,000,000 in compliance with Central Bank of Nigeria (CBN) guidelines. Cryptocurrency and third-party payment apps are not accepted.</p>
+            ${
+              us
+                ? `${US_PAYMENT_METHODS}
+            <h3>Deposits</h3>
+            ${US_DEPOSITS}`
+                : `<p>We accept payment via bank transfer, USSD, and other electronic transfer methods. Cash payments may be accepted for amounts up to ₦5,000,000 in compliance with Central Bank of Nigeria (CBN) guidelines. Cryptocurrency and third-party payment apps are not accepted.</p>
             <h3>Deposits</h3>
             <p>A deposit is required to reserve a vehicle for a defined holding period. The deposit amount and holding period will be communicated to you in writing. Deposits are:</p>
             <ul>
                 <li>Fully refundable if the vehicle is no longer available due to circumstances on our part.</li>
                 <li>Non-refundable if you withdraw from the purchase without cause after the holding period begins, unless otherwise agreed in writing.</li>
                 <li>Applied towards the full purchase price upon completion of the transaction.</li>
-            </ul>
+            </ul>`
+            }
             <h3>Receipts</h3>
             <p>An official receipt will be issued for all payments. Please retain this receipt. We are not responsible for lost payments made to unofficial accounts. Always verify our official account details directly with us before making any transfer.</p>
             <div class="warning-box">
-                <p><i class="fas fa-exclamation-triangle" style="color: var(--illustration-gold); margin-right: 8px;"></i> Beware of fraud. We will never ask you to transfer funds to a personal account. Always confirm payment details via our official WhatsApp or phone number.</p>
+                <p><i class="fas fa-exclamation-triangle" style="color: var(--illustration-gold); margin-right: 8px;"></i> Beware of fraud. We will never ask you to transfer funds to a personal account. ${f.confirmPayment}</p>
             </div>
         </div>
         <!-- Section 7 -->
@@ -301,7 +444,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
                 <li>Any indirect, incidental, consequential, or special loss or damage arising from your use of our services.</li>
                 <li>Mechanical or technical faults in vehicles that arise after the transfer of ownership, except where covered by a written warranty.</li>
                 <li>Losses arising from the actions of third parties including banks, insurance providers, or logistics partners.</li>
-                <li>Inaccuracies in currency conversion rates displayed on our website.</li>
+${us ? "" : `                <li>Inaccuracies in currency conversion rates displayed on our website.</li>`}
             </ul>
             <p>Our total liability to you in connection with any single transaction shall not exceed the amount you paid to us in that transaction. Nothing in these Terms limits our liability for fraud, personal injury caused by our negligence, or any other liability that cannot be excluded by law.</p>
         </div>
@@ -311,7 +454,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <p>When engaging with our services or website, you agree not to:</p>
             <ul>
                 <li>Provide false, misleading, or fraudulent information in any application, form, or communication with us.</li>
-                <li>Use our services for any unlawful purpose or in violation of applicable Nigerian law.</li>
+                <li>Use our services for any unlawful purpose or in violation of applicable ${us ? "" : "Nigerian "}law.</li>
                 <li>Attempt to circumvent or manipulate our payment, financing, or referral systems.</li>
                 <li>Harass, threaten, or engage in abusive conduct toward our staff or other customers.</li>
                 <li>Reproduce, distribute, or commercially exploit our website content or vehicle listings without written permission.</li>
@@ -322,32 +465,44 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
         <!-- Section 9 -->
         <div class="policy-section" id="dispute">
             <h2><i class="fas fa-handshake"></i> 9. Dispute Resolution</h2>
-            <p>We are committed to resolving disputes amicably and promptly. In the event of a dispute:</p>
+            ${
+              us
+                ? US_DISPUTES
+                : `<p>We are committed to resolving disputes amicably and promptly. In the event of a dispute:</p>
             <ol>
-                <li><strong style="color: var(--silver-classic);">Direct Resolution:</strong> You must first contact us directly via phone, email, or WhatsApp. We will endeavour to resolve the matter within 14 business days.</li>
+                <li><strong style="color: var(--silver-classic);">Direct Resolution:</strong> You must first contact us directly via ${f.channels}. We will endeavour to resolve the matter within 14 business days.</li>
                 <li><strong style="color: var(--silver-classic);">Mediation:</strong> If direct resolution is unsuccessful, either party may request mediation through a mutually agreed independent mediator in Lagos, Nigeria.</li>
                 <li><strong style="color: var(--silver-classic);">Arbitration:</strong> If mediation fails, the dispute shall be referred to arbitration in accordance with the Arbitration and Conciliation Act (as amended) of Nigeria. The arbitration shall be conducted in Lagos.</li>
             </ol>
-            <p>Nothing in this clause prevents either party from seeking urgent interim relief from a competent court.</p>
+            <p>Nothing in this clause prevents either party from seeking urgent interim relief from a competent court.</p>`
+            }
         </div>
         <!-- Section 10 -->
         <div class="policy-section" id="governing-law">
             <h2><i class="fas fa-gavel"></i> 10. Governing Law</h2>
-            <p>These Terms of Service are governed by and construed in accordance with the laws of the Federal Republic of Nigeria. The courts of Lagos State, Nigeria, shall have exclusive jurisdiction to hear and determine any dispute arising out of or in connection with these Terms, subject to the dispute resolution clause above.</p>
+            ${
+              us
+                ? US_GOVERNING_LAW
+                : `<p>These Terms of Service are governed by and construed in accordance with the laws of the Federal Republic of Nigeria. The courts of Lagos State, Nigeria, shall have exclusive jurisdiction to hear and determine any dispute arising out of or in connection with these Terms, subject to the dispute resolution clause above.</p>`
+            }
         </div>
         <!-- Section 11 -->
         <div class="policy-section" id="amendments">
             <h2><i class="fas fa-edit"></i> 11. Amendments</h2>
-            <p>We reserve the right to update these Terms of Service at any time. Updated Terms will be posted on our website with a revised "Last Updated" date. Your continued use of our services after any amendment constitutes acceptance of the new Terms. For significant changes, we will make reasonable efforts to notify existing customers via email or WhatsApp.</p>
+            <p>We reserve the right to update these Terms of Service at any time. Updated Terms will be posted on our website with a revised "Last Updated" date. Your continued use of our services after any amendment constitutes acceptance of the new Terms. For significant changes, we will make reasonable efforts to notify existing customers via ${f.writtenChannels}.</p>
         </div>
         <!-- Section 12 -->
         <div class="policy-section" id="contact-us">
             <h2><i class="fas fa-envelope"></i> 12. Contact Us</h2>
             <p>For questions about these Terms of Service or any aspect of our services, please contact us:</p>
-        </div>`,
-  },
+        </div>`;
+}
 
-  "rental-policy": {
+/**
+ * The original Rental Policy, written for Lagos. Nigeria's page shows it.
+ * Greensboro has its own (rentalPolicyUs.ts).
+ */
+const RENTAL_POLICY_NG: LegalPage = {
     slug: "rental-policy",
     title: "Rental <span>Policy</span>",
     subtitle: "Everything you need to know before renting a vehicle from us",
@@ -555,7 +710,7 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             <h2><i class="fas fa-undo-alt"></i> 12. Vehicle Return</h2>
             <p>Vehicles must be returned to our designated location as agreed at the time of booking, unless an alternative drop-off has been pre-arranged in writing. The following applies to vehicle returns:</p>
             <ul>
-                <li>Return must be made during our business hours (Monday – Saturday, 9:00 AM – 6:00 PM) unless a prior arrangement has been made for after-hours return.</li>
+                <li>Return must be made during our business hours unless a prior arrangement has been made for after-hours return.</li>
                 <li>A joint return inspection will be conducted by our staff and the renter upon vehicle return.</li>
                 <li>Any new damage found on return will be noted and assessed for cost, which will be deducted from the security deposit or invoiced separately if costs exceed the deposit.</li>
                 <li>The renter must be present during the return inspection. If the renter is absent, our assessment of the vehicle condition shall be final.</li>
@@ -563,8 +718,28 @@ export const LEGAL_PAGES: Record<string, LegalPage> = {
             </ul>
             <p>Upon successful return and clearance of all charges, your security deposit will be refunded within 3–5 business days to your registered bank account.</p>
         </div>`,
-  },
+};
 
+const PRIVACY_HEAD = {
+  slug: "privacy-policy",
+  title: "Privacy <span>Policy</span>",
+  subtitle: "How we collect, use, and protect your personal information",
+};
+
+const TERMS_HEAD = {
+  slug: "terms-of-service",
+  title: "Terms of <span>Service</span>",
+  subtitle: "The terms and conditions governing your use of our services",
+};
+
+/**
+ * The pages, in footer order, with Nigeria's text. `legalPageFor` returns the
+ * market's own version; this record supplies the slugs and titles.
+ */
+export const LEGAL_PAGES: Record<string, LegalPage> = {
+  "privacy-policy": { ...PRIVACY_HEAD, body: privacyBody("ng") },
+  "terms-of-service": { ...TERMS_HEAD, body: termsBody("ng") },
+  "rental-policy": RENTAL_POLICY_NG,
 };
 
 export const LEGAL_SLUGS = Object.keys(LEGAL_PAGES);
@@ -579,7 +754,11 @@ export const LEGAL_SLUGS = Object.keys(LEGAL_PAGES);
  * other page falls back to the shared text.
  */
 const MARKET_OVERRIDES: Partial<Record<MarketCode, Record<string, LegalPage>>> = {
-  us: { "rental-policy": RENTAL_POLICY_US },
+  us: {
+    "privacy-policy": { ...PRIVACY_HEAD, body: privacyBody("us") },
+    "terms-of-service": { ...TERMS_HEAD, body: termsBody("us") },
+    "rental-policy": RENTAL_POLICY_US,
+  },
 };
 
 export function legalPageFor(slug: string, market: MarketCode): LegalPage | undefined {

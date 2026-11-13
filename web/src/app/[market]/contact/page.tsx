@@ -19,6 +19,7 @@ import {
 } from "@/lib/contact";
 import { LegacyMessageForm } from "@/components/LegacyMessageForm";
 import { dealerJsonLd } from "@/lib/seo/dealer";
+import { REPLY_WITHIN } from "@/content/site";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,7 @@ export async function generateMetadata({
   return {
     title: "Contact Us",
     description:
-      "Talk to us about buying, renting or financing a vehicle. Call, message or send the form and we will reply within 24 hours.",
+      `Talk to us about buying, renting or financing a vehicle. Call, message or send the form and we will reply within ${REPLY_WITHIN}.`,
     alternates: {
       canonical: `/${market}/contact`,
       languages: { "en-US": "/us/contact", "en-NG": "/ng/contact" },
