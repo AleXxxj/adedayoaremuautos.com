@@ -860,25 +860,134 @@
     }
 }
 
-/* The hero's backdrop: a real rental car behind the words (the developer
-   found the plain dark panel empty). The photo is shown faintly and under a
-   dark fade that is strongest on the left, where the words are, so white
-   and green text keep their contrast whatever the photo. */
-.legacy-theme .rf-hero-bg {
+/* The headline's band and its picture of earning (page.tsx, .rf-art).
+   The band runs from the top of the hero to just above the buttons and no
+   further. The picture is a statement card with one line per example car
+   and their sum, tilted at the right, with two coins; a dark fade from the
+   left keeps the headline at full contrast over it. */
+.legacy-theme .rf-hero-top {
+    position: relative;
+    isolation: isolate;
+    margin: -108px calc(-1 * var(--rf-gutter)) 0;
+    padding: 108px var(--rf-gutter) 28px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-subtle);
+    background:
+        radial-gradient(90% 120% at 100% 30%, rgba(255, 201, 77, 0.14), rgba(255, 201, 77, 0) 60%),
+        var(--surface-1);
+}
+.legacy-theme .rf-hero-top + .rf-actions {
+    margin-top: 24px;
+}
+.legacy-theme .rf-art {
     position: absolute;
     inset: 0;
     z-index: -1;
+    pointer-events: none;
 }
-.legacy-theme .rf-hero-bg img {
-    object-fit: cover;
-    object-position: center 40%;
-    opacity: 0.8;
-}
-.legacy-theme .rf-hero-bg::after {
+.legacy-theme .rf-art::after {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(180deg, rgba(7, 12, 10, 0.6) 0%, rgba(7, 12, 10, 0.5) 34%, rgba(7, 12, 10, 0.88) 72%, var(--surface-0) 100%),
-        linear-gradient(90deg, rgba(7, 12, 10, 0.55) 0%, rgba(7, 12, 10, 0) 70%);
+    background: linear-gradient(90deg, var(--surface-1) 0%, rgba(20, 30, 25, 0.9) 42%, rgba(20, 30, 25, 0.35) 78%, rgba(20, 30, 25, 0.15) 100%);
+}
+.legacy-theme .rf-art-card {
+    position: absolute;
+    right: 10px;
+    top: 84px;
+    width: 216px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 18px;
+    background: var(--surface-0);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    transform: rotate(-4deg);
+}
+.legacy-theme .rf-art-head {
+    margin: 0 0 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.legacy-theme .rf-art-rows {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+.legacy-theme .rf-art-rows li,
+.legacy-theme .rf-art-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+.legacy-theme .rf-art-rows b,
+.legacy-theme .rf-art-total b {
+    flex: none;
+}
+.legacy-theme .rf-art-rows span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.legacy-theme .rf-art-rows b {
+    color: var(--accent-400);
+    font-variant-numeric: tabular-nums;
+}
+.legacy-theme .rf-art-total {
+    margin: 12px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-default);
+    font-size: 14px;
+    color: var(--text-primary);
+}
+.legacy-theme .rf-art-total b {
+    font-size: 22px;
+    line-height: 1;
+    color: var(--accent-400);
+    font-variant-numeric: tabular-nums;
+}
+.legacy-theme .rf-art-coin {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-400);
+    color: #1a1300;
+    font-size: 18px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+.legacy-theme .rf-art-coin--a {
+    right: 18px;
+    top: 62px;
+}
+.legacy-theme .rf-art-coin--b {
+    right: 190px;
+    bottom: 14px;
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+}
+/* On a wide screen the picture of the idea sits beside the words already
+   (.rf-flow), so the band and its card are for phones and tablets only. */
+@media (min-width: 1024px) {
+    .legacy-theme .rf-hero-top {
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        background: none;
+    }
+    .legacy-theme .rf-art {
+        display: none;
+    }
 }

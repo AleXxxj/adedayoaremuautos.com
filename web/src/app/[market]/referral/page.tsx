@@ -5,8 +5,6 @@ import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
 import { canResize } from "@/lib/photo";
-import { listInventory } from "@/lib/repositories/vehicles";
-import { mediaUrl } from "@/lib/media";
 import { listFleet } from "@/lib/repositories/rentals";
 import {
   DEFAULT_RENTAL_COMMISSION_BPS,
@@ -176,39 +174,59 @@ export default async function ReferralPage({
   // rate and amount as the first card under it.
   const lead = examples[0];
   const leadPhoto = lead ? (photo.get(lead.id) ?? null) : null;
-  // Behind the words: a real car from the lot, so the top of the page isn't a blank dark panel. It is dimmed in
-  // the stylesheet until the headline passes contrast on a bright photo.
-  // The newest car for sale's main photo: those are outdoor shots of the whole
-  // car, where a rental car's first photo is sometimes its interior.
-  const { vehicles: newest } = await listInventory(code, { limit: 4, sort: "newest" });
-  const outdoor = newest.find((v) => v.primaryImage)?.primaryImage;
-  const backdrop = outdoor ? mediaUrl(outdoor) : (leadPhoto ?? "/img/hero-wide.png");
+  // Behind the headline: a picture of earning, built from the same examples
+  // as the cards below (real cars, their weekly rates, and the arithmetic on
+  // one week each). Nothing in it is typed by hand.
+  const artTotal = examples.reduce((sum, e) => sum + e.earnMinor, 0);
   // A partner's link as it is written, with a stand-in for the code.
   const sampleLink = referralLink(siteUrl(), "YOURCODE").replace(/^https?:\/\/(www\.)?/, "");
 
   return (
     <div className="rf">
       <section className="rf-hero" aria-labelledby="rf-title">
-        <div className="rf-hero-bg" aria-hidden="true">
-          <Image
-            src={backdrop}
-            alt=""
-            fill
-            sizes="100vw"
-            loading="eager"
-            fetchPriority="high"
-            unoptimized={!canResize(backdrop)}
-          />
-        </div>
         <div className="rf-wrap rf-hero-grid">
           <div className="rf-hero-copy">
-            <p className="rf-eyebrow">Referral program</p>
-            <h1 id="rf-title" className="rf-title">
-              Send a renter. <span>Earn {RATE}.</span>
-            </h1>
-            <p className="rf-lead">
-              You get {RATE} of what they pay, every week they keep renting.
-            </p>
+            {/* The headline's own band. Its picture of earning stops here, above
+                the buttons: a statement card like a banking app's, with one
+                line per example car. Decorative, so hidden from screen
+                readers; the cards below say the same in words. */}
+            <div className="rf-hero-top">
+              {examples.length > 0 && (
+                <div className="rf-art" aria-hidden="true">
+                  <div className="rf-art-card">
+                    <p className="rf-art-head">
+                      <i className="fas fa-key" /> Example week · {examples.length}{" "}
+                      {examples.length === 1 ? "renter" : "renters"}
+                    </p>
+                    <ul className="rf-art-rows">
+                      {examples.map((e) => (
+                        <li key={e.id}>
+                          <span>{e.car}</span>
+                          <b>+{fmt(e.earnMinor)}</b>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="rf-art-total">
+                      <span>You earn</span>
+                      <b>{fmt(artTotal)}</b>
+                    </p>
+                  </div>
+                  <span className="rf-art-coin rf-art-coin--a">
+                    <i className="fas fa-dollar-sign" />
+                  </span>
+                  <span className="rf-art-coin rf-art-coin--b">
+                    <i className="fas fa-dollar-sign" />
+                  </span>
+                </div>
+              )}
+              <p className="rf-eyebrow">Referral program</p>
+              <h1 id="rf-title" className="rf-title">
+                Send a renter. <span>Earn {RATE}.</span>
+              </h1>
+              <p className="rf-lead">
+                You get {RATE} of what they pay, every week they keep renting.
+              </p>
+            </div>
             <div className="rf-actions">
               <a href="#apply" className="rf-btn rf-btn--primary">
                 Apply now
