@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { canResize } from "@/lib/photo";
 import type { CardView } from "./carData";
 import { SaveButton } from "./SaveButton";
@@ -21,6 +22,7 @@ export function CarCard({
   heading = "h3",
   eager = false,
   sizes = "(min-width: 1100px) 380px, (min-width: 700px) 50vw, 100vw",
+  extra,
 }: {
   card: CardView;
   market: string;
@@ -29,10 +31,12 @@ export function CarCard({
   /** The first card of a list: usually the largest thing on the first screen. */
   eager?: boolean;
   sizes?: string;
+  /** Something under the card, outside its link: a saved car's price alert. */
+  extra?: ReactNode;
 }) {
   const Heading = heading;
   return (
-    <li className="cc">
+    <li className={extra ? "cc cc--extra" : "cc"}>
       <Link href={card.href} className="cc-link">
         <span className="cc-photo">
           {card.image ? (
@@ -73,6 +77,7 @@ export function CarCard({
         </span>
       </Link>
       <SaveButton market={market} slug={card.slug} name={card.full} />
+      {extra}
     </li>
   );
 }

@@ -2,6 +2,7 @@
 
 import { violates } from "@/lib/dbError";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { and, count, eq, sql } from "drizzle-orm";
@@ -12,6 +13,8 @@ import { supabaseAdmin, VEHICLE_BUCKET } from "@/lib/supabase/admin";
 import { MARKETS, isMarketCode, type MarketCode } from "@/lib/market";
 import { fromMajor } from "@/lib/money";
 import { announceVehicle } from "@/lib/push/announce";
+import { afterVehicleSaved } from "@/lib/alerts/deliver";
+import { priceAlertsEnabled } from "@/lib/alerts/rules";
 
 export interface ActionResult {
   ok: boolean;
@@ -392,6 +395,32 @@ export async function updateVehicle(
   }
 
   await audit(user, id, "update", changes);
+
+  /*
+   * Price-drop alerts, after the save and never part of it: the response has
+   * gone before this runs, and nothing in it can fail the save. It tells each
+   * watcher once when the price went down, sends nothing on a rise, and ends
+   * the watching when the car sells or is unlisted. Off, and not even
+   * scheduled, unless PRICE_ALERTS_ENABLED is set.
+   */
+  if (priceAlertsEnabled()) {
+    const newPriceMinor = v.price != null ? fromMajor(v.price, market.currency).minor : null;
+    after(() =>
+      afterVehicleSaved(
+        {
+          id,
+          marketCode: before.marketCode,
+          slug,
+          year: v.year,
+          make: v.make,
+          model: v.model,
+          trim: v.trim ?? null,
+        },
+        { status: before.status, priceMinor: before.priceMinor },
+        { status: v.status, priceMinor: newPriceMinor },
+      ).catch(() => {}),
+    );
+  }
   // The page that was just submitted, so what it shows afterwards is what was
   // saved. Without this it re-renders from the pre-edit data and the fields
   // appear to snap back to their old values — which, to someone who has been

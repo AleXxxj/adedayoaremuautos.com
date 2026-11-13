@@ -6,6 +6,7 @@ import { MARKETS, type MarketCode } from "@/lib/market";
 import { useHydrated } from "@/lib/useHydrated";
 import { cardFor, type ListKind } from "./carData";
 import { CarCard } from "./CarCard";
+import { PriceAlert } from "./PriceAlert";
 import { forgetCars, useSlugList } from "./savedStore";
 import { useCars } from "./useCars";
 
@@ -53,10 +54,13 @@ export function SavedCars({
   market: code,
   kind,
   allHref,
+  alerts,
 }: {
   market: MarketCode;
   /** The list this is on: a saved car shows that list's price when it has one. */
   kind: ListKind;
+  /** Set when price-drop alerts are switched on: each sale car gets the control. */
+  alerts?: { email: boolean };
   /** The list without the Saved filter. */
   allHref: string;
 }) {
@@ -120,15 +124,29 @@ export function SavedCars({
 
   return (
     <ul className="cc-grid" id="cars">
-      {cars.map((car, i) => (
-        <CarCard
-          key={car.slug}
-          card={cardFor(car, market, kind)}
-          market={code}
-          heading="h2"
-          eager={i === 0}
-        />
-      ))}
+      {cars.map((car, i) => {
+        const card = cardFor(car, market, kind);
+        return (
+          <CarCard
+            key={car.slug}
+            card={card}
+            market={code}
+            heading="h2"
+            eager={i === 0}
+            extra={
+              alerts && kind === "sale" && car.sale?.priceMinor != null ? (
+                <PriceAlert
+                  market={code}
+                  slug={car.slug}
+                  name={card.full}
+                  email={alerts.email}
+                  variant="card"
+                />
+              ) : undefined
+            }
+          />
+        );
+      })}
     </ul>
   );
 }

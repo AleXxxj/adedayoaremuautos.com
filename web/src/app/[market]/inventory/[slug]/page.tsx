@@ -16,6 +16,8 @@ import { Gallery } from "@/components/cars/Gallery";
 import { ReadMore } from "@/components/cars/ReadMore";
 import { RecentlyViewed } from "@/components/cars/RecentlyViewed";
 import { SaveButton } from "@/components/cars/SaveButton";
+import { PriceAlert } from "@/components/cars/PriceAlert";
+import { canWatch, mailConfigured, priceAlertsEnabled } from "@/lib/alerts/rules";
 import {
   bodyLabel,
   bodyTypeOf,
@@ -321,6 +323,11 @@ export default async function CarDetailPage({
                 </span>
               )}
             </p>
+
+            {/* Price-drop alerts: off unless PRICE_ALERTS_ENABLED is set. */}
+            {priceAlertsEnabled() && canWatch(v) && (
+              <PriceAlert market={code} slug={v.slug} name={title} email={mailConfigured()} />
+            )}
 
             {rentFrom && !sold && (
               <Link href={`/${code}/rentals/${v.slug}`} className="cd-also">

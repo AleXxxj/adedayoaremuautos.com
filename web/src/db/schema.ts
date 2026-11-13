@@ -1613,3 +1613,72 @@ export const vinCheckUsage = pgTable(
   },
   (t) => [primaryKey({ columns: [t.visitor, t.day] })],
 );
+
+/* ── Price-drop alerts ─────────────────────────────────────────────────── */
+
+/**
+ * Who asked to be told when one car's price goes down (migration 0033).
+ *
+ * One row per person per car. A person is one browser (its push subscription,
+ * stored as the browser gave it) or one email address that confirmed through
+ * the link it was sent. Push details are kept here and not in
+ * `push_subscriptions`: that table is the audience for every broadcast, and
+ * asking about one car's price is not asking for those.
+ *
+ * Stopping deletes the row. When the car sells or is unlisted, `endedAt` is
+ * set (nothing more is sent) and the row is deleted 30 days later
+ * (src/lib/alerts/store.ts).
+ */
+export const priceAlerts = pgTable(
+  "price_alerts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    vehicleId: uuid("vehicle_id")
+      .notNull()
+      .references(() => vehicles.id, { onDelete: "cascade" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    /** "push" or "email"; a CHECK in the migration holds it to those. */
+    channel: text("channel").$type<"push" | "email">().notNull(),
+    pushEndpoint: text("push_endpoint"),
+    pushP256dh: text("push_p256dh"),
+    pushAuth: text("push_auth"),
+    /** Lowercase. Only ever used to send this car's alert. */
+    email: text("email"),
+    /** The price on the page when they asked. */
+    priceMinorAtWatch: bigint("price_minor_at_watch", { mode: "number" }).notNull(),
+    /** The price in the last alert they were sent. One alert per drop. */
+    lastAlertPriceMinor: bigint("last_alert_price_minor", { mode: "number" }),
+    lastAlertAt: timestamp("last_alert_at", { withTimezone: true }),
+    /** Random. Stops this one alert with no login. */
+    stopToken: text("stop_token").notNull(),
+    /** Random, emailed once, cleared on confirming. */
+    confirmToken: text("confirm_token"),
+    confirmSentAt: timestamp("confirm_sent_at", { withTimezone: true }),
+    /** Set at once for push; for email, when the link's button is pressed. */
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    /** When the car sold or was unlisted. */
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    failureCount: integer("failure_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("price_alerts_vehicle_push_unique")
+      .on(t.vehicleId, t.pushEndpoint)
+      .where(sql`${t.pushEndpoint} is not null`),
+    uniqueIndex("price_alerts_vehicle_email_unique")
+      .on(t.vehicleId, t.email)
+      .where(sql`${t.email} is not null`),
+    uniqueIndex("price_alerts_stop_token_unique").on(t.stopToken),
+    uniqueIndex("price_alerts_confirm_token_unique")
+      .on(t.confirmToken)
+      .where(sql`${t.confirmToken} is not null`),
+    index("price_alerts_email_idx").on(t.email).where(sql`${t.email} is not null`),
+    index("price_alerts_push_endpoint_idx")
+      .on(t.pushEndpoint)
+      .where(sql`${t.pushEndpoint} is not null`),
+  ],
+);
+
+export type PriceAlertRow = typeof priceAlerts.$inferSelect;
