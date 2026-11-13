@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import type { Staff } from "@/lib/auth";
 import type { AdminNavItem } from "@/components/admin/AdminNav";
+import { saleHoldEnabled } from "@/lib/saleHolds/settings";
+
+const HOLDS = "/admin/holds";
 
 /**
  * What each role can reach.
@@ -20,6 +23,9 @@ const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
   { href: "/admin/conversations", label: "Chats", icon: "fas fa-comment-dots", roles: ["owner", "manager", "sales"] },
   { href: "/admin/deals", label: "Deals", icon: "fas fa-handshake", roles: ["owner", "manager", "sales"] },
   { href: "/admin/rentals", label: "Rentals", icon: "fas fa-calendar-check", roles: ["owner", "manager", "sales"] },
+  // Cars held with a deposit. In the menu only while SALE_HOLD_ENABLED is on
+  // (see navFor); the page itself always opens, for holds already paid.
+  { href: HOLDS, label: "Holds", icon: "fas fa-hourglass-half", roles: ["owner", "manager", "sales"] },
   { href: "/admin/finance", label: "Finance", icon: "fas fa-file-invoice-dollar", roles: ["owner", "manager"] },
   { href: "/admin/tiers", label: "Rent to Own", icon: "fas fa-key", roles: ["owner", "manager"] },
   { href: "/admin/referrals", label: "Referrals", icon: "fas fa-hand-holding-usd", roles: ["owner", "manager"] },
@@ -33,7 +39,9 @@ const ALL: (AdminNavItem & { roles: Staff["role"][] })[] = [
 ];
 
 export function navFor(role: Staff["role"]): AdminNavItem[] {
-  return ALL.filter((i) => i.roles.includes(role)).map(({ href, label, icon }) => ({
+  return ALL.filter(
+    (i) => i.roles.includes(role) && (i.href !== HOLDS || saleHoldEnabled()),
+  ).map(({ href, label, icon }) => ({
     href,
     label,
     icon,

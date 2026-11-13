@@ -1613,3 +1613,74 @@ export const vinCheckUsage = pgTable(
   },
   (t) => [primaryKey({ columns: [t.visitor, t.day] })],
 );
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOLDING A CAR FOR SALE
+
+   A small refundable deposit, paid on Stripe's hosted page, that keeps a car
+   off the market for a set time (migration 0034). The status and deposit
+   values, the checks between them, and the two "one per car" unique indexes
+   are in the migration: the index helpers here only describe them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export const saleHolds = pgTable(
+  "sale_holds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    vehicleId: uuid("vehicle_id")
+      .notNull()
+      .references(() => vehicles.id, { onDelete: "restrict" }),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    /** checkout | abandoned | active | expired | released | completed | conflict */
+    status: text("status").notNull().default("checkout"),
+
+    buyerName: text("buyer_name").notNull(),
+    buyerPhone: text("buyer_phone").notNull(),
+    buyerEmail: text("buyer_email"),
+
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    currency: currencyCode("currency").notNull(),
+    holdHours: integer("hold_hours").notNull(),
+
+    termsVersion: text("terms_version").notNull(),
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }).notNull(),
+
+    provider: paymentProvider("provider").notNull().default("stripe"),
+    /** Stripe's id for the checkout. Never a card detail. */
+    providerRef: text("provider_ref"),
+    /** Stripe's id for the payment: what the admin's link opens. */
+    paymentRef: text("payment_ref"),
+    livemode: boolean("livemode"),
+
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    heldUntil: timestamp("held_until", { withTimezone: true }),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    endedBy: uuid("ended_by").references(() => staff.id),
+
+    /** held | refunded | applied: a record of what staff did in Stripe. */
+    depositState: text("deposit_state"),
+    depositMarkedAt: timestamp("deposit_marked_at", { withTimezone: true }),
+    depositMarkedBy: uuid("deposit_marked_by").references(() => staff.id),
+
+    leadId: uuid("lead_id").references(() => leads.id, { onDelete: "set null" }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sale_holds_one_active_per_vehicle")
+      .on(t.vehicleId)
+      .where(sql`status = 'active'`),
+    uniqueIndex("sale_holds_one_checkout_per_vehicle")
+      .on(t.vehicleId)
+      .where(sql`status = 'checkout'`),
+    uniqueIndex("sale_holds_provider_ref_unique")
+      .on(t.provider, t.providerRef)
+      .where(sql`provider_ref IS NOT NULL`),
+    index("sale_holds_status_idx").on(t.status, t.heldUntil),
+  ],
+);
+
+export type SaleHold = typeof saleHolds.$inferSelect;

@@ -19,7 +19,7 @@ This is the Next.js app. The HTML files one folder up are the original site and 
 | `npm run build` | Everything that must pass before a push: design tokens, contrast check, copy check, every test suite, then the production build |
 | `npm run lint` | ESLint |
 | `npm run check:copy` | The American English check on its own |
-| `npm run test:<name>` | One suite: `schema`, `deal`, `amort`, `ledger`, `rental`, `payout`, `holds`, `referrals`, `vin`, `sell`, `home`, `cars`, `value`, `guides` |
+| `npm run test:<name>` | One suite: `schema`, `deal`, `amort`, `ledger`, `rental`, `payout`, `holds`, `holds-sale`, `referrals`, `vin`, `sell`, `home`, `cars`, `value`, `guides` |
 
 The test suites are scripts in `scripts/verify-*`. They run pure logic, or the real migrations in an in-memory Postgres; none touches the live database.
 
@@ -37,6 +37,7 @@ Optional settings and what they switch on:
 | `ASSISTANT_MODEL`, `RECALL_SUMMARY_MODEL` | Override the default models. |
 | `MARKETCHECK_API_KEY` | The price estimate at `/us/value`, for signed-in staff only. |
 | `VALUE_CHECK_PUBLIC=1` | Opens the price estimate to everyone. `VALUE_CHECK_MONTHLY_CAP` limits calls per month. |
+| `SALE_HOLD_ENABLED=1` | "Hold this car" on cars for sale: a refundable deposit paid on Stripe's hosted checkout, and Holds in the admin. Off unless set. Needs migration 0034 and the Stripe keys; the amount, hours and terms are in `src/lib/saleHolds/settings.ts`. With a Stripe test key only signed-in staff can pay. |
 
 ## Where things are
 

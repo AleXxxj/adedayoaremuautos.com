@@ -7,6 +7,9 @@ import { sendBookingReceipt } from "@/lib/payments/receipt";
 import { recordRentalEarning } from "@/lib/partnerEarnings";
 import { restoreHoldAfterCheckout } from "@/lib/rentalHolds";
 import { revalidatePath } from "next/cache";
+import { handleSaleHoldEvent, isSaleHoldEvent } from "@/lib/saleHolds/webhook";
+import { holdStripe } from "@/lib/saleHolds/stripe";
+import { notifyStaffOfLead } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +48,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (isSaleHoldEvent(event)) {
+      // A deposit to hold a car for sale, not a rental: its checkout carries
+      // a hold's id and no booking. Routed first so the rental code below
+      // never sees it (it would log a paid session with no booking).
+      await handleSaleHoldEvent(event, {
+        notify: notifyStaffOfLead,
+        stripe: holdStripe,
+        // The car's page and the lists that show "Sale pending".
+        revalidate: () => {
+          revalidatePath("/[market]/inventory/[slug]", "page");
+          revalidatePath("/[market]/inventory", "page");
+          revalidatePath("/admin/holds");
+          revalidatePath("/admin/leads");
+        },
+      });
+    } else if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       await markPaid(session.id, session.metadata?.bookingId ?? null);
     } else if (
