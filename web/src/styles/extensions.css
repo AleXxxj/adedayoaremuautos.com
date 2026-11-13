@@ -1,0 +1,269 @@
+/* "Need it longer?" on the renter's booking page (src/components/ExtendCard.tsx).
+   Scoped under .legacy-theme like the rest of the reserved page, because the
+   market layout's reset would flatten utility classes.
+
+   Green is the one primary button. Chips and facts are white and silver;
+   gold is the added cost only. */
+
+/* A section of the booking card, not a card inside it: a second frame would
+   cost 36px of width a 320px phone does not have. */
+.legacy-theme .ext-card {
+    margin: 24px 0 0;
+    padding: 22px 0 0;
+    border-top: 1px solid var(--border-default);
+    text-align: left;
+    min-width: 0;
+}
+
+.legacy-theme .ext-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ext-eyebrow::before {
+    content: "";
+    flex: none;
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+}
+
+.legacy-theme .ext-title {
+    margin: 10px 0 0;
+    font-size: clamp(24px, 6.4vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.06;
+    color: var(--text-primary);
+}
+
+.legacy-theme .ext-form {
+    margin: 16px 0 0;
+}
+
+.legacy-theme .ext-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.legacy-theme .ext-chips .ext-chip:last-child {
+    grid-column: 1 / -1;
+}
+
+.legacy-theme .ext-chip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px 8px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 10px;
+    line-height: 1.15;
+    text-align: center;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 180ms ease-out, color 180ms ease-out;
+}
+
+.legacy-theme .ext-chip.is-on {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.legacy-theme .ext-chip[disabled] {
+    cursor: not-allowed;
+    /* Still has to be read: it says the car is not free. */
+    opacity: 1;
+    color: var(--text-muted);
+    border-style: dashed;
+}
+
+.legacy-theme .ext-chip-sub {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.legacy-theme .ext-date {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ext-date input {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font-size: 16px;
+    color-scheme: dark;
+}
+
+.legacy-theme .ext-sum {
+    margin: 14px 0 0;
+    padding: 4px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    background: var(--surface-1);
+}
+
+.legacy-theme .ext-sum > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding: 10px 0;
+}
+
+.legacy-theme .ext-sum > div + div {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.legacy-theme .ext-sum dt {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ext-sum dd {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .ext-sum dd.ext-money {
+    font-size: 20px;
+    color: var(--accent-400);
+}
+
+.legacy-theme .ext-fact {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ext-fact i {
+    flex: none;
+    width: 16px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.legacy-theme .ext-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    margin: 16px 0 0;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--cta-bg);
+    color: var(--cta-fg);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 180ms ease-out;
+}
+
+.legacy-theme .ext-submit:hover {
+    background: var(--cta-bg-hover);
+}
+
+.legacy-theme .ext-submit[disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.legacy-theme .ext-chip:focus-visible,
+.legacy-theme .ext-submit:focus-visible,
+.legacy-theme .ext-date input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.legacy-theme .ext-note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.legacy-theme .ext-error {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    border: 1px solid var(--danger);
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--danger);
+}
+
+.legacy-theme .ext-status {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--surface-1);
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ext-status strong {
+    color: var(--text-primary);
+}
+
+.legacy-theme .ext-status i {
+    flex: none;
+}
+
+.legacy-theme .ext-status-pending i {
+    color: var(--warning);
+}
+
+.legacy-theme .ext-status-ok i {
+    color: var(--success);
+}
+
+.legacy-theme .ext-status-no i {
+    color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .ext-chip,
+    .legacy-theme .ext-submit {
+        transition: none;
+    }
+}

@@ -37,6 +37,7 @@ Optional settings and what they switch on:
 | `ASSISTANT_MODEL`, `RECALL_SUMMARY_MODEL` | Override the default models. |
 | `MARKETCHECK_API_KEY` | The price estimate at `/us/value`, for signed-in staff only. |
 | `VALUE_CHECK_PUBLIC=1` | Opens the price estimate to everyone. `VALUE_CHECK_MONTHLY_CAP` limits calls per month. |
+| `RENTAL_EXTENSIONS_ENABLED=1` | "Keep it another week": renters ask for more days from their booking page, staff approve in Rentals. Off by default. Needs migration 0035; the reminder 2 days before return also needs `CRON_SECRET`. |
 
 ## Where things are
 

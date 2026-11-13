@@ -39,6 +39,11 @@ export interface BookingPaidData {
   pickupLocation: string | null;
   businessPhone: string | null;
   bookingUrl: string;
+  /**
+   * The renter's private booking page, when "Keep it another week" is on and
+   * the booking has one. Absent otherwise, and then nothing is said about it.
+   */
+  extendUrl?: string | null;
 }
 
 function row(label: string, value: string): string {
@@ -120,6 +125,13 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
 
   <tr><td style="padding:22px 28px 28px">
     ${
+      d.extendUrl
+        ? `<div style="margin-bottom:14px;font-size:15px;line-height:1.6;color:#333"><strong>Need it longer later?</strong>
+             <a href="${escapeHtml(d.extendUrl)}" style="color:${GREEN};font-weight:600">Ask for another week</a>
+             from your booking page. Keep this email.</div>`
+        : ""
+    }
+    ${
       d.businessPhone
         ? `<div style="font-size:15px;color:#333">Any questions, call us on
              <a href="tel:${escapeHtml(d.businessPhone.replace(/[^\d+]/g, ""))}" style="color:${GREEN};font-weight:600;text-decoration:none">${escapeHtml(d.businessPhone)}</a>
@@ -158,6 +170,8 @@ export function renderBookingPaid(d: BookingPaidData): { html: string; text: str
       : null,
     "- We'll be in touch to set a pickup time.",
     "",
+    d.extendUrl ? `Need it longer later? Ask for another week here: ${d.extendUrl}` : null,
+    d.extendUrl ? "" : null,
     d.businessPhone ? `Questions? Call ${d.businessPhone} and quote ${d.reference}.` : null,
     "",
     "Adedayo Aremu Autos",

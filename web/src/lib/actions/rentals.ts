@@ -30,6 +30,7 @@ import {
   MAX_OPEN_RESERVATIONS,
 } from "@/lib/reservation";
 import { syncRentalEarning } from "@/lib/partnerEarnings";
+import { extensionsEnabled } from "@/lib/extensions/pricing";
 
 /**
  * Every public vehicle page, as a route pattern for revalidatePath(…, "page").
@@ -592,6 +593,7 @@ export async function requestRental(
       payUrl,
       businessPhone,
       payOnline: providerConfigured(providerFor(f.marketCode)),
+      canExtend: extensionsEnabled(),
     };
     after(() => sendReservation(reservation).catch((e) => console.error("[rental] reservation email failed", e)));
   }

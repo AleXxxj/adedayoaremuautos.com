@@ -9,6 +9,7 @@ import {
   reviewBookingDocuments,
   adjustHold,
 } from "@/lib/actions/rentals";
+import { decideExtensionRequest } from "@/lib/actions/extensions";
 import { formatRange } from "@/lib/pgRange";
 import { bookingTiming, timingLabel } from "@/lib/bookingTiming";
 import { LicenceLink } from "./LicenceLink";
@@ -47,6 +48,15 @@ interface Booking {
   /** Still owed, in major units, to prefill the counter payment. */
   owedMajor: number;
   currencySymbol: string;
+  /** The renter has asked to keep the car longer, and nobody has answered. */
+  extension?: {
+    id: string;
+    addedDays: number;
+    /** "Fri, Nov 27" */
+    newEnd: string;
+    added: string;
+    newTotal: string;
+  } | null;
 }
 
 /**
@@ -202,6 +212,7 @@ export function BookingRow({
         </div>
       </div>
 
+      {booking.extension && <ExtensionRequest request={booking.extension} />}
       <HoldPanel booking={booking} />
       <DocumentCheck booking={booking} />
       {booking.status !== "cancelled" && (
@@ -280,6 +291,58 @@ export function BookingRow({
         )}
       </div>
     </li>
+  );
+}
+
+/**
+ * The renter tapped "Ask to keep it" on their booking page.
+ *
+ * Loud, because somebody is waiting on it and the car is due back soon.
+ * Approving lengthens this booking and adds the cost to its total; the
+ * database still refuses if another booking has those days, and says so
+ * here. Nothing is charged: the added cost shows as owed below.
+ */
+function ExtensionRequest({ request }: { request: NonNullable<Booking["extension"]> }) {
+  const [state, action, pending] = useActionState(decideExtensionRequest, null);
+  useActionToast(state);
+
+  return (
+    <div className="mt-3 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-3 py-3">
+      <p className="text-sm font-semibold text-[var(--warning)]">
+        <i className="fas fa-calendar-plus mr-1.5" aria-hidden="true" />
+        Wants to keep it {request.addedDays} more day{request.addedDays === 1 ? "" : "s"}, until{" "}
+        {request.newEnd}
+      </p>
+      <p className="mt-1 text-xs text-[var(--text-secondary)]">
+        Adds {request.added}. New total {request.newTotal}. Nothing was charged online.
+      </p>
+      {state?.error && (
+        <p className="mt-2 text-sm text-[var(--danger)]" role="alert">
+          {state.error}
+        </p>
+      )}
+      <form action={action} className="mt-3 flex flex-wrap gap-2">
+        <input type="hidden" name="id" value={request.id} />
+        <button
+          type="submit"
+          name="decision"
+          value="approve"
+          disabled={pending}
+          className="min-h-11 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] disabled:opacity-50"
+        >
+          {pending ? "Saving…" : "Approve"}
+        </button>
+        <button
+          type="submit"
+          name="decision"
+          value="decline"
+          disabled={pending}
+          className="min-h-11 rounded-lg border border-[var(--border-default)] px-4 py-2 text-sm disabled:opacity-50"
+        >
+          Decline
+        </button>
+      </form>
+    </div>
   );
 }
 
