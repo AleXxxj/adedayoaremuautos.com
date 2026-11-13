@@ -23,6 +23,12 @@
  *      round of "guess the price" is dealt and scored, every way through
  *      the story reaching an ending, every recall card with its source, the
  *      trip's cost against quoteRental, and what a shared link may carry.
+ *   9. The motion: an animation may take any path, but it ends on the real
+ *      figure. Easing and the spring start at 0 and end at 1, a count ends
+ *      on its value, bars keep the figures' proportions, the needle leans
+ *      the way the guess was off, the route starts and ends on its two
+ *      places, every trip has a place on the map, and each guide's scene
+ *      shows the same numbers its tool does.
  *
  * Nothing here touches the live database or the network.
  *
@@ -92,6 +98,35 @@ import { LIFE_PROFILES, LIFE_QUESTIONS, lifeShareText } from "../src/content/gui
 import { PRICE_RANKS, priceShareText } from "../src/content/guides/priceGame";
 import { NHTSA_RECALLS_URL, RECALL_FACTS, RECALL_RANKS, recallShareText } from "../src/content/guides/recallQuiz";
 import { TRIP_MILEAGE_NOTE, TRIP_PLACES, TRIP_POLICY_RELIES_ON, tripShareText } from "../src/content/guides/roadTrip";
+import { cash } from "../src/content/guides/format";
+import { HOME_COORDS, PLACE_COORDS, cardBars, sceneFor } from "../src/components/guides/motion/sceneData";
+import {
+  GAUGE_SWING,
+  barScales,
+  boundsOf,
+  countAt,
+  countStart,
+  crowMiles,
+  easeDrive,
+  easeInOut,
+  easeOut,
+  gaugeAngle,
+  gaugeWord,
+  nearestToCenter,
+  odometerDigits,
+  parseFigure,
+  project,
+  readProgress,
+  route,
+  routeDots,
+  routePoint,
+  spring,
+  storyMonth,
+  storyStops,
+  tilt,
+  tripMs,
+  writeFigure,
+} from "../src/components/guides/motion/sceneMath";
 import { bodyGroup as bodyOf } from "../src/components/compare/compareData";
 import {
   MAX_COMPARE,
@@ -1054,6 +1089,183 @@ eq("no stock", guideUpdated({ updated: "2026-11-12", live: true }, { stockUpdate
     "https://photos.test/2001-lexus-rx.jpg",
   ]);
   eq("no photos in stock: none", guidePhotos(picks, EMPTY)[GUIDES[0].meta.slug], null);
+}
+
+// ── The motion ────────────────────────────────────────────────────────────
+console.log("\nMotion: easing, the spring and counts end on the real value");
+{
+  const steps = Array.from({ length: 101 }, (_, i) => i / 100);
+  for (const [name, f] of [["easeOut", easeOut], ["easeInOut", easeInOut], ["easeDrive", easeDrive], ["spring", spring]] as const) {
+    eq(`${name} starts at 0`, f(0), 0);
+    eq(`${name} ends at exactly 1`, f(1), 1);
+    eq(`${name} holds outside 0 to 1`, [f(-1), f(2)], [0, 1]);
+  }
+  for (const [name, f] of [["easeOut", easeOut], ["easeInOut", easeInOut], ["easeDrive", easeDrive]] as const) {
+    ok(`${name} never goes back`, steps.every((t, i) => i === 0 || f(t) >= f(steps[i - 1])));
+  }
+  ok("the spring passes 1 and comes back", Math.max(...steps.map(spring)) > 1.02 && Math.abs(spring(0.99) - 1) < 0.01);
+  ok("easeDrive is halfway at half time", Math.abs(easeDrive(0.5) - 0.5) < 1e-9);
+
+  eq("a count starts where it is told", countAt(0, 35000, 0), 0);
+  eq("a count ends on the value", countAt(0, 35000, 1), 35000);
+  eq("past the end: still the value", countAt(0, 35000, 1.4), 35000);
+  ok("a count shows whole numbers and never passes its value", steps.every((t) => Number.isInteger(countAt(0, 34999, t)) && countAt(0, 34999, t) <= 34999));
+  eq("a count can come down to a lower figure", [countAt(900, 300, 0), countAt(900, 300, 1)], [900, 300]);
+}
+
+console.log("\nMotion: bars, the needle and the odometer");
+{
+  eq("bars keep the figures' proportions", barScales([50000, 100000, 25000]), [0.5, 1, 0.25]);
+  eq("a missing figure has no bar", barScales([null, 100000, 0]), [0, 1, 0]);
+  eq("a small real figure is still seen", barScales([100, 100000, null])[0], 0.04);
+  eq("nothing to compare: no bars", barScales([null, null, null]), [0, 0, 0]);
+
+  eq("the price itself: straight up", gaugeAngle(799500, 799500), 0);
+  ok("a low guess leans left, a high one right", gaugeAngle(600000, 799500) < 0 && gaugeAngle(950000, 799500) > 0);
+  eq("far too low is pinned", gaugeAngle(100000, 799500), -GAUGE_SWING);
+  eq("far too high is pinned", gaugeAngle(5000000, 799500), GAUGE_SWING);
+  ok("a near miss still leans far enough to see", Math.abs(gaugeAngle(799600, 799500)) >= 8);
+  ok("further off leans further", gaugeAngle(700000, 799500) > gaugeAngle(500000, 799500));
+  eq("the words match the lean", [gaugeWord(1, 2), gaugeWord(2, 2), gaugeWord(3, 2)], ["low", "right", "high"]);
+  ok(
+    "every price the game offers leans the way it is off",
+    priceRounds(SALE, 7).every((r) => {
+      const price = SALE.find((c) => c.slug === r.slug)!.priceMinor;
+      return r.optionsMinor.every((o) => Math.sign(gaugeAngle(o, price)) === Math.sign(o - price) && Math.abs(gaugeAngle(o, price)) <= GAUGE_SWING);
+    }),
+  );
+
+  eq("an odometer shows the budget", odometerDigits(5000, 5), [0, 5, 0, 0, 0]);
+  eq("five wheels for $15,000", odometerDigits(15000, 5), [1, 5, 0, 0, 0]);
+  ok("every budget fits the wheels", BUDGETS_MAJOR.every((m) => Number(odometerDigits(m, 5).join("")) === m));
+}
+
+console.log("\nMotion: the map and the year");
+{
+  ok("every trip has a place on the map", TRIP_PLACES.every((p) => PLACE_COORDS[p.id] != null));
+  ok("no place on the map without a trip", Object.keys(PLACE_COORDS).every((id) => TRIP_PLACES.some((p) => p.id === id)));
+  for (const p of TRIP_PLACES) {
+    const crow = crowMiles(HOME_COORDS, PLACE_COORDS[p.id]);
+    // A road is longer than the straight line, and not twice as long.
+    ok(`${p.name}: the straight line (${Math.round(crow)} mi) fits the road (${p.miles} mi)`, crow < p.miles && crow > p.miles * 0.6);
+  }
+  const all = [HOME_COORDS, ...TRIP_PLACES.map((p) => PLACE_COORDS[p.id])];
+  const bounds = boundsOf(all);
+  const pts = all.map((c) => project(c, bounds));
+  ok("every place is inside the scene, clear of its edges", pts.every((p) => p.x >= 12 && p.x <= 88 && p.y >= 12 && p.y <= 88), pts);
+  const home = project(HOME_COORDS, bounds);
+  const dc = project(PLACE_COORDS["washington-dc"], bounds);
+  const asheville = project(PLACE_COORDS.asheville, bounds);
+  ok("north is up and east is right", dc.y < home.y && dc.x > home.x && asheville.x < home.x);
+
+  const r = route(home, dc);
+  eq("a route starts on Greensboro", routePoint(r, 0), home);
+  eq("and ends on the place", routePoint(r, 1), dc);
+  ok("it bows, like a road", Math.abs(routePoint(r, 0.5).y - (home.y + dc.y) / 2) > 1);
+  const dots = routeDots(r, 310);
+  ok("a route's dots run from one end to the other", dots[0].x === home.x && dots[dots.length - 1].x === dc.x && dots.length >= 9 && dots.length <= 35, dots.length);
+  ok("a longer trip has more dots", routeDots(r, 310).length > routeDots(r, 45).length);
+  ok("a longer trip takes longer to watch", TRIP_PLACES.every((p, i) => i === 0 || tripMs(p.miles) >= tripMs(TRIP_PLACES[i - 1].miles)));
+  ok("no trip moves by itself for 5 seconds", TRIP_PLACES.every((p) => tripMs(p.miles) >= 1300 && tripMs(p.miles) < 5000));
+
+  eq("a month is its number", [storyMonth("Month 3"), storyMonth("Month 12"), storyMonth("On the lot")], [3, 12, 0]);
+  const stops = storyStops(STORY_STEPS.map((s) => s.when));
+  eq("a stop for every moment of the story", stops.length, STORY_STEPS.length);
+  eq("the year starts at the start of the road", stops[0], 0);
+  eq("month 12 is the end of the road", stops[stops.length - 1], 1);
+  ok("the car only ever moves forward", stops.every((s, i) => i === 0 || s > stops[i - 1]), stops);
+}
+
+console.log("\nMotion: the page");
+{
+  eq("at the top: nothing read", readProgress(0, 4000, 800), 0);
+  eq("at the bottom: all read", readProgress(3200, 4000, 800), 1);
+  eq("halfway", readProgress(1600, 4000, 800), 0.5);
+  eq("a page with nothing to scroll is read", readProgress(0, 600, 800), 1);
+  eq("a bounce past the end stays at the end", readProgress(3400, 4000, 800), 1);
+
+  eq("the card across the middle of the screen", nearestToCenter([{ top: -200, bottom: 100 }, { top: 300, bottom: 500 }, { top: 600, bottom: 900 }], 800), 1);
+  eq("cards off screen don't count", nearestToCenter([{ top: -400, bottom: -10 }, { top: 900, bottom: 1200 }], 800), -1);
+  eq("no cards", nearestToCenter([], 800), -1);
+
+  eq("a pointer at the center: flat", tilt(100, 50, 200, 100), { rx: 0, ry: 0 });
+  eq("top left: leans up and left", tilt(0, 0, 200, 100), { rx: 5, ry: -5 });
+  eq("bottom right: the other way", tilt(200, 100, 200, 100), { rx: -5, ry: 5 });
+  eq("outside the card: no more than the corner", tilt(900, -50, 200, 100), { rx: 5, ry: 5 });
+
+  eq("money in a line", parseFigure("$1,200 a month"), { before: "$", value: 1200, after: " a month", commas: true });
+  eq("written back as it was", writeFigure(parseFigure("From $350 a week")!, 350), "From $350 a week");
+  eq("on the way up", writeFigure(parseFigure("$1,200 a month")!, 1010), "$1,010 a month");
+  eq("a count", parseFigure("9 cars")?.value, 9);
+  eq("a model year is not counted up", parseFigure("2014"), null);
+  eq("cents are left alone", parseFigure("$17.50"), null);
+  eq("no figure", parseFigure("Free"), null);
+  eq("a count starts most of the way there", countStart(350), 210);
+  ok("and keeps its number of digits, so the line keeps its length", [9, 12, 350, 1200, 5995, 15000].every((v) => String(countStart(v)).length === String(v).length && countStart(v) <= v));
+}
+
+console.log("\nMotion: each scene shows what its tool shows");
+{
+  for (const g of GUIDES) ok(`${g.meta.slug} has a scene`, sceneFor(g.meta.tool, DATA, "https://photos.test/a.jpg") != null);
+
+  const week = sceneFor("weeks", DATA, null);
+  if (week?.tool !== "weeks") throw new Error("no week scene");
+  const lowest = cheapestRental(RENT.filter((c) => c.image), 7)!;
+  eq("the week: the lowest-cost car for 7 days", week.car.name, lowest.car.name);
+  eq("its seven figures are the booking form's", week.days, [1, 2, 3, 4, 5, 6, 7].map((d) => { try { return quoteRental(lowest.car.tariff, d).hireMinor; } catch { return null; } }));
+  ok("the line under it names the week's price", week.caption.includes(cash(DATA, lowest.cost.rentMinor)), week.caption);
+
+  const lanes = sceneFor("three-way", DATA, null);
+  if (lanes?.tool !== "three-way") throw new Error("no lanes scene");
+  eq("the lanes: every length the tool offers", lanes.lengths.map((l) => l.key), LENGTHS.map((l) => l.key));
+  for (const l of LENGTHS) {
+    const f = threeWay({ rent: RENT, buyLowestMinor: buy.lowestMinor, tier: economy }, l.days);
+    const lane = lanes.lengths.find((x) => x.key === l.key)!;
+    eq(`${l.label}: the tool's three figures`, lane.values, { rent: f.rent?.cost.rentMinor ?? null, buy: f.buyMinor, own: f.own?.paidMinor ?? null });
+    eq(`${l.label}: the same lowest`, lane.lowest, f.lowest);
+  }
+  ok("the card's bars are today's proportions", cardBars(lanes)!.every((b) => b >= 0 && b <= 1) && Math.max(...cardBars(lanes)!) === 1);
+  eq("only that guide's card has bars", cardBars(week), null);
+
+  const budget = sceneFor("budget", DATA, null);
+  if (budget?.tool !== "budget") throw new Error("no budget scene");
+  eq("the budgets: the tool's counts", budget.budgets, BUDGETS_MAJOR.map((m) => ({ major: m, count: budgetBucket(SALE, m * 100).count })));
+  ok("its cars are in stock, lowest price first", budget.cars.every((c, i) => SALE.some((s) => s.name === c.name && s.priceMinor === c.priceMinor) && (i === 0 || c.priceMinor >= budget.cars[i - 1].priceMinor)));
+
+  const spots = sceneFor("checklist", DATA, null);
+  if (spots?.tool !== "checklist") throw new Error("no checklist scene");
+  eq("the checklist: its parts and their checks", spots.spots.map((s) => [s.title, s.checks]), CHECKLIST.map((g) => [g.title, g.checks.length]));
+  ok("the line under it counts every check", spots.caption.startsWith(`${ALL_CHECKS.length} checks in ${CHECKLIST.length} parts`), spots.caption);
+
+  const tag = sceneFor("price-game", DATA, null);
+  if (tag?.tool !== "price-game") throw new Error("no price scene");
+  ok("the price tag: a car the game could show, at its listed price", priceEligible(SALE).some((c) => c.name === tag.car.name && c.priceMinor === tag.car.priceMinor));
+
+  const year = sceneFor("cost-story", DATA, null);
+  if (year?.tool !== "cost-story") throw new Error("no story scene");
+  const pair = storyCars(SALE)!;
+  eq("the year: the story's own two cars", [year.cheap?.priceMinor, year.pricier?.priceMinor], [pair.cheap.priceMinor, pair.pricier.priceMinor]);
+  eq("a stop for each choice", year.stops.map((s) => s.when), STORY_STEPS.map((s) => s.when));
+
+  const stamp = sceneFor("recall-quiz", DATA, null);
+  eq("the stamp: the first card's explanation", stamp?.caption, RECALL_FACTS.find((f) => f.id === "free")!.why);
+  ok("which is that the fix is free", RECALL_FACTS.find((f) => f.id === "free")!.answer === false && /free/i.test(stamp!.caption));
+
+  const map = sceneFor("road-trip", DATA, null);
+  if (map?.tool !== "road-trip") throw new Error("no map scene");
+  eq("the map: every trip, with the tool's miles", map.places.map((p) => [p.id, p.miles]), TRIP_PLACES.map((p) => [p.id, p.miles]));
+  ok("it opens on a real trip", TRIP_PLACES.some((p) => p.id === map.start));
+
+  // With nothing in stock, a scene is left out or shows no car; it never invents one.
+  for (const tool of ["weeks", "budget", "price-game"] as const) eq(`${tool}: no stock, no scene`, sceneFor(tool, EMPTY, null), null);
+  eq("three ways with nothing to compare: no scene", sceneFor("three-way", EMPTY, null), null);
+  const bare = sceneFor("cost-story", EMPTY, null);
+  ok("the story with no stock: a road and no car", bare?.tool === "cost-story" && bare.cheap == null && bare.pricier == null);
+  const noCar = sceneFor("road-trip", EMPTY, null);
+  ok("the map with no fleet: the places and no car", noCar?.tool === "road-trip" && noCar.car == null && noCar.places.length === TRIP_PLACES.length);
+
+  const everyCaption = GUIDES.map((g) => sceneFor(g.meta.tool, DATA, null)?.caption ?? "");
+  ok("no scene's line sells", everyCaption.every((c) => c.length > 0 && !HYPE.test(c)), everyCaption);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

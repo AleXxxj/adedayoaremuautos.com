@@ -334,7 +334,7 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
           </li>
         </ol>
         <div className="ck-bar" aria-hidden="true">
-          <span style={{ width: `${Math.round(((score.total - score.left) / score.total) * 100)}%` }} />
+          <span style={{ transform: `scaleX(${((score.total - score.left) / score.total).toFixed(3)})` }} />
         </div>
         <p className="ck-tally" role="status" aria-live="polite">
           <span>
@@ -357,7 +357,7 @@ export function ChecklistTool({ groups, path }: { groups: CheckGroup[]; path: st
               Part {step + 1} of {groups.length}
             </span>
           </h3>
-          <ul className="ck-list">
+          <ul className="ck-list ck-list--in" key={group.id}>
             {group.checks.map((c) => (
               <li key={c.id} className="ck-item" data-answer={answers[c.id]}>
                 <p className="ck-label">{c.label}</p>

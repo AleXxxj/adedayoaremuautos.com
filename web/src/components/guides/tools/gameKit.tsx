@@ -115,8 +115,9 @@ export function Progress({ done, of, label }: { done: number; of: number; label:
   const pct = of > 0 ? Math.round((Math.min(done, of) / of) * 100) : 0;
   return (
     <div className="gm-progress">
+      {/* Scaled, not resized: the line flows to its new length without a layout. */}
       <div className="gm-progress-bar" aria-hidden="true">
-        <span style={{ width: `${pct}%` }} />
+        <span style={{ transform: `scaleX(${pct / 100})` }} />
       </div>
       <p className="gm-progress-text">{label}</p>
     </div>
@@ -180,6 +181,47 @@ export function CountUp({ value, format }: { value: number; format: (n: number) 
       <span className="gd-sr">{format(value)}</span>
     </>
   );
+}
+
+/* ── A photo that carries from one step to the next ────────────────────── */
+
+const allowsMotion = () =>
+  typeof window.matchMedia !== "function" || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Makes one picture seem to travel between two steps: call `take(el)` with
+ * the picture as it is now, just before the step changes, and put `ref` on
+ * the picture in the next step. The new one starts where the old one was and
+ * settles into its own place (a transform only; nothing else on the page
+ * moves). With reduced motion it is simply in its place.
+ */
+export function useCarry<T extends HTMLElement>(step: unknown) {
+  const ref = useRef<T>(null);
+  const from = useRef<DOMRect | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const a = from.current;
+    from.current = null;
+    if (!el || !a || !allowsMotion() || typeof el.animate !== "function") return;
+    const b = el.getBoundingClientRect();
+    if (!a.width || !b.width || !b.height) return;
+    el.animate(
+      [
+        {
+          transformOrigin: "top left",
+          transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`,
+        },
+        { transformOrigin: "top left", transform: "none" },
+      ],
+      { duration: 560, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+    );
+  }, [step]);
+  return {
+    ref,
+    take: (el: Element | null | undefined) => {
+      from.current = el ? el.getBoundingClientRect() : null;
+    },
+  };
 }
 
 /* ── A friend's result, from the link they sent ────────────────────────── */

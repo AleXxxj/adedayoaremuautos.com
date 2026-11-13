@@ -1,0 +1,2195 @@
+/*
+ * How the guides move (components/guides/motion/*), loaded after guides.css.
+ *
+ * Four parts, in this order:
+ *   sc-  a guide's scene: the moving picture under its title
+ *   gg-  the needle gauge (the price game's scene and its reveal)
+ *   gm-  motion inside the games: presses, steps arriving, a result's reveal
+ *   gd-  the page: blocks easing in, the reading line, the cards' lean
+ *   pv-  the small preview in the corner of a guide's card
+ *
+ * THE RULES THIS SHEET KEEPS.
+ *
+ * 1. Only transform and opacity are ever animated or transitioned, so no
+ *    frame lays the page out or repaints text. Colors change at once.
+ * 2. The resting state of everything is its LAST frame. Animations are
+ *    written as "from" keyframes that run backwards-filled into that state,
+ *    so with no animation (reduced motion, no JavaScript, an old browser)
+ *    the page shows the finished, informative picture.
+ * 3. Nothing loops on its own. A scene plays once and has a "play again"
+ *    button; a card's preview plays twice and stops.
+ * 4. Every scene has a fixed height from the first paint: no layout shift.
+ * 5. Color follows guides.css: white and silver on dark glass, one green
+ *    thing ("Lowest"), gold for money only.
+ *
+ * Every selector starts `.legacy-theme .…` (0,2,0 or more), like guides.css.
+ */
+
+/* A spring for things that are pressed, dealt or dropped: past the mark,
+   back, and at rest. Browsers without linear() get one overshoot. */
+.legacy-theme :is(.gd-page, .gd-cards) {
+    --gd-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --gd-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+    .legacy-theme :is(.gd-page, .gd-cards) {
+        --gd-spring: linear(
+            0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159,
+            1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%,
+            0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1.004 83.8%, 1
+        );
+    }
+}
+
+/* ── A scene's frame ──────────────────────────────────────────────────── */
+
+.legacy-theme .sc-slot {
+    /* The stage, the gap, and two lines of caption: held before the scene's own bundle arrives. */
+    min-height: calc(var(--sc-h) + 50px);
+    --sc-h: 184px;
+    --sc-car-w: 92px;
+}
+
+.legacy-theme .sc {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin: 0;
+}
+
+.legacy-theme .sc-stage {
+    position: relative;
+    height: var(--sc-h);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 62%),
+        var(--surface-1);
+    color: var(--text-primary);
+    /* Its own layer and its own box: a play never repaints the page around it. */
+    contain: layout paint;
+    isolation: isolate;
+}
+
+.legacy-theme .sc-stage p {
+    margin: 0;
+}
+
+/* Until the browser has decided whether to play, the stage is held back, so
+   a visitor never sees the last frame jump to the first. Only where scripts
+   run and motion is allowed; and if the script never arrives, the stage
+   shows itself after four seconds. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .legacy-theme .sc[data-wait] .sc-stage > * {
+        animation: sc-late 1ms linear 4s backwards;
+    }
+}
+
+@keyframes sc-late {
+    from {
+        opacity: 0;
+    }
+}
+
+/* Off screen: every animation in the scene waits. */
+.legacy-theme .sc[data-off] .sc-stage *,
+.legacy-theme .sc[data-off] .sc-stage *::before,
+.legacy-theme .sc[data-off] .sc-stage *::after {
+    animation-play-state: paused;
+}
+
+.legacy-theme .sc-cap {
+    min-height: 40px;
+    padding-right: 48px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sc-replay {
+    position: absolute;
+    right: -4px;
+    bottom: -2px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 15px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 480ms var(--gd-spring);
+}
+
+.legacy-theme .sc-replay::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+}
+
+.legacy-theme .sc-replay:hover {
+    color: var(--text-primary);
+}
+
+.legacy-theme .sc-replay:active {
+    transform: rotate(90deg) scale(0.92);
+    transition-duration: 90ms;
+}
+
+.legacy-theme .sc-replay:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -3px;
+}
+
+/* A real car from stock: a small photo with a hard edge and weight under it. */
+.legacy-theme .sc-car {
+    position: relative;
+    display: block;
+    width: var(--sc-car-w);
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    background: var(--surface-2);
+    transform-origin: 50% 100%;
+}
+
+.legacy-theme .sc-car img {
+    object-fit: cover;
+}
+
+.legacy-theme .sc-money {
+    color: var(--accent-400);
+}
+
+/* A small label in the corner of a stage: the length, the moment. */
+.legacy-theme .sc-chip {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+    padding: 4px 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: rgba(7, 12, 10, 0.7);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sc[data-run] .sc-chip {
+    animation: sc-rise 320ms var(--gd-out) backwards;
+}
+
+@keyframes sc-rise {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@keyframes sc-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+}
+
+@keyframes sc-ping {
+    from {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2.4);
+    }
+}
+
+/* ── Scene: a week of renting ── */
+
+.legacy-theme .sc-week {
+    position: absolute;
+    inset: 0;
+}
+
+.legacy-theme .sc-days {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.legacy-theme .sc-day {
+    display: grid;
+    justify-items: center;
+    padding: 4px 0 5px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.1;
+    opacity: 0.26;
+    transform: translateY(3px) scale(0.94);
+    transition:
+        opacity 200ms ease-out,
+        transform 420ms var(--gd-spring);
+}
+
+.legacy-theme .sc-day small {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sc-day[data-on] {
+    opacity: 1;
+    transform: none;
+}
+
+.legacy-theme .sc-week-read {
+    position: absolute;
+    top: 60px;
+    left: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sc-week-figure {
+    min-width: 3ch;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .sc-road {
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+    left: 0;
+    height: 2px;
+    background: var(--border-strong);
+}
+
+/* The lane marks slide back a little as the car moves on: the ground goes by. */
+.legacy-theme .sc-road-marks {
+    position: absolute;
+    top: 9px;
+    right: -60px;
+    left: 0;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--border-default) 0 14px, transparent 14px 30px);
+}
+
+.legacy-theme .sc-track {
+    position: absolute;
+    right: 10px;
+    bottom: 22px;
+    left: 10px;
+    height: 62px;
+    pointer-events: none;
+}
+
+.legacy-theme .sc-track .sc-car {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+/* The car's shadow on the road. */
+.legacy-theme :is(.sc-track, .sc-year-track)::before {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 6px;
+    width: calc(var(--sc-car-w) - 12px);
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    filter: blur(4px);
+}
+
+/* Headlights: a soft wedge of light ahead of the car. */
+.legacy-theme .sc-beam {
+    position: absolute;
+    bottom: 3px;
+    left: calc(var(--sc-car-w) - 2px);
+    width: 84px;
+    height: 30px;
+    background: linear-gradient(90deg, rgba(255, 244, 214, 0.3), transparent);
+    clip-path: polygon(0 42%, 100% 0, 100% 100%, 0 72%);
+}
+
+/* ── Scene: three lanes ── */
+
+.legacy-theme .sc-lanes {
+    position: absolute;
+    inset: 44px 14px 12px;
+    display: grid;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.legacy-theme .sc-lane {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: center;
+    gap: 5px 10px;
+}
+
+.legacy-theme .sc-lane-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.legacy-theme .sc-lane-name i {
+    width: 16px;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* The one green thing in the scene. */
+.legacy-theme .sc-lane-name em {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--brand-300);
+    color: var(--surface-0);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.legacy-theme .sc-lane-figure {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .sc-lane-road {
+    position: relative;
+    grid-column: 1 / -1;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-2);
+}
+
+/* As wide as the lane and slid in from the left by its share (--p), so its
+   bright tip travels like a headlight and no width is ever animated. */
+.legacy-theme .sc-lane-bar {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(241, 246, 243, 0.18), var(--text-primary));
+    transform: translateX(calc((var(--p) - 1) * 100%));
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.legacy-theme .sc-lane[data-lowest] .sc-lane-bar {
+    background: linear-gradient(90deg, rgba(95, 199, 145, 0.15), var(--brand-300));
+}
+
+.legacy-theme .sc[data-run] .sc-lane-bar {
+    animation: sc-lane-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i) * 120ms) backwards;
+}
+
+@keyframes sc-lane-in {
+    from {
+        transform: translateX(-100%);
+    }
+}
+
+/* ── Scene: an odometer and the cars it reaches ── */
+
+.legacy-theme .sc-budget-top {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    left: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.legacy-theme .sc-odo {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent-400);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .sc-odo-unit {
+    margin-right: 3px;
+}
+
+.legacy-theme .sc-odo-cell {
+    display: flex;
+    align-items: flex-end;
+}
+
+.legacy-theme .sc-odo-comma {
+    padding: 0 1px;
+}
+
+/* One wheel: a window one digit high onto a strip of ten, shaded top and bottom like a drum. */
+.legacy-theme .sc-wheel {
+    display: block;
+    width: 0.76em;
+    height: 1.3em;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    background: var(--surface-0);
+    box-shadow:
+        inset 0 7px 6px -5px rgba(0, 0, 0, 0.9),
+        inset 0 -7px 6px -5px rgba(0, 0, 0, 0.9);
+}
+
+.legacy-theme .sc-wheel[data-lead] {
+    opacity: 0.3;
+}
+
+.legacy-theme .sc-wheel-strip {
+    display: block;
+    height: 1000%;
+    transition: transform 1000ms cubic-bezier(0.2, 0.9, 0.25, 1) calc(var(--i) * 70ms);
+}
+
+.legacy-theme .sc-wheel-strip span {
+    display: grid;
+    place-items: center;
+    height: 10%;
+}
+
+.legacy-theme .sc[data-run] .sc-wheel-strip {
+    animation: sc-wheel-in 1300ms cubic-bezier(0.2, 0.9, 0.25, 1) calc(var(--i) * 90ms) backwards;
+}
+
+@keyframes sc-wheel-in {
+    from {
+        transform: translateY(-90%);
+    }
+}
+
+.legacy-theme .sc-budget-count {
+    display: grid;
+    justify-items: end;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.legacy-theme .sc-budget-count strong {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .sc-lot {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+/* Out of reach: small and faint at the back of the lot. In reach: forward and lit. */
+.legacy-theme .sc-lot-car {
+    opacity: 0.24;
+    transform: translateY(8px) scale(0.88);
+    transition:
+        opacity 320ms ease-out calc(var(--i) * 60ms),
+        transform 560ms var(--gd-spring) calc(var(--i) * 60ms);
+}
+
+.legacy-theme .sc-lot-car[data-in] {
+    opacity: 1;
+    transform: none;
+}
+
+.legacy-theme .sc-lot-car .sc-car {
+    width: 100%;
+}
+
+.legacy-theme .sc-lot-car:nth-child(n + 5) {
+    display: none;
+}
+
+.legacy-theme .sc[data-run] .sc-lot-car {
+    animation: sc-lot-in 620ms var(--gd-out) calc(300ms + var(--i) * 90ms) backwards;
+}
+
+@keyframes sc-lot-in {
+    from {
+        opacity: 0;
+        transform: translateX(46px) scale(0.88);
+    }
+}
+
+/* ── Scene: a car and the parts to check ── */
+
+.legacy-theme .sc-spots-photo {
+    object-fit: cover;
+}
+
+/* Shading, so the marks and the readout are clear on a white car in bright sun. */
+.legacy-theme .sc--spots .sc-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(7, 12, 10, 0.92), rgba(7, 12, 10, 0.2) 55%, rgba(7, 12, 10, 0.4));
+}
+
+/* A band of light crosses the car once, like a torch run along the paint. */
+.legacy-theme .sc-sweep {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    width: 34%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    opacity: 0;
+}
+
+.legacy-theme .sc[data-run] .sc-sweep {
+    animation: sc-sweep 1400ms ease-in-out 100ms;
+}
+
+@keyframes sc-sweep {
+    from {
+        opacity: 1;
+        transform: translateX(-120%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(420%);
+    }
+}
+
+.legacy-theme .sc-spot {
+    position: absolute;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1.5px solid var(--text-primary);
+    border-radius: 50%;
+    background: rgba(7, 12, 10, 0.74);
+    font-size: 13px;
+}
+
+.legacy-theme .sc-spot::after {
+    content: "";
+    position: absolute;
+    inset: -1.5px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.legacy-theme .sc[data-run] .sc-spot {
+    animation: sc-pop 420ms var(--gd-spring) calc(500ms + var(--i) * 640ms) backwards;
+}
+
+.legacy-theme .sc[data-run] .sc-spot::after {
+    animation: sc-ping 900ms ease-out calc(620ms + var(--i) * 640ms);
+}
+
+.legacy-theme .sc-readout {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    left: 14px;
+    z-index: 1;
+    height: 22px;
+}
+
+.legacy-theme .sc-readout p {
+    position: absolute;
+    inset: 0;
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.legacy-theme .sc-readout strong {
+    margin-right: 6px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.legacy-theme .sc-readout .sc-readout-last {
+    opacity: 1;
+}
+
+.legacy-theme .sc[data-run] .sc-readout p {
+    animation: sc-read 640ms ease-out calc(500ms + var(--i) * 640ms) both;
+}
+
+.legacy-theme .sc[data-run] .sc-readout .sc-readout-last {
+    animation: sc-rise 420ms ease-out calc(500ms + var(--i) * 640ms) backwards;
+}
+
+@keyframes sc-read {
+    0% {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    20%,
+    80% {
+        opacity: 1;
+        transform: none;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+/* ── Scene: cards dealt and turned over ── */
+
+.legacy-theme .sc-deal {
+    position: absolute;
+    inset: 0;
+    perspective: 800px;
+}
+
+/* --o is the card's place in the fan: -1, 0, 1. */
+.legacy-theme .sc-deal-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 27%;
+    max-width: 150px;
+    aspect-ratio: 4 / 5;
+    transform: translate(-50%, -50%) translateX(calc(var(--o) * 112%)) rotate(calc(var(--o) * 5deg));
+    transform-style: preserve-3d;
+}
+
+.legacy-theme .sc[data-run] .sc-deal-card {
+    animation: sc-deal 640ms cubic-bezier(0.2, 0.9, 0.3, 1.15) calc(var(--i) * 130ms) backwards;
+}
+
+@keyframes sc-deal {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(150%) rotate(-18deg) scale(0.8);
+    }
+}
+
+.legacy-theme .sc-flip {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: rotateY(180deg);
+    transform-style: preserve-3d;
+}
+
+.legacy-theme .sc[data-run] .sc-deal .sc-flip {
+    animation: sc-flip 760ms cubic-bezier(0.3, 0.1, 0.2, 1) calc(900ms + var(--i) * 240ms) backwards;
+}
+
+@keyframes sc-flip {
+    from {
+        transform: rotateY(0deg);
+    }
+}
+
+.legacy-theme .sc-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 6px;
+    padding: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    background: var(--surface-2);
+    box-shadow: 0 14px 24px -12px rgba(0, 0, 0, 0.85);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+    backface-visibility: hidden;
+}
+
+.legacy-theme .sc-face--ask i {
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme :is(.sc-face--car, .sc-face--price) {
+    transform: rotateY(180deg);
+}
+
+.legacy-theme .sc-face--car {
+    padding: 0;
+}
+
+.legacy-theme .sc-face--car .sc-car {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+}
+
+.legacy-theme .sc-face--car > span:last-child {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 16px 6px 6px;
+    overflow: hidden;
+    background: linear-gradient(transparent, rgba(7, 12, 10, 0.92));
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Scene: a price tag and a needle ── */
+
+.legacy-theme .sc--tag .sc-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+}
+
+.legacy-theme .sc-tag-car {
+    position: relative;
+    max-width: 230px;
+}
+
+.legacy-theme .sc-tag-car > .sc-car {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 14px;
+}
+
+/* The tag hangs from its corner, swings when it is turned, and comes to rest. */
+.legacy-theme .sc-tag {
+    position: absolute;
+    right: -8px;
+    bottom: -8px;
+    width: 98px;
+    height: 38px;
+    perspective: 500px;
+    transform: rotate(-4deg);
+    transform-origin: 8% 0;
+}
+
+.legacy-theme .sc-tag .sc-face {
+    padding: 0 8px 0 16px;
+    border-radius: 8px;
+    background: var(--surface-0);
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* The hole the string goes through. */
+.legacy-theme .sc-tag .sc-face::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 6px;
+    width: 5px;
+    height: 5px;
+    margin-top: -2.5px;
+    border-radius: 50%;
+    background: var(--border-strong);
+}
+
+.legacy-theme .sc[data-run] .sc-tag {
+    animation: sc-swing 1500ms ease-in-out 1150ms backwards;
+}
+
+@keyframes sc-swing {
+    0% {
+        transform: rotate(-4deg);
+    }
+    18% {
+        transform: rotate(8deg);
+    }
+    42% {
+        transform: rotate(-10deg);
+    }
+    68% {
+        transform: rotate(-1deg);
+    }
+    100% {
+        transform: rotate(-4deg);
+    }
+}
+
+.legacy-theme .sc[data-run] .sc-tag .sc-flip {
+    animation: sc-flip 620ms cubic-bezier(0.3, 0.1, 0.2, 1) 1250ms backwards;
+}
+
+.legacy-theme .sc--tag .gg {
+    justify-self: center;
+    max-width: 170px;
+}
+
+/* ── The needle gauge ─────────────────────────────────────────────────── */
+
+.legacy-theme .gg {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+}
+
+.legacy-theme .gg-dial {
+    position: relative;
+    display: block;
+    aspect-ratio: 140 / 80;
+}
+
+.legacy-theme .gg svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.legacy-theme .gg-arc,
+.legacy-theme .gg-mid {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-linecap: round;
+    stroke-width: 5;
+}
+
+.legacy-theme .gg-mid {
+    stroke: var(--text-primary);
+}
+
+.legacy-theme .gg-tick {
+    stroke: var(--text-secondary);
+    stroke-width: 1.5;
+}
+
+/* Pivots at the hub (70, 72 in the dial's 140 by 80), and is 50 long. */
+.legacy-theme .gg-needle {
+    position: absolute;
+    top: 27.5%;
+    left: 50%;
+    width: 3px;
+    height: 62.5%;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: linear-gradient(to top, var(--text-primary) 70%, var(--accent-400));
+    transform: rotate(var(--a, 0deg));
+    transform-origin: 50% 100%;
+}
+
+.legacy-theme .gg-hub {
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border: 2px solid var(--surface-1);
+    border-radius: 50%;
+    background: var(--text-primary);
+}
+
+.legacy-theme .gg-ends {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* In the game: the needle starts at "too low" and springs to where the guess was. */
+.legacy-theme .gm-reveal .gg-needle {
+    animation: gg-settle 1000ms var(--gd-spring) backwards;
+}
+
+@keyframes gg-settle {
+    from {
+        transform: rotate(-70deg);
+    }
+}
+
+/* In the scene: end to end, then smaller and smaller swings onto the price. */
+.legacy-theme .sc[data-run] .gg[data-sweep] .gg-needle {
+    animation: gg-sweep 2700ms ease-in-out backwards;
+}
+
+@keyframes gg-sweep {
+    0%,
+    6% {
+        transform: rotate(-70deg);
+    }
+    44% {
+        transform: rotate(70deg);
+    }
+    58% {
+        transform: rotate(-30deg);
+    }
+    70% {
+        transform: rotate(16deg);
+    }
+    81% {
+        transform: rotate(-7deg);
+    }
+    91% {
+        transform: rotate(3deg);
+    }
+    100% {
+        transform: rotate(var(--a, 0deg));
+    }
+}
+
+/* ── Scene: a year on a road ── */
+
+.legacy-theme .sc-year-car {
+    position: absolute;
+    top: 42px;
+    right: 14px;
+    left: 14px;
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+    animation: sc-rise 320ms var(--gd-out) backwards;
+}
+
+.legacy-theme .sc-year-car span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.legacy-theme .sc-year-car strong {
+    font-weight: 800;
+}
+
+.legacy-theme .sc-year {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    left: 16px;
+    height: 100px;
+    --sc-car-w: 68px;
+}
+
+.legacy-theme .sc-year-road {
+    position: absolute;
+    right: 0;
+    bottom: 26px;
+    left: 0;
+    height: 2px;
+    background: var(--border-strong);
+    transform-origin: left;
+}
+
+.legacy-theme .sc[data-run] .sc-year-road {
+    animation: sc-draw 800ms cubic-bezier(0.3, 0, 0.2, 1) backwards;
+}
+
+@keyframes sc-draw {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+/* --at is a place along the year, 0 to 1. The car is over a stop when they share it. */
+.legacy-theme :is(.sc-year-tick, .sc-year-stop, .sc-year-label) {
+    position: absolute;
+    left: calc(var(--sc-car-w) / 2 + (100% - var(--sc-car-w)) * var(--at));
+}
+
+.legacy-theme .sc-year-tick {
+    bottom: 21px;
+    width: 1px;
+    height: 5px;
+    background: var(--border-strong);
+}
+
+.legacy-theme .sc-year-stop {
+    bottom: 21px;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 50%;
+    background: var(--surface-1);
+}
+
+.legacy-theme .sc-year-stop::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.legacy-theme .sc-year-stop[data-done] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+}
+
+.legacy-theme .sc-year-stop[data-done]::after {
+    animation: sc-ping 760ms ease-out 700ms;
+}
+
+.legacy-theme .sc[data-run] .sc-year-stop {
+    animation: sc-pop 380ms var(--gd-spring) calc(500ms + var(--i) * 90ms) backwards;
+}
+
+.legacy-theme .sc-year-label {
+    bottom: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.legacy-theme .sc-year-track {
+    position: absolute;
+    right: 0;
+    bottom: 36px;
+    left: 0;
+    height: 46px;
+    transform: translateX(calc((100% - var(--sc-car-w)) * var(--at)));
+    transition: transform 1100ms cubic-bezier(0.45, 0.05, 0.2, 1);
+}
+
+.legacy-theme .sc-year-track .sc-car {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.legacy-theme .sc-car--none {
+    border-style: dashed;
+}
+
+.legacy-theme .sc[data-run] .sc-year-track {
+    animation: sc-roll-in 900ms var(--gd-out) 300ms backwards;
+}
+
+@keyframes sc-roll-in {
+    from {
+        opacity: 0;
+        transform: translateX(-140px);
+    }
+}
+
+/* ── Scene: a notice and two stamps ── */
+
+.legacy-theme .sc--stamp .sc-stage {
+    display: grid;
+    place-items: center;
+}
+
+/* Paper: the one light thing on a dark stage. */
+.legacy-theme .sc-notice {
+    position: relative;
+    width: min(76%, 320px);
+    padding: 14px 16px 18px;
+    border-radius: 8px;
+    background: #e9eeea;
+    box-shadow: 0 20px 30px -14px rgba(0, 0, 0, 0.95);
+    color: #0b1410;
+    transform: rotate(-2deg);
+}
+
+.legacy-theme .sc[data-run] .sc-notice {
+    animation:
+        sc-drop 520ms cubic-bezier(0.2, 0.9, 0.3, 1.1) backwards,
+        sc-jolt 260ms ease-out 620ms,
+        sc-jolt 260ms ease-out 1980ms;
+}
+
+@keyframes sc-drop {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) rotate(-7deg);
+    }
+}
+
+/* The desk gives a little under the stamp. */
+@keyframes sc-jolt {
+    30% {
+        transform: rotate(-2deg) translateY(3px) scale(0.985);
+    }
+}
+
+.legacy-theme .sc-notice-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.legacy-theme .sc-notice-line {
+    display: block;
+    height: 6px;
+    margin-top: 9px;
+    border-radius: 3px;
+    background: currentColor;
+    opacity: 0.16;
+}
+
+.legacy-theme .sc-notice-line--short {
+    width: 58%;
+}
+
+.legacy-theme .sc-notice-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 0.5fr);
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.legacy-theme .sc-notice-row .sc-notice-line {
+    margin-top: 0;
+}
+
+.legacy-theme .sc-stamp {
+    position: absolute;
+    padding: 3px 9px;
+    border: 3px solid currentColor;
+    border-radius: 6px;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Ink on paper, so the light theme's ink colors: a red and the brand's dark green. */
+.legacy-theme .sc-stamp--open {
+    top: 30%;
+    right: 6%;
+    color: #b3251a;
+    opacity: 0.28;
+    transform: rotate(-11deg);
+}
+
+.legacy-theme .sc-stamp--fixed {
+    right: 5%;
+    bottom: 9%;
+    color: var(--brand-700);
+    font-size: 19px;
+    transform: rotate(7deg);
+}
+
+.legacy-theme .sc[data-run] .sc-stamp--open {
+    animation: sc-press-open 2000ms linear 400ms backwards;
+}
+
+@keyframes sc-press-open {
+    0% {
+        opacity: 0;
+        transform: rotate(-11deg) scale(2.4);
+        animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4);
+    }
+    11%,
+    66% {
+        opacity: 0.95;
+        transform: rotate(-11deg) scale(1);
+    }
+    100% {
+        opacity: 0.28;
+        transform: rotate(-11deg) scale(1);
+    }
+}
+
+.legacy-theme .sc[data-run] .sc-stamp--fixed {
+    animation: sc-press 240ms cubic-bezier(0.6, 0, 0.9, 0.4) 1760ms backwards;
+}
+
+@keyframes sc-press {
+    from {
+        opacity: 0;
+        transform: rotate(7deg) scale(2.6);
+    }
+}
+
+/* ── Scene: the trips as a map ── */
+
+/* A faint grid, like the lines on a road atlas. */
+.legacy-theme .sc--map .sc-stage {
+    background:
+        linear-gradient(var(--border-subtle) 1px, transparent 1px) 0 0 / 100% 25%,
+        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px) 0 0 / 12.5% 100%,
+        var(--surface-1);
+}
+
+.legacy-theme .sc-map {
+    position: absolute;
+    inset: 8px 14px 36px;
+}
+
+.legacy-theme .sc-map-north {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    display: grid;
+    justify-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text-muted);
+}
+
+.legacy-theme .sc-map-north::before {
+    content: "";
+    border: 4px solid transparent;
+    border-top: 0;
+    border-bottom: 6px solid currentColor;
+    margin-bottom: 2px;
+}
+
+.legacy-theme .sc-map-place {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    opacity: 0.75;
+}
+
+.legacy-theme .sc-map-place[data-on] {
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    background: var(--text-primary);
+    box-shadow: 0 0 0 4px rgba(241, 246, 243, 0.16);
+    opacity: 1;
+}
+
+.legacy-theme .sc-map-home {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    background: var(--surface-0);
+}
+
+.legacy-theme .sc-map-home em {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.legacy-theme .sc-map-dot {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    margin: -1.5px 0 0 -1.5px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
+}
+
+.legacy-theme .sc-map-dot[data-on] {
+    opacity: 0.85;
+}
+
+/* As large as the map and moved by percentages of itself, so the car's place
+   is a transform and nothing else. The car rides just above its point. */
+.legacy-theme .sc-map-mark {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.legacy-theme .sc-map-mark .sc-car {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 44px;
+    margin: -36px 0 0 -22px;
+    border-radius: 7px;
+    box-shadow: 0 8px 12px -4px rgba(0, 0, 0, 0.95);
+}
+
+.legacy-theme .sc-map-pin {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border: 3px solid var(--surface-0);
+    border-radius: 50%;
+    background: var(--text-primary);
+}
+
+.legacy-theme .sc-map-read {
+    position: absolute;
+    right: 14px;
+    bottom: 9px;
+    left: 14px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .sc-map-read > span {
+    overflow: hidden;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.legacy-theme .sc-map-read strong {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.legacy-theme .sc-map-miles {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Scenes on wider screens ── */
+
+@media (min-width: 560px) {
+    .legacy-theme .sc-lot {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .legacy-theme .sc-lot-car:nth-child(n + 5) {
+        display: block;
+    }
+}
+
+@media (min-width: 700px) {
+    .legacy-theme .sc-slot {
+        --sc-h: 236px;
+        --sc-car-w: 116px;
+    }
+
+    .legacy-theme .sc-track {
+        height: 78px;
+    }
+
+    .legacy-theme .sc-week-read {
+        top: 66px;
+    }
+
+    .legacy-theme .sc-week-figure,
+    .legacy-theme .sc-odo {
+        font-size: 36px;
+    }
+
+    .legacy-theme .sc-lanes {
+        inset: 52px 20px 18px;
+    }
+
+    .legacy-theme .sc-lane-road {
+        height: 8px;
+    }
+
+    .legacy-theme .sc-lane-figure {
+        font-size: 19px;
+    }
+
+    .legacy-theme .sc-year {
+        height: 124px;
+        --sc-car-w: 92px;
+    }
+
+    .legacy-theme .sc-year-track {
+        height: 62px;
+    }
+
+    .legacy-theme .sc-stamp--fixed {
+        font-size: 24px;
+    }
+
+    .legacy-theme .sc-map-mark .sc-car {
+        width: 56px;
+        margin: -44px 0 0 -28px;
+    }
+}
+
+/* ── Inside the games ─────────────────────────────────────────────────── */
+
+/* A press gives, and springs back when let go. */
+.legacy-theme .gd-page :is(.gt-chip, .gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gd-btn, .gd-share-btn, .ck-btn, .ck-step, .gt-more) {
+    transition:
+        transform 480ms var(--gd-spring),
+        background-color 180ms ease-out,
+        border-color 180ms ease-out,
+        color 180ms ease-out,
+        opacity 180ms ease-out;
+}
+
+.legacy-theme .gd-page :is(.gt-chip, .gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gd-btn, .gd-share-btn, .ck-btn, .ck-step, .gt-more):not([aria-disabled="true"]):active {
+    transform: scale(0.955);
+    transition-duration: 90ms, 180ms, 180ms, 180ms, 180ms;
+    transition-timing-function: ease-out;
+}
+
+/* What was just chosen answers with a small bounce. */
+.legacy-theme .gd-page :is(.gt-chip, .gm-choice, .gm-price, .gm-place, .ck-btn)[aria-pressed="true"] {
+    animation: gm-pop 420ms var(--gd-spring);
+}
+
+@keyframes gm-pop {
+    from {
+        transform: scale(0.93);
+    }
+}
+
+/* A new step arrives from the side it is going to. */
+.legacy-theme .gm-in {
+    animation: gm-in 380ms var(--gd-out) backwards;
+}
+
+.legacy-theme :is(.gm-pair, .gm-prices).gm-in {
+    animation-delay: 70ms;
+}
+
+@keyframes gm-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+@keyframes gm-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+/* Answers, rows and cars are dealt one after another. */
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > * {
+    animation: gm-rise 420ms var(--gd-out) backwards;
+}
+
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > :nth-child(2) {
+    animation-delay: 50ms;
+}
+
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > :nth-child(3) {
+    animation-delay: 100ms;
+}
+
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > :nth-child(4) {
+    animation-delay: 150ms;
+}
+
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > :nth-child(5) {
+    animation-delay: 200ms;
+}
+
+.legacy-theme :is(.gm-deal, .gt-rows--in, .gd-cars--in, .ck-list--in) > :nth-child(n + 6) {
+    animation-delay: 250ms;
+}
+
+/* Each round's car drives in. The frame stays; only the picture moves. */
+.legacy-theme .gm-photo {
+    overflow: hidden;
+}
+
+.legacy-theme .gm-photo--in img {
+    animation: gm-photo-in 560ms var(--gd-out) backwards;
+}
+
+@keyframes gm-photo-in {
+    from {
+        opacity: 0;
+        transform: translateX(34px) scale(1.06);
+    }
+}
+
+/* The price game's reveal: the needle beside the words. Its height is held, so the buttons below don't jump. */
+.legacy-theme .gm-reveal--gauge:not(:empty) {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    animation: gm-rise 320ms var(--gd-out) backwards;
+}
+
+/* A true-or-false card is dealt, and takes its stamp. */
+.legacy-theme .gm-card {
+    position: relative;
+}
+
+.legacy-theme .gm-card--in {
+    animation: gm-card-in 480ms var(--gd-spring) backwards;
+}
+
+.legacy-theme .gm-card--in[data-flipped] {
+    animation:
+        gm-card-in 480ms var(--gd-spring) backwards,
+        gm-card-press 280ms ease-out 200ms;
+}
+
+@keyframes gm-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) rotate(1.5deg);
+    }
+}
+
+@keyframes gm-card-press {
+    30% {
+        transform: translateY(3px) scale(0.985);
+    }
+}
+
+.legacy-theme .gm-stamp {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 2px 9px;
+    border: 3px solid currentColor;
+    border-radius: 6px;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--warning);
+    transform: rotate(7deg);
+    animation: gm-stamp 240ms cubic-bezier(0.6, 0, 0.9, 0.4) backwards;
+}
+
+.legacy-theme .gm-stamp[data-right] {
+    color: var(--text-primary);
+}
+
+@keyframes gm-stamp {
+    from {
+        opacity: 0;
+        transform: rotate(7deg) scale(2.6);
+    }
+}
+
+/* A result lifts into place, its lines follow, and a band of light crosses it once. */
+.legacy-theme :is(.gm-result, .ck-result) {
+    position: relative;
+    overflow: hidden;
+    animation: gm-lift 640ms var(--gd-spring) backwards;
+}
+
+@keyframes gm-lift {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+}
+
+.legacy-theme :is(.gm-result, .ck-result)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    pointer-events: none;
+    animation: gm-sweep 1100ms ease-out 280ms;
+}
+
+@keyframes gm-sweep {
+    from {
+        opacity: 1;
+        transform: translateX(-130%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(330%);
+    }
+}
+
+.legacy-theme .gm-result > * {
+    animation: gm-rise 420ms var(--gd-out) 120ms backwards;
+}
+
+.legacy-theme .gm-result > :nth-child(2) {
+    animation-delay: 180ms;
+}
+
+.legacy-theme .gm-result > :nth-child(3) {
+    animation-delay: 240ms;
+}
+
+.legacy-theme .gm-result > :nth-child(4) {
+    animation-delay: 300ms;
+}
+
+.legacy-theme .gm-result > :nth-child(n + 5) {
+    animation-delay: 360ms;
+}
+
+/* The story: the car that was chosen, carried up from the pair (gameKit.useCarry). */
+.legacy-theme .gm-mycar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .gm-mycar-photo {
+    position: relative;
+    flex: none;
+    width: 68px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .gm-mycar-photo img {
+    object-fit: cover;
+}
+
+.legacy-theme .gm-mycar strong {
+    display: block;
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-primary);
+}
+
+/* ── The page as it is scrolled ───────────────────────────────────────── */
+
+/* Set by ScrollLife, and only on blocks below the first screen: without the
+   script nothing is ever hidden. */
+.legacy-theme .gd-page [data-reveal="wait"] {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+.legacy-theme .gd-page [data-reveal="in"] {
+    transition:
+        opacity 520ms ease-out,
+        transform 640ms var(--gd-out);
+}
+
+/* How far down the guide the reader is: a thin line under the fixed header. */
+.legacy-theme .gd-read {
+    position: fixed;
+    top: 74px;
+    right: 0;
+    left: 0;
+    z-index: 40;
+    height: 3px;
+    pointer-events: none;
+}
+
+.legacy-theme .gd-read span {
+    display: block;
+    height: 100%;
+    background: var(--text-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+@media (min-width: 700px) {
+    .legacy-theme .gd-read {
+        top: 90px;
+    }
+}
+
+/* ── The cards on the index ───────────────────────────────────────────── */
+
+/* With a mouse, a card leans toward the pointer (CardMotion sets --rx and
+   --ry, a few degrees) and its photo drifts the other way. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .legacy-theme .gd-page .gd-cards > li {
+        perspective: 900px;
+    }
+
+    .legacy-theme .gd-page .gd-card {
+        transform: rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg));
+        transition:
+            transform 260ms ease-out,
+            border-color 180ms ease-out;
+    }
+
+    .legacy-theme .gd-page .gd-card-photo {
+        overflow: hidden;
+    }
+
+    .legacy-theme .gd-page .gd-card-photo img {
+        transition: transform 420ms ease-out;
+    }
+
+    .legacy-theme .gd-page .gd-card:hover .gd-card-photo img {
+        transform: scale(1.06) translate(calc(var(--ry, 0) * -1.2px), calc(var(--rx, 0) * 1.2px));
+    }
+}
+
+/* ── A card's preview (pv-) ───────────────────────────────────────────────
+ *
+ * A sketch of the guide's scene on dark glass, in the corner of the photo.
+ * Still by default. It plays twice (2.4 seconds each) while the card is
+ * hovered, focused, or the one CardMotion marks as nearest the middle of a
+ * touch screen.
+ */
+
+.legacy-theme .pv {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 1;
+    display: block;
+    width: 84px;
+    height: 36px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    background: rgba(7, 12, 10, 0.82);
+    color: var(--text-primary);
+}
+
+.legacy-theme .pv :is(i, b, em) {
+    display: block;
+    font-style: normal;
+}
+
+/* Marks in a row along the bottom: days, months, cars on a lot. */
+.legacy-theme :is(.pv--weeks, .pv--cost-story, .pv--budget) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 9px 8px;
+}
+
+.legacy-theme :is(.pv--weeks, .pv--cost-story) i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.legacy-theme .pv--cost-story i {
+    width: 2px;
+    height: 5px;
+    border-radius: 1px;
+}
+
+/* The car that runs along them. */
+.legacy-theme :is(.pv--weeks, .pv--cost-story) b {
+    position: absolute;
+    bottom: 16px;
+    left: 8px;
+    width: 15px;
+    height: 9px;
+    border-radius: 3px;
+    background: currentColor;
+    transform: translateX(53px);
+}
+
+.legacy-theme .pv--budget i {
+    width: 10px;
+    height: 8px;
+    border-radius: 2px;
+    background: currentColor;
+}
+
+.legacy-theme .pv--budget i:nth-of-type(n + 4) {
+    opacity: 0.25;
+}
+
+.legacy-theme .pv--budget b {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    left: 9px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--accent-400);
+    transform: scaleX(0.6);
+    transform-origin: left;
+}
+
+/* Three bars, as long beside each other as today's three figures. */
+.legacy-theme .pv--three-way {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    padding: 0 9px;
+}
+
+.legacy-theme .pv--three-way i {
+    height: 4px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: scaleX(var(--p));
+    transform-origin: left;
+}
+
+.legacy-theme :is(.pv--checklist, .pv--life-quiz) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 12px;
+}
+
+.legacy-theme .pv--life-quiz i {
+    width: 13px;
+    height: 18px;
+    border-radius: 3px;
+    background: currentColor;
+}
+
+/* A dial and its needle. */
+.legacy-theme .pv--price-game i {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    width: 44px;
+    height: 22px;
+    margin-left: -22px;
+    border: 3px solid rgba(241, 246, 243, 0.35);
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+}
+
+.legacy-theme .pv--price-game b {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    width: 2px;
+    height: 19px;
+    margin-left: -1px;
+    border-radius: 1px;
+    background: var(--accent-400);
+    transform-origin: 50% 100%;
+}
+
+.legacy-theme .pv--recall-quiz {
+    display: grid;
+    place-items: center;
+}
+
+.legacy-theme .pv--recall-quiz em {
+    padding: 1px 6px;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    transform: rotate(-7deg);
+}
+
+.legacy-theme .pv--road-trip i {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.legacy-theme .pv--road-trip i:last-child {
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+}
+
+/* Playing. Each mark's turn comes --i steps after the one before it, and the
+   second time round follows in the same order. */
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv :is(i, b, em) {
+    animation-duration: 2400ms;
+    animation-timing-function: var(--gd-out);
+    animation-iteration-count: 2;
+    animation-fill-mode: backwards;
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) :is(.pv--weeks, .pv--road-trip) i {
+    animation-name: pv-light;
+    animation-delay: calc(var(--i) * 190ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--cost-story i {
+    animation-name: pv-light;
+    animation-delay: calc(var(--i) * 110ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) :is(.pv--weeks, .pv--cost-story) b {
+    animation-name: pv-run;
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--budget i:nth-of-type(-n + 3) {
+    animation-name: pv-pop;
+    animation-delay: calc(300ms + var(--i) * 200ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--budget b {
+    animation-name: pv-fill;
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--three-way i {
+    animation-name: pv-grow;
+    animation-delay: calc(var(--i) * 150ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--checklist i {
+    animation-name: pv-pop;
+    animation-delay: calc(var(--i) * 260ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--life-quiz i {
+    animation-name: pv-flip;
+    animation-delay: calc(var(--i) * 240ms);
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--price-game b {
+    animation-name: pv-needle;
+    animation-timing-function: ease-in-out;
+}
+
+.legacy-theme :is(.gd-card:hover, .gd-card:focus-visible, .gd-card[data-live]) .pv--recall-quiz em {
+    animation-name: pv-stamp;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4);
+}
+
+@keyframes pv-light {
+    0% {
+        opacity: 0.2;
+    }
+    10%,
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes pv-run {
+    0% {
+        transform: translateX(0);
+    }
+    62%,
+    100% {
+        transform: translateX(53px);
+    }
+}
+
+@keyframes pv-fill {
+    0% {
+        transform: scaleX(0);
+    }
+    45%,
+    100% {
+        transform: scaleX(0.6);
+    }
+}
+
+@keyframes pv-grow {
+    0% {
+        transform: scaleX(0);
+    }
+    42%,
+    100% {
+        transform: scaleX(var(--p));
+    }
+}
+
+@keyframes pv-pop {
+    0% {
+        opacity: 0.2;
+        transform: scale(0.5);
+    }
+    14%,
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes pv-flip {
+    0% {
+        opacity: 0.3;
+        transform: rotateY(180deg);
+    }
+    24%,
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes pv-needle {
+    0% {
+        transform: rotate(-70deg);
+    }
+    34% {
+        transform: rotate(70deg);
+    }
+    52% {
+        transform: rotate(-22deg);
+    }
+    68% {
+        transform: rotate(9deg);
+    }
+    82%,
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes pv-stamp {
+    0% {
+        opacity: 0;
+        transform: rotate(-7deg) scale(2.4);
+    }
+    10%,
+    100% {
+        opacity: 1;
+        transform: rotate(-7deg) scale(1);
+    }
+}
+
+/* The compact rows on a phone have a small photo: the preview is drawn smaller to fit it. */
+@media (max-width: 699px) {
+    .legacy-theme .gd-cards--compact .pv {
+        right: 5px;
+        bottom: 5px;
+        transform: scale(0.72);
+        transform-origin: 100% 100%;
+    }
+}
+
+/* ── Reduced motion: every picture is its last frame, and stays there ─── */
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme :is(.sc, .gt, .pv) *,
+    .legacy-theme :is(.sc, .gt, .pv) *::before,
+    .legacy-theme :is(.sc, .gt, .pv) *::after,
+    .legacy-theme .gd-page :is(.gd-btn, .gd-share-btn, .gd-card, .gd-card-photo img),
+    .legacy-theme .gd-page [data-reveal] {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .legacy-theme .gd-page [data-reveal="wait"] {
+        opacity: 1;
+        transform: none;
+    }
+
+    .legacy-theme .gd-page :is(.gt-chip, .gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gd-btn, .gd-share-btn, .ck-btn, .ck-step, .gt-more):active {
+        transform: none;
+    }
+}

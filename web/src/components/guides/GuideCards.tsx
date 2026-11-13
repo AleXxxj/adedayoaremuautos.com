@@ -2,11 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { canResize } from "@/lib/photo";
 import { GUIDES, guideHref } from "@/content/guides";
-import type { GuideData, GuideGroup } from "@/content/guides/types";
+import type { GuideData, GuideGroup, ToolKey } from "@/content/guides/types";
+import { cardBars, sceneFor } from "./motion/sceneData";
+import { CardPreview } from "./motion/CardPreview";
 import { guidePhotos, readMinutes } from "./guideMath";
 
 export interface GuideCard {
   slug: string;
+  tool: ToolKey;
   group: GuideGroup;
   href: string;
   icon: string;
@@ -19,6 +22,8 @@ export interface GuideCard {
   /** A real car from stock, or null with none photographed. */
   photo: string | null;
   minutes: number;
+  /** For the rent-buy-own card's preview: its three bars at today's proportions. */
+  bars: number[] | null;
 }
 
 /**
@@ -34,6 +39,7 @@ export function guideCards(data: GuideData): GuideCard[] {
   );
   return built.map(({ g, w }) => ({
     slug: g.meta.slug,
+    tool: g.meta.tool,
     group: g.meta.group,
     href: guideHref(g.meta.slug),
     icon: g.meta.card.icon,
@@ -43,6 +49,7 @@ export function guideCards(data: GuideData): GuideCard[] {
     stat: w.stat,
     photo: photos[g.meta.slug],
     minutes: readMinutes(w),
+    bars: g.meta.tool === "three-way" ? cardBars(sceneFor(g.meta.tool, data, null)) : null,
   }));
 }
 
@@ -86,6 +93,7 @@ export function GuideCards({
                 <i className={`fas ${c.icon}`} aria-hidden="true" />
                 {c.label}
               </span>
+              <CardPreview tool={c.tool} bars={c.bars} />
             </span>
             <span className="gd-card-body">
               <Title className="gd-card-title">{c.title}</Title>

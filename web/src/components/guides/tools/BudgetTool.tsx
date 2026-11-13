@@ -1,11 +1,12 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
 import type { GuideSaleCar } from "@/content/guides/types";
 import { GuideCarCard } from "../GuideCarCard";
 import { budgetBucket } from "../guideMath";
+import { signalScene } from "../motion/sceneKit";
 
 /** Cards shown under a budget; the rest are a tap away on the sale list. */
 const SHOWN = 6;
@@ -39,6 +40,8 @@ export function BudgetTool({
   // Open on the first budget that buys something.
   const [major, setMajor] = useState(() => (buckets.find((b) => b.count > 0) ?? buckets[0]).major);
   const label = useId();
+  // The odometer at the top of the page rolls to the same budget.
+  useEffect(() => signalScene({ tool: "budget", major }), [major]);
   const fmt = (minor: number) => formatMoney(money(minor, currency), locale);
   const num = (n: number) => new Intl.NumberFormat(locale).format(n);
   const b = buckets.find((x) => x.major === major)!;
@@ -127,7 +130,8 @@ export function BudgetTool({
 
       {b.count > 0 && (
         <>
-          <ul className="gd-cars">
+          {/* Keyed by the budget: its cars arrive one after another. */}
+          <ul className="gd-cars gd-cars--in" key={b.major}>
             {b.cars.slice(0, SHOWN).map((c) => (
               <GuideCarCard
                 key={c.slug}

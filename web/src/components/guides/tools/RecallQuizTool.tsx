@@ -149,7 +149,13 @@ export function RecallQuizTool({ facts, path }: { facts: RecallFact[]; path: str
       )}
       <Progress done={at + (done ? 1 : 0)} of={total} label={`Card ${at + 1} of ${total} · Score ${score}`} />
 
-      <div className="gm-card" data-flipped={done || undefined}>
+      {/* Keyed by the card, so each one is dealt in; the stamp is for the eye, the verdict below is read out. */}
+      <div className="gm-card gm-card--in" key={fact.id} data-flipped={done || undefined}>
+        {done && (
+          <span className="gm-stamp" aria-hidden="true" data-right={right || undefined}>
+            {fact.answer ? "True" : "False"}
+          </span>
+        )}
         <p className="gm-card-kicker">True or false?</p>
         <h3 className="gm-card-claim" tabIndex={-1} ref={ref}>
           {fact.claim}
