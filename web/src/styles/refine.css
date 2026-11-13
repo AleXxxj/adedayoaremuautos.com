@@ -4291,17 +4291,17 @@
 }
 
 /* ── The header ─────────────────────────────────────────────────────────────
-   One row at every width: the logo and name (one link home), the links, the
-   country switch and the partner log in. Below 1100px the links fold behind
-   the menu button, which then sits last in the row; below 900px the country
-   switch moves into the menu too, leaving the logo, the name, "Log in" and
-   the menu button.
+   One row at every width: the name (one link home), the links, the country
+   switch, the saved-cars heart and the partner log in. Below 1100px the
+   links fold behind the menu button, which then sits last in the row; below
+   900px the country switch moves into the menu too, leaving the name, the
+   heart, "Log in" and the menu button.
 
-   The mark is public/img/logo-mark.png: the logo trimmed of the empty border
-   that made up two thirds of logo.png, so at 34-40px tall the letters are
-   legible. The name never breaks mid-word; where room runs out it stacks,
-   and on the narrowest phones the tagline is dropped (the menu lists the
-   same things one tap away). */
+   The name is the logo: "ADEDAYO AREMU" with "AUTOS" in green. There is no
+   mark beside it (the image files stay in public/img for email and print).
+   The name shows at every width and never breaks mid-word; where room runs
+   out it stacks on two lines, and on the narrowest phones the tagline is
+   dropped (the menu lists the same things one tap away). */
 .legacy-theme .header {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -4319,12 +4319,6 @@
     text-decoration: none;
 }
 
-.legacy-theme .logo-container .logo-mark {
-    flex: none;
-    width: auto;
-    height: 36px;
-}
-
 .legacy-theme .logo-container:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 4px;
@@ -4339,8 +4333,33 @@
     line-height: 1.15;
 }
 
+/* "AUTOS" was a dark green gradient clipped to the letters, under 2:1 on
+   the header. It is half of the logo now, so it is solid --brand-300
+   (9:1), the same green as a page title's highlighted words. */
+.legacy-theme .logo-text h1 span {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: currentColor;
+    color: var(--brand-300);
+}
+
 .legacy-theme .logo-text p {
     white-space: nowrap;
+}
+
+/* The footer's copy of the name: the same two colors and weight. */
+.legacy-theme .footer-about .footer-wordmark {
+    margin: 0 0 15px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    color: var(--silver-classic);
+}
+
+.legacy-theme .footer-about .footer-wordmark span {
+    color: var(--brand-300);
 }
 
 /* "Log in" on a phone, "Partner log in" from 1100px. */
@@ -4372,7 +4391,50 @@
     background: rgba(95, 199, 145, 0.08);
 }
 
+/* Saved cars: a heart in a 44px round button, white on dark glass. The count
+   is a small white badge on its corner, shown once this browser has saved a
+   car (SavedCarsLink.tsx). */
+.legacy-theme .saved-link {
+    position: relative;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 16px;
+    text-decoration: none;
+    transition:
+        border-color 180ms ease-out,
+        background-color 180ms ease-out;
+}
+
+.legacy-theme .saved-link:hover {
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.legacy-theme .saved-link-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 0 0 2px #0a0a0a;
+    color: #070c0a;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 18px;
+    text-align: center;
+}
+
 .legacy-theme .partner-pill:focus-visible,
+.legacy-theme .saved-link:focus-visible,
 .legacy-theme .market-switch:focus-visible,
 .legacy-theme .mobile-menu-btn:focus-visible {
     outline: 2px solid var(--focus);
@@ -4415,21 +4477,18 @@
 }
 
 /* Wide screens: every link in the row, which is long. Measured November
-   2026 (US header): the eight links need 587px of text at 12.5px and 634px
-   at 13.5px; the mark is 108px at 40px tall; the name 198px at 16px and
-   246px at 20px; the globe 44px and the pill 150px, plus the gaps. So:
+   2026 (US header, by script): the eight links need 587px of text at 12.5px
+   and 634px at 13.5px; the name is 126px stacked at 15px, 222px on one line at
+   18px and 246px at 20px; the globe and the heart are 44px each; the pill
+   is 100px as "Log in" and 150px as "Partner log in"; plus the gaps. So:
 
-     1100-1279  the mark alone (the name is still read out), 1,019px of 1,070
-     1280-1439  the mark and the name, 1,216px of 1,250
-     1440 up    the name at full size and the tagline, 1,364px of 1,400
+     1100-1279  the name stacked on two lines, "Log in": 1,036px of 1,070
+     1280-1439  the name on one line, 1,182px of 1,250
+     1440 up    the name at full size and the tagline, 1,295px of 1,400
 
    and the country switch is the globe alone throughout (its label is in
    its accessible name and tooltip). */
 @media (min-width: 1100px) {
-    .legacy-theme .logo-container .logo-mark {
-        height: 40px;
-    }
-
     .legacy-theme .partner-pill-short {
         display: none;
     }
@@ -4464,7 +4523,7 @@
     }
 
     .legacy-theme .logo-text h1 {
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .legacy-theme .logo-text p {
@@ -4472,21 +4531,23 @@
     }
 }
 
+/* No room for the name on one line beside eight links: it stacks, as on a
+   phone, and the pill says "Log in" as it does there. */
 @media (min-width: 1100px) and (max-width: 1279px) {
-    .legacy-theme .logo-text {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
+    .legacy-theme .partner-pill-short {
+        display: inline;
     }
-}
 
-@media (min-width: 1280px) and (max-width: 1439px) {
-    .legacy-theme .logo-container .logo-mark {
-        height: 36px;
+    .legacy-theme .partner-pill-long {
+        display: none;
+    }
+
+    .legacy-theme .logo-text h1 {
+        font-size: 15px;
+    }
+
+    .legacy-theme .logo-text h1 span {
+        display: block;
     }
 }
 
@@ -4592,9 +4653,9 @@
     }
 }
 
-/* Phones, upright and on their side: the mark, the name stacked, "Log in",
-   the menu. On one line the name needs about 220px, which with "Log in" and
-   the menu fits only from 600px. */
+/* Phones, upright and on their side: the name stacked on two lines, the
+   heart, "Log in", the menu. On one line the name needs about 220px, which
+   with the three buttons fits only from 600px. */
 @media (max-width: 599px) {
     .legacy-theme .header-container {
         column-gap: 8px;
@@ -4604,12 +4665,8 @@
         gap: 8px;
     }
 
-    .legacy-theme .logo-container .logo-mark {
-        height: 30px;
-    }
-
     .legacy-theme .logo-text h1 {
-        font-size: 15px;
+        font-size: 17px;
         white-space: normal;
     }
 
@@ -4634,17 +4691,24 @@
     }
 }
 
-@media (max-width: 359px) {
-    .legacy-theme .logo-container .logo-mark {
-        height: 24px;
-    }
-
+/* Under 390px the three buttons leave the name about 140px. */
+@media (max-width: 389px) {
     .legacy-theme .logo-text h1 {
-        font-size: 14px;
+        font-size: 15px;
+    }
+}
+
+/* The narrowest phones: "Log in" is its icon alone, 44px round (its name is
+   still read out, and the menu has "Partner log in" in words). */
+@media (max-width: 359px) {
+    .legacy-theme .partner-pill {
+        width: 44px;
+        padding: 0;
+        justify-content: center;
     }
 
-    .legacy-theme .partner-pill {
-        padding: 0 10px;
+    .legacy-theme .partner-pill-short {
+        display: none;
     }
 }
 

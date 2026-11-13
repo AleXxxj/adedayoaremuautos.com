@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { card, cardTitle } from "./ui";
 
@@ -38,34 +37,22 @@ export function PartnerShell({
 }
 
 /**
- * The logo and the business name, back to the public site.
+ * The business name, back to the public site.
  *
- * The trimmed mark (logo-mark.png), the same file the site header uses: the
- * original logo.png is mostly transparent margin, which made the letters
- * too small to read. `compact` is for a row it shares with a
- * button: below 360px the name is left to screen readers, rather than
- * folded into three lines beside it.
+ * The name is the logo, as in the site header: "ADEDAYO AREMU" with "AUTOS"
+ * in green, and no separate mark. `compact` is for a row it shares with a
+ * button: the name is stacked on two lines there, so it fits beside the
+ * button on the narrowest phone.
  */
 export function PartnerBrand({ href = "/us", compact = false }: { href?: string; compact?: boolean }) {
   return (
     <Link
       href={href}
-      className="inline-flex min-h-[44px] min-w-0 items-center gap-2 rounded-lg text-text-primary"
+      aria-label="Adedayo Aremu Autos home"
+      className="inline-flex min-h-[44px] min-w-0 items-center rounded-lg text-text-primary"
     >
-      <Image
-        src="/img/logo-mark.png"
-        alt=""
-        width={431}
-        height={160}
-        sizes="81px"
-        className="h-[30px] w-auto shrink-0"
-      />
-      <span
-        className={`min-w-0 font-[family-name:var(--font-space-grotesk)] text-[15px] font-bold leading-tight tracking-tight ${
-          compact ? "sr-only min-[360px]:not-sr-only" : ""
-        }`}
-      >
-        Adedayo Aremu Autos
+      <span className="min-w-0 font-[family-name:var(--font-space-grotesk)] text-[16px] font-extrabold uppercase leading-[1.15] tracking-[0.02em]">
+        Adedayo Aremu <span className={`text-brand-300 ${compact ? "block" : ""}`}>Autos</span>
       </span>
     </Link>
   );

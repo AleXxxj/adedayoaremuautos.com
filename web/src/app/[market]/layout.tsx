@@ -18,6 +18,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/styles/refine.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
+import { SavedCarsLink } from "@/components/SavedCarsLink";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
 import { NotifyPrompt } from "@/components/NotifyPrompt";
@@ -27,7 +28,6 @@ import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { socialLinks } from "@/lib/contact";
 import { legalNav } from "@/content/legal";
-import Image from "next/image";
 
 export function generateStaticParams() {
   return MARKET_CODES.map((market) => ({ market }));
@@ -113,20 +113,10 @@ export default async function MarketLayout({
 
       <div className="header">
         <div className="header-container">
-          {/* One link home: the mark and the name together. The mark is the
-              logo trimmed of its empty border (public/img/logo-mark.png), so
-              it is legible at header size; logo.png stays for print and
-              email. */}
+          {/* One link home. The name is the logo: there is no separate mark
+              beside it (the image files stay in public/img for email and
+              print). */}
           <Link href={`/${code}`} className="logo-container" aria-label="Adedayo Aremu Autos home">
-            <Image
-              className="logo-mark"
-              src="/img/logo-mark.png"
-              alt=""
-              width={431}
-              height={160}
-              sizes="108px"
-              loading="eager"
-            />
             <div className="logo-text">
               <h1>
                 ADEDAYO AREMU <span>AUTOS</span>
@@ -159,6 +149,9 @@ export default async function MarketLayout({
                 <span>{sw.name}</span>
               </Link>
             ))}
+            {/* The cars this browser has saved: a heart, with a count once
+                there are any. */}
+            <SavedCarsLink market={code} />
             {/* The partners' way in, on every page rather than buried in the
                 referral page. "Log in" on a phone, "Partner log in" wider. */}
             <Link href="/partner/login" className="partner-pill" aria-label="Partner log in">
@@ -188,19 +181,10 @@ export default async function MarketLayout({
               time is why the whole footer stacked into one column. */}
           <div className="footer-grid">
             <div className="footer-about">
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 15 }}>
-                <Image
-                  src="/img/logo-mark.png"
-                  alt=""
-                  width={431}
-                  height={160}
-                  sizes="108px"
-                  style={{ height: 40, width: "auto" }}
-                />
-                <h3 style={{ color: "var(--silver-classic)", fontSize: 20 }}>
-                  ADEDAYO AREMU <span>AUTOS</span>
-                </h3>
-              </div>
+              {/* The name as the logo, as in the header (refine.css). */}
+              <h3 className="footer-wordmark">
+                ADEDAYO AREMU <span>AUTOS</span>
+              </h3>
               {/* Rent to own is named for the United States only. Nigeria has
                   no categories priced yet, and its own page says the programme
                   is opening in the States first — the footer must not promise
