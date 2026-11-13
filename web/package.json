@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "tokens": "node scripts/build-tokens.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "screenshots": "node scripts/build-screenshots.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",

@@ -1,0 +1,407 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   The app shell: what a visitor sees while something is loading.
+
+   Four pieces, all drawn before any data arrives:
+
+   1. The splash (components/app/AppSplash.tsx): the name on the dark
+      background with a slim moving line. Only when the site runs as an
+      installed app, and only for the first screen of a session.
+   2. The progress bar (components/app/NavProgress.tsx): a 3px line along the
+      top edge from the tap on a link until the next page is on screen.
+   3. Skeletons (components/app/Skeletons.tsx, used by the loading.tsx files):
+      gray blocks in the shape of the page that is on its way.
+   4. The page change itself: a short fade (components/app/PageTransition.tsx).
+
+   Green is used once, on the splash line. Everything else is white or gray.
+   Every animation here is switched off by name under reduced motion: the
+   global rule only shortens durations, which would turn a looping animation
+   into a flicker.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. Splash ────────────────────────────────────────────────────────── */
+
+.app-splash {
+  display: none;
+}
+
+html[data-splash] .app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  background: #070c0a;
+  color: #f1f6f3;
+  opacity: 1;
+  transition: opacity 240ms ease-out;
+}
+
+html[data-splash="out"] .app-splash {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The page behind must not scroll while the splash covers it. */
+html[data-splash="on"] body {
+  overflow: hidden;
+}
+
+.app-splash-name {
+  margin: 0;
+  font-family: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
+  font-size: clamp(20px, 6.4vw, 30px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.app-splash-name span {
+  color: #5fc791;
+}
+
+.app-splash-line {
+  position: relative;
+  width: min(180px, 46vw);
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(241, 246, 243, 0.14);
+}
+
+.app-splash-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: #5fc791;
+  animation: app-splash-run 1.1s ease-in-out infinite;
+}
+
+@keyframes app-splash-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* ── 2. Progress bar ──────────────────────────────────────────────────── */
+
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147482000;
+  width: 100%;
+  height: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--text-primary);
+  box-shadow: 0 0 8px rgba(241, 246, 243, 0.45);
+}
+
+/* Runs toward, and never reaches, the right edge: it shows that something is
+   happening, not how much is left, because nothing knows how much is left. */
+.nav-progress[data-state="loading"] {
+  opacity: 1;
+  animation: nav-progress-run 9s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+.nav-progress[data-state="done"] {
+  transform: scaleX(1);
+  opacity: 0;
+  transition:
+    transform 180ms ease-out,
+    opacity 220ms ease-out 160ms;
+}
+
+@keyframes nav-progress-run {
+  0% {
+    transform: scaleX(0.04);
+  }
+  20% {
+    transform: scaleX(0.45);
+  }
+  100% {
+    transform: scaleX(0.92);
+  }
+}
+
+/* ── 3. Skeletons ─────────────────────────────────────────────────────── */
+
+/* Every rule is scoped under .sk-page: the public pages reset margins with
+   `.legacy-theme *`, which would otherwise tie with a single class and win. */
+
+.sk-page.sk-page {
+  /* The same room the real pages leave for the fixed header. */
+  min-height: 100vh;
+  padding: 98px 0 56px;
+  background: var(--surface-0);
+}
+
+.sk-page .sk-wrap {
+  max-width: 1232px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.sk-page .sk-wrap--narrow {
+  max-width: 860px;
+}
+
+.sk-page .sk {
+  display: block;
+  border-radius: 10px;
+  background: var(--surface-2, #1a2620);
+  opacity: 0.7;
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(241, 246, 243, 0.06) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: sk-sheen 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-sheen {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -90% 0;
+  }
+}
+
+.sk-page .sk-eyebrow {
+  width: 120px;
+  height: 12px;
+}
+
+.sk-page .sk-title {
+  width: min(78%, 420px);
+  height: clamp(36px, 10vw, 60px);
+  margin-top: 12px;
+  border-radius: 12px;
+}
+
+.sk-page .sk-line {
+  width: min(52%, 260px);
+  height: 16px;
+  margin-top: 14px;
+}
+
+.sk-page .sk-line--wide {
+  width: min(92%, 620px);
+}
+
+.sk-page .sk-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.sk-page .sk-chip {
+  flex: none;
+  width: 92px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.sk-page .sk-bar {
+  height: 52px;
+  margin-top: 16px;
+  border-radius: 16px;
+}
+
+.sk-page .sk-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.sk-page .sk-card {
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  background: var(--surface-1);
+}
+
+.sk-page .sk-card .sk-photo {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+
+.sk-page .sk-card-body {
+  padding: 16px;
+}
+
+.sk-page .sk-card-body .sk-line:first-child {
+  margin-top: 0;
+  width: 70%;
+  height: 20px;
+}
+
+/* One car. */
+.sk-page .sk-car {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.sk-page .sk-car .sk-photo {
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+}
+
+.sk-page .sk-facts {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.sk-page .sk-fact {
+  width: 84px;
+  height: 40px;
+  border-radius: 999px;
+}
+
+.sk-page .sk-price {
+  width: 160px;
+  height: 40px;
+  margin-top: 18px;
+  border-radius: 12px;
+}
+
+.sk-page .sk-button {
+  height: 52px;
+  margin-top: 20px;
+  border-radius: 999px;
+}
+
+.sk-page .sk-rows {
+  margin-top: 28px;
+}
+
+.sk-page .sk-rows .sk-line {
+  width: 100%;
+  height: 44px;
+  margin-top: 10px;
+  border-radius: 12px;
+}
+
+/* For a screen reader, in place of the gray blocks. */
+.sk-page .sk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 700px) {
+  .sk-page.sk-page {
+    padding: 122px 0 80px;
+  }
+
+  .sk-page .sk-wrap {
+    padding: 0 24px;
+  }
+
+  .sk-page .sk-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .sk-page .sk-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .sk-page .sk-car {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .sk-page .sk-car > :first-child {
+    order: 2;
+  }
+}
+
+/* ── 4. Page change ───────────────────────────────────────────────────── */
+
+::view-transition-old(.page-out) {
+  animation: 120ms ease-out both page-fade-out;
+}
+
+::view-transition-new(.page-in) {
+  animation: 220ms ease-out 80ms both page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ── Reduced motion: nothing moves ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .app-splash-line::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.7;
+  }
+
+  /* A still line across the top says "loading" without traveling. */
+  .nav-progress[data-state="loading"] {
+    animation: none;
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+
+  .nav-progress[data-state="done"] {
+    transition: none;
+  }
+
+  .sk-page .sk {
+    animation: none;
+    background-image: none;
+  }
+
+  ::view-transition-old(.page-out),
+  ::view-transition-new(.page-in) {
+    animation: none;
+  }
+}
+
+@media print {
+  .app-splash,
+  .nav-progress {
+    display: none !important;
+  }
+}

@@ -1,6 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { inter, fraunces, spaceGrotesk } from "@/lib/fonts";
 import { siteUrl } from "@/lib/siteUrl";
+import { AppSplash } from "@/components/app/AppSplash";
+import { NavProgress } from "@/components/app/NavProgress";
+import { ServiceWorker } from "@/components/app/ServiceWorker";
 import "./globals.css";
 
 /**
@@ -41,19 +44,44 @@ export const metadata: Metadata = {
     siteName: "Adedayo Aremu Autos",
     type: "website",
   },
+  // For an iPhone's "Add to Home Screen": the name under the icon, and the
+  // page drawn under the status bar as in an app. Android reads the manifest
+  // (manifest.ts) instead.
+  appleWebApp: {
+    capable: true,
+    title: "Adedayo Autos",
+    statusBarStyle: "black-translucent",
+  },
 };
+
+/**
+ * The color of the phone's status bar and of the installed app's title area:
+ * the page background (--surface-0), so the header runs to the top edge with
+ * no band of another color above it.
+ */
+export const viewport: Viewport = { themeColor: "#070C0A" };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     // Dark is the default theme; the toggle swaps this attribute.
+    // suppressHydrationWarning: the splash script (AppSplash) sets an
+    // attribute on this element before React starts. It covers this one
+    // element's attributes only, nothing inside it.
     <html
       lang="en"
       data-theme="dark"
+      suppressHydrationWarning
       className={`${inter.variable} ${fraunces.variable} ${spaceGrotesk.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {/* First, so it is on screen before anything else is parsed. */}
+        <AppSplash />
+        <NavProgress />
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }
