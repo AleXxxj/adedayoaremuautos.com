@@ -1,0 +1,21 @@
+# Build output
+build/
+app/build/
+.gradle/
+*.apk
+*.aab
+*.ap_
+
+# This computer's SDK location
+local.properties
+
+# Signing keys and their passwords: never in the repository
+*.keystore
+*.jks
+keystore.properties
+
+# Android Studio
+.idea/
+*.iml
+captures/
+.DS_Store

@@ -25,6 +25,7 @@ import { CountryNotice } from "@/components/CountryNotice";
 import { NotifyPrompt } from "@/components/NotifyPrompt";
 import { Toaster } from "@/components/Toast";
 import { TabBar } from "@/components/TabBar";
+import { PageTransition } from "@/components/app/PageTransition";
 import { Assistant } from "@/components/Assistant";
 import { LegacyNewsletter } from "@/components/LegacyBlog";
 import { socialLinks } from "@/lib/contact";
@@ -160,7 +161,9 @@ export default async function MarketLayout({
         </div>
       </div>
 
-      {children}
+      {/* A short fade from one page to the next. The header, footer and tab
+          bar are outside it and stay still. */}
+      <PageTransition>{children}</PageTransition>
 
       {/* Sitewide, directly above the footer. It used to live only on the blog,
           which most visitors never reach — a mailing list nobody can find

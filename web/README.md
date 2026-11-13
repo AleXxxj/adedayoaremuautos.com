@@ -60,6 +60,17 @@ scripts/              Checks, test suites, and database scripts
 
 A page's server component loads data through `src/lib/repositories/*`. Forms post to server actions in `src/lib/actions/*`, which validate with Zod and write through Drizzle. Money is stored in minor units (cents) and formatted with `src/lib/money.ts`. Market differences (currency, locale, time zone) come from `src/lib/market.ts`, never from a setting the visitor picks.
 
+### The installable app
+
+The site installs as an app ("Add to Home Screen", Chrome's "Install app"), and the Android app in `../mobile/android` is this same site in a full-screen window (`../mobile/README.md`).
+
+- `src/app/manifest.ts`: name, colors, icons, shortcuts, install-sheet pictures.
+- `npm run icons` redraws every icon from `scripts/build-icons.mjs`. `npm run screenshots` retakes the install-sheet pictures from the live site. Neither runs in the build; commit their output.
+- `src/components/app/` and `src/styles/app-shell.css`: the splash (installed app only, once per session), the progress line along the top, the gray loading skeletons, and the fade between pages.
+- `loading.tsx` files show a skeleton the moment a link is tapped. A page under a loading file can no longer answer 404, so list pages sit in a `(list)` folder (the loading file then covers only the list) and each car's folder has a `layout.tsx` that checks the car exists first. Keep that pattern when adding one.
+- `public/sw.js` handles notifications and shows `public/offline.html` when a page can't be reached. It stores only those two files, never a page or anything about a person.
+- `/.well-known/assetlinks.json` (values in `src/lib/app/androidApp.ts`) is what lets the Android app hide the address bar.
+
 ## Outside services
 
 Supabase (database, sign-in, file storage), Vercel (hosting), Stripe (hosted checkout), Resend and Twilio (staff alerts), Anthropic (assistant and recall summaries), NHTSA (VIN decoding, recalls, complaints, crash ratings), Wikimedia Commons (model photos for the car check), MarketCheck (price estimate).
