@@ -22,11 +22,11 @@ export interface Requirement {
 
 /* ── About ─────────────────────────────────────────────────────────────── */
 
-/** The founder's own story, carried over verbatim from the legacy about page. */
+/** The founder's own story, carried over from the legacy about page. Spelling is American; the words are his. */
 export const FOUNDER_STORY: string[] = [
   "Adedayo Aremu is an entrepreneur driven by vision, discipline, and an unwavering commitment to excellence. With a strong foundation in business development and a passion for the automotive industry, he has built his professional identity around integrity, strategic growth, and customer-centered service.",
-  "From an early stage, Adedayo demonstrated a natural inclination toward commerce and enterprise. His understanding of value creation, branding, and market positioning shaped his entrepreneurial journey and laid the groundwork for his ventures. Over time, he refined his focus toward the automotive sector, recognising both its economic potential and its role in empowering mobility, independence, and opportunity.",
-  "As the founder of Adedayo Aremu Autos, he has positioned his brand to reflect professionalism, reliability, and premium service standards. His business philosophy emphasises transparency, quality assurance, and long-term client relationships. Rather than simply facilitating vehicle transactions, he prioritises delivering tailored automotive solutions that align with customer needs and financial goals.",
+  "From an early stage, Adedayo demonstrated a natural inclination toward commerce and enterprise. His understanding of value creation, branding, and market positioning shaped his entrepreneurial journey and laid the groundwork for his ventures. Over time, he refined his focus toward the automotive sector, recognizing both its economic potential and its role in empowering mobility, independence, and opportunity.",
+  "As the founder of Adedayo Aremu Autos, he has positioned his brand to reflect professionalism, reliability, and premium service standards. His business philosophy emphasizes transparency, quality assurance, and long-term client relationships. Rather than simply facilitating vehicle transactions, he prioritizes delivering tailored automotive solutions that align with customer needs and financial goals.",
   "Adedayo's leadership style is strategic and growth-oriented. He believes in continuous improvement, leveraging digital platforms, market analytics, and customer insights to enhance operational efficiency and brand visibility. His approach integrates traditional business principles with modern innovation, ensuring adaptability in an evolving marketplace.",
   "Beyond business, Adedayo values personal development, financial literacy, and community impact. He views entrepreneurship not merely as a means of income generation, but as a platform for influence, mentorship, and sustainable wealth creation.",
   "Grounded in discipline and guided by ambition, Adedayo Aremu continues to build a legacy defined by professionalism, resilience, and purposeful leadership.",
@@ -36,13 +36,13 @@ export const MISSION =
   "To deliver reliable and premium automotive solutions through transparent business practices, quality vehicle sourcing, competitive pricing, and exceptional customer service. Guided by integrity, operational excellence, and faith-driven values, Adedayo Aremu Autos is committed to creating lasting value for customers while building a high-performance automotive enterprise.";
 
 export const VISION =
-  "To establish Adedayo Aremu Autos as a trusted and distinguished automotive brand recognised for integrity, professionalism, and customer satisfaction, while expanding into a scalable multi-location dealership known for quality inventory, strong market presence, and positive community impact.";
+  "To establish Adedayo Aremu Autos as a trusted and distinguished automotive brand recognized for integrity, professionalism, and customer satisfaction, while expanding into a scalable multi-location dealership known for quality inventory, strong market presence, and positive community impact.";
 
 /** The short executive version, the owner's own words from the legacy page. */
 export const EXECUTIVE_BIO: string[] = [
   "Adedayo Aremu is an entrepreneurial professional and founder of Adedayo Aremu Autos, a growing automotive enterprise committed to excellence, transparency, and customer-centered service. With a strategic mindset and strong business acumen, he has positioned his brand to deliver reliable vehicle sourcing, quality assurance, and value-driven automotive solutions.",
   "Adedayo's approach to business is grounded in integrity, operational efficiency, and long-term relationship building. He understands that success in the automotive industry requires more than transactions — it demands trust, market insight, and consistent performance. By leveraging digital platforms, data-informed decision-making, and disciplined execution, he continues to expand his brand presence and customer base.",
-  "Focused on sustainable growth, Adedayo is building a dealership model that prioritises professionalism, financial intelligence, and scalable systems. His long-term vision is to establish Adedayo Aremu Autos as a recognised and respected name in the automotive marketplace, known for quality inventory, competitive pricing, and exceptional client experience.",
+  "Focused on sustainable growth, Adedayo is building a dealership model that prioritizes professionalism, financial intelligence, and scalable systems. His long-term vision is to establish Adedayo Aremu Autos as a recognized and respected name in the automotive marketplace, known for quality inventory, competitive pricing, and exceptional client experience.",
 ];
 
 export interface Objective {
@@ -67,7 +67,7 @@ export const OBJECTIVES: Objective[] = [
     icon: "fas fa-chart-line",
     points: [
       "Achieve sustainable annual revenue growth through disciplined execution",
-      "Optimise inventory sourcing and turnover using data-driven insights",
+      "Optimize inventory sourcing and turnover using data-driven insights",
       "Develop strategic financing partnerships to expand vehicle accessibility",
     ],
   },
@@ -75,7 +75,7 @@ export const OBJECTIVES: Objective[] = [
     title: "Brand & Digital Expansion",
     icon: "fas fa-globe",
     points: [
-      "Build a recognisable, high-conversion digital automotive platform",
+      "Build a recognizable, high-conversion digital automotive platform",
       "Strengthen brand visibility through modern marketing and technology",
       "Establish structured systems that support scalable dealership operations",
     ],
@@ -86,7 +86,7 @@ export const OBJECTIVES: Objective[] = [
     points: [
       "Conduct business with honesty, integrity, and responsible stewardship",
       "Create employment and mentorship opportunities",
-      "Contribute positively to the community while honouring faith-centred values",
+      "Contribute positively to the community while honoring faith-centered values",
     ],
   },
   {
@@ -104,10 +104,9 @@ export const OBJECTIVES: Objective[] = [
  * The year the business was founded.
  *
  * The legacy timeline dated the milestones 2020–2024; the owner has since
- * confirmed they all happened in 2026. The dates in TIMELINE below are still
- * the legacy ones and are pending correction — this constant is the one the
- * public "years trading" figure is derived from, so it is set to the year we
- * have actually been told.
+ * confirmed (2026-08-10) they all happened in 2026. This constant is the one
+ * the public "trading since" figure is derived from, so it is set to the year
+ * we have actually been told.
  */
 export const FOUNDED_YEAR = 2026;
 
@@ -115,52 +114,84 @@ export interface Milestone {
   year: number;
   title: string;
   body: string;
+  /**
+   * Whether the founder has confirmed this entry's date and wording. Only
+   * confirmed entries are shown (see CONFIRMED_TIMELINE).
+   */
+  confirmed: boolean;
 }
 
 /**
- * The journey, carried over from the legacy timeline.
+ * The journey, carried over from the legacy timeline. NONE of it is shown
+ * today.
  *
- * One change: the 2021 entry claimed "20+ vehicles", which contradicts the
- * owner's own figure of 15 sold to date and would have had the same page
- * asserting two different numbers. The milestone is kept; the count is not,
- * because the live counter elsewhere on the page is the number of record.
+ * The years are the legacy ones (2020–2024). The founder has said every
+ * milestone happened in 2026, so the About page was printing "Trading Since
+ * 2026" above a timeline that started in 2020. The last entry also told
+ * Greensboro readers we serve "customers across Nigeria", and the 2022 entry
+ * says "nationwide" without saying which nation.
+ *
+ * Nothing here can be checked from the repository, so every entry is marked
+ * unconfirmed and hidden rather than re-dated by guesswork. To bring one
+ * back: FOUNDER TO SUPPLY its real date and confirm its wording, then set
+ * `confirmed: true`.
+ *
+ * An earlier change: the 2021 entry claimed "20+ vehicles", which contradicts
+ * the owner's own figure of 15 sold to date. The count was removed.
  */
 export const TIMELINE: Milestone[] = [
   {
     year: 2020,
     title: "Foundation",
     body: "Adedayo Aremu Autos was established with a vision to transform the automotive buying experience.",
+    confirmed: false,
   },
   {
     year: 2021,
     title: "First Major Milestone",
     body: "Built a reputation for quality and transparency on the strength of early sales.",
+    confirmed: false,
   },
   {
     year: 2022,
     title: "Digital Expansion",
     body: "Launched our online platform, making vehicle browsing and financing accessible nationwide.",
+    confirmed: false,
   },
   {
     year: 2023,
     title: "Rental & Financing",
     body: "Expanded services to include flexible rental options and tailored financing plans.",
+    confirmed: false,
   },
   {
     year: 2024,
     title: "Building the Hub",
     body: "Working towards a physical dealership hub while serving customers across Nigeria.",
+    confirmed: false,
   },
 ];
+
+/** The milestones the About page may show: the confirmed ones only. */
+export const CONFIRMED_TIMELINE: Milestone[] = TIMELINE.filter((m) => m.confirmed);
 
 export const VALUES: { title: string; body: string }[] = [
   { title: "Integrity", body: "Honest dealings and transparent communication, on every vehicle and every figure." },
   { title: "Excellence", body: "Premium quality in every vehicle we put our name to." },
   { title: "Trust", body: "Long-term client relationships rather than one-off transactions." },
-  { title: "Innovation", body: "Modern systems that make buying, hiring and financing straightforward." },
+  { title: "Innovation", body: "Modern systems that make buying, renting and financing straightforward." },
 ];
 
 /* ── Financing ─────────────────────────────────────────────────────────── */
+
+/**
+ * How soon we say we reply to a form. One phrase, used by the financing page,
+ * its first step, and the contact page, which used to say "within 24 hours"
+ * in some places and "one business day" in others. The referral and sell
+ * pages already say one business day. We are closed some days, so 24 hours
+ * was a promise the opening hours could not keep.
+ */
+export const REPLY_WITHIN = "one business day";
 
 /**
  * Rewritten at the founder's request to read more professionally.
@@ -179,7 +210,7 @@ export const FINANCE_STEPS: Step[] = [
   },
   {
     title: "Get a decision",
-    body: "A member of our finance team reviews your application personally and contacts you, normally within one business day, to talk through the options available to you and answer any questions.",
+    body: `A member of our finance team reviews your application personally and contacts you, normally within ${REPLY_WITHIN}, to talk through the options available to you and answer any questions.`,
   },
   {
     title: "Drive",
@@ -198,14 +229,14 @@ export const FINANCE_STEPS: Step[] = [
  */
 export const ELIGIBILITY: Record<MarketCode, Requirement[]> = {
   us: [
-    { title: "Valid driver's licence", body: "A current, unexpired US driver's licence." },
+    { title: "Valid driver's license", body: "A current, unexpired US driver's license." },
     { title: "Proof of income", body: "Recent pay stubs or bank statements covering the last three months." },
     { title: "Proof of address", body: "A utility bill or lease agreement in your name." },
     { title: "Down payment", body: "Discussed with you on application and based on the vehicle and terms agreed." },
     { title: "Contact details", body: "A working phone number and email address." },
   ],
   ng: [
-    { title: "Valid ID", body: "Driver's licence, international passport, or national ID." },
+    { title: "Valid ID", body: "Driver's license, international passport, or national ID." },
     { title: "Proof of income", body: "Last three months of payslips or bank statements." },
     { title: "Bank verification", body: "A valid BVN (Bank Verification Number)." },
     { title: "Down payment", body: "Minimum 30% of the vehicle value." },
@@ -217,7 +248,7 @@ export const ELIGIBILITY: Record<MarketCode, Requirement[]> = {
 /** Shown wherever financing is discussed. Not legal advice; reviewed content. */
 export const FINANCE_NOTE: Record<MarketCode, string> = {
   us: "Figures produced by the calculator are estimates for your own planning. They are not an offer of credit, a pre-approval, or a commitment to lend. Actual terms depend on your circumstances and are confirmed in writing before anything is signed.",
-  ng: "Figures produced by the calculator are estimates for your own planning. Final terms, deposit and instalment amounts are confirmed in writing before anything is signed.",
+  ng: "Figures produced by the calculator are estimates for your own planning. Final terms, deposit and installment amounts are confirmed in writing before anything is signed.",
 };
 
 export const WHY_US: Record<MarketCode, { title: string; body: string }[]> = {
@@ -232,9 +263,9 @@ export const WHY_US: Record<MarketCode, { title: string; body: string }[]> = {
   ng: [
     { title: "Verified vehicles", body: "Every vehicle is inspected before it is listed." },
     { title: "Documentation handled", body: "Customs papers and transfer of ownership sorted for you." },
-    { title: "Flexible instalments", body: "Payment plans arranged in-house over terms that suit you." },
+    { title: "Flexible installments", body: "Payment plans arranged in-house over terms that suit you." },
     { title: "Nationwide delivery", body: "We arrange delivery anywhere in the country." },
-    { title: "Clear figures", body: "Price, deposit and instalments set out in full before you commit." },
+    { title: "Clear figures", body: "Price, deposit and installments set out in full before you commit." },
     { title: "After the sale", body: "We stay reachable once you have driven away." },
   ],
 };

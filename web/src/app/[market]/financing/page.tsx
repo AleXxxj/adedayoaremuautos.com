@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
 import { MARKETS, isMarketCode } from "@/lib/market";
-import { FINANCE_STEPS, ELIGIBILITY, FINANCE_NOTE } from "@/content/site";
+import { FINANCE_STEPS, ELIGIBILITY, FINANCE_NOTE, REPLY_WITHIN } from "@/content/site";
 import { listInventory } from "@/lib/repositories/vehicles";
 import { listLocations, formatPhone } from "@/lib/repositories/locations";
 import { toMajor, money } from "@/lib/money";
@@ -238,7 +238,8 @@ export default async function FinancingPage({
           <h2>
             Apply for <span>Financing</span>
           </h2>
-          <p>Fill out the form below and we&rsquo;ll get back to you within 24 hours</p>
+          {/* The same promise the first step and the form's thank-you make. */}
+          <p>Fill out the form below and we&rsquo;ll get back to you, usually within {REPLY_WITHIN}</p>
         </div>
 
         {/* Stated where the missing fields were, so it reads as a deliberate

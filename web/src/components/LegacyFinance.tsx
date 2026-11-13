@@ -16,6 +16,7 @@ import {
   type CurrencyCode,
 } from "@/lib/money";
 import { useFormTimer } from "@/lib/useFormTimer";
+import { REPLY_WITHIN } from "@/content/site";
 
 /* ── Calculator ─────────────────────────────────────────────────────────── */
 
@@ -242,8 +243,8 @@ export function LegacyFinanceApplication({
       <div className="application-form">
         <h3>Application received</h3>
         <p>
-          Thank you. We will review it and come back to you — usually within one
-          business day
+          Thank you. We will review it and come back to you — usually within{" "}
+          {REPLY_WITHIN}
           {phone ? (
             <>
               {" "}
