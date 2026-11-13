@@ -41,6 +41,14 @@ export function LegacyNav({
   const open = openedAt === pathname;
   const setOpen = (next: boolean) => setOpenedAt(next ? pathname : null);
 
+  // Forget the menu once the route has changed. Without this the stored route
+  // stayed set after leaving the page, so coming back to that page (by the
+  // tab bar, say) found the menu open again, and it only went away when the
+  // visitor closed it by hand.
+  // Done while rendering (React's pattern for state that follows a prop),
+  // not in an effect.
+  if (openedAt !== null && openedAt !== pathname) setOpenedAt(null);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -68,6 +76,11 @@ export function LegacyNav({
         className={`nav-menu${open ? " active" : ""}`}
         id="navMenu"
         aria-label="Primary"
+        // Any link in the menu closes it, including the link to the page the
+        // visitor is already on, where the route doesn't change.
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest("a")) setOpenedAt(null);
+        }}
       >
         {items.map((n) => {
           // Every entry owns its sub-pages, so a car's page keeps Buy Cars lit.

@@ -48,11 +48,21 @@ export function PartnerBrand({ href = "/us", compact = false }: { href?: string;
   return (
     <Link
       href={href}
-      aria-label="Adedayo Aremu Autos home"
-      className="inline-flex min-h-[44px] min-w-0 items-center rounded-lg text-text-primary"
+      aria-label="Back to the Adedayo Aremu Autos website"
+      className="group inline-flex min-h-[44px] min-w-0 items-center gap-3 rounded-lg text-text-primary"
     >
-      <span className="min-w-0 font-[family-name:var(--font-space-grotesk)] text-[16px] font-extrabold uppercase leading-[1.15] tracking-[0.02em]">
-        Adedayo Aremu <span className={`text-brand-300 ${compact ? "block" : ""}`}>Autos</span>
+      {/* A visible way back: the name alone didn't read as a link home. */}
+      <span
+        aria-hidden="true"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-strong text-text-secondary transition-colors duration-200 ease-out group-hover:border-brand-300 group-hover:text-text-primary motion-reduce:transition-none"
+      >
+        <i className="fas fa-arrow-left" />
+      </span>
+      <span className="min-w-0">
+        <span className="block font-[family-name:var(--font-space-grotesk)] text-[16px] font-extrabold uppercase leading-[1.15] tracking-[0.02em]">
+          Adedayo Aremu <span className={`text-brand-300 ${compact ? "block" : ""}`}>Autos</span>
+        </span>
+        <span className="mt-0.5 block text-[12px] font-semibold text-text-secondary">Back to the website</span>
       </span>
     </Link>
   );
