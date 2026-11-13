@@ -18,6 +18,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/styles/refine.css";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 import { LegacyNav } from "@/components/LegacyNav";
+import { PartnerPill } from "@/components/PartnerPill";
 import { SavedCarsLink } from "@/components/SavedCarsLink";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { CountryNotice } from "@/components/CountryNotice";
@@ -154,15 +155,7 @@ export default async function MarketLayout({
             <SavedCarsLink market={code} />
             {/* The partners' way in, on every page rather than buried in the
                 referral page. "Log in" on a phone, "Partner log in" wider. */}
-            <Link href="/partner/login" className="partner-pill" aria-label="Partner log in">
-              <i className="fas fa-user" aria-hidden="true" />
-              <span className="partner-pill-short" aria-hidden="true">
-                Log in
-              </span>
-              <span className="partner-pill-long" aria-hidden="true">
-                Partner log in
-              </span>
-            </Link>
+            <PartnerPill />
           </div>
         </div>
       </div>

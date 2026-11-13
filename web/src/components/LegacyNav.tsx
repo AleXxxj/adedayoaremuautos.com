@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { usePartnerSession } from "@/lib/usePartnerSession";
 
 /**
  * The header navigation, and the menu it folds into on smaller screens.
@@ -31,6 +32,8 @@ export function LegacyNav({
   switches?: { href: string; market: string; name: string }[];
 }) {
   const pathname = usePathname();
+  // "Log in" becomes "My partner page" for a partner who is logged in.
+  const partner = usePartnerSession();
   // Storing the route the menu was opened on, rather than a plain boolean,
   // closes it on any navigation — link, back button or forward — without an
   // effect that would fire a second render on every route change.
@@ -81,9 +84,9 @@ export function LegacyNav({
           );
         })}
 
-        <Link href="/partner/login" className="nav-extra nav-extra--partner">
-          <i className="fas fa-user" aria-hidden="true" />
-          Partner log in
+        <Link href={partner ? "/partner" : "/partner/login"} className="nav-extra nav-extra--partner">
+          <i className={`fas ${partner ? "fa-user-check" : "fa-user"}`} aria-hidden="true" />
+          {partner ? "My partner page" : "Partner log in"}
         </Link>
         {switches.map((s) => (
           <Link
