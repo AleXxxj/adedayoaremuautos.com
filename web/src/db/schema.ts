@@ -1167,6 +1167,50 @@ export const campaignRecipients = pgTable(
 );
 
 /**
+ * Which guides and articles have been announced to subscribers.
+ *
+ * The email itself is an ordinary campaign. This row is what says "announced",
+ * so the Broadcasts screen stops offering the guide and a second press cannot
+ * send it twice: the partial unique index allows one first announcement per
+ * guide per market, and a deliberate "Send again" is a separate row.
+ *
+ * Migration 0036. Until it is applied the table does not exist; every read
+ * catches that and the announce panel shows itself as not switched on.
+ */
+export const contentAnnouncements = pgTable(
+  "content_announcements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketCode: marketCode("market_code")
+      .notNull()
+      .references(() => markets.code),
+    /** "guide" (src/content/guides) or "article" (src/content/articles.ts). */
+    contentType: text("content_type").notNull(),
+    slug: text("slug").notNull(),
+    /** As announced: the title can change later, this is what went out. */
+    title: text("title").notNull(),
+    /** The one line staff may edit. */
+    intro: text("intro").notNull(),
+    /** The campaign that carried the email; null for notification only. */
+    campaignId: uuid("campaign_id").references(() => campaigns.id, { onDelete: "set null" }),
+    pushSent: integer("push_sent"),
+    pushFailed: integer("push_failed"),
+    sendAgain: boolean("send_again").notNull().default(false),
+    announcedBy: uuid("announced_by"),
+    announcedByEmail: text("announced_by_email"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("content_announcements_once")
+      .on(t.marketCode, t.contentType, t.slug)
+      .where(sql`NOT ${t.sendAgain}`),
+    index("content_announcements_campaign_idx").on(t.campaignId),
+  ],
+);
+
+export type ContentAnnouncement = typeof contentAnnouncements.$inferSelect;
+
+/**
  * Where a partner is in the process.
  *
  * pending   — applied, nobody has looked yet

@@ -32,9 +32,9 @@ export interface RenderOptions {
   phone?: string | null;
 }
 
-const GREEN = "#2a5c42";
-const INK = "#1a1a1a";
-const MUTED = "#6f6f6f";
+export const GREEN = "#2a5c42";
+export const INK = "#1a1a1a";
+export const MUTED = "#6f6f6f";
 const RULE = "#e4e4e4";
 
 export function escapeHtml(s: string): string {
@@ -89,9 +89,17 @@ function vehicleCard(v: CampaignVehicle): string {
 </table>`;
 }
 
-export function renderHtml(o: RenderOptions): string {
-  const cards = (o.vehicles ?? []).map(vehicleCard).join("");
-
+/**
+ * Everything above the message: the document, the card and the brand band.
+ *
+ * Shared with the guide announcement (announceMail.ts), so every email the
+ * list receives opens the same way.
+ *
+ * The card is `width:100%; max-width:600px`, with the `width="600"` attribute
+ * for Outlook. The other way round (600px wide, max-width 100%) does not
+ * shrink inside a table cell, so on a phone the right-hand side was cut off.
+ */
+export function mailOpen(siteBase: string): string {
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Adedayo Aremu Autos</title></head>
@@ -99,18 +107,46 @@ export function renderHtml(o: RenderOptions): string {
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f2f2f2">
 <tr><td align="center" style="padding:24px 12px">
 
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;max-width:100%;background:#ffffff;border-radius:12px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
 
   <!-- Brand band. Dark like the site; the body below stays white to read. -->
   <tr><td style="background:#0a0a0a;padding:24px 28px">
-    <img src="${o.siteBase}/img/logo.png" alt="" width="40" height="40" style="vertical-align:middle;border:0" />
+    <img src="${siteBase}/img/logo.png" alt="" width="40" height="40" style="vertical-align:middle;border:0" />
     <span style="display:inline-block;vertical-align:middle;margin-left:12px;font-size:18px;font-weight:800;letter-spacing:.04em;color:#f0f0f0">
       ADEDAYO AREMU <span style="color:#4e9d76">AUTOS</span>
     </span>
     <div style="margin-top:6px;font-size:11px;letter-spacing:.16em;color:#8f8f8f">
       BUY &bull; RENT &bull; RENT-TO-OWN &bull; FINANCE
     </div>
+  </td></tr>`;
+}
+
+/**
+ * Everything below the message: the postal address and the way off the list.
+ *
+ * Both are required by CAN-SPAM in every commercial email, which is why this
+ * is one function rather than a block each template remembers to copy.
+ */
+export function mailClose(address: string, unsubscribeUrl: string): string {
+  return `  <tr><td style="background:#fafafa;border-top:1px solid ${RULE};padding:20px 28px">
+    <div style="font-size:12px;line-height:1.6;color:${MUTED}">
+      ${escapeHtml(address)}
+    </div>
+    <div style="margin-top:8px;font-size:12px;line-height:1.6;color:${MUTED}">
+      You are receiving this because you subscribed on our website.
+      <a href="${unsubscribeUrl}" style="color:${MUTED};text-decoration:underline">Unsubscribe</a>
+    </div>
   </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
+export function renderHtml(o: RenderOptions): string {
+  const cards = (o.vehicles ?? []).map(vehicleCard).join("");
+
+  return `${mailOpen(o.siteBase)}
 
   <tr><td style="padding:32px 28px 8px">
     ${paragraphs(o.body)}
@@ -125,19 +161,7 @@ export function renderHtml(o: RenderOptions): string {
     ${o.phone ? `<div style="margin-top:16px;font-size:14px;color:${MUTED}">Or call us on <a href="tel:${o.phone}" style="color:${GREEN};font-weight:600">${escapeHtml(o.phone)}</a></div>` : ""}
   </td></tr>
 
-  <tr><td style="background:#fafafa;border-top:1px solid ${RULE};padding:20px 28px">
-    <div style="font-size:12px;line-height:1.6;color:${MUTED}">
-      ${escapeHtml(o.address)}
-    </div>
-    <div style="margin-top:8px;font-size:12px;line-height:1.6;color:${MUTED}">
-      You are receiving this because you subscribed on our website.
-      <a href="${o.unsubscribeUrl}" style="color:${MUTED};text-decoration:underline">Unsubscribe</a>
-    </div>
-  </td></tr>
-
-</table>
-</td></tr></table>
-</body></html>`;
+${mailClose(o.address, o.unsubscribeUrl)}`;
 }
 
 /**

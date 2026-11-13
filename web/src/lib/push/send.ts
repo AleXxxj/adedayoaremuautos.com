@@ -72,11 +72,12 @@ const CONCURRENCY = 20;
 export async function pushToMarket(
   market: MarketCode,
   payload: PushPayload,
+  database: typeof db = db,
 ): Promise<PushResult> {
   const problem = configure();
   if (problem) return { sent: 0, failed: 0, pruned: 0, error: problem };
 
-  const rows = await db
+  const rows = await database
     .select()
     .from(pushSubscriptions)
     .where(eq(pushSubscriptions.marketCode, market));
@@ -118,10 +119,10 @@ export async function pushToMarket(
   }
 
   if (dead.length > 0) {
-    await db.delete(pushSubscriptions).where(inArray(pushSubscriptions.endpoint, dead));
+    await database.delete(pushSubscriptions).where(inArray(pushSubscriptions.endpoint, dead));
   }
   if (shaky.length > 0) {
-    await db
+    await database
       .update(pushSubscriptions)
       .set({ failureCount: sql`${pushSubscriptions.failureCount} + 1` })
       .where(inArray(pushSubscriptions.endpoint, shaky));
@@ -129,7 +130,7 @@ export async function pushToMarket(
   if (ok.length > 0) {
     // Anything that accepted a message is healthy again, whatever it did last
     // time. Listing the successes is clearer than excluding the failures.
-    await db
+    await database
       .update(pushSubscriptions)
       .set({ failureCount: 0, lastSeenAt: new Date() })
       .where(inArray(pushSubscriptions.endpoint, ok));

@@ -19,7 +19,7 @@ This is the Next.js app. The HTML files one folder up are the original site and 
 | `npm run build` | Everything that must pass before a push: design tokens, contrast check, copy check, every test suite, then the production build |
 | `npm run lint` | ESLint |
 | `npm run check:copy` | The American English check on its own |
-| `npm run test:<name>` | One suite: `schema`, `deal`, `amort`, `ledger`, `rental`, `payout`, `holds`, `referrals`, `vin`, `sell`, `home`, `cars`, `value`, `guides` |
+| `npm run test:<name>` | One suite: `schema`, `deal`, `amort`, `ledger`, `rental`, `payout`, `holds`, `referrals`, `vin`, `sell`, `home`, `cars`, `value`, `guides`, `announce` |
 
 The test suites are scripts in `scripts/verify-*`. They run pure logic, or the real migrations in an in-memory Postgres; none touches the live database.
 

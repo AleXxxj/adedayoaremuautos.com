@@ -12,6 +12,11 @@ import { ContinueCampaign } from "@/components/admin/ContinueCampaign";
 import { PushComposer } from "@/components/admin/PushComposer";
 import { DigestPanel } from "@/components/admin/DigestPanel";
 import { pushAudience } from "@/lib/push/send";
+import { AnnouncePanel, type AnnounceItem } from "@/components/admin/AnnouncePanel";
+import { announceables } from "@/lib/campaign/announceContent";
+import { listAnnounced } from "@/lib/campaign/announceRecord";
+import { mailingAddress } from "@/lib/campaign/send";
+import { siteUrl } from "@/lib/siteUrl";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +77,32 @@ export default async function AdminCampaignsPage() {
   const pushReach: Record<string, number> = {};
   for (const m of markets) pushReach[m] = await pushAudience(m);
 
+  // Guides and articles, and which of them subscribers have been told about.
+  // Before migration 0036 the record does not exist: `ready` is false and the
+  // panel shows its drafts with Send switched off.
+  const announced = await listAnnounced(markets);
+  const day = (d: Date) =>
+    d.toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "America/New_York" });
+  const announceItems: AnnounceItem[] = markets.flatMap((m) =>
+    announceables(m).map((item) => {
+      // Rows are newest first, so the last match is the first announcement.
+      const first = announced.rows.findLast(
+        (r) => r.marketCode === m && r.contentType === item.kind && r.slug === item.slug,
+      );
+      return {
+        ...item,
+        publishedLabel: item.published
+          ? new Date(`${item.published}T12:00:00Z`).toLocaleDateString("en-US", {
+              dateStyle: "medium",
+              timeZone: "UTC",
+            })
+          : null,
+        announcedLabel: first ? day(first.createdAt) : null,
+      };
+    }),
+  );
+  const announcementCampaigns = new Set(announced.rows.map((r) => r.campaignId));
+
   const history = await db
     .select()
     .from(campaigns)
@@ -92,6 +123,16 @@ export default async function AdminCampaignsPage() {
         </div>
 
         <CampaignComposer markets={markets} audience={audience} stock={stock} />
+
+        <AnnouncePanel
+          markets={markets}
+          items={announceItems}
+          emailAudience={audience}
+          pushAudience={pushReach}
+          ready={announced.ready}
+          siteBase={siteUrl()}
+          address={mailingAddress()}
+        />
 
         <PushComposer markets={markets} audience={pushReach} />
 
@@ -123,6 +164,11 @@ export default async function AdminCampaignsPage() {
                         {c.kind === "weekly_digest" && (
                           <span className="rounded-full border border-[var(--border-default)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
                             weekly digest
+                          </span>
+                        )}
+                        {announcementCampaigns.has(c.id) && (
+                          <span className="rounded-full border border-[var(--border-default)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+                            announcement
                           </span>
                         )}
                         {c.status === "sending" && (
