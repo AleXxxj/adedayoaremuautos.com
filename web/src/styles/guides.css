@@ -1417,12 +1417,14 @@
     background: var(--surface-2);
 }
 
+/* The line is full width and scaled to its share, so filling it never lays the page out again. */
 .legacy-theme .ck-bar span {
     display: block;
     height: 100%;
     border-radius: inherit;
     background: var(--text-primary);
-    transition: width 240ms ease-out;
+    transform-origin: left;
+    transition: transform 620ms cubic-bezier(0.2, 0.9, 0.25, 1);
 }
 
 .legacy-theme .ck-tally {
@@ -1845,12 +1847,14 @@
     background: var(--surface-2);
 }
 
+/* Full width, scaled to its share: progress flows to its new length and no layout is done. */
 .legacy-theme .gm-progress-bar span {
     display: block;
     height: 100%;
     border-radius: 999px;
     background: var(--text-primary);
-    transition: width 320ms ease-out;
+    transform-origin: left;
+    transition: transform 620ms cubic-bezier(0.2, 0.9, 0.25, 1);
 }
 
 .legacy-theme .gm-progress-text,
@@ -2569,27 +2573,41 @@
     background: var(--surface-2);
 }
 
+/* The filled stretch is scaled and the marker slid, both by --far (the
+   trip's share of the farthest one), so the road runs out with no layout. */
 .legacy-theme .gm-road-line span {
-    position: relative;
     display: block;
     height: 100%;
-    min-width: 12px;
     border-radius: 999px;
     background: var(--text-primary);
-    transition: width 320ms ease-out;
+    transform: scaleX(var(--far, 0));
+    transform-origin: left;
+    transition: transform 720ms cubic-bezier(0.3, 0, 0.2, 1);
 }
 
-.legacy-theme .gm-road-line span::after {
+/* The marker's box lies to the left of the road and slides in from there:
+   it never reaches past the road's right end, so it can't widen the page. */
+.legacy-theme .gm-road-line i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -100%;
+    width: 100%;
+    transform: translateX(calc(var(--far, 0) * 100%));
+    transition: transform 720ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.legacy-theme .gm-road-line i::after {
     content: "";
     position: absolute;
     top: 50%;
     right: -6px;
     width: 12px;
     height: 12px;
+    margin-top: -6px;
     border: 2px solid var(--surface-1);
     border-radius: 50%;
     background: var(--text-primary);
-    transform: translateY(-50%);
 }
 
 .legacy-theme .gm-miles {
@@ -2678,7 +2696,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .legacy-theme :is(.gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gm-progress-bar span, .gm-road-line span) {
+    .legacy-theme :is(.gm-option, .gm-choice, .gm-price, .gm-place, .gm-duel-card, .gm-progress-bar span, .gm-road-line span, .gm-road-line i) {
         transition: none;
     }
 

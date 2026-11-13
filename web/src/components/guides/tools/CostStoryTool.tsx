@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
@@ -16,7 +16,8 @@ import {
   type StoryPicks,
   type StoryStep,
 } from "../gameMath";
-import { FriendNote, Progress, useHash, useStepFocus } from "./gameKit";
+import { signalScene } from "../motion/sceneKit";
+import { FriendNote, Progress, useCarry, useHash, useStepFocus } from "./gameKit";
 
 interface StoryCar {
   slug: string;
@@ -60,6 +61,10 @@ export function CostStoryTool({
   // -1 is choosing the car; steps.length is the ending.
   const [at, setAt] = useState(-1);
   const { ref, moved } = useStepFocus<HTMLHeadingElement>(at);
+  // The chosen car's photo travels from the pair to the corner of the story.
+  const { ref: carried, take } = useCarry<HTMLSpanElement>(side);
+  // The road at the top of the page follows the story.
+  useEffect(() => signalScene({ tool: "cost-story", side, at }), [side, at]);
   const friend = parseGotHash(
     useHash(),
     endings.map((e) => e.id),
@@ -74,7 +79,8 @@ export function CostStoryTool({
     setAt(next);
   }
 
-  function choose(s: Side) {
+  function choose(s: Side, from: Element | null) {
+    take(from);
     setSide(s);
     go(0);
   }
@@ -109,7 +115,7 @@ export function CostStoryTool({
         )}
         <div className="gm-duel" role="group" aria-label="Which one do you buy?">
           {sides.map((s) => (
-            <button key={s.id} type="button" className="gm-duel-card" onClick={() => choose(s.id)}>
+            <button key={s.id} type="button" className="gm-duel-card" onClick={(e) => choose(s.id, e.currentTarget.querySelector(".gm-duel-photo"))}>
               {s.car?.image && (
                 <span className="gm-duel-photo">
                   <Image
@@ -226,6 +232,8 @@ export function CostStoryTool({
   const chosen = step.choices.find((c) => c.id === picks[step.id]) ?? null;
   const last = at === steps.length - 1;
 
+  const mine = pair ? pair[side] : null;
+
   return (
     <div className="gt gm">
       <Progress
@@ -233,14 +241,27 @@ export function CostStoryTool({
         of={steps.length + 1}
         label={`Choice ${at + 1} of ${steps.length} · ${chances} left to chance`}
       />
-      <p className="gm-when">
+      {mine && (
+        <p className="gm-mycar">
+          {mine.image && (
+            <span className="gm-mycar-photo" ref={carried}>
+              <Image src={mine.image} alt="" fill sizes="96px" unoptimized={!canResize(mine.image)} />
+            </span>
+          )}
+          <span>
+            Your car
+            <strong>{mine.name}</strong>
+          </span>
+        </p>
+      )}
+      <p className="gm-when gm-in" key={`when-${step.id}`}>
         <i className={`fas ${step.icon}`} aria-hidden="true" />
         {step.when}
       </p>
-      <h3 className="gm-ask" tabIndex={-1} ref={ref}>
+      <h3 className="gm-ask gm-in" key={`ask-${step.id}`} tabIndex={-1} ref={ref}>
         {step.ask}
       </h3>
-      <div className="gm-pair" role="group" aria-label={step.ask}>
+      <div className="gm-pair gm-in" key={`pair-${step.id}`} role="group" aria-label={step.ask}>
         {step.choices.map((c) => (
           <button
             key={c.id}

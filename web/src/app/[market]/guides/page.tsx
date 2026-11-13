@@ -6,7 +6,10 @@ import { GUIDE_GROUPS } from "@/content/guides";
 import { BUSINESS } from "@/content/guides/format";
 import { loadGuideData } from "@/components/guides/loadGuideData";
 import { GuideCards, guideCards } from "@/components/guides/GuideCards";
+import { CardMotion } from "@/components/guides/motion/CardMotion";
+import { ScrollLife } from "@/components/guides/motion/ScrollLife";
 import "@/styles/guides.css";
+import "@/styles/guides-motion.css";
 
 /** Cached and revalidated, like the guides themselves: the cards carry live figures. */
 export const revalidate = 300;
@@ -89,6 +92,9 @@ export default async function GuidesPage({ params }: { params: Promise<{ market:
 
   return (
     <div className="gd-page">
+      {/* Groups ease in as they are reached; cards lean to the pointer and play a small preview of their guide. */}
+      <ScrollLife />
+      <CardMotion />
       {jsonLd.map((node) => (
         <script
           key={node["@type"]}

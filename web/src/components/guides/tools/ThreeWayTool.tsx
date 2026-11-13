@@ -1,12 +1,14 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
 import type { OwnershipTier } from "@/lib/rentToOwn";
 import type { GuideRentCar } from "@/content/guides/types";
 import { LENGTHS, type LengthKey, type Way } from "../guideMath";
 import { threeWay, verdict } from "../threeWay";
+import { signalScene } from "../motion/sceneKit";
+import { CountUp } from "./gameKit";
 
 /**
  * Tap how long you need a car, see three figures side by side: renting that
@@ -48,7 +50,11 @@ export function ThreeWayTool({
 }) {
   const [key, setKey] = useState<LengthKey>("3m");
   const label = useId();
+  // The three lanes at the top of the page run to the same figures.
+  useEffect(() => signalScene({ tool: "three-way", key }), [key]);
   const fmt = (minor: number) => formatMoney(money(minor, currency), locale);
+  // Counted in whole dollars: the figure climbs to the real one and stops on it.
+  const counted = (minor: number) => <CountUp value={minor / 100} format={(n) => fmt(Math.round(n * 100))} />;
   const length = LENGTHS.find((l) => l.key === key)!;
   const f = threeWay({ rent, buyLowestMinor: buy?.lowestMinor ?? null, tier }, length.days);
   const lowest = (way: Way) => f.lowest.length === 1 && f.lowest[0] === way;
@@ -78,7 +84,7 @@ export function ThreeWayTool({
           <span className="gt-way-label">
             <i className="fas fa-key" aria-hidden="true" /> Rent
           </span>
-          <strong className="gt-way-figure">{f.rent ? fmt(f.rent.cost.rentMinor) : "—"}</strong>
+          <strong className="gt-way-figure">{f.rent ? counted(f.rent.cost.rentMinor) : "—"}</strong>
           <span className="gt-way-sub">{f.rent ? `for ${length.phrase}` : "Not that long"}</span>
           {lowest("rent") && <span className="gt-tag">Lowest</span>}
         </div>
@@ -94,7 +100,7 @@ export function ThreeWayTool({
           <span className="gt-way-label">
             <i className="fas fa-hand-holding-heart" aria-hidden="true" /> Rent to own
           </span>
-          <strong className="gt-way-figure">{f.own ? fmt(f.own.paidMinor) : "—"}</strong>
+          <strong className="gt-way-figure">{f.own ? counted(f.own.paidMinor) : "—"}</strong>
           <span className="gt-way-sub">
             {f.own ? (f.own.owned ? "and it's yours" : `of ${fmt(f.own.totalMinor)}`) : "Not offered"}
           </span>

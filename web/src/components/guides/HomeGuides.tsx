@@ -5,6 +5,8 @@ import { GuideCards, guideCards } from "./GuideCards";
 // Here, not in the home page: the section brings its own sheet, so the page
 // that shows it needs one import and one line.
 import "@/styles/guides.css";
+// The cards' small previews.
+import "@/styles/guides-motion.css";
 
 /**
  * The home page's "Guides" section (US only): three guides as cards, and a

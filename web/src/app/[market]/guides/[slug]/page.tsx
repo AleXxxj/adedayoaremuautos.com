@@ -11,9 +11,13 @@ import { guideUpdated, readMinutes } from "@/components/guides/guideMath";
 import { GuideCards, guideCards } from "@/components/guides/GuideCards";
 import { GuideCarCard } from "@/components/guides/GuideCarCard";
 import { GuideTool } from "@/components/guides/GuideTool";
+import { GuideScene } from "@/components/guides/motion/GuideScene";
+import { ScrollLife } from "@/components/guides/motion/ScrollLife";
+import { sceneFor } from "@/components/guides/motion/sceneData";
 import { Rich } from "@/components/guides/Rich";
 import { ShareButton } from "@/components/guides/ShareButton";
 import "@/styles/guides.css";
+import "@/styles/guides-motion.css";
 
 /**
  * Cached and revalidated, like the other public pages: a guide's numbers are
@@ -157,6 +161,8 @@ export default async function GuidePage({
   const words = guide.words(data);
   const cards = guideCards(data);
   const photo = cards.find((c) => c.slug === slug)?.photo ?? null;
+  // The moving picture under the title: today's figures and real cars, or nothing.
+  const scene = sceneFor(meta.tool, data, photo);
   const updated = guideUpdated(meta, data);
   const minutes = readMinutes(words);
   const base = siteUrl();
@@ -237,6 +243,8 @@ export default async function GuidePage({
 
   return (
     <article className="gd-page">
+      {/* Sections ease in as they are reached, figures count up, and a line under the header shows how far along the page is. */}
+      <ScrollLife progress />
       {jsonLd.map((node) => (
         <script
           key={node["@type"]}
@@ -264,6 +272,8 @@ export default async function GuidePage({
             <span>{minutes} min read</span>
           </p>
         </header>
+
+        {scene && <GuideScene scene={scene} currency={data.currency} locale={data.locale} />}
 
         {/* A game is played before it is read about: it comes first. */}
         {meta.game ? (

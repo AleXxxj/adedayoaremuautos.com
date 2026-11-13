@@ -85,10 +85,11 @@ export function LifeQuizTool({
           </FriendNote>
         )}
         <Progress done={step} of={questions.length} label={`Question ${step + 1} of ${questions.length}`} />
-        <h3 className="gm-ask" tabIndex={-1} ref={ref}>
+        {/* Keyed by the question: each one is dealt in, its answers one after another. */}
+        <h3 className="gm-ask gm-in" key={`ask-${q.id}`} tabIndex={-1} ref={ref}>
           {q.ask}
         </h3>
-        <div className="gm-options" role="group" aria-label={q.ask}>
+        <div className="gm-options gm-deal" key={q.id} role="group" aria-label={q.ask}>
           {q.options.map((o) => (
             <button
               key={o.id}

@@ -97,7 +97,8 @@ export function WeeksTool({
         )}
       </p>
 
-      <ol className="gt-rows">
+      {/* Keyed by the length: the new totals arrive one row after another. */}
+      <ol className="gt-rows gt-rows--in" key={weeks}>
         {rows.map(({ car, cost }, i) => (
           <li key={car.slug} hidden={!all && i >= FIRST}>
             <Link href={`/us/rentals/${car.slug}`} className="gt-row">

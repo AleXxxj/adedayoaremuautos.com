@@ -9,6 +9,8 @@ import { PRICE_RANKS, priceShareText } from "@/content/guides/priceGame";
 import type { GuideSaleCar } from "@/content/guides/types";
 import { GuideCarCard } from "../GuideCarCard";
 import { ShareButton } from "../ShareButton";
+import { Gauge } from "../motion/Gauge";
+import { gaugeAngle, gaugeWord } from "../motion/sceneMath";
 import { parseScoreHash, priceRounds, priceScore, rankFor, scoreHash } from "../gameMath";
 import { CountUp, FriendNote, Progress, parseBest, useHash, useStepFocus, useStored } from "./gameKit";
 
@@ -198,7 +200,8 @@ export function PriceGameTool({
         label={`Round ${at + 1} of ${rounds.length} · Score ${score}`}
       />
 
-      <div className="gm-photo">
+      {/* Keyed by the car: each round's photo arrives, it doesn't blink in. */}
+      <div className="gm-photo gm-photo--in" key={car.slug}>
         {car.image && (
           <Image
             src={car.image}
@@ -210,7 +213,7 @@ export function PriceGameTool({
           />
         )}
       </div>
-      <h3 className="gm-ask" tabIndex={-1} ref={ref}>
+      <h3 className="gm-ask gm-in" key={`name-${car.slug}`} tabIndex={-1} ref={ref}>
         {car.name}
       </h3>
       <p className="gm-sub">
@@ -219,7 +222,7 @@ export function PriceGameTool({
         {" · What is the price?"}
       </p>
 
-      <div className="gm-prices" role="group" aria-label={`Price of the ${car.name}`}>
+      <div className="gm-prices gm-in" key={`prices-${car.slug}`} role="group" aria-label={`Price of the ${car.name}`}>
         {round.optionsMinor.map((minor) => {
           const isAnswer = minor === car.priceMinor;
           const state = !done ? undefined : isAnswer ? "right" : minor === picked ? "wrong" : "off";
@@ -242,15 +245,24 @@ export function PriceGameTool({
         })}
       </div>
 
-      <div className="gm-reveal" role="status" aria-live="polite">
+      <div className="gm-reveal gm-reveal--gauge" role="status" aria-live="polite">
         {done && (
-          <p className="gm-reveal-line" data-right={right || undefined}>
-            <span>{right ? "Right." : "Not this time."} It is listed at</span>{" "}
-            <strong>
-              {/* Counted in whole dollars, so no cents flicker on the way up. */}
-              <CountUp value={car.priceMinor / 100} format={(n) => fmt(Math.round(n * 100))} />
-            </strong>
-          </p>
+          <>
+            {/* The needle rests where the guess was: under the price, on it, or over it. */}
+            <Gauge angle={gaugeAngle(picked, car.priceMinor)} />
+            <p className="gm-reveal-line" data-right={right || undefined}>
+              <span>
+                {right
+                  ? "Right."
+                  : `${fmt(Math.abs(picked - car.priceMinor))} too ${gaugeWord(picked, car.priceMinor)}.`}{" "}
+                It is listed at
+              </span>{" "}
+              <strong>
+                {/* Counted in whole dollars, so no cents flicker on the way up. */}
+                <CountUp value={car.priceMinor / 100} format={(n) => fmt(Math.round(n * 100))} />
+              </strong>
+            </p>
+          </>
         )}
       </div>
 

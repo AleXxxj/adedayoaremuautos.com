@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
@@ -9,6 +9,7 @@ import { TRIP_MILEAGE_NOTE, tripShareText, type TripPlace } from "@/content/guid
 import type { GuideRentCar } from "@/content/guides/types";
 import { ShareButton } from "../ShareButton";
 import { TRIP_DAYS, roundTripMiles, tripCost } from "../gameMath";
+import { signalScene } from "../motion/sceneKit";
 import { CountUp, FriendNote, useHash, useStepFocus } from "./gameKit";
 
 /** Cars shown before "Show all". */
@@ -58,6 +59,8 @@ export function RoadTripTool({
   const placeId = pickedPlace ?? shared?.place ?? null;
   const days = pickedDays ?? shared?.days ?? TRIP_DAYS[0];
   const { ref, moved } = useStepFocus<HTMLHeadingElement>(placeId);
+  // The map at the top of the page drives to the same place.
+  useEffect(() => signalScene({ tool: "road-trip", place: placeId }), [placeId]);
 
   const fmt = (minor: number) => formatMoney(money(minor, currency), locale);
   const num = (n: number) => new Intl.NumberFormat(locale).format(n);
@@ -110,8 +113,10 @@ export function RoadTripTool({
           <p className="gm-sub">{place.line}</p>
 
           <div className="gm-road" aria-hidden="true">
-            <span className="gm-road-line">
-              <span style={{ width: `${Math.round((place.miles / farthest) * 100)}%` }} />
+            {/* Scaled, not resized: the road runs out to the place without a layout. */}
+            <span className="gm-road-line" style={{ "--far": (place.miles / farthest).toFixed(3) } as CSSProperties}>
+              <span />
+              <i />
             </span>
           </div>
           <dl className="gt-facts gm-miles">
@@ -169,7 +174,7 @@ export function RoadTripTool({
                 )}
               </p>
 
-              <ol className="gt-rows">
+              <ol className="gt-rows gt-rows--in" key={days}>
                 {trip.rows.map(({ car, cost }, i) => (
                   <li key={car.slug} hidden={!all && i >= FIRST}>
                     <Link href={`/us/rentals/${car.slug}`} className="gt-row">
