@@ -76,6 +76,7 @@ export function NotifyPrompt({ market }: { market: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    let watcher: MutationObserver | null = null;
 
     void (async () => {
       const views = bumpViews();
@@ -116,20 +117,40 @@ export function NotifyPrompt({ market }: { market: string }) {
       // A breath after the page settles, so it does not arrive mid-paint.
       // Shorter in an installed app, where it is the expected next step rather
       // than an interruption.
-      const timer = window.setTimeout(
-        () => {
+      const reveal = (after: number) =>
+        window.setTimeout(() => {
           if (!cancelled) {
             setState(current);
             setShow(true);
           }
-        },
-        installed ? 900 : 2500,
-      );
-      return () => window.clearTimeout(timer);
+        }, after);
+
+      // On a guide the reader is in the middle of a game or a tool, and this
+      // card covers the lower half of a phone. It waits for the game's result
+      // to be on screen (.gm-result, or the trip's prices), then a few seconds
+      // more. A guide with no ending (a calculator) is never interrupted.
+      if (/\/guides\/[^/]+/.test(window.location.pathname)) {
+        const ended = () => document.querySelector(".gm-result, .gm-trip") !== null;
+        if (ended()) {
+          reveal(4000);
+          return;
+        }
+        watcher = new MutationObserver(() => {
+          if (!ended()) return;
+          watcher?.disconnect();
+          watcher = null;
+          reveal(4000);
+        });
+        watcher.observe(document.body, { childList: true, subtree: true });
+        return;
+      }
+
+      reveal(installed ? 900 : 2500);
     })();
 
     return () => {
       cancelled = true;
+      watcher?.disconnect();
     };
   }, []);
 
