@@ -232,6 +232,13 @@
       "when": 1794400000000,
       "tag": "0032_vin_check_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794486400000,
+      "tag": "0033_price_alerts",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,230 @@
+/*
+ * "Tell me if the price drops" (components/cars/PriceAlert.tsx).
+ *
+ *   .pa          the control: a quiet outline button, or "we tell you" + stop
+ *   .pa--page    under a car's price
+ *   .pa--card    under a saved car's card
+ *   .pa-sheet    the sheet's own parts; the sheet itself is cars.css's .cd-sheet
+ *
+ * White and silver only. The one green thing on a car's page is "I'm
+ * interested"; in the sheet it is the first way offered.
+ */
+
+.legacy-theme .pa {
+    min-width: 0;
+}
+
+.legacy-theme .pa--page {
+    margin-top: 14px;
+    /* A push notification lands here; keep it clear of the fixed header. */
+    scroll-margin-top: 110px;
+}
+
+.legacy-theme .pa--card {
+    margin-top: 8px;
+}
+
+.legacy-theme .pa-ask {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-sizing: border-box;
+    max-width: 100%;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        background-color 180ms ease-out,
+        border-color 180ms ease-out;
+}
+
+.legacy-theme .pa--card .pa-ask {
+    width: 100%;
+    font-size: 15px;
+}
+
+.legacy-theme .pa-ask i {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-ask[disabled] {
+    opacity: 0.7;
+}
+
+@media (hover: hover) {
+    .legacy-theme .pa-ask:hover {
+        border-color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
+.legacy-theme :is(.pa-ask, .pa-stop):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+/* On: one line that says so, and the way out beside it. */
+.legacy-theme .pa-on {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+    min-width: 0;
+}
+
+.legacy-theme .pa--card .pa-on {
+    padding: 4px 14px 0;
+}
+
+.legacy-theme .pa-on-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-primary);
+}
+
+.legacy-theme .pa-on-text i {
+    flex: none;
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-stop {
+    min-height: 44px;
+    padding: 0 8px;
+    margin-left: -8px;
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+.legacy-theme .pa-note,
+.legacy-theme .pa-error {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-note:empty {
+    display: none;
+}
+
+.legacy-theme .pa-error {
+    color: var(--danger);
+}
+
+.legacy-theme .pa--card :is(.pa-note, .pa-error) {
+    padding: 0 14px;
+}
+
+/* ── The sheet ────────────────────────────────────────────────────────── */
+
+.legacy-theme .pa-sheet-lead {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-ways {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.legacy-theme .pa-ways .cd-btn {
+    width: 100%;
+}
+
+.legacy-theme .pa-ways .cd-btn[disabled] {
+    opacity: 0.6;
+}
+
+.legacy-theme .pa-hint {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-hint i {
+    flex: none;
+    margin-top: 3px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .pa-hint strong {
+    color: var(--text-primary);
+}
+
+.legacy-theme .pa-email {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+}
+
+.legacy-theme .pa-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.legacy-theme .pa-fine {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+/* ── A saved car's card, with the control under it ────────────────────── */
+
+.legacy-theme .cc--extra {
+    display: flex;
+    flex-direction: column;
+}
+
+.legacy-theme .cc--extra .cc-link {
+    flex: 1 1 auto;
+    height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legacy-theme .pa-ask {
+        transition: none;
+    }
+}

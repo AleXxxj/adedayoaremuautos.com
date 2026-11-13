@@ -6,6 +6,7 @@ import { requireStaff, allowedMarkets } from "@/lib/auth";
 import { AdminChrome } from "../layout";
 import { MARKETS } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
+import { watcherCounts } from "@/lib/alerts/store";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,10 @@ export default async function AdminVehiclesPage() {
     )
     .orderBy(desc(vehicles.updatedAt))
     .limit(200);
+
+  // People who asked to hear if a car's price drops. Empty until migration
+  // 0033 is applied, and while nobody has asked.
+  const watchers = await watcherCounts(rows.map((r) => r.id));
 
   return (
     <AdminChrome email={user.email} role={user.role}>
@@ -95,6 +100,12 @@ export default async function AdminVehiclesPage() {
                         <div className="text-xs text-[var(--text-muted)]">
                           {v.vin ?? v.chassisNo ?? "no identifier"}
                         </div>
+                        {(watchers.get(v.id) ?? 0) > 0 && (
+                          <div className="mt-1 text-xs font-medium text-[var(--text-secondary)]">
+                            <i className="fas fa-bell mr-1.5" aria-hidden="true" />
+                            {watchers.get(v.id)} {watchers.get(v.id) === 1 ? "person" : "people"} watching the price
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 uppercase text-[var(--text-muted)]">
                         {v.marketCode}

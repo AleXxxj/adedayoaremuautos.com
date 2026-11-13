@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { CarCard } from "@/components/cars/CarCard";
 import { BodyChips, ListHead } from "@/components/cars/ListChrome";
 import { SavedCars, SavedCount } from "@/components/cars/Saved";
+import { mailConfigured, priceAlertsEnabled } from "@/lib/alerts/rules";
 import { priceCeilings, spread } from "@/components/home/homeData";
 import {
   bodyCounts,
@@ -284,7 +285,12 @@ export default async function InventoryPage({
         )}
 
         {showSaved ? (
-          <SavedCars market={code} kind="sale" allHref={path} />
+          <SavedCars
+            market={code}
+            kind="sale"
+            allHref={path}
+            alerts={priceAlertsEnabled() ? { email: mailConfigured() } : undefined}
+          />
         ) : vehicles.length === 0 ? (
           /* An empty filter and an empty market are different situations.
              Showing one message for both is what makes a page read broken:
