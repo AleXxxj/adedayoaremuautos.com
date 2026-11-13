@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { MARKETS, isMarketCode } from "@/lib/market";
 import { formatMoney, money } from "@/lib/money";
 import { canResize } from "@/lib/photo";
+import { listInventory } from "@/lib/repositories/vehicles";
+import { mediaUrl } from "@/lib/media";
 import { listFleet } from "@/lib/repositories/rentals";
 import {
   DEFAULT_RENTAL_COMMISSION_BPS,
@@ -174,12 +176,30 @@ export default async function ReferralPage({
   // rate and amount as the first card under it.
   const lead = examples[0];
   const leadPhoto = lead ? (photo.get(lead.id) ?? null) : null;
+  // Behind the words: a real car from the lot, so the top of the page isn't a blank dark panel. It is dimmed in
+  // the stylesheet until the headline passes contrast on a bright photo.
+  // The newest car for sale's main photo: those are outdoor shots of the whole
+  // car, where a rental car's first photo is sometimes its interior.
+  const { vehicles: newest } = await listInventory(code, { limit: 4, sort: "newest" });
+  const outdoor = newest.find((v) => v.primaryImage)?.primaryImage;
+  const backdrop = outdoor ? mediaUrl(outdoor) : (leadPhoto ?? "/img/hero-wide.png");
   // A partner's link as it is written, with a stand-in for the code.
   const sampleLink = referralLink(siteUrl(), "YOURCODE").replace(/^https?:\/\/(www\.)?/, "");
 
   return (
     <div className="rf">
       <section className="rf-hero" aria-labelledby="rf-title">
+        <div className="rf-hero-bg" aria-hidden="true">
+          <Image
+            src={backdrop}
+            alt=""
+            fill
+            sizes="100vw"
+            loading="eager"
+            fetchPriority="high"
+            unoptimized={!canResize(backdrop)}
+          />
+        </div>
         <div className="rf-wrap rf-hero-grid">
           <div className="rf-hero-copy">
             <p className="rf-eyebrow">Referral program</p>

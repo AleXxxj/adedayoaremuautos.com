@@ -859,3 +859,26 @@
         margin-top: 12px;
     }
 }
+
+/* The hero's backdrop: a real rental car behind the words (the developer
+   found the plain dark panel empty). The photo is shown faintly and under a
+   dark fade that is strongest on the left, where the words are, so white
+   and green text keep their contrast whatever the photo. */
+.legacy-theme .rf-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+.legacy-theme .rf-hero-bg img {
+    object-fit: cover;
+    object-position: center 40%;
+    opacity: 0.8;
+}
+.legacy-theme .rf-hero-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(7, 12, 10, 0.6) 0%, rgba(7, 12, 10, 0.5) 34%, rgba(7, 12, 10, 0.88) 72%, var(--surface-0) 100%),
+        linear-gradient(90deg, rgba(7, 12, 10, 0.55) 0%, rgba(7, 12, 10, 0) 70%);
+}
