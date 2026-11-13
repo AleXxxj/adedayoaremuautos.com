@@ -253,6 +253,13 @@
       "when": 1794700000000,
       "tag": "0035_rental_extensions",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794700000000,
+      "tag": "0036_content_announcements",
+      "breakpoints": true
     }
   ]
 }

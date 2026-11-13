@@ -10,6 +10,10 @@ import { mediaUrl } from "@/lib/media";
 import { formatMoney, money } from "@/lib/money";
 import { MARKETS, formatDistance, type MarketCode } from "@/lib/market";
 import { listLocations } from "@/lib/repositories/locations";
+import { announcementForCampaign } from "./announceRecord";
+import { findAnnounceable } from "./announceContent";
+import { draftFor, type AnnounceDraft, type AnnounceKind } from "./announceDraft";
+import { renderAnnouncementHtml, renderAnnouncementText } from "./announceMail";
 
 /**
  * Resend accepts up to 100 messages per batch call. Each recipient gets their
@@ -28,6 +32,17 @@ const BATCH_SIZE = 100;
  * unique constraint on (campaign, email) means a retry cannot double-send.
  */
 const PER_RUN = 400;
+
+/**
+ * The postal address in every footer. CAN-SPAM requires a valid physical
+ * address in commercial email; the default is used when the setting is absent.
+ */
+export function mailingAddress(): string {
+  return (
+    process.env.MAILING_ADDRESS ??
+    "Adedayo Aremu Autos, 507 Gillespie St, Greensboro, NC 27401, USA"
+  );
+}
 
 export interface SendProgress {
   attempted: number;
@@ -100,8 +115,12 @@ async function resolveVehicles(
  * the snapshot is still excluded — see the filter below, which is re-checked
  * per batch.
  */
-export async function snapshotAudience(campaignId: string, market: string): Promise<number> {
-  const subs = await db
+export async function snapshotAudience(
+  campaignId: string,
+  market: string,
+  database: typeof db = db,
+): Promise<number> {
+  const subs = await database
     .select({ id: newsletterSubscribers.id, email: newsletterSubscribers.email })
     .from(newsletterSubscribers)
     .where(
@@ -113,7 +132,7 @@ export async function snapshotAudience(campaignId: string, market: string): Prom
 
   if (subs.length === 0) return 0;
 
-  await db
+  await database
     .insert(campaignRecipients)
     .values(
       subs.map((s) => ({
@@ -124,7 +143,7 @@ export async function snapshotAudience(campaignId: string, market: string): Prom
     )
     .onConflictDoNothing();
 
-  await db
+  await database
     .update(campaigns)
     .set({ recipientCount: subs.length })
     .where(eq(campaigns.id, campaignId));
@@ -138,14 +157,15 @@ export async function snapshotAudience(campaignId: string, market: string): Prom
  * Safe to call repeatedly: only rows still marked pending are attempted, and
  * each is marked before the next batch begins.
  */
-export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
+export async function sendNextBatch(
+  campaignId: string,
+  database: typeof db = db,
+): Promise<SendProgress> {
   const key = process.env.RESEND_API_KEY;
   const from = mailFrom();
-  const address =
-    process.env.MAILING_ADDRESS ??
-    "Adedayo Aremu Autos, 507 Gillespie St, Greensboro, NC 27401, USA";
+  const address = mailingAddress();
 
-  const [campaign] = await db
+  const [campaign] = await database
     .select()
     .from(campaigns)
     .where(eq(campaigns.id, campaignId))
@@ -161,7 +181,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     };
   }
 
-  const pending = await db
+  const pending = await database
     .select()
     .from(campaignRecipients)
     .where(
@@ -170,14 +190,14 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     .limit(PER_RUN);
 
   if (pending.length === 0) {
-    await finalise(campaignId);
+    await finalise(campaignId, database);
     return { attempted: 0, sent: 0, failed: 0, remaining: 0, finished: true };
   }
 
   // Anyone who opted out between the snapshot and now must not be emailed.
   const optedOut = new Set(
     (
-      await db
+      await database
         .select({ email: newsletterSubscribers.email })
         .from(newsletterSubscribers)
         .where(sql`${newsletterSubscribers.unsubscribedAt} is not null`)
@@ -187,11 +207,34 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
   const base = siteUrl();
   // Resolved once per invocation, not per recipient: the same cards go to
   // everyone, and this is a database round trip.
-  const featured = await resolveVehicles(
-    (campaign.vehicleIds as string[]) ?? [],
-    campaign.marketCode,
-  );
-  const sites = await listLocations(campaign.marketCode);
+  /*
+   * A guide announcement is an ordinary campaign with one difference: its
+   * template. The words are read from the guide as the mail goes out, like
+   * vehicle prices are, so every recipient gets the title as it stands now.
+   */
+  const announcement = await announcementForCampaign(campaignId, database);
+  let announce: AnnounceDraft | null = null;
+  if (announcement) {
+    const item = findAnnounceable(
+      campaign.marketCode,
+      announcement.contentType as AnnounceKind,
+      announcement.slug,
+    );
+    if (!item) {
+      // Left pending rather than sent: a button to a page that has been
+      // taken down is worse than a late email.
+      return {
+        attempted: 0, sent: 0, failed: 0, remaining: pending.length, finished: false,
+        error: "That page is no longer on the site, so nothing was sent.",
+      };
+    }
+    announce = draftFor(item, base, announcement.intro);
+  }
+
+  const featured = announce
+    ? []
+    : await resolveVehicles((campaign.vehicleIds as string[]) ?? [], campaign.marketCode);
+  const sites = announce ? [] : await listLocations(campaign.marketCode);
   const phone = sites[0]?.phone ?? null;
 
   let sent = 0;
@@ -208,7 +251,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
   // pending status can never be resolved, so the campaign would never finish
   // and "Continue sending" would offer itself forever with nothing to send.
   for (const r of skipped) {
-    await db
+    await database
       .update(campaignRecipients)
       .set({ status: "skipped", error: "Unsubscribed before this batch was sent" })
       .where(eq(campaignRecipients.id, r.id));
@@ -220,7 +263,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     deliverable.length === 0
       ? []
       : (
-          await db
+          await database
             .select({
               email: newsletterSubscribers.email,
               token: newsletterSubscribers.unsubscribeToken,
@@ -239,22 +282,26 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
         from,
         to: [r.email],
         subject: campaign.subject,
-        html: renderHtml({
-          body: campaign.body,
-          unsubscribeUrl: url,
-          address,
-          siteBase: base,
-          vehicles: featured,
-          phone,
-        }),
-        text: renderText({
-          body: campaign.body,
-          unsubscribeUrl: url,
-          address,
-          siteBase: base,
-          vehicles: featured,
-          phone,
-        }),
+        html: announce
+          ? renderAnnouncementHtml({ draft: announce, unsubscribeUrl: url, address, siteBase: base })
+          : renderHtml({
+              body: campaign.body,
+              unsubscribeUrl: url,
+              address,
+              siteBase: base,
+              vehicles: featured,
+              phone,
+            }),
+        text: announce
+          ? renderAnnouncementText({ draft: announce, unsubscribeUrl: url, address, siteBase: base })
+          : renderText({
+              body: campaign.body,
+              unsubscribeUrl: url,
+              address,
+              siteBase: base,
+              vehicles: featured,
+              phone,
+            }),
         headers: {
           // Required by Gmail and Yahoo for bulk senders since 2024. Without
           // both of these, mail to those providers is rejected or junked.
@@ -275,7 +322,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
       if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 300)}`);
 
       for (const r of slice) {
-        await db
+        await database
           .update(campaignRecipients)
           .set({ status: "sent", sentAt: new Date() })
           .where(eq(campaignRecipients.id, r.id));
@@ -284,7 +331,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       for (const r of slice) {
-        await db
+        await database
           .update(campaignRecipients)
           .set({ status: "failed", error: message.slice(0, 500) })
           .where(eq(campaignRecipients.id, r.id));
@@ -293,7 +340,7 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     }
   }
 
-  await db
+  await database
     .update(campaigns)
     .set({
       sentCount: sql`${campaigns.sentCount} + ${sent}`,
@@ -301,14 +348,14 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
     })
     .where(eq(campaigns.id, campaignId));
 
-  const [{ left }] = await db
+  const [{ left }] = await database
     .select({ left: sql<number>`count(*)::int` })
     .from(campaignRecipients)
     .where(
       and(eq(campaignRecipients.campaignId, campaignId), eq(campaignRecipients.status, "pending")),
     );
 
-  if (left === 0) await finalise(campaignId);
+  if (left === 0) await finalise(campaignId, database);
 
   return {
     attempted: pending.length,
@@ -319,15 +366,15 @@ export async function sendNextBatch(campaignId: string): Promise<SendProgress> {
   };
 }
 
-async function finalise(campaignId: string) {
-  const [{ failed }] = await db
+async function finalise(campaignId: string, database: typeof db = db) {
+  const [{ failed }] = await database
     .select({ failed: sql<number>`count(*)::int` })
     .from(campaignRecipients)
     .where(
       and(eq(campaignRecipients.campaignId, campaignId), eq(campaignRecipients.status, "failed")),
     );
 
-  await db
+  await database
     .update(campaigns)
     .set({ status: failed > 0 ? "failed" : "sent", completedAt: new Date() })
     .where(eq(campaigns.id, campaignId));
@@ -343,9 +390,7 @@ export async function sendPreview(
 ): Promise<{ ok: boolean; error?: string }> {
   const key = process.env.RESEND_API_KEY;
   const from = mailFrom();
-  const address =
-    process.env.MAILING_ADDRESS ??
-    "Adedayo Aremu Autos, 507 Gillespie St, Greensboro, NC 27401, USA";
+  const address = mailingAddress();
   if (!key) return { ok: false, error: "RESEND_API_KEY is not set." };
 
   // A deliberately dead token: a test must render the footer exactly as a real
