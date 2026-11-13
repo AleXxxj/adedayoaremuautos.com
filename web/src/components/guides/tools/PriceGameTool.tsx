@@ -11,8 +11,11 @@ import { GuideCarCard } from "../GuideCarCard";
 import { ShareButton } from "../ShareButton";
 import { Gauge } from "../motion/Gauge";
 import { gaugeAngle, gaugeWord } from "../motion/sceneMath";
-import { parseScoreHash, priceRounds, priceScore, rankFor, scoreHash } from "../gameMath";
-import { CountUp, FriendNote, Progress, parseBest, useHash, useStepFocus, useStored } from "./gameKit";
+import { momentFor, parseScoreHash, priceRounds, priceScore, rankFor, scoreHash, streak, timeLeft } from "../gameMath";
+import { CountUp, FriendNote, Progress, buzz, parseBest, useHash, useStepFocus, useStored } from "./gameKit";
+
+/** Seconds a round takes: look at the car, tap a price, see the answer. */
+const ROUND_SECONDS = 10;
 
 const KEY = "aaa:guess-the-price:best:v1";
 
@@ -81,6 +84,7 @@ export function PriceGameTool({
     const next = [...guesses];
     next[at] = minor;
     setGuesses(next);
+    buzz();
     // The last guess ends the game: keep the score if it is the best yet.
     if (at === rounds.length - 1) {
       const final = priceScore(answers, next);
@@ -182,6 +186,9 @@ export function PriceGameTool({
   const done = picked != null;
   const right = picked === car.priceMinor;
   const last = at === rounds.length - 1;
+  const marks = guesses.filter((g) => g != null).map((g, i) => g === answers[i]);
+  const moment = done ? momentFor(marks.length, rounds.length, streak(marks)) : null;
+  const left = timeLeft(rounds.length - at - (done ? 1 : 0), ROUND_SECONDS);
 
   return (
     <div className="gt gm">
@@ -197,7 +204,8 @@ export function PriceGameTool({
       <Progress
         done={at + (done ? 1 : 0)}
         of={rounds.length}
-        label={`Round ${at + 1} of ${rounds.length} · Score ${score}`}
+        label={`Round ${at + 1} of ${rounds.length} · Score ${score}${left ? ` · ${left}` : ""}`}
+        moment={moment}
       />
 
       {/* Keyed by the car: each round's photo arrives, it doesn't blink in. */}
@@ -276,6 +284,11 @@ export function PriceGameTool({
             See this car
           </Link>
         </div>
+      )}
+      {!last && marks.length > 0 && (
+        <button type="button" className="gm-skip" onClick={() => { moved(); setAt(rounds.length); }}>
+          Stop here and see my score
+        </button>
       )}
     </div>
   );

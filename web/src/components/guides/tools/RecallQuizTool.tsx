@@ -4,8 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { RECALL_RANKS, recallShareText, type RecallFact } from "@/content/guides/recallQuiz";
 import { ShareButton } from "../ShareButton";
-import { parseScoreHash, rankFor, scoreHash, trueFalseScore } from "../gameMath";
-import { CountUp, FriendNote, Progress, parseBest, useHash, useStepFocus, useStored } from "./gameKit";
+import { momentFor, parseScoreHash, rankFor, scoreHash, streak, timeLeft, trueFalseScore } from "../gameMath";
+import { CountUp, FriendNote, Progress, buzz, parseBest, useHash, useStepFocus, useStored } from "./gameKit";
+
+/** Seconds a card takes: read it, tap, read why. For "about 1 min left". */
+const CARD_SECONDS = 12;
 
 const KEY = "aaa:recall-or-not:best:v1";
 
@@ -33,6 +36,7 @@ export function RecallQuizTool({ facts, path }: { facts: RecallFact[]; path: str
     if (answers[id] !== undefined) return;
     const next = { ...answers, [id]: value };
     setAnswers(next);
+    buzz();
     if (at === total - 1) {
       const final = trueFalseScore(facts, next);
       if (!best || final / total > best.score / best.of) setBestRaw(`${final}-${total}`);
@@ -135,6 +139,10 @@ export function RecallQuizTool({ facts, path }: { facts: RecallFact[]; path: str
   const done = picked !== undefined;
   const right = picked === fact.answer;
   const last = at === total - 1;
+  // Right or wrong, card by card, for a streak; the halfway mark and the last card get a word too.
+  const marks = facts.filter((f) => answers[f.id] !== undefined).map((f) => answers[f.id] === f.answer);
+  const moment = done ? momentFor(marks.length, total, streak(marks)) : null;
+  const left = timeLeft(total - at - (done ? 1 : 0), CARD_SECONDS);
 
   return (
     <div className="gt gm">
@@ -147,7 +155,12 @@ export function RecallQuizTool({ facts, path }: { facts: RecallFact[]; path: str
           . Beat it.
         </FriendNote>
       )}
-      <Progress done={at + (done ? 1 : 0)} of={total} label={`Card ${at + 1} of ${total} · Score ${score}`} />
+      <Progress
+        done={at + (done ? 1 : 0)}
+        of={total}
+        label={`Card ${at + 1} of ${total} · Score ${score}${left ? ` · ${left}` : ""}`}
+        moment={moment}
+      />
 
       {/* Keyed by the card, so each one is dealt in; the stamp is for the eye, the verdict below is read out. */}
       <div className="gm-card gm-card--in" key={fact.id} data-flipped={done || undefined}>
@@ -201,6 +214,12 @@ export function RecallQuizTool({ facts, path }: { facts: RecallFact[]; path: str
             <i className="fas fa-arrow-right" aria-hidden="true" />
           </button>
         </div>
+      )}
+      {/* Leaving early is fine: the score so far is still a score. */}
+      {!last && marks.length > 0 && (
+        <button type="button" className="gm-skip" onClick={() => go(total)}>
+          Stop here and see my score
+        </button>
       )}
     </div>
   );

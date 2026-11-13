@@ -1,21 +1,18 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { formatMoney, money, type CurrencyCode } from "@/lib/money";
-import { canResize } from "@/lib/photo";
 import { TRIP_MILEAGE_NOTE, tripShareText, type TripPlace } from "@/content/guides/roadTrip";
 import type { GuideRentCar } from "@/content/guides/types";
 import { ShareButton } from "../ShareButton";
 import { TRIP_DAYS, roundTripMiles, tripCost } from "../gameMath";
 import { signalScene } from "../motion/sceneKit";
-import { CountUp, FriendNote, useHash, useStepFocus } from "./gameKit";
+import { FleetHero, FleetRows } from "./FleetRows";
+import { CountUp, FriendNote, buzz, useHash, useStepFocus } from "./gameKit";
 
-/** Cars shown before "Show all". */
-const FIRST = 5;
-
-const PER = { monthly: "a month", weekly: "a week", daily: "a day" } as const;
+/** Cars shown before "Show all": the answer is the car above them. */
+const FIRST = 3;
 
 /** "#trip=asheville-2": a place and a number of days, both checked against the tool's own lists. */
 function parseTrip(hash: string, places: TripPlace[]): { place: string; days: number } | null {
@@ -55,7 +52,6 @@ export function RoadTripTool({
   const shared = parseTrip(useHash(), places);
   const [pickedPlace, setPickedPlace] = useState<string | null>(null);
   const [pickedDays, setPickedDays] = useState<number | null>(null);
-  const [all, setAll] = useState(false);
   const placeId = pickedPlace ?? shared?.place ?? null;
   const days = pickedDays ?? shared?.days ?? TRIP_DAYS[0];
   const { ref, moved } = useStepFocus<HTMLHeadingElement>(placeId);
@@ -69,6 +65,8 @@ export function RoadTripTool({
   const trip = tripCost(cars, days);
   const priced = trip.rows.filter((r) => r.cost);
   const span = `${days} ${days === 1 ? "day" : "days"}`;
+  const best = priced[0]?.cost ? { car: priced[0].car, cost: priced[0].cost } : null;
+  const others = best ? trip.rows.filter((r) => r.car.slug !== best.car.slug) : trip.rows;
 
   return (
     <div className="gt gm">
@@ -87,6 +85,7 @@ export function RoadTripTool({
             aria-pressed={p.id === placeId}
             onClick={() => {
               moved();
+              buzz();
               setPickedPlace(p.id);
             }}
           >
@@ -144,7 +143,10 @@ export function RoadTripTool({
                 type="button"
                 className="gt-chip"
                 aria-pressed={d === days}
-                onClick={() => setPickedDays(d)}
+                onClick={() => {
+                  buzz();
+                  setPickedDays(d);
+                }}
               >
                 {d} {d === 1 ? "day" : "days"}
               </button>
@@ -174,49 +176,13 @@ export function RoadTripTool({
                 )}
               </p>
 
-              <ol className="gt-rows gt-rows--in" key={days}>
-                {trip.rows.map(({ car, cost }, i) => (
-                  <li key={car.slug} hidden={!all && i >= FIRST}>
-                    <Link href={`/us/rentals/${car.slug}`} className="gt-row">
-                      <span className="gt-row-photo">
-                        {car.image ? (
-                          <Image src={car.image} alt="" fill sizes="72px" unoptimized={!canResize(car.image)} />
-                        ) : (
-                          <i className="fas fa-camera" aria-hidden="true" />
-                        )}
-                      </span>
-                      <span className="gt-row-text">
-                        <span className="gt-row-name">{car.name}</span>
-                        {cost ? (
-                          <>
-                            <span className="gt-row-mix">
-                              {cost.lines.map((l) => `${l.quantity} × ${fmt(l.unitMinor)} ${PER[l.tier]}`).join(" + ")}
-                            </span>
-                            {cost.depositMinor > 0 && (
-                              <span className="gt-row-deposit">+ {fmt(cost.depositMinor)} deposit</span>
-                            )}
-                          </>
-                        ) : (
-                          <span className="gt-row-mix">
-                            {car.tariff.maxDays && days > car.tariff.maxDays
-                              ? `Rents for up to ${car.tariff.maxDays} days`
-                              : `Rents for ${car.tariff.minDays} days or more`}
-                          </span>
-                        )}
-                      </span>
-                      <span className="gt-row-total">
-                        {cost ? <strong>{fmt(cost.rentMinor)}</strong> : <span aria-hidden="true">—</span>}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-              {trip.rows.length > FIRST && (
-                <button type="button" className="gt-more" aria-expanded={all} onClick={() => setAll(!all)}>
-                  {all ? "Show fewer" : `Show all ${trip.rows.length} cars`}
-                  <i className={`fas ${all ? "fa-chevron-up" : "fa-chevron-down"}`} aria-hidden="true" />
-                </button>
+              {/* The lowest-cost car for the trip rolls in; the rest of the fleet follows as bars. */}
+              {best && (
+                <div className="gt-stage" key={`${place.id}-${days}`}>
+                  <FleetHero row={best} span={span} fmt={fmt} />
+                </div>
               )}
+              {others.length > 0 && <FleetRows rows={others} days={days} fmt={fmt} first={FIRST} />}
             </>
           )}
 

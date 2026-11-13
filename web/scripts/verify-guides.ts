@@ -30,6 +30,11 @@
  *      places, every trip has a place on the map, and each guide's scene
  *      shows the same numbers its tool does.
  *
+ *  10. The journeys: the checklist as a walk (every check once and in
+ *      order, where the walk goes after an answer or a skip, a result that
+ *      is honest when it stops early, the minutes left), and the moments a
+ *      game gives (a streak, halfway, one to go) and its "time left".
+ *
  * Nothing here touches the live database or the network.
  *
  * Run: npm run test:guides
@@ -146,6 +151,17 @@ import {
 import { GUIDES, GUIDE_GROUPS, HOME_GUIDE_SLUGS, getGuide, guideHref } from "../src/content/guides";
 import { MARKS, plain } from "../src/content/guides/format";
 import { ALL_CHECKS, CHECKLIST } from "../src/content/guides/checklist";
+import {
+  areaProgress,
+  minutesLeft,
+  nextStop,
+  walkMoment,
+  walkResult,
+  walkStops,
+  type Answer,
+} from "../src/components/guides/guideMath";
+import { STREAK_FROM, momentFor, streak, timeLeft } from "../src/components/guides/gameMath";
+import { SPOT_AT } from "../src/components/guides/motion/sceneData";
 import { RTO_DISCLOSURE, owningTiers, rtoTierLine } from "../src/content/guides/rentBuyOwn";
 import { POLICY_RELIES_ON } from "../src/content/guides/weeklyRental";
 import { RENTAL_POLICY_US } from "../src/content/rentalPolicyUs";
@@ -1267,6 +1283,96 @@ console.log("\nMotion: each scene shows what its tool shows");
   const everyCaption = GUIDES.map((g) => sceneFor(g.meta.tool, DATA, null)?.caption ?? "");
   ok("no scene's line sells", everyCaption.every((c) => c.length > 0 && !HYPE.test(c)), everyCaption);
 }
+
+/* ── 10. The journeys ──────────────────────────────────────────────────── */
+console.log("\nThe checklist as a walk, and the moments a game gives");
+{
+  const stops = walkStops(CHECKLIST);
+  eq("the walk visits every check once, in the checklist's order", stops.map((s) => s.id), ALL_CHECKS.map((c) => c.id));
+  ok("each stop knows its part and its place in it", stops.every((s) => CHECKLIST[s.part].checks[s.index].id === s.id));
+  ok("every part has a mark on the photo, inside it", CHECKLIST.every((g) => SPOT_AT[g.id] && SPOT_AT[g.id].x > 5 && SPOT_AT[g.id].x < 95 && SPOT_AT[g.id].y > 5 && SPOT_AT[g.id].y < 95));
+
+  const none: Record<string, Answer> = {};
+  eq("a new walk starts at the first check", nextStop(stops, none, -1), 0);
+  eq("after an answer it moves to the next check", nextStop(stops, { [stops[0].id]: "good" }, 0), 1);
+  // Skip the second check, answer the rest: the walk comes back round to it.
+  const skipped: Record<string, Answer> = {};
+  stops.forEach((s, i) => {
+    if (i !== 1) skipped[s.id] = "good";
+  });
+  eq("a skipped check is come back to at the end", nextStop(stops, skipped, stops.length - 1), 1);
+  const every: Record<string, Answer> = { ...skipped, [stops[1].id]: "problem" };
+  eq("with every check answered the walk ends at the result", nextStop(stops, every, 1), stops.length);
+  eq("and a returning visitor with all of them lands on the result", nextStop(stops, every, -1), stops.length);
+
+  const firstPart: Record<string, Answer> = {};
+  CHECKLIST[0].checks.forEach((c, i) => (firstPart[c.id] = i === 0 ? "problem" : "good"));
+  const areas = areaProgress(CHECKLIST, firstPart);
+  eq("a finished part is sealed, the others are not", areas.map((a) => a.sealed), [true, false, false, false, false]);
+  eq("and its problems are counted", [areas[0].done, areas[0].total, areas[0].problems], [CHECKLIST[0].checks.length, CHECKLIST[0].checks.length, 1]);
+  eq("answers for checks that no longer exist seal nothing", areaProgress(CHECKLIST, { gone: "good" }).some((a) => a.done > 0), false);
+
+  eq("nothing checked: the result says so, and how to start", walkResult(CHECKLIST, none).title, "Nothing checked yet");
+  const part = walkResult(CHECKLIST, firstPart);
+  eq("stopping early is still a result", part.title, `${CHECKLIST[0].checks.length} of ${ALL_CHECKS.length} checked`);
+  ok("which names what was covered and what to ask", part.line.startsWith(`${CHECKLIST[0].title} is done.`) && part.line.endsWith("1 to ask the seller about."), part.line);
+  const one = walkResult(CHECKLIST, { [stops[0].id]: "good" });
+  ok("one check in, no part done: no scolding", one.title === `1 of ${ALL_CHECKS.length} checked` && /No problems marked\./.test(one.line) && !/only|just|still|should/i.test(one.line), one);
+  const done = walkResult(CHECKLIST, every);
+  eq("all of them", [done.title, done.line], [`All ${ALL_CHECKS.length} checked`, "1 to ask the seller about."]);
+  ok("no result's words sell", [part, one, done].every((r) => !HYPE.test(`${r.title} ${r.line}`)));
+
+  eq("minutes left: the whole walk is ten", minutesLeft(ALL_CHECKS.length, ALL_CHECKS.length), 10);
+  eq("half of it is five", minutesLeft(ALL_CHECKS.length / 2, ALL_CHECKS.length), 5);
+  eq("one check left is still a minute, not none", minutesLeft(1, ALL_CHECKS.length), 1);
+  eq("nothing left, no minutes", minutesLeft(0, ALL_CHECKS.length), 0);
+  let last = Infinity;
+  let falls = true;
+  for (let left = ALL_CHECKS.length; left >= 0; left--) {
+    const m = minutesLeft(left, ALL_CHECKS.length);
+    if (m > last) falls = false;
+    last = m;
+  }
+  ok("and it never goes up as checks are answered", falls);
+
+  // The moments of a walk, answered top to bottom.
+  const so: Record<string, Answer> = {};
+  const moments: (string | null)[] = [];
+  for (const s of stops) {
+    const next = { ...so, [s.id]: "good" as Answer };
+    moments.push(walkMoment(CHECKLIST, so, next));
+    so[s.id] = "good";
+  }
+  const partEnds = CHECKLIST.map((g) => g.title);
+  ok("each part's last check is its moment", partEnds.slice(0, -1).every((t) => moments.includes(`${t} done`)), moments);
+  eq("halfway comes once", moments.filter((m) => m === "Halfway").length, 1);
+  eq("at the halfway check", moments.indexOf("Halfway"), Math.ceil(stops.length / 2) - 1);
+  eq("the last answer is all done", moments[moments.length - 1], "All done");
+  ok("most answers earn nothing: a moment stays a moment", moments.filter(Boolean).length <= CHECKLIST.length + 2, moments.filter(Boolean));
+  eq("changing an answer earns nothing", walkMoment(CHECKLIST, { [stops[0].id]: "good" }, { [stops[0].id]: "problem" }), null);
+
+  eq("a streak counts back from the latest answer", [streak([]), streak([true]), streak([true, false, true, true]), streak([true, true, false])], [0, 1, 2, 0]);
+  eq("two right is not yet a streak", momentFor(2, 8, 2), null);
+  eq("three is", momentFor(STREAK_FROM, 8, STREAK_FROM), `${STREAK_FROM} in a row`);
+  eq("a streak beats halfway", momentFor(4, 8, 4), "4 in a row");
+  eq("every one right", momentFor(5, 5, 5), "All of them");
+  eq("halfway with no streak", momentFor(4, 8, 0), "Halfway");
+  eq("halfway of an odd count is the middle one", momentFor(3, 5, 0), "Halfway");
+  eq("one to go", momentFor(7, 8, 1), "One to go");
+  eq("the last step has no moment of its own: the result is the moment", momentFor(8, 8, 0), null);
+  eq("nothing before the first answer", momentFor(0, 6, 0), null);
+  eq("a short game has no halfway", momentFor(1, 2, 0), null);
+  for (const of of [5, 6, 7, 8]) {
+    const said = Array.from({ length: of }, (_, i) => momentFor(i + 1, of, 0)).filter(Boolean);
+    eq(`a game of ${of} with no streak: halfway, then one to go`, said, ["Halfway", "One to go"]);
+  }
+
+  eq("time left: under a minute", timeLeft(4, 12), "under 1 min left");
+  eq("about a minute", timeLeft(6, 12), "about 1 min left");
+  eq("about two", timeLeft(10, 12), "about 2 min left");
+  eq("nothing left, nothing said", timeLeft(0, 12), "");
+}
+
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

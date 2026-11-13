@@ -323,3 +323,39 @@ export function tripCost<T extends { tariff: RentalTariff }>(cars: T[], days: nu
 
 /** There and back. */
 export const roundTripMiles = (oneWayMiles: number) => oneWayMiles * 2;
+
+/* ── Moments: a streak, the halfway mark, the last one ─────────────────── */
+
+/** How many right answers in a row the latest answer makes (0 after a miss). */
+export function streak(results: readonly boolean[]): number {
+  let n = 0;
+  for (let i = results.length - 1; i >= 0 && results[i]; i--) n++;
+  return n;
+}
+
+/** A streak worth a word starts at three. */
+export const STREAK_FROM = 3;
+
+/**
+ * The small moment a step earns, or null for most of them: a streak of right
+ * answers first, then halfway through, then one to go. A game of fewer than
+ * four steps has no halfway.
+ *
+ * @param done steps finished, counting the one just answered
+ * @param run  right answers in a row (0 where a game has no right answer)
+ */
+export function momentFor(done: number, of: number, run = 0): string | null {
+  if (done <= 0 || done > of) return null;
+  if (run >= STREAK_FROM) return run === of ? "All of them" : `${run} in a row`;
+  if (done === of) return null;
+  if (of >= 4 && done === Math.ceil(of / 2)) return "Halfway";
+  if (of >= 3 && done === of - 1) return "One to go";
+  return null;
+}
+
+/** "under 1 min left", "about 2 min left": what is left at so many seconds a step. */
+export function timeLeft(left: number, secondsEach: number): string {
+  const seconds = Math.max(0, left) * secondsEach;
+  if (seconds <= 0) return "";
+  return seconds < 60 ? "under 1 min left" : `about ${Math.round(seconds / 60)} min left`;
+}

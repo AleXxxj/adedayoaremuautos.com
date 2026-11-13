@@ -24,7 +24,16 @@ import { WeeksTool } from "./tools/WeeksTool";
  * prices and rates. The arithmetic runs in the browser on those, with the
  * same pure functions the build checks.
  */
-export function GuideTool({ meta, data }: { meta: GuideMeta; data: GuideData }) {
+export function GuideTool({
+  meta,
+  data,
+  photo,
+}: {
+  meta: GuideMeta;
+  data: GuideData;
+  /** The guide's own car photo from stock: the checklist walks around it. */
+  photo: string | null;
+}) {
   switch (meta.tool) {
     case "weeks":
       return <WeeksTool cars={data.rent} currency={data.currency} locale={data.locale} />;
@@ -66,7 +75,7 @@ export function GuideTool({ meta, data }: { meta: GuideMeta; data: GuideData }) 
       );
 
     case "checklist":
-      return <ChecklistTool groups={CHECKLIST} path={guideHref(meta.slug)} />;
+      return <ChecklistTool groups={CHECKLIST} path={guideHref(meta.slug)} photo={photo} />;
 
     case "life-quiz":
       return (

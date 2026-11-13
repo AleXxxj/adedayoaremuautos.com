@@ -9,7 +9,9 @@ import { STORY_VERDICT, storyShareText } from "@/content/guides/cheapCar";
 import { ShareButton } from "../ShareButton";
 import {
   gotHash,
+  momentFor,
   parseGotHash,
+  timeLeft,
   storyChances,
   storyEnding,
   type StoryEnding,
@@ -17,7 +19,10 @@ import {
   type StoryStep,
 } from "../gameMath";
 import { signalScene } from "../motion/sceneKit";
-import { FriendNote, Progress, useCarry, useHash, useStepFocus } from "./gameKit";
+import { FriendNote, Progress, buzz, useCarry, useHash, useStepFocus } from "./gameKit";
+
+/** Seconds a moment in the year takes: a question, a tap, what came of it. */
+const CHOICE_SECONDS = 9;
 
 interface StoryCar {
   slug: string;
@@ -81,6 +86,7 @@ export function CostStoryTool({
 
   function choose(s: Side, from: Element | null) {
     take(from);
+    buzz();
     setSide(s);
     go(0);
   }
@@ -104,7 +110,7 @@ export function CostStoryTool({
             Your friend ended as <strong>{friendEnding.title}</strong>. How will your year go?
           </FriendNote>
         )}
-        <Progress done={0} of={steps.length + 1} label="Day one" />
+        <Progress done={0} of={steps.length + 1} label={`Day one · ${steps.length} choices · ${timeLeft(steps.length, CHOICE_SECONDS)}`} />
         <h3 className="gm-ask" tabIndex={-1} ref={ref}>
           Which one do you buy?
         </h3>
@@ -239,7 +245,10 @@ export function CostStoryTool({
       <Progress
         done={at + 1 + (chosen ? 1 : 0)}
         of={steps.length + 1}
-        label={`Choice ${at + 1} of ${steps.length} · ${chances} left to chance`}
+        label={`Choice ${at + 1} of ${steps.length} · ${chances} left to chance${
+          steps.length - at - (chosen ? 1 : 0) > 0 ? ` · ${timeLeft(steps.length - at - (chosen ? 1 : 0), CHOICE_SECONDS)}` : ""
+        }`}
+        moment={chosen ? momentFor(at + 1, steps.length) : null}
       />
       {mine && (
         <p className="gm-mycar">
@@ -271,7 +280,9 @@ export function CostStoryTool({
             aria-disabled={chosen != null || undefined}
             data-off={(chosen != null && chosen.id !== c.id) || undefined}
             onClick={() => {
-              if (!chosen) setPicks((p) => ({ ...p, [step.id]: c.id }));
+              if (chosen) return;
+              buzz();
+              setPicks((p) => ({ ...p, [step.id]: c.id }));
             }}
           >
             {c.label}

@@ -2708,3 +2708,1068 @@
         animation: none;
     }
 }
+
+/* ── The tools as journeys (second motion round) ──────────────────────────
+ *
+ * The four calculators stopped being forms here: one question with big
+ * answers (gt-tile), and an answer that is a picture before it is a table
+ * (a strip of weeks, a car in a frame, bars, lanes, a price line). The
+ * checklist became a walk around one car, one check at a time.
+ *
+ * This part is where things sit at rest. How they move is in
+ * guides-motion.css, and with that sheet's motion switched off everything
+ * below is the finished picture.
+ */
+
+/* A transform never widens the page: a card on its way in from the side is cut at the page's edge. */
+.legacy-theme .gd-page {
+    overflow-x: clip;
+}
+
+/* ── Big answers ── */
+
+.legacy-theme .gt-tiles {
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .gt-tiles--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.legacy-theme .gt-tiles--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.legacy-theme .gt-tiles--5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.legacy-theme .gt-tile {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 76px;
+    padding: 10px 2px;
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.legacy-theme .gt-tile:hover {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .gt-tile:focus-visible,
+.legacy-theme :is(.ck-link, .gm-skip):focus-visible,
+.legacy-theme .gt-math summary:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 16px;
+}
+
+.legacy-theme .gt-tile-n {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .gt-tile-n--money {
+    font-size: clamp(16px, 5vw, 24px);
+}
+
+.legacy-theme .gt-tile-unit {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .gt-tile-from {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Chosen: white on dark turned around, like the chips. No green. */
+.legacy-theme .gt-tile[aria-pressed="true"] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--surface-0);
+}
+
+.legacy-theme .gt-tile[aria-pressed="true"] span {
+    color: inherit;
+}
+
+/* ── The weeks, one block each ── */
+
+.legacy-theme .gt-span {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 4px;
+    height: 8px;
+}
+
+.legacy-theme .gt-span span {
+    position: relative;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .gt-span span::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--text-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.legacy-theme .gt-span span[data-on]::after {
+    transform: none;
+}
+
+/* ── The answer: one car in a frame ── */
+
+/* Tall enough for the car and four lines, so a new length doesn't move the rows under it. */
+.legacy-theme .gt-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 136px;
+}
+
+.legacy-theme .gt-hero {
+    display: grid;
+    grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+    padding: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.legacy-theme .gt-hero:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.legacy-theme .gt-hero-road {
+    position: relative;
+    display: block;
+    padding-bottom: 10px;
+}
+
+/* The road under the car: a broken line. */
+.legacy-theme .gt-hero-road::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: 0;
+    left: -40px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 26px);
+}
+
+.legacy-theme .gt-hero-car {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    background: var(--surface-2);
+    box-shadow: 0 12px 16px -10px rgba(0, 0, 0, 0.8);
+    color: var(--text-muted);
+}
+
+.legacy-theme .gt-hero-car img {
+    object-fit: cover;
+}
+
+.legacy-theme .gt-hero-text {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.legacy-theme .gt-hero-kicker,
+.legacy-theme .ck-kicker {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+/* Money: the one gold figure in the tool. */
+.legacy-theme .gt-hero-total {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(28px, 8.6vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--accent-400);
+    font-variant-numeric: tabular-nums;
+}
+
+.legacy-theme .gt-hero-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.legacy-theme .gt-hero-mix {
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+/* Under the frame the range is a line, not a second headline. */
+.legacy-theme .gt-answer--small strong {
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+/* ── A bar under each car's row ── */
+
+.legacy-theme .gt-row {
+    position: relative;
+}
+
+.legacy-theme .gt-row-bar {
+    position: absolute;
+    right: 12px;
+    bottom: 3px;
+    left: 8px;
+    overflow: hidden;
+    height: 3px;
+    border-radius: 999px;
+}
+
+.legacy-theme .gt-row-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--border-strong);
+    transform: scaleX(var(--w, 0));
+    transform-origin: left;
+}
+
+/* ── Rent, buy, rent to own: three lanes ── */
+
+.legacy-theme .gt-lanes {
+    display: grid;
+    gap: 8px;
+}
+
+.legacy-theme .gt-lane {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 6px 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    background: var(--surface-0);
+}
+
+/* The one green thing on this screen: the answer. */
+.legacy-theme .gt-lane.is-lowest {
+    border-color: var(--brand-300);
+}
+
+.legacy-theme .gt-lane-label {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.legacy-theme .gt-lane-label i {
+    width: 20px;
+    margin-right: 4px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.legacy-theme .gt-lane-figure {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.legacy-theme .gt-lane-track {
+    grid-column: 1 / -1;
+    overflow: hidden;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .gt-lane-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--border-strong);
+    transform: scaleX(var(--w, 0));
+    transform-origin: left;
+}
+
+.legacy-theme .gt-lane.is-lowest .gt-lane-track span {
+    background: var(--text-primary);
+}
+
+.legacy-theme .gt-lane-sub {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 24px;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .gt-lane-sub .gt-tag {
+    margin: 0;
+}
+
+.legacy-theme .gt-verdict span {
+    display: block;
+}
+
+/* The working: one lane open at a time. */
+.legacy-theme .gt-math {
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    background: var(--surface-0);
+}
+
+.legacy-theme .gt-math details + details {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.legacy-theme .gt-math summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+    cursor: pointer;
+    list-style: none;
+}
+
+.legacy-theme .gt-math summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-theme .gt-math summary span i {
+    width: 20px;
+    margin-right: 4px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.legacy-theme .gt-math summary > i {
+    flex: none;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .gt-math details[open] summary > i {
+    transform: rotate(45deg);
+}
+
+.legacy-theme .gt-math-body {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    padding: 0 14px 14px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.legacy-theme .gt-math-body strong {
+    color: var(--text-primary);
+}
+
+/* ── A budget on a line of prices ── */
+
+.legacy-theme .gt-rail {
+    position: relative;
+    height: 70px;
+    margin: 2px 4px 0;
+}
+
+.legacy-theme .gt-rail-line,
+.legacy-theme .gt-rail-reach {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    left: 0;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .gt-rail-reach {
+    background: var(--text-primary);
+    transform: scaleX(var(--at, 0));
+    transform-origin: left;
+}
+
+/* One mark for each car in stock, at its price. */
+.legacy-theme .gt-rail-car {
+    position: absolute;
+    top: 30px;
+    width: 4px;
+    height: 20px;
+    margin-left: -2px;
+    border-radius: 2px;
+    background: var(--border-strong);
+    transform: scaleY(0.5);
+}
+
+.legacy-theme .gt-rail-car[data-in] {
+    background: var(--text-primary);
+    transform: none;
+}
+
+/* As wide as the line and moved by its own width times the budget's share: a transform only. */
+.legacy-theme .gt-rail-mark {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateX(calc(var(--at, 0) * 100%));
+}
+
+.legacy-theme .gt-rail-mark::after {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: -1px;
+    width: 2px;
+    height: 34px;
+    background: var(--text-primary);
+}
+
+/* The label leans back as the marker nears the right end, so it never leaves the card. */
+.legacy-theme .gt-rail-mark span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--text-primary);
+    color: var(--surface-0);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.5;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    transform: translateX(calc(var(--at, 0) * -100%));
+}
+
+.legacy-theme .gt-rail-ends {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── The checklist as a walk around the car ── */
+
+.legacy-theme .ck-car {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: clamp(150px, 46vw, 230px);
+    border-radius: 16px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .ck-car img {
+    object-fit: cover;
+}
+
+/* Shading, so the marks and the line under them are clear on a white car in bright sun. */
+.legacy-theme .ck-car::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(7, 12, 10, 0.92), rgba(7, 12, 10, 0.25) 55%, rgba(7, 12, 10, 0.45));
+}
+
+.legacy-theme .ck-spot {
+    position: absolute;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1.5px solid rgba(241, 246, 243, 0.5);
+    border-radius: 50%;
+    background: rgba(7, 12, 10, 0.78);
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* A finished part: its seal. */
+.legacy-theme .ck-spot[data-sealed] {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+/* The part being checked now. */
+.legacy-theme .ck-spot[data-on] {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--surface-0);
+    transform: scale(1.2);
+}
+
+.legacy-theme .ck-spot::after {
+    content: "";
+    position: absolute;
+    inset: -1.5px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+/* Top left, the one corner no mark sits in: its own dark plate, so it reads on any photo. */
+.legacy-theme .ck-car-read {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    z-index: 1;
+    max-width: calc(100% - 16px);
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(7, 12, 10, 0.82);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ck-car-read strong {
+    margin-right: 6px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* Five parts across, on every phone: 48px each at 320px. */
+.legacy-theme .ck-steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.legacy-theme .ck-barrow,
+.legacy-theme .gm-progress {
+    position: relative;
+}
+
+.legacy-theme .ck-card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    overflow: hidden;
+    padding: 16px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    background: var(--surface-0);
+}
+
+.legacy-theme .ck-card[data-answer="good"] {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .ck-card[data-answer="problem"] {
+    border-color: var(--warning);
+}
+
+/* The deck: the check in view, over the unseen words of all the others. */
+.legacy-theme .ck-deck {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.legacy-theme .ck-deck > .ck-card {
+    grid-area: 1 / 1;
+}
+
+.legacy-theme .ck-card--ghost {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Room on the right for the stamp. */
+.legacy-theme .ck-card .ck-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+    padding-right: 84px;
+}
+
+.legacy-theme .ck-card .ck-label {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(20px, 5.8vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+.legacy-theme .ck-card .ck-label:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+.legacy-theme .ck-card .ck-hint {
+    font-size: 15px;
+}
+
+.legacy-theme .ck-stamp {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 2px 9px;
+    border: 3px solid currentColor;
+    border-radius: 6px;
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    transform: rotate(7deg);
+}
+
+.legacy-theme .ck-stamp[data-kind="problem"] {
+    color: var(--warning);
+}
+
+/* Two big answers: the whole point of the card. */
+.legacy-theme .ck-part > .ck-btns {
+    margin-top: 0;
+}
+
+.legacy-theme .ck-part > .ck-btns .ck-btn {
+    min-height: 64px;
+    border-radius: 18px;
+    font-size: 17px;
+}
+
+.legacy-theme .ck-part > .ck-btns .ck-btn:not([aria-pressed="true"]) {
+    background: var(--surface-0);
+}
+
+.legacy-theme .ck-part > .ck-btns .ck-btn i {
+    font-size: 15px;
+}
+
+.legacy-theme .ck-part > .ck-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 8px;
+    margin-top: 0;
+}
+
+.legacy-theme .ck-link,
+.legacy-theme .gm-skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.legacy-theme .ck-link i {
+    font-size: 12px;
+}
+
+.legacy-theme :is(.ck-link, .gm-skip):hover {
+    color: var(--text-primary);
+}
+
+.legacy-theme .ck-link--stop {
+    color: var(--text-primary);
+}
+
+.legacy-theme .ck-link:disabled {
+    opacity: 0.35;
+    text-decoration: none;
+    cursor: default;
+}
+
+.legacy-theme .gm-skip {
+    justify-self: center;
+}
+
+.legacy-theme .ck-result-title {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: clamp(26px, 7.4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--text-primary);
+}
+
+.legacy-theme .ck-result-title:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+.legacy-theme .ck-result-line {
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.legacy-theme .ck-areas {
+    display: grid;
+    gap: 6px;
+    list-style: none;
+}
+
+.legacy-theme .ck-areas li {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--surface-0);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.legacy-theme .ck-areas i {
+    font-size: 15px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.legacy-theme .ck-areas [data-sealed] {
+    border-color: var(--border-strong);
+}
+
+.legacy-theme .ck-areas [data-sealed] i {
+    color: var(--text-primary);
+}
+
+.legacy-theme .ck-area-n {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.legacy-theme .ck-area-n em {
+    font-style: normal;
+    color: var(--warning);
+}
+
+.legacy-theme .ck-plain {
+    display: grid;
+    gap: 12px;
+    padding-left: 20px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.legacy-theme .ck-plain ul {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+    padding-left: 18px;
+}
+
+/* ── The word a step earns ("3 in a row", "Halfway") ──
+   It sits over the end of the progress line, out of the flow: nothing under it moves. */
+
+.legacy-theme .gm-moment {
+    position: absolute;
+    top: -11px;
+    right: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.legacy-theme .gm-moment span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--text-primary);
+    box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.8);
+    color: var(--surface-0);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.legacy-theme .gm-moment i {
+    font-size: 10px;
+}
+
+/* ── The article ── */
+
+/* A short rule under each section's heading: the eyebrow's line, drawn as the section arrives. */
+.legacy-theme :is(.gd-section, .gd-toolbox) > .gd-h::after {
+    content: "";
+    display: block;
+    width: 28px;
+    height: 2px;
+    margin-top: 10px;
+    background: var(--text-primary);
+    transform-origin: left;
+}
+
+/* What opens: the wrapper is what eases in. */
+.legacy-theme .gd-fold {
+    display: block;
+}
+
+/* ── What arrives above the closing call to action (GuideOutro) ── */
+
+.legacy-theme .gd-outro {
+    position: relative;
+    overflow: hidden;
+    height: 78px;
+    margin-bottom: 4px;
+}
+
+.legacy-theme .gd-outro-road {
+    position: absolute;
+    right: 0;
+    bottom: 6px;
+    left: 0;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 26px);
+}
+
+/* The lane the car runs in: as wide as the strip, so moving it by its own width is the whole drive. */
+.legacy-theme .gd-outro-run {
+    position: absolute;
+    inset: 0;
+}
+
+.legacy-theme .gd-outro-car {
+    position: absolute;
+    right: 12px;
+    bottom: 9px;
+    width: 84px;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    background: var(--surface-2);
+    box-shadow: 0 10px 12px -8px rgba(0, 0, 0, 0.85);
+}
+
+.legacy-theme .gd-outro-car img {
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+.legacy-theme .gd-outro-seal,
+.legacy-theme .gd-outro-tag {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    color: var(--surface-0);
+    font-size: 12px;
+}
+
+/* The route: a whole line from one pin to the other. */
+.legacy-theme .gd-outro--route .gd-outro-road {
+    right: 54px;
+    left: 5px;
+    background: var(--text-secondary);
+    transform-origin: left;
+}
+
+.legacy-theme .gd-outro-pin {
+    position: absolute;
+    bottom: 2px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    background: var(--surface-1);
+}
+
+.legacy-theme .gd-outro-pin--from {
+    left: 0;
+}
+
+.legacy-theme .gd-outro-pin--to {
+    right: 49px;
+    background: var(--text-primary);
+}
+
+/* A recall notice and its stamp. */
+.legacy-theme .gd-outro-notice {
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    display: block;
+    width: 132px;
+    height: 68px;
+    padding: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-0);
+}
+
+.legacy-theme .gd-outro-lines {
+    display: grid;
+    gap: 7px;
+}
+
+.legacy-theme .gd-outro-lines i {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface-2);
+}
+
+.legacy-theme .gd-outro-lines i:nth-child(2) {
+    width: 70%;
+}
+
+.legacy-theme .gd-outro-lines i:nth-child(3) {
+    width: 84%;
+}
+
+.legacy-theme .gd-outro-stamp {
+    position: absolute;
+    top: 20px;
+    left: 44px;
+    padding: 2px 8px;
+    border: 3px solid currentColor;
+    border-radius: 6px;
+    background: var(--surface-0);
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-primary);
+    transform: rotate(-7deg);
+}
+
+@media (min-width: 560px) {
+    .legacy-theme .gt-tiles--4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .legacy-theme .gt-hero {
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 20px;
+        padding: 16px;
+    }
+
+    .legacy-theme .gt-stage {
+        min-height: 184px;
+    }
+}
+
+@media (max-width: 359px) {
+    .legacy-theme .gt-tiles--5 .gt-tile-n {
+        font-size: 22px;
+    }
+
+    .legacy-theme .gt-tiles--5 .gt-tile-unit {
+        font-size: 11px;
+    }
+}
+
+/* "Home" in the breadcrumb: a thumb wide as well as tall. */
+.legacy-theme .gd-crumbs a {
+    min-width: 44px;
+}
+
+/* A link in a sentence: 44px to the finger at every text size. */
+.legacy-theme .gd-a {
+    padding-block: 13px;
+}
